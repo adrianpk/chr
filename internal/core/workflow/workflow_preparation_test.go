@@ -17,8 +17,8 @@ type workflowPreparationProviderFixture struct {
 	revision string
 }
 
-func (p *workflowPreparationProviderFixture) WorkflowIntegrationCapability(_ context.Context, pr PullRequestSnapshot, method string) (PublicationCapability, error) {
-	return PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: "fixture_atomic_source_base", Revision: contenthash.Sum([]byte(p.revision)), AtomicSourceBase: p.guarded, ExactResult: p.guarded}, nil
+func (p *workflowPreparationProviderFixture) WorkflowIntegrationCapability(_ context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowstate.PublicationCapability, error) {
+	return workflowstate.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: "fixture_atomic_source_base", Revision: contenthash.Sum([]byte(p.revision)), AtomicSourceBase: p.guarded, ExactResult: p.guarded}, nil
 }
 
 type workflowPreparationFixture struct {
@@ -73,7 +73,7 @@ func workflowPreparationPlanFixture(t *testing.T, method, extent string, gate wo
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), config)
 
 	repo := request.Selection.Target.Repository
-	pr := PullRequestSnapshot{URL: repo + "/pulls/7", Repository: repo, HeadRepository: repo, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: commit, State: "open"}
+	pr := workflowstate.PullRequestSnapshot{URL: repo + "/pulls/7", Repository: repo, HeadRepository: repo, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: commit, State: "open"}
 	provider := &workflowPreparationProviderFixture{workflowReviewProviderFixture: &workflowReviewProviderFixture{workflowPRProviderFixture: &workflowPRProviderFixture{pr: pr}, target: commit}, guarded: true, revision: "guard-v1"}
 	workflowPREnsure(t, store, run.ID, provider)
 
@@ -136,7 +136,7 @@ func testWorkflowPreparationMethod(t *testing.T, method string) {
 	}
 }
 
-func checkWorkflowPreparationMethodFacts(t *testing.T, f workflowPreparationFixture, candidate IntegrationCandidate, method string) {
+func checkWorkflowPreparationMethodFacts(t *testing.T, f workflowPreparationFixture, candidate workflowstate.IntegrationCandidate, method string) {
 	t.Helper()
 
 	if candidate.Input.Git.Method != method || candidate.Input.Git.BaseCommit != f.base || candidate.Validation.Validation[0].Stdout != "combined" || candidate.Lane.Worktree == f.run.Lane.Worktree {
@@ -148,7 +148,7 @@ func checkWorkflowPreparationMethodFacts(t *testing.T, f workflowPreparationFixt
 	}
 }
 
-func checkWorkflowPreparationReview(t *testing.T, f workflowPreparationFixture, old ReviewBinding, candidate IntegrationCandidate) {
+func checkWorkflowPreparationReview(t *testing.T, f workflowPreparationFixture, old workflowstate.ReviewBinding, candidate workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	if _, err := f.store.CheckWorkflowReviewGrant(t.Context(), f.run.ID, f.provider); err == nil {

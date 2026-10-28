@@ -36,7 +36,7 @@ func validateWorkflowDecisionRecord(record IntegrationDecisions) error {
 }
 
 func validateWorkflowDecisionAnswer(record IntegrationDecisions, answer workflowstate.IntegrationAnswer) error {
-	index := slices.IndexFunc(record.Requests, func(d MergerDecision) bool { return d.ID == answer.DecisionID })
+	index := slices.IndexFunc(record.Requests, func(d workflowstate.MergerDecision) bool { return d.ID == answer.DecisionID })
 	if index < 0 || !validWorkflowDecisionAnswerActor(answer) {
 		return workflowstate.ErrConflict
 	}
@@ -111,7 +111,7 @@ func validWorkflowDecisionAnswerActor(answer workflowstate.IntegrationAnswer) bo
 	return workflowstate.ValidRequestKey(answer.ID) && workflowstate.ValidRequestKey(answer.Actor) && validWorkflowMergerText(answer.Reason) && slices.Contains([]string{"resolve", "defer"}, answer.Action)
 }
 
-func validWorkflowDecisionInterpretation(question MergerDecision, answer workflowstate.IntegrationAnswer) bool {
+func validWorkflowDecisionInterpretation(question workflowstate.MergerDecision, answer workflowstate.IntegrationAnswer) bool {
 	if answer.Action != "resolve" {
 		return true
 	}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ManualTask exposes immutable manual inputs; the claim remains private.
@@ -38,15 +40,15 @@ func (s *Store) PrepareWorkflowManualTask(ctx context.Context, claim *Claim, wor
 
 // ExecuteWorkflowManualTask supervises the frozen harness once. Success retains
 // ownership for explicit candidate reconciliation; it does not validate the task.
-func (s *Store) ExecuteWorkflowManualTask(ctx context.Context, claim *Claim) (CommandResult, error) {
+func (s *Store) ExecuteWorkflowManualTask(ctx context.Context, claim *Claim) (workflowstate.CommandResult, error) {
 	if err := beginWorkflowClaimExecution(claim); err != nil {
-		return CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 	defer endWorkflowClaimExecution(claim)
 
 	prepared, err := s.loadWorkflowManualTask(ctx, claim, true)
 	if err != nil {
-		return CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 
 	watched, stop := s.watchWorkflowStop(ctx, claim)
@@ -81,14 +83,14 @@ func (s *Store) ExecuteWorkflowManualTask(ctx context.Context, claim *Claim) (Co
 
 // ReconcileWorkflowTask verifies a reported manual Git image with the frozen host
 // gate and the same guarded result writer used by automatic execution.
-func (s *Store) ReconcileWorkflowTask(ctx context.Context, claim *Claim, candidate ManualCandidate) (TaskResult, error) {
+func (s *Store) ReconcileWorkflowTask(ctx context.Context, claim *Claim, candidate ManualCandidate) (workflowstate.TaskResult, error) {
 	if err := beginWorkflowClaimExecution(claim); err != nil {
-		return TaskResult{}, err
+		return workflowstate.TaskResult{}, err
 	}
 	defer endWorkflowClaimExecution(claim)
 
 	if err := validateWorkflowManualCandidate(candidate); err != nil {
-		return TaskResult{}, err
+		return workflowstate.TaskResult{}, err
 	}
 
 	if result, found, err := s.reuseWorkflowManualResult(ctx, claim, candidate); found || err != nil {
@@ -97,11 +99,11 @@ func (s *Store) ReconcileWorkflowTask(ctx context.Context, claim *Claim, candida
 
 	prepared, err := s.loadWorkflowManualTask(ctx, claim, false)
 	if err != nil {
-		return TaskResult{}, err
+		return workflowstate.TaskResult{}, err
 	}
 
 	if err := s.checkWorkflowManualCandidate(ctx, claim, prepared, candidate); err != nil {
-		return TaskResult{}, err
+		return workflowstate.TaskResult{}, err
 	}
 
 	watched, stop := s.watchWorkflowStop(ctx, claim)

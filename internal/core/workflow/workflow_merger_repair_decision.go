@@ -11,7 +11,7 @@ import (
 
 // MergerRequiredDecisions identifies incompatible intent and unsupported
 // procedures before a model call. These questions cannot be answered by time.
-func MergerRequiredDecisions(input MergerInput) ([]MergerDecision, error) {
+func MergerRequiredDecisions(input workflowstate.MergerInput) ([]workflowstate.MergerDecision, error) {
 	if err := validateWorkflowMergerIntent(input); err != nil {
 		return nil, err
 	}
@@ -19,7 +19,7 @@ func MergerRequiredDecisions(input MergerInput) ([]MergerDecision, error) {
 	decisions := workflowMergerIntentDecisions(input)
 	for _, conflict := range input.Conflicts {
 		if workflowMergerProcedureRequired(conflict) && !workflowMergerProcedureDeclared(input, conflict) {
-			decisions = append(decisions, MergerDecision{ID: "procedure-" + contenthash.Sum([]byte(conflict.ID))[:16], Issue: fmt.Sprintf("%s conflict at %s has no declared deterministic regeneration and validation procedure.", conflict.Kind, conflict.Path), RequirementIDs: slices.Clone(conflict.RequirementIDs), Options: []string{"Declare a repository-owned resolution and validation procedure", "Leave this conflict unresolved"}, Authority: "maintainer"})
+			decisions = append(decisions, workflowstate.MergerDecision{ID: "procedure-" + contenthash.Sum([]byte(conflict.ID))[:16], Issue: fmt.Sprintf("%s conflict at %s has no declared deterministic regeneration and validation procedure.", conflict.Kind, conflict.Path), RequirementIDs: slices.Clone(conflict.RequirementIDs), Options: []string{"Declare a repository-owned resolution and validation procedure", "Leave this conflict unresolved"}, Authority: "maintainer"})
 		}
 	}
 
@@ -27,15 +27,15 @@ func MergerRequiredDecisions(input MergerInput) ([]MergerDecision, error) {
 		return nil, workflowstate.ErrConflict
 	}
 
-	decisions = slices.DeleteFunc(decisions, func(d MergerDecision) bool {
+	decisions = slices.DeleteFunc(decisions, func(d workflowstate.MergerDecision) bool {
 		return input.OperatorDecisionRef != nil && strings.HasPrefix(d.ID, "intent-") && workflowDecisionResolved(input.OperatorAnswers, d.ID)
 	})
 
 	return decisions, validateWorkflowMergerDecisions(decisions, input)
 }
 
-func workflowMergerIntentDecisions(input MergerInput) []MergerDecision {
-	var decisions []MergerDecision
+func workflowMergerIntentDecisions(input workflowstate.MergerInput) []workflowstate.MergerDecision {
+	var decisions []workflowstate.MergerDecision
 
 	seen := map[string]bool{}
 
@@ -50,22 +50,22 @@ func workflowMergerIntentDecisions(input MergerInput) []MergerDecision {
 			}
 
 			seen[key] = true
-			decisions = append(decisions, MergerDecision{ID: "intent-" + contenthash.Sum([]byte(key))[:16], Issue: fmt.Sprintf("Requirements %s and %s declare incompatible intent; preserving both requires a product or ownership decision.", pair[0], pair[1]), RequirementIDs: pair, Options: []string{"Provide a compatible requirement interpretation", "Approve a scoped requirement change"}, Authority: "maintainer"})
+			decisions = append(decisions, workflowstate.MergerDecision{ID: "intent-" + contenthash.Sum([]byte(key))[:16], Issue: fmt.Sprintf("Requirements %s and %s declare incompatible intent; preserving both requires a product or ownership decision.", pair[0], pair[1]), RequirementIDs: pair, Options: []string{"Provide a compatible requirement interpretation", "Approve a scoped requirement change"}, Authority: "maintainer"})
 		}
 	}
 
 	return decisions
 }
 
-func workflowMergerProcedureRequired(conflict MergerConflict) bool {
+func workflowMergerProcedureRequired(conflict workflowstate.MergerConflict) bool {
 	return conflict.Kind != "text" && conflict.Kind != "semantic"
 }
 
-func workflowMergerProcedureDeclared(input MergerInput, conflict MergerConflict) bool {
+func workflowMergerProcedureDeclared(input workflowstate.MergerInput, conflict workflowstate.MergerConflict) bool {
 	return validWorkflowMergerCommand(conflict.RegenerationCommand) && validWorkflowMergerCommand(conflict.ValidationCommand) && slices.ContainsFunc(input.ValidationCommands, func(command []string) bool { return slices.Equal(command, conflict.ValidationCommand) })
 }
 
-func validateWorkflowMergerIntentConflicts(requirements []MergerRequirement) error {
+func validateWorkflowMergerIntentConflicts(requirements []workflowstate.MergerRequirement) error {
 	for _, requirement := range requirements {
 		if len(requirement.ConflictsWith) == 0 {
 			continue

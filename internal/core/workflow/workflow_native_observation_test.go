@@ -77,16 +77,16 @@ func TestNativeCanonicalOutcomes(t *testing.T) {
 
 	cases := []struct {
 		name, condition string
-		change          func(*PullRequestSnapshot)
+		change          func(*workflowstate.PullRequestSnapshot)
 	}{
-		{"pending", "", func(_ *PullRequestSnapshot) {}},
-		{"closed", "canonical_pr_closed_unmerged", func(pr *PullRequestSnapshot) { pr.State = "closed" }},
-		{"retargeted", "canonical_pr_retargeted", func(pr *PullRequestSnapshot) { pr.BaseBranch = "main" }},
-		{"identity", "canonical_pr_identity_changed", func(pr *PullRequestSnapshot) { pr.URL += "0" }},
-		{"wrong_result", "canonical_pr_result_mismatch", func(pr *PullRequestSnapshot) {
+		{"pending", "", func(_ *workflowstate.PullRequestSnapshot) {}},
+		{"closed", "canonical_pr_closed_unmerged", func(pr *workflowstate.PullRequestSnapshot) { pr.State = "closed" }},
+		{"retargeted", "canonical_pr_retargeted", func(pr *workflowstate.PullRequestSnapshot) { pr.BaseBranch = "main" }},
+		{"identity", "canonical_pr_identity_changed", func(pr *workflowstate.PullRequestSnapshot) { pr.URL += "0" }},
+		{"wrong_result", "canonical_pr_result_mismatch", func(pr *workflowstate.PullRequestSnapshot) {
 			pr.State, pr.Merged, pr.ResultCommit = "closed", true, b.OriginalSource
 		}},
-		{"merged", "", func(pr *PullRequestSnapshot) {
+		{"merged", "", func(pr *workflowstate.PullRequestSnapshot) {
 			pr.State, pr.Merged, pr.ResultCommit = "closed", true, b.PreparedResult
 		}},
 	}
@@ -115,7 +115,7 @@ func TestNativeCanonicalOutcomes(t *testing.T) {
 	checkNativeCanonicalDivergence(t, fixture, before)
 }
 
-func checkNativeCanonicalBlocker(t *testing.T, store *Store, submission Submission, condition string) {
+func checkNativeCanonicalBlocker(t *testing.T, store *Store, submission workflowstate.Submission, condition string) {
 	t.Helper()
 
 	entry := nativeReviewEntry(t, store, submission.InvocationID)
@@ -143,7 +143,7 @@ func checkNativeCanonicalDivergence(t *testing.T, fixture nativeCanonicalFixture
 	nativeCanonicalPending(t, fixture, submission, before)
 }
 
-func nativeCanonicalLast(t *testing.T, store *Store, submission Submission) NativePublicationObservation {
+func nativeCanonicalLast(t *testing.T, store *Store, submission workflowstate.Submission) NativePublicationObservation {
 	t.Helper()
 
 	refs := submission.Native.ObservationRefs
@@ -159,7 +159,7 @@ func nativeCanonicalLast(t *testing.T, store *Store, submission Submission) Nati
 	return observation
 }
 
-func nativeCanonicalPending(t *testing.T, fixture nativeCanonicalFixture, submission Submission, before IntegrationBudget) {
+func nativeCanonicalPending(t *testing.T, fixture nativeCanonicalFixture, submission workflowstate.Submission, before IntegrationBudget) {
 	t.Helper()
 
 	if submission.State != "awaiting_observation" || submission.Native.ApplicationState != "git_applied" || submission.Native.ReceiptRef != nil || fixture.publisher.calls.Load() != 1 {
@@ -310,7 +310,7 @@ func TestNativeCanonicalDeadline(t *testing.T) {
 	checkNativeDeadlineRecovery(t, fixture, submission)
 }
 
-func checkNativeDeadlineRecovery(t *testing.T, fixture nativeCanonicalFixture, submission Submission) {
+func checkNativeDeadlineRecovery(t *testing.T, fixture nativeCanonicalFixture, submission workflowstate.Submission) {
 	t.Helper()
 
 	f := fixture.f

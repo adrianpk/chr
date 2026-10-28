@@ -11,7 +11,7 @@ import (
 
 // PlanWorkflowMergerRepair selects a source-owned semantic repair or requests
 // an explicit integration fix or ownership decision. It does not accept edits.
-func PlanWorkflowMergerRepair(ctx context.Context, directory string, input MergerInput, proof IntegrationProof, fix *workflowstate.ReviewFinding) (MergerRepairPlan, error) {
+func PlanWorkflowMergerRepair(ctx context.Context, directory string, input workflowstate.MergerInput, proof workflowstate.IntegrationProof, fix *workflowstate.ReviewFinding) (MergerRepairPlan, error) {
 	plan := MergerRepairPlan{InputHash: input.InputHash}
 	if validateWorkflowMergerInput(input, time.Now().UTC()) != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) != nil || !workflowMergerRepairIdentity(input, proof) {
 		return plan, workflowstate.ErrConflict
@@ -51,11 +51,11 @@ func PlanWorkflowMergerRepair(ctx context.Context, directory string, input Merge
 	return workflowMergerSemanticPlan(plan, input, owners, fix)
 }
 
-func workflowMergerRepairIdentity(input MergerInput, proof IntegrationProof) bool {
+func workflowMergerRepairIdentity(input workflowstate.MergerInput, proof workflowstate.IntegrationProof) bool {
 	return input.Source == proof.SourceCommit && input.Base == proof.BaseCommit && input.Repository == proof.Repository && input.TargetRef == "refs/heads/"+proof.TargetBranch && input.Method == proof.Method
 }
 
-func (reader workflowIntegrationReader) mergerSemanticOwners(ctx context.Context, input MergerInput, proof IntegrationProof) ([]string, error) {
+func (reader workflowIntegrationReader) mergerSemanticOwners(ctx context.Context, input workflowstate.MergerInput, proof workflowstate.IntegrationProof) ([]string, error) {
 	var owners []string
 
 	owned := map[string]bool{}
@@ -86,7 +86,7 @@ func (reader workflowIntegrationReader) mergerSemanticOwners(ctx context.Context
 	return owners, nil
 }
 
-func workflowMergerOwnsConflict(conflicts []MergerConflict, paths []string, owned map[string]bool) bool {
+func workflowMergerOwnsConflict(conflicts []workflowstate.MergerConflict, paths []string, owned map[string]bool) bool {
 	matched := false
 
 	for _, conflict := range conflicts {
@@ -98,7 +98,7 @@ func workflowMergerOwnsConflict(conflicts []MergerConflict, paths []string, owne
 	return matched
 }
 
-func workflowMergerSemanticPlan(plan MergerRepairPlan, input MergerInput, owners []string, fix *workflowstate.ReviewFinding) (MergerRepairPlan, error) {
+func workflowMergerSemanticPlan(plan MergerRepairPlan, input workflowstate.MergerInput, owners []string, fix *workflowstate.ReviewFinding) (MergerRepairPlan, error) {
 	if answered, found, err := workflowMergerAnsweredPlan(plan, input, owners); found || err != nil {
 		return answered, err
 	}
@@ -126,7 +126,7 @@ func workflowMergerSemanticPlan(plan MergerRepairPlan, input MergerInput, owners
 	}
 
 	plan.Outcome = "needs_decision"
-	plan.Decisions = []MergerDecision{{ID: "replay-owner", Issue: "The semantic repair has no unique original replay owner. Select the owning source step or declare an actionable integration fix.", RequirementIDs: requirements, Options: []string{"Identify the original source step", "Declare an integration fix with an actionable finding"}, Authority: "maintainer"}}
+	plan.Decisions = []workflowstate.MergerDecision{{ID: "replay-owner", Issue: "The semantic repair has no unique original replay owner. Select the owning source step or declare an actionable integration fix.", RequirementIDs: requirements, Options: []string{"Identify the original source step", "Declare an integration fix with an actionable finding"}, Authority: "maintainer"}}
 
 	return plan, validateWorkflowMergerDecisions(plan.Decisions, input)
 }

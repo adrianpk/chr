@@ -14,15 +14,15 @@ import (
 )
 
 type workflowPullRequestObservation struct {
-	Schema      string                `json:"schema"`
-	BindingID   string                `json:"binding_id"`
-	CandidateID string                `json:"candidate_id"`
-	Reason      string                `json:"reason"`
-	Snapshots   []PullRequestSnapshot `json:"snapshots"`
-	ObservedAt  time.Time             `json:"observed_at"`
+	Schema      string                              `json:"schema"`
+	BindingID   string                              `json:"binding_id"`
+	CandidateID string                              `json:"candidate_id"`
+	Reason      string                              `json:"reason"`
+	Snapshots   []workflowstate.PullRequestSnapshot `json:"snapshots"`
+	ObservedAt  time.Time                           `json:"observed_at"`
 }
 
-func (s *Store) workflowPullRequestObservation(run *workflowInvocationFile, snapshots []PullRequestSnapshot) (workflowstate.FileChange, error) {
+func (s *Store) workflowPullRequestObservation(run *workflowInvocationFile, snapshots []workflowstate.PullRequestSnapshot) (workflowstate.FileChange, error) {
 	binding := run.PullRequest
 
 	if len(snapshots) > workflowstate.RecordLimit {

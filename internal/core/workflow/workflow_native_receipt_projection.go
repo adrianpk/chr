@@ -6,7 +6,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) projectWorkflowNativeReceiptObservation(run *workflowInvocationFile, entry *IntegrationEntry, submission Submission) error {
+func (s *Store) projectWorkflowNativeReceiptObservation(run *workflowInvocationFile, entry *IntegrationEntry, submission workflowstate.Submission) error {
 	refs := submission.Native.ObservationRefs
 	if len(refs) == 0 {
 		return workflowstate.ErrConflict
@@ -46,7 +46,7 @@ func retainWorkflowNativeReceiptStop(run *workflowInvocationFile, entry Integrat
 	run.Status = workflowstate.StopStatus(run.StopIntent)
 }
 
-func (s *Store) checkWorkflowNativeReceiptContinuation(submission Submission) error {
+func (s *Store) checkWorkflowNativeReceiptContinuation(submission workflowstate.Submission) error {
 	if submission.Native == nil || submission.Native.ReceiptRef == nil {
 		return nil
 	}

@@ -19,7 +19,7 @@ type WorkflowIntegrationDecisionStatus struct {
 	Revision uint64                            `json:"revision"`
 	Hash     string                            `json:"hash"`
 	State    string                            `json:"state"`
-	Requests []workflowcore.MergerDecision     `json:"questions"`
+	Requests []workflowstate.MergerDecision    `json:"questions"`
 	Answers  []workflowstate.IntegrationAnswer `json:"answers"`
 }
 
@@ -85,7 +85,7 @@ func workflowIntegrationStatus(observed *workflowcore.IntegrationInspection) *Wo
 	return result
 }
 
-func workflowIntegrationCandidateStatus(result *WorkflowIntegrationStatus, candidate *workflowcore.IntegrationCandidate) {
+func workflowIntegrationCandidateStatus(result *WorkflowIntegrationStatus, candidate *workflowstate.IntegrationCandidate) {
 	if candidate == nil {
 		return
 	}
@@ -98,7 +98,7 @@ func workflowIntegrationCandidateStatus(result *WorkflowIntegrationStatus, candi
 	}
 }
 
-func workflowIntegrationPublicationStatus(submission *workflowcore.Submission) string {
+func workflowIntegrationPublicationStatus(submission *workflowstate.Submission) string {
 	if submission == nil {
 		return "not_started"
 	}

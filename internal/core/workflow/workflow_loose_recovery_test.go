@@ -9,6 +9,7 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowLooseCrashProcess is the owned process-death fixture for the
@@ -51,7 +52,7 @@ func TestWorkflowLooseCrashProcess(t *testing.T) {
 		run := workflowTestRead(t, store, id)
 		remote := os.Getenv("CHR_LOOSE_CRASH_REMOTE")
 		git := NewWorkflowIntegrationGit(run.Selection.Target.Repository, remote)
-		provider := workflowFrontierProvider{&workflowPRProviderFixture{pr: PullRequestSnapshot{Repository: run.Selection.Target.Repository}}, remote}
+		provider := workflowFrontierProvider{&workflowPRProviderFixture{pr: workflowstate.PullRequestSnapshot{Repository: run.Selection.Target.Repository}}, remote}
 		_, err = store.ResumeWorkflow(t.Context(), id, ResumePorts{Provider: provider, Target: git, TargetBranch: "dev"})
 	case "frontier":
 		err = workflowLooseCrashFrontier(t, store, id)

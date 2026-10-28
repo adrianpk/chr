@@ -38,7 +38,7 @@ func (s *Store) guardWorkflowPreparationWork(ctx context.Context, run workflowIn
 	return nil
 }
 
-func (s *Store) reprepareWorkflowNativeInputs(ctx context.Context, run *workflowInvocationFile, source ReviewInput, capability PublicationCapability, provider PublicationGuardProvider) error {
+func (s *Store) reprepareWorkflowNativeInputs(ctx context.Context, run *workflowInvocationFile, source workflowstate.ReviewInput, capability workflowstate.PublicationCapability, provider PublicationGuardProvider) error {
 	if capability.Mechanism != workspaceconfig.WorkflowPublicationGitAtomicDualRef || run.Preparation == nil {
 		return nil
 	}
@@ -65,7 +65,7 @@ func (s *Store) reprepareWorkflowNativeInputs(ctx context.Context, run *workflow
 	return s.replaceWorkflowNativePreparation(ctx, run, entry, previous, source)
 }
 
-func workflowNativePreparationChanged(ctx context.Context, run workflowInvocationFile, previous PreparationInput, source ReviewInput, provider PublicationGuardProvider) (bool, error) {
+func workflowNativePreparationChanged(ctx context.Context, run workflowInvocationFile, previous workflowstate.PreparationInput, source workflowstate.ReviewInput, provider PublicationGuardProvider) (bool, error) {
 	hash, err := workflowReviewInputHash(source)
 	if err != nil || hash != run.Preparation.SourceHash {
 		return err == nil, err
@@ -76,7 +76,7 @@ func workflowNativePreparationChanged(ctx context.Context, run workflowInvocatio
 	return capability != previous.Capability, err
 }
 
-func (s *Store) retainedWorkflowNativePreparation(run workflowInvocationFile) (PreparationInput, error) {
+func (s *Store) retainedWorkflowNativePreparation(run workflowInvocationFile) (workflowstate.PreparationInput, error) {
 	if run.Preparation.ResultRef != "" {
 		candidate, err := s.readWorkflowPreparation(run)
 
@@ -91,20 +91,20 @@ func (s *Store) retainedWorkflowNativePreparation(run workflowInvocationFile) (P
 
 		data, err := s.readWorkflowReviewImage(attempt.InputRef, attempt.InputHash)
 		if err != nil {
-			return PreparationInput{}, err
+			return workflowstate.PreparationInput{}, err
 		}
 
 		var input TaskInput
 		if err := json.Unmarshal(data, &input); err != nil || input.Preparation == nil {
-			return PreparationInput{}, errorsOrConflict(err)
+			return workflowstate.PreparationInput{}, errorsOrConflict(err)
 		}
 
 		if err := checkWorkflowReviewInputHash(input.Preparation.Source, run.Preparation.SourceHash); err != nil {
-			return PreparationInput{}, err
+			return workflowstate.PreparationInput{}, err
 		}
 
 		return *input.Preparation, nil
 	}
 
-	return PreparationInput{}, nil
+	return workflowstate.PreparationInput{}, nil
 }

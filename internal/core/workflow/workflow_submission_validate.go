@@ -35,7 +35,7 @@ func validateWorkflowSubmissionJournal(journal workflowSubmissionJournal) error 
 		return workflowstate.ErrConflict
 	}
 
-	run := workflowInvocationFile{OwnerRoot: journal.OwnerRoot, Invocation: Invocation{Identity: Identity{ID: journal.InvocationID, Namespace: journal.Namespace}, InvocationExecution: InvocationExecution{Lane: &Lane{Unit: journal.Unit}}}}
+	run := workflowInvocationFile{OwnerRoot: journal.OwnerRoot, Invocation: Invocation{Identity: workflowstate.Identity{ID: journal.InvocationID, Namespace: journal.Namespace}, InvocationExecution: InvocationExecution{Lane: &workflowstate.Lane{Unit: journal.Unit}}}}
 	if journal.Key != workflowSubmissionJournalKey(run) {
 		return workflowstate.ErrConflict
 	}
@@ -61,7 +61,7 @@ func validWorkflowSubmissionJournalHeader(journal workflowSubmissionJournal) boo
 	return slices.Contains([]string{"chr-integration-journal/v1", "chr-integration-journal/v2"}, journal.Schema) && filepath.IsAbs(journal.OwnerRoot) && opsnamespace.Valid(journal.Namespace) && journal.InvocationID != "" && journal.Unit.ID != "" && len(journal.Attempts) >= 1 && len(journal.Attempts) <= 10
 }
 
-func validateWorkflowSubmission(submission Submission, journal workflowSubmissionJournal) error {
+func validateWorkflowSubmission(submission workflowstate.Submission, journal workflowSubmissionJournal) error {
 	guard := submission.Guard
 	if !validWorkflowSubmissionIdentity(submission, journal) {
 		return workflowstate.ErrConflict
@@ -87,11 +87,11 @@ func validateWorkflowSubmission(submission Submission, journal workflowSubmissio
 	return validateWorkflowSubmissionProof(submission)
 }
 
-func validWorkflowSubmissionIdentity(submission Submission, journal workflowSubmissionJournal) bool {
+func validWorkflowSubmissionIdentity(submission workflowstate.Submission, journal workflowSubmissionJournal) bool {
 	return submission.ID == workflowSubmissionID(journal.Key, submission.Attempt, submission.Guard.PreparationHash) && submission.CandidateID != "" && len(submission.CandidateHash) == 64 && validWorkflowSubmissionState(submission.State) && !submission.SubmittedAt.IsZero() && !submission.UpdatedAt.Before(submission.SubmittedAt)
 }
 
-func validateWorkflowSubmissionGuard(guard PublicationGuard) error {
+func validateWorkflowSubmissionGuard(guard workflowstate.PublicationGuard) error {
 	if guard.PreparationRef == "" || len(guard.PreparationHash) != 64 || len(guard.ReviewHash) != 64 || guard.PullRequest.HeadCommit != guard.Git.SourceCommit || guard.PullRequest.BaseCommit != guard.Git.BaseCommit || guard.PullRequest.BaseBranch != guard.Git.TargetBranch {
 		return workflowstate.ErrConflict
 	}
@@ -100,7 +100,7 @@ func validateWorkflowSubmissionGuard(guard PublicationGuard) error {
 		return err
 	}
 
-	if err := validateWorkflowPublicationCapability(ReviewInput{PullRequest: guard.PullRequest, Policy: guard.Policy}, guard.Capability); err != nil {
+	if err := validateWorkflowPublicationCapability(workflowstate.ReviewInput{PullRequest: guard.PullRequest, Policy: guard.Policy}, guard.Capability); err != nil {
 		return err
 	}
 
@@ -111,7 +111,7 @@ func validateWorkflowSubmissionGuard(guard PublicationGuard) error {
 	return validateWorkflowIntegrationProof(guard.Git.IntegrationQuery, guard.Git)
 }
 
-func validateWorkflowSubmissionProof(submission Submission) error {
+func validateWorkflowSubmissionProof(submission workflowstate.Submission) error {
 	if submission.State != "confirmed" {
 		if submission.Proof != nil || submission.ObservedPR != nil || submission.ExternalDelivery {
 			return workflowstate.ErrConflict
@@ -137,11 +137,11 @@ func validateWorkflowSubmissionProof(submission Submission) error {
 	return validateWorkflowIntegrationProof(query, proof)
 }
 
-func validWorkflowConfirmedSubmissionHeader(submission Submission) bool {
+func validWorkflowConfirmedSubmissionHeader(submission workflowstate.Submission) bool {
 	return submission.Unpublished == nil && submission.Proof != nil && submission.ObservedPR != nil && submission.ObservedPR.Merged && workflowSubmissionPRMatches(submission, *submission.ObservedPR)
 }
 
-func validateWorkflowUnpublishedProof(submission Submission) error {
+func validateWorkflowUnpublishedProof(submission workflowstate.Submission) error {
 	if submission.State == "unpublished" {
 		if submission.Unpublished == nil || submission.Unpublished.SubmissionID != submission.ID || !submission.Unpublished.Unpublished {
 			return workflowstate.ErrConflict

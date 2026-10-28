@@ -9,37 +9,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (input MergerInput) evidenceRefs() []workflowstate.EvidenceRef {
-	refs := []workflowstate.EvidenceRef{input.SourceManifestRef, input.ValidationContractRef}
-	if input.OperatorDecisionRef != nil {
-		refs = append(refs, *input.OperatorDecisionRef)
-	}
-
-	if input.RepairCheckpointRef != nil {
-		refs = append(refs, *input.RepairCheckpointRef)
-	}
-
-	refs = append(refs, input.IntentRefs...)
-	refs = append(refs, input.TargetChangeRefs...)
-	refs = append(refs, input.FindingRefs...)
-
-	for _, requirement := range input.Requirements {
-		refs = append(refs, requirement.Evidence)
-	}
-
-	for _, conflict := range input.Conflicts {
-		refs = append(refs, conflict.Evidence)
-	}
-
-	if input.HistoryCheckpoint != nil {
-		refs = append(refs, input.HistoryCheckpoint.Evidence)
-	}
-
-	return refs
-}
-
-func validateWorkflowMergerReferences(input MergerInput) error {
-	refs := input.evidenceRefs()
+func validateWorkflowMergerReferences(input workflowstate.MergerInput) error {
+	refs := input.EvidenceRefs()
 	if len(input.IntentRefs) == 0 || len(input.TargetChangeRefs) == 0 || len(refs) > workflowstate.PageLimit {
 		return workflowstate.ErrConflict
 	}
@@ -63,12 +34,12 @@ func validateWorkflowMergerReferences(input MergerInput) error {
 
 // CheckWorkflowMergerEvidence reads immutable evidence through the existing
 // contained store port. It neither mutates an invocation nor acquires a slot.
-func (s *Store) CheckWorkflowMergerEvidence(ctx context.Context, input MergerInput, now time.Time) error {
+func (s *Store) CheckWorkflowMergerEvidence(ctx context.Context, input workflowstate.MergerInput, now time.Time) error {
 	if err := validateWorkflowMergerInput(input, now); err != nil {
 		return err
 	}
 
-	for _, ref := range input.evidenceRefs() {
+	for _, ref := range input.EvidenceRefs() {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
@@ -85,7 +56,7 @@ func (s *Store) CheckWorkflowMergerEvidence(ctx context.Context, input MergerInp
 	return s.checkWorkflowMergerManifest(input)
 }
 
-func (s *Store) checkWorkflowMergerManifest(input MergerInput) error {
+func (s *Store) checkWorkflowMergerManifest(input workflowstate.MergerInput) error {
 	var manifest NativeSourceManifest
 	if err := s.readWorkflowNativeEvidence(input.InvocationID, input.SourceManifestRef, &manifest); err != nil {
 		return err
@@ -114,7 +85,7 @@ func (s *Store) checkWorkflowMergerManifest(input MergerInput) error {
 	return s.checkWorkflowMergerCheckpointEvidence(input, manifest)
 }
 
-func (s *Store) checkWorkflowMergerCheckpointEvidence(input MergerInput, manifest NativeSourceManifest) error {
+func (s *Store) checkWorkflowMergerCheckpointEvidence(input workflowstate.MergerInput, manifest NativeSourceManifest) error {
 	checkpoint := input.HistoryCheckpoint
 	if checkpoint == nil {
 		return nil
@@ -135,7 +106,7 @@ func (s *Store) checkWorkflowMergerCheckpointEvidence(input MergerInput, manifes
 		return err
 	}
 
-	var retained MergerCheckpoint
+	var retained workflowstate.MergerCheckpoint
 	if err := json.Unmarshal(data, &retained); err != nil {
 		return err
 	}

@@ -12,6 +12,12 @@ multi-record writes and recovery. Every method of the store stays with its type.
 Core composition and application adapters call this owner directly. The package
 cannot import root core or application adapters.
 
+Consumer-owned contracts in `integrate`, `merge`, `review`, `forge` and `closeout`
+serve live validation, evidence, decision, response and gate operations. Bound
+implementations retain private claim/prepared/provider or journal identities;
+the merger evidence contract is implemented directly by the store. Stage policy
+extraction uses these operation boundaries without moving mutation authority.
+
 Shared retained values live in `workflow/state`. That package has a separate,
 narrow import contract and cannot import this coordinator or its configuration.
 Ticket projections and SQL indexing use the existing ticket and database owners;

@@ -118,7 +118,7 @@ func (s *Store) workflowSliceInput(ctx context.Context, run workflowInvocationFi
 	input.ExecutionMode, input.Body = "aggregate", contract.Contract
 	input.ContractHash = observation.descriptor.ContractHash
 	input.Contract.Validation = contract.Validation
-	input.Slice = &SliceInput{Unit: run.Lane.Unit, SetID: observation.set.ID, ContractRef: observation.descriptor.ContractRef, ContractHash: observation.descriptor.ContractHash}
+	input.Slice = &workflowstate.SliceInput{Unit: run.Lane.Unit, SetID: observation.set.ID, ContractRef: observation.descriptor.ContractRef, ContractHash: observation.descriptor.ContractHash}
 	input.EvidenceHashes[observation.descriptor.ContractRef] = observation.descriptor.ContractHash
 
 	for _, task := range observation.tasks {
@@ -160,10 +160,10 @@ func (s *Store) readWorkflowSliceContract(descriptor workflowstate.WorkflowSlice
 	return contract, workflowstate.ValidateGate(contract.Validation)
 }
 
-func (s *Store) workflowSliceTaskProof(ctx context.Context, run workflowInvocationFile, record Record) (SliceTaskProof, error) {
+func (s *Store) workflowSliceTaskProof(ctx context.Context, run workflowInvocationFile, record Record) (workflowstate.SliceTaskProof, error) {
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
-		return SliceTaskProof{}, err
+		return workflowstate.SliceTaskProof{}, err
 	}
 
 	request := run.ExecutionSelection()
@@ -173,10 +173,10 @@ func (s *Store) workflowSliceTaskProof(ctx context.Context, run workflowInvocati
 	for _, previous := range runs {
 		for _, attempt := range previous.Attempts {
 			if previous.Namespace == run.Namespace && workflowAttemptValidatesTask(attempt, record) && s.workflowRetainedResultMatches(ctx, previous, attempt, record, &reader) {
-				return SliceTaskProof{Key: record.Task.Key, ContractHash: record.Task.ContractHash, EvidenceRef: attempt.ResultRef, EvidenceHash: attempt.ResultHash, InputRef: attempt.InputRef, InputHash: attempt.InputHash}, nil
+				return workflowstate.SliceTaskProof{Key: record.Task.Key, ContractHash: record.Task.ContractHash, EvidenceRef: attempt.ResultRef, EvidenceHash: attempt.ResultHash, InputRef: attempt.InputRef, InputHash: attempt.InputHash}, nil
 			}
 		}
 	}
 
-	return SliceTaskProof{}, workflowstate.ErrConflict
+	return workflowstate.SliceTaskProof{}, workflowstate.ErrConflict
 }

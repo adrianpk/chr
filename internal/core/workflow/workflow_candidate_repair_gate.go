@@ -6,7 +6,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) resumeWorkflowCandidateRepairGate(ctx context.Context, run *workflowInvocationFile, source ReviewInput) error {
+func (s *Store) resumeWorkflowCandidateRepairGate(ctx context.Context, run *workflowInvocationFile, source workflowstate.ReviewInput) error {
 	if run.Integration == nil {
 		return nil
 	}
@@ -56,14 +56,14 @@ func (s *Store) commitWorkflowCandidateRepairGate(run *workflowInvocationFile, e
 	return err
 }
 
-func workflowMergerRepairSourceMatches(source ReviewInput, proof IntegrationProof) bool {
+func workflowMergerRepairSourceMatches(source workflowstate.ReviewInput, proof workflowstate.IntegrationProof) bool {
 	return source.PullRequest.HeadCommit == proof.SourceCommit && source.TargetCommit == proof.BaseCommit && source.Policy.Method == proof.Method && source.PullRequest.Repository == proof.Repository && source.PullRequest.BaseBranch == proof.TargetBranch
 }
 
-func (s *Store) prepareWorkflowCandidateRepairGit(ctx context.Context, run workflowInvocationFile, git PreparationGit, query PreparationQuery) (IntegrationProof, []workflowstate.EvidenceRef, error) {
+func (s *Store) prepareWorkflowCandidateRepairGit(ctx context.Context, run workflowInvocationFile, git PreparationGit, query PreparationQuery) (workflowstate.IntegrationProof, []workflowstate.EvidenceRef, error) {
 	state, refs, err := s.acceptedWorkflowCandidateRepair(run)
 	if err != nil {
-		return IntegrationProof{}, nil, err
+		return workflowstate.IntegrationProof{}, nil, err
 	}
 
 	if state == nil {
@@ -74,7 +74,7 @@ func (s *Store) prepareWorkflowCandidateRepairGit(ctx context.Context, run workf
 
 	repaired, ok := git.(RepairedPreparationGit)
 	if !ok {
-		return IntegrationProof{}, nil, workflowstate.ErrConflict
+		return workflowstate.IntegrationProof{}, nil, workflowstate.ErrConflict
 	}
 
 	proof, err := repaired.PrepareWorkflowRepairedIntegration(ctx, query, *state)

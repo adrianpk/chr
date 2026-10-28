@@ -23,8 +23,8 @@ type workflowSubmissionProviderFixture struct {
 	lost    bool
 	unknown bool
 	sealed  map[string]bool
-	before  func(context.Context, Submission)
-	after   func(Submission)
+	before  func(context.Context, workflowstate.Submission)
+	after   func(workflowstate.Submission)
 }
 
 func newWorkflowSubmissionFixture(t *testing.T, method string) (workflowPreparationFixture, *workflowSubmissionProviderFixture) {
@@ -44,7 +44,7 @@ func newWorkflowSubmissionFixture(t *testing.T, method string) (workflowPreparat
 	return f, p
 }
 
-func (p *workflowSubmissionProviderFixture) ReadWorkflowPullRequest(ctx context.Context, _ string) (PullRequestSnapshot, error) {
+func (p *workflowSubmissionProviderFixture) ReadWorkflowPullRequest(ctx context.Context, _ string) (workflowstate.PullRequestSnapshot, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -70,7 +70,7 @@ func (p *workflowSubmissionProviderFixture) ReadWorkflowBranch(ctx context.Conte
 	return strings.TrimSpace(string(output)), err
 }
 
-func (p *workflowSubmissionProviderFixture) SubmitWorkflowIntegration(ctx context.Context, submission Submission) (SubmissionResponse, error) {
+func (p *workflowSubmissionProviderFixture) SubmitWorkflowIntegration(ctx context.Context, submission workflowstate.Submission) (workflowstate.SubmissionResponse, error) {
 	p.mu.Lock()
 	p.calls++
 	p.mu.Unlock()
@@ -80,7 +80,7 @@ func (p *workflowSubmissionProviderFixture) SubmitWorkflowIntegration(ctx contex
 	}
 
 	if p.unknown {
-		return SubmissionResponse{}, context.DeadlineExceeded
+		return workflowstate.SubmissionResponse{}, context.DeadlineExceeded
 	}
 
 	if err := p.publish(ctx, submission); err != nil {
@@ -89,14 +89,14 @@ func (p *workflowSubmissionProviderFixture) SubmitWorkflowIntegration(ctx contex
 			p.seal(submission.ID)
 		}
 
-		return SubmissionResponse{}, err
+		return workflowstate.SubmissionResponse{}, err
 	}
 
 	if p.after != nil {
 		p.after(submission)
 	}
 
-	response := SubmissionResponse{Accepted: true, ResultCommit: submission.Guard.Git.ResultCommit}
+	response := workflowstate.SubmissionResponse{Accepted: true, ResultCommit: submission.Guard.Git.ResultCommit}
 	if p.lost {
 		return response, context.DeadlineExceeded
 	}
@@ -104,7 +104,7 @@ func (p *workflowSubmissionProviderFixture) SubmitWorkflowIntegration(ctx contex
 	return response, nil
 }
 
-func (p *workflowSubmissionProviderFixture) publish(ctx context.Context, submission Submission) error {
+func (p *workflowSubmissionProviderFixture) publish(ctx context.Context, submission workflowstate.Submission) error {
 	guard := submission.Guard
 
 	command := exec.CommandContext(ctx, "git", "-C", p.remote, "fetch", "--quiet", "--no-tags", "--", submission.PreparedLane.Worktree, guard.Git.ResultCommit)
@@ -130,11 +130,11 @@ func (p *workflowSubmissionProviderFixture) publish(ctx context.Context, submiss
 	return opsfile.WriteAtomic(filepath.Join(p.remote, "workflow-provider-pr.json"), data)
 }
 
-func (p *workflowSubmissionProviderFixture) ObserveWorkflowSubmission(_ context.Context, submission Submission) (SubmissionObservation, error) {
+func (p *workflowSubmissionProviderFixture) ObserveWorkflowSubmission(_ context.Context, submission workflowstate.Submission) (workflowstate.SubmissionObservation, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	return SubmissionObservation{SubmissionID: submission.ID, Unpublished: p.sealed[submission.ID]}, nil
+	return workflowstate.SubmissionObservation{SubmissionID: submission.ID, Unpublished: p.sealed[submission.ID]}, nil
 }
 
 func (p *workflowSubmissionProviderFixture) seal(id string) {

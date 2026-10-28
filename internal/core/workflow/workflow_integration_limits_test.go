@@ -178,7 +178,7 @@ func TestNativeBudgetDeadline(t *testing.T) {
 			r.Allowance.Deadline = time.Now().UTC().Add(time.Minute)
 
 			if !tc.metered {
-				r.RuntimeDeadline, r.Allowance = r.Allowance.Deadline, TokenAllowance{}
+				r.RuntimeDeadline, r.Allowance = r.Allowance.Deadline, workflowstate.TokenAllowance{}
 			}
 
 			request := IntegrationReserve{IntegrationBudgetGuard: nativeBudgetGuard(t, store, entry.InvocationID), Reservation: r}

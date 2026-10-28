@@ -15,8 +15,8 @@ func workflowPreparationPath(id string, round int) string {
 	return filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "preparation", fmt.Sprintf("%03d.json", round)))
 }
 
-func (s *Store) readWorkflowPreparation(run workflowInvocationFile) (IntegrationCandidate, error) {
-	var candidate IntegrationCandidate
+func (s *Store) readWorkflowPreparation(run workflowInvocationFile) (workflowstate.IntegrationCandidate, error) {
+	var candidate workflowstate.IntegrationCandidate
 	if run.Preparation == nil || run.Preparation.ResultRef == "" {
 		return candidate, workflowstate.ErrConflict
 	}
@@ -45,7 +45,7 @@ func (s *Store) readWorkflowPreparation(run workflowInvocationFile) (Integration
 	return candidate, nil
 }
 
-func (s *Store) checkWorkflowRetainedPreparationInput(run workflowInvocationFile, candidate IntegrationCandidate) error {
+func (s *Store) checkWorkflowRetainedPreparationInput(run workflowInvocationFile, candidate workflowstate.IntegrationCandidate) error {
 	result := candidate.Validation
 
 	data, err := s.readWorkflowReviewImage(result.InputRef, result.InputHash)
@@ -75,13 +75,13 @@ func (s *Store) checkWorkflowRetainedPreparationInput(run workflowInvocationFile
 	return validateWorkflowPreparationGate(input, result)
 }
 
-func workflowPreparationInputMatches(input TaskInput, candidate IntegrationCandidate) bool {
+func workflowPreparationInputMatches(input TaskInput, candidate workflowstate.IntegrationCandidate) bool {
 	result := candidate.Validation
 
 	return input.Preparation != nil && input.Lane == candidate.Lane && input.AttemptID == result.AttemptID && input.Generation == result.Generation && input.ContractHash == candidate.Input.Source.Slice.ContractHash
 }
 
-func validateWorkflowPreparationCandidate(run workflowInvocationFile, candidate IntegrationCandidate) error {
+func validateWorkflowPreparationCandidate(run workflowInvocationFile, candidate workflowstate.IntegrationCandidate) error {
 	b := run.Preparation
 
 	if err := validateWorkflowCandidateSchema(candidate); err != nil {
@@ -108,7 +108,7 @@ func validateWorkflowPreparationCandidate(run workflowInvocationFile, candidate 
 	return validateWorkflowPreparationResult(run, candidate)
 }
 
-func validateWorkflowPreparationProofBinding(candidate IntegrationCandidate) error {
+func validateWorkflowPreparationProofBinding(candidate workflowstate.IntegrationCandidate) error {
 	proof, source := candidate.Input.Git, candidate.Input.Source
 
 	capability := candidate.Input.Capability
@@ -123,7 +123,7 @@ func validateWorkflowPreparationProofBinding(candidate IntegrationCandidate) err
 	return validateWorkflowPreparationLaneProof(candidate)
 }
 
-func validateWorkflowPreparationLaneProof(candidate IntegrationCandidate) error {
+func validateWorkflowPreparationLaneProof(candidate workflowstate.IntegrationCandidate) error {
 	proof := candidate.Input.Git
 	if proof.SourceDirectory != "" || proof.ObservedTarget != proof.BaseCommit || candidate.Lane.HeadCommit != proof.ResultCommit || candidate.Lane.BaseCommit != proof.BaseCommit {
 		return workflowstate.ErrConflict
@@ -132,7 +132,7 @@ func validateWorkflowPreparationLaneProof(candidate IntegrationCandidate) error 
 	return validateWorkflowIntegrationProof(proof.IntegrationQuery, proof)
 }
 
-func validateWorkflowPreparationResult(run workflowInvocationFile, candidate IntegrationCandidate) error {
+func validateWorkflowPreparationResult(run workflowInvocationFile, candidate workflowstate.IntegrationCandidate) error {
 	result := candidate.Validation
 	if !result.Successful || result.Schema != "chr-integration-validation/v1" || result.Outcome != "integration_validated" || result.Commit != candidate.Input.Git.ResultCommit || result.Tree != candidate.Input.Git.PreparedTree || result.FinishedAt.IsZero() {
 		return workflowstate.ErrConflict
@@ -147,11 +147,11 @@ func validateWorkflowPreparationResult(run workflowInvocationFile, candidate Int
 	return workflowstate.ErrConflict
 }
 
-func workflowPreparationAttemptMatches(attempt Attempt, result TaskResult, hash string) bool {
+func workflowPreparationAttemptMatches(attempt Attempt, result workflowstate.TaskResult, hash string) bool {
 	return attempt.ID == result.AttemptID && attempt.Purpose == workflowIntegrationValidationPurpose && attempt.Outcome == "prepared" && attempt.ResultHash == hash && attempt.InputRef == result.InputRef && attempt.InputHash == result.InputHash
 }
 
-func (s *Store) persistWorkflowPreparation(run *workflowInvocationFile, record Record, candidate IntegrationCandidate) error {
+func (s *Store) persistWorkflowPreparation(run *workflowInvocationFile, record Record, candidate workflowstate.IntegrationCandidate) error {
 	if err := s.checkWorkflowNativeCandidate(candidate); err != nil {
 		return err
 	}
@@ -195,7 +195,7 @@ func (s *Store) persistWorkflowPreparation(run *workflowInvocationFile, record R
 	return s.commitWorkflowPullRequestFiles(run, files, workflowstate.FileChange{Path: ref, After: data})
 }
 
-func validateWorkflowPreparationGate(input TaskInput, result TaskResult) error {
+func validateWorkflowPreparationGate(input TaskInput, result workflowstate.TaskResult) error {
 	gate := input.Contract.Validation
 	if !gate.Required {
 		if result.WaiverReason != gate.WaiverReason || len(result.Validation) != 0 {

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowSubmissionCrashProcess is the owned writer that exits during
@@ -39,7 +40,7 @@ func TestWorkflowSubmissionCrashProcess(t *testing.T) {
 	remote := os.Getenv("CHR_SUBMISSION_CRASH_REMOTE")
 	base := &workflowPreparationProviderFixture{workflowReviewProviderFixture: &workflowReviewProviderFixture{workflowPRProviderFixture: &workflowPRProviderFixture{pr: pr}}, guarded: true, revision: "guard-v1"}
 	provider := &workflowSubmissionProviderFixture{workflowPreparationProviderFixture: base, remote: remote, sealed: map[string]bool{}}
-	provider.after = func(Submission) {
+	provider.after = func(workflowstate.Submission) {
 		if stage == "provider" {
 			os.Exit(17)
 		}
@@ -141,7 +142,7 @@ func assertWorkflowSubmissionRecovery(t *testing.T, f workflowPreparationFixture
 	checkWorkflowPreparationTaskProofs(t, restarted, workflowTestRead(t, restarted, f.run.ID))
 }
 
-func sealWorkflowSubmissionCrash(t *testing.T, store *Store, f workflowPreparationFixture, provider *workflowSubmissionProviderFixture, first Submission, stage string) string {
+func sealWorkflowSubmissionCrash(t *testing.T, store *Store, f workflowPreparationFixture, provider *workflowSubmissionProviderFixture, first workflowstate.Submission, stage string) string {
 	t.Helper()
 
 	if stage != "intent" && stage != "projection" {

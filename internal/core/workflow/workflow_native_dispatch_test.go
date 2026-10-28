@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"sync/atomic"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeDispatchPublisherFixture struct {
@@ -78,7 +80,7 @@ func TestNativeDispatch(t *testing.T) {
 	nativeDispatchNoRepeat(t, f, publisher, submission)
 }
 
-func nativeDispatchNoRepeat(t *testing.T, f nativeSubmissionFixture, publisher *nativeDispatchPublisherFixture, submission Submission) {
+func nativeDispatchNoRepeat(t *testing.T, f nativeSubmissionFixture, publisher *nativeDispatchPublisherFixture, submission workflowstate.Submission) {
 	t.Helper()
 
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)

@@ -83,7 +83,7 @@ func workflowClosingIntegrateLater(t *testing.T, fixture *workflowIntegrationFix
 
 	workflowIntegrationCommand(t, candidate.Lane.Worktree, "push", fixture.remote, candidate.Lane.HeadCommit+":"+candidate.Lane.Branch)
 
-	fixture.provider.pr = PullRequestSnapshot{URL: fixture.provider.pr.Repository + "/pulls/9", Repository: fixture.provider.pr.Repository, HeadRepository: fixture.provider.pr.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", BaseCommit: fixture.target, HeadCommit: candidate.Result.Commit, State: "open"}
+	fixture.provider.pr = workflowstate.PullRequestSnapshot{URL: fixture.provider.pr.Repository + "/pulls/9", Repository: fixture.provider.pr.Repository, HeadRepository: fixture.provider.pr.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", BaseCommit: fixture.target, HeadCommit: candidate.Result.Commit, State: "open"}
 	fixture.provider.found = nil
 	workflowPREnsure(t, fixture.store, fixture.run.ID, workflowFrontierProvider{fixture.provider, fixture.remote})
 	workflowIntegrationCommand(t, fixture.actor, "fetch", "origin", candidate.Lane.Branch)

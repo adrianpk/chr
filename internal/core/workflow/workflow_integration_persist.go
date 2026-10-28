@@ -84,11 +84,11 @@ func (s *Store) readWorkflowDeliveryProof(run workflowInvocationFile) (SliceDeli
 }
 
 func checkWorkflowLegacyDeliveryProof(run workflowInvocationFile, proof SliceDeliveryProof) error {
-	if !workflowDeliveryProofMatchesRun(run, proof) || !proof.PullRequest.Merged || workflowPullRequestMismatch(*run.PullRequest, []PullRequestSnapshot{proof.PullRequest}) != "" {
+	if !workflowDeliveryProofMatchesRun(run, proof) || !proof.PullRequest.Merged || workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{proof.PullRequest}) != "" {
 		return workflowstate.ErrConflict
 	}
 
-	query := IntegrationQuery{Repository: run.PullRequest.Request.Repository, TargetBranch: run.PullRequest.Request.BaseBranch, Method: proof.Git.Method, SourceCommit: run.PullRequest.SourceCommit, SourceTree: run.PullRequest.SourceTree, OriginCommit: run.ExecutionSelection().Target.Commit, ResultCommit: proof.PullRequest.ResultCommit}
+	query := workflowstate.IntegrationQuery{Repository: run.PullRequest.Request.Repository, TargetBranch: run.PullRequest.Request.BaseBranch, Method: proof.Git.Method, SourceCommit: run.PullRequest.SourceCommit, SourceTree: run.PullRequest.SourceTree, OriginCommit: run.ExecutionSelection().Target.Commit, ResultCommit: proof.PullRequest.ResultCommit}
 
 	return validateWorkflowIntegrationProof(query, proof.Git)
 }

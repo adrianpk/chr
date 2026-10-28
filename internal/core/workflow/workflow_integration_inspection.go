@@ -25,9 +25,9 @@ type IntegrationInspection struct {
 	Capacity      IntegrationCapacity
 	Roles         []IntegrationRoleObservation
 	QueuePosition int
-	Candidate     *IntegrationCandidate
+	Candidate     *workflowstate.IntegrationCandidate
 	Decisions     *IntegrationDecisions
-	Submission    *Submission
+	Submission    *workflowstate.Submission
 }
 
 func (s *Store) inspectWorkflowIntegration(ctx context.Context, run workflowInvocationFile) (*IntegrationInspection, error) {
@@ -88,7 +88,7 @@ func (s *Store) inspectWorkflowIntegrationEntry(ctx context.Context, run workflo
 	}
 
 	if entry.CandidateRef != nil {
-		var candidate IntegrationCandidate
+		var candidate workflowstate.IntegrationCandidate
 		if err := s.readWorkflowNativeEvidence(run.ID, *entry.CandidateRef, &candidate); err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func workflowIntegrationQueuePosition(views []IntegrationView, entry Integration
 	return 0
 }
 
-func workflowIntegrationObservedSubmission(journals []workflowSubmissionJournal, entry IntegrationEntry) (*Submission, error) {
+func workflowIntegrationObservedSubmission(journals []workflowSubmissionJournal, entry IntegrationEntry) (*workflowstate.Submission, error) {
 	if entry.SubmissionRef == nil {
 		return nil, nil
 	}

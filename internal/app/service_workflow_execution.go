@@ -72,10 +72,10 @@ func (s service) CheckpointWorkflow(ctx context.Context, claim *workflowcore.Cla
 }
 
 // ExecuteWorkflowTask runs an owned isolated task and the frozen host gate.
-func (s service) ExecuteWorkflowTask(ctx context.Context, claim *workflowcore.Claim, worker []string) (workflowcore.TaskResult, error) {
+func (s service) ExecuteWorkflowTask(ctx context.Context, claim *workflowcore.Claim, worker []string) (workflowstate.TaskResult, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.TaskResult{}, err
+		return workflowstate.TaskResult{}, err
 	}
 
 	return store.ExecuteWorkflowTask(ctx, claim, worker)
@@ -176,20 +176,20 @@ func (s service) PrepareWorkflowManualTask(ctx context.Context, claim *workflowc
 }
 
 // ExecuteWorkflowManualTask supervises the frozen harness without completing work.
-func (s service) ExecuteWorkflowManualTask(ctx context.Context, claim *workflowcore.Claim) (workflowcore.CommandResult, error) {
+func (s service) ExecuteWorkflowManualTask(ctx context.Context, claim *workflowcore.Claim) (workflowstate.CommandResult, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 
 	return store.ExecuteWorkflowManualTask(ctx, claim)
 }
 
 // ReconcileWorkflowTask host-validates an explicit manual candidate before status.
-func (s service) ReconcileWorkflowTask(ctx context.Context, claim *workflowcore.Claim, candidate workflowcore.ManualCandidate) (workflowcore.TaskResult, error) {
+func (s service) ReconcileWorkflowTask(ctx context.Context, claim *workflowcore.Claim, candidate workflowcore.ManualCandidate) (workflowstate.TaskResult, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.TaskResult{}, err
+		return workflowstate.TaskResult{}, err
 	}
 
 	return store.ReconcileWorkflowTask(ctx, claim, candidate)

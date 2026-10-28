@@ -10,16 +10,6 @@ import (
 // WorkflowSchema identifies explicitly executable workflow records.
 const WorkflowSchema = "chr-workflow/v1"
 
-// Identity is a scoped durable identity independent of a checkout path.
-type Identity struct {
-	ID        string    `json:"id"`
-	ProjectID string    `json:"project_id"`
-	Namespace string    `json:"namespace"`
-	Revision  uint64    `json:"revision"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
 // Task extends a native ticket without replacing its display fields.
 type Task struct {
 	Schema          string              `json:"workflow_schema"`
@@ -75,7 +65,7 @@ type Receipt struct {
 // Record separates envelope identity, native content and workflow domain.
 // Path is relative to the namespace root. Metadata and Domain retain unknown fields.
 type Record struct {
-	Identity
+	workflowstate.Identity
 	Kind       string
 	Path       string
 	Body       []byte

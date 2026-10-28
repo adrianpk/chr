@@ -13,15 +13,15 @@ import (
 
 type workflowPRProviderFixture struct {
 	mu                              sync.Mutex
-	pr                              PullRequestSnapshot
-	found                           []PullRequestSnapshot
+	pr                              workflowstate.PullRequestSnapshot
+	found                           []workflowstate.PullRequestSnapshot
 	createErr                       error
 	beforeIO                        func(string)
 	createHook                      func()
 	creates, reads, finds, branches int
 }
 
-func (p *workflowPRProviderFixture) FindWorkflowPullRequests(_ context.Context, _ PullRequestQuery) ([]PullRequestSnapshot, error) {
+func (p *workflowPRProviderFixture) FindWorkflowPullRequests(_ context.Context, _ PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (p *workflowPRProviderFixture) FindWorkflowPullRequests(_ context.Context, 
 	return p.found, nil
 }
 
-func (p *workflowPRProviderFixture) ReadWorkflowPullRequest(_ context.Context, _ string) (PullRequestSnapshot, error) {
+func (p *workflowPRProviderFixture) ReadWorkflowPullRequest(_ context.Context, _ string) (workflowstate.PullRequestSnapshot, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -45,7 +45,7 @@ func (p *workflowPRProviderFixture) ReadWorkflowPullRequest(_ context.Context, _
 	return p.pr, nil
 }
 
-func (p *workflowPRProviderFixture) CreateWorkflowPullRequest(_ context.Context, _ PullRequestRequest) (PullRequestSnapshot, error) {
+func (p *workflowPRProviderFixture) CreateWorkflowPullRequest(_ context.Context, _ PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -54,7 +54,7 @@ func (p *workflowPRProviderFixture) CreateWorkflowPullRequest(_ context.Context,
 		p.beforeIO("create")
 	}
 
-	p.found = []PullRequestSnapshot{p.pr}
+	p.found = []workflowstate.PullRequestSnapshot{p.pr}
 	if p.createHook != nil {
 		p.createHook()
 	}
@@ -170,7 +170,7 @@ func workflowPRPlanFixture(t *testing.T, extent string, policy workflowstate.Exe
 		t.Fatal(err)
 	}
 
-	pr := PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: commit, State: "open"}
+	pr := workflowstate.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: commit, State: "open"}
 
 	return store, hierarchy, run.Invocation, &workflowPRProviderFixture{pr: pr}
 }
@@ -179,7 +179,7 @@ func workflowPRWorker() []string {
 	return []string{"sh", "-c", "printf 'Task result\\n' >> result.txt && git add result.txt && git -c user.name=Test -c user.email=test@example.com commit -qm 'Task result'"}
 }
 
-func workflowPREnsure(t *testing.T, store *Store, id string, provider PullRequestProvider) PullRequestSnapshot {
+func workflowPREnsure(t *testing.T, store *Store, id string, provider PullRequestProvider) workflowstate.PullRequestSnapshot {
 	t.Helper()
 
 	pr, err := store.EnsureWorkflowSlicePullRequest(t.Context(), id, workflowPRContent(), provider)
@@ -214,7 +214,7 @@ func TestWorkflowSlicePRReuse(t *testing.T) {
 	checkWorkflowPRBinding(t, store, hierarchy, run.ID, pr)
 }
 
-func checkWorkflowPRBinding(t *testing.T, store *Store, hierarchy MaterializationResult, id string, pr PullRequestSnapshot) {
+func checkWorkflowPRBinding(t *testing.T, store *Store, hierarchy MaterializationResult, id string, pr workflowstate.PullRequestSnapshot) {
 	t.Helper()
 
 	run, err := store.ReadWorkflow(t.Context(), id)
@@ -265,7 +265,7 @@ func TestWorkflowSlicePRObservation(t *testing.T) {
 		t.Fatal("unobserved creation was blindly retried")
 	}
 
-	provider.found = []PullRequestSnapshot{provider.pr}
+	provider.found = []workflowstate.PullRequestSnapshot{provider.pr}
 
 	pr := workflowPREnsure(t, NewWorkflowStore(store.layout, store.projectID), run.ID, provider)
 	if pr.URL != provider.pr.URL || provider.creates != 1 {
@@ -327,7 +327,7 @@ func TestWorkflowSlicePRExisting(t *testing.T) {
 				provider.pr.State = "closed"
 			}
 
-			provider.found = []PullRequestSnapshot{provider.pr}
+			provider.found = []workflowstate.PullRequestSnapshot{provider.pr}
 			if name == "ambiguous" {
 				provider.found = append(provider.found, provider.pr)
 			}

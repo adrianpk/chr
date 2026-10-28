@@ -14,18 +14,6 @@ import (
 
 const workflowPreparationCollisionLimit = 3
 
-// IntegrationPreparation binds host identity, bounded retries and
-// signature policy to the prepared objects without adding artificial commits.
-type IntegrationPreparation struct {
-	Identity             string                 `json:"identity"`
-	InitialCommitterDate string                 `json:"initial_committer_date"`
-	CommitterDate        string                 `json:"committer_date"`
-	NoOpCollisions       int                    `json:"no_op_collisions"`
-	RequiredSignatures   bool                   `json:"required_signatures"`
-	Signing              *CommitSigningProfile  `json:"signing,omitempty"`
-	Signatures           []IntegrationSignature `json:"signatures,omitempty"`
-}
-
 func (git OSWorkflowPreparationGit) preparationReader(dir string, query PreparationQuery) (workflowIntegrationReader, error) {
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: dir}, signing: git.signing}
 
@@ -36,7 +24,7 @@ func (git OSWorkflowPreparationGit) preparationReader(dir string, query Preparat
 
 	initial := fmt.Sprintf("%d +0000", date.Unix())
 
-	reader.preparation = &IntegrationPreparation{InitialCommitterDate: initial, CommitterDate: initial, RequiredSignatures: query.RequiredSignatures}
+	reader.preparation = &workflowstate.IntegrationPreparation{InitialCommitterDate: initial, CommitterDate: initial, RequiredSignatures: query.RequiredSignatures}
 	if !query.RequiredSignatures {
 		reader.signing = nil
 		if query.SigningProfile != "" {
@@ -56,7 +44,7 @@ func (git OSWorkflowPreparationGit) preparationReader(dir string, query Preparat
 	return reader, nil
 }
 
-func (reader workflowIntegrationReader) prepareDistinctResult(ctx context.Context, proof IntegrationProof) (string, error) {
+func (reader workflowIntegrationReader) prepareDistinctResult(ctx context.Context, proof workflowstate.IntegrationProof) (string, error) {
 	build := func() (string, error) {
 		if proof.Method == "rebase" {
 			return reader.prepareRebase(ctx, proof)
@@ -68,7 +56,7 @@ func (reader workflowIntegrationReader) prepareDistinctResult(ctx context.Contex
 	return workflowDistinctPreparation(proof.SourceCommit, reader.preparation, build)
 }
 
-func workflowDistinctPreparation(source string, preparation *IntegrationPreparation, build func() (string, error)) (string, error) {
+func workflowDistinctPreparation(source string, preparation *workflowstate.IntegrationPreparation, build func() (string, error)) (string, error) {
 	if preparation == nil || !validWorkflowCommitDate(preparation.InitialCommitterDate) {
 		return "", workflowstate.ErrConflict
 	}
@@ -95,7 +83,7 @@ func workflowDistinctPreparation(source string, preparation *IntegrationPreparat
 	return "", fmt.Errorf("%w: prepared source identity collision budget exhausted", workflowstate.ErrConflict)
 }
 
-func workflowPreparationIdentity(proof IntegrationProof, p IntegrationPreparation) string {
+func workflowPreparationIdentity(proof workflowstate.IntegrationProof, p workflowstate.IntegrationPreparation) string {
 	profile := ""
 	if p.Signing != nil {
 		profile = p.Signing.Hash
@@ -104,7 +92,7 @@ func workflowPreparationIdentity(proof IntegrationProof, p IntegrationPreparatio
 	return contenthash.Sum([]byte(fmt.Sprintf("chr-preparation/v1:%s:%s:%s:%s:%s:%s:%s:%d:%s", proof.Repository, proof.Method, proof.SourceCommit, proof.BaseCommit, proof.ResultCommit, p.InitialCommitterDate, p.CommitterDate, p.NoOpCollisions, profile)))
 }
 
-func validWorkflowPreparationMetadata(proof IntegrationProof, p IntegrationPreparation) bool {
+func validWorkflowPreparationMetadata(proof workflowstate.IntegrationProof, p workflowstate.IntegrationPreparation) bool {
 	if !validWorkflowCommitDate(p.InitialCommitterDate) || !validWorkflowCommitDate(p.CommitterDate) || p.NoOpCollisions < 0 || p.NoOpCollisions > workflowPreparationCollisionLimit {
 		return false
 	}
@@ -117,7 +105,7 @@ func validWorkflowPreparationMetadata(proof IntegrationProof, p IntegrationPrepa
 	return p.Identity == workflowPreparationIdentity(proof, p) && validWorkflowPreparationSignatures(proof, p)
 }
 
-func (reader workflowIntegrationReader) addPreparationMetadata(ctx context.Context, proof IntegrationProof, provenance *IntegrationProvenance) error {
+func (reader workflowIntegrationReader) addPreparationMetadata(ctx context.Context, proof workflowstate.IntegrationProof, provenance *workflowstate.IntegrationProvenance) error {
 	metadata := reader.preparation
 	if metadata == nil && proof.Provenance != nil {
 		metadata = proof.Provenance.Preparation
@@ -151,12 +139,12 @@ func (reader workflowIntegrationReader) addPreparationMetadata(ctx context.Conte
 	return nil
 }
 
-func workflowPreparationCommitterMatches(entry IntegrationAttribution, p IntegrationPreparation, replay bool) bool {
+func workflowPreparationCommitterMatches(entry workflowstate.IntegrationAttribution, p workflowstate.IntegrationPreparation, replay bool) bool {
 	return entry.Committer.Name == "Workflow Host" && entry.Committer.Email == "workflow@example.invalid" && (!replay || entry.Committer.Date == p.CommitterDate)
 }
 
-func checkWorkflowPreparationSigning(proof IntegrationProof, required bool, profile string) error {
-	var p *IntegrationPreparation
+func checkWorkflowPreparationSigning(proof workflowstate.IntegrationProof, required bool, profile string) error {
+	var p *workflowstate.IntegrationPreparation
 	if proof.Provenance != nil {
 		p = proof.Provenance.Preparation
 	}

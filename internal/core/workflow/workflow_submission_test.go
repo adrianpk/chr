@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowSubmissionMethods publishes actual merge/rebase/squash results
@@ -19,7 +21,7 @@ func testWorkflowSubmissionMethod(t *testing.T, method string) {
 	t.Helper()
 
 	f, provider := newWorkflowSubmissionFixture(t, method)
-	provider.before = func(ctx context.Context, submission Submission) {
+	provider.before = func(ctx context.Context, submission workflowstate.Submission) {
 		assertWorkflowSubmissionIntent(t, ctx, f, submission)
 	}
 
@@ -40,7 +42,7 @@ func testWorkflowSubmissionMethod(t *testing.T, method string) {
 	assertWorkflowSubmissionRetry(t, f, provider, submission)
 }
 
-func assertWorkflowSubmissionIntent(t *testing.T, ctx context.Context, f workflowPreparationFixture, submission Submission) {
+func assertWorkflowSubmissionIntent(t *testing.T, ctx context.Context, f workflowPreparationFixture, submission workflowstate.Submission) {
 	t.Helper()
 
 	retained, err := f.store.ReadWorkflowSubmission(ctx, f.run.ID)
@@ -54,7 +56,7 @@ func assertWorkflowSubmissionIntent(t *testing.T, ctx context.Context, f workflo
 	}
 }
 
-func assertWorkflowSubmissionRetry(t *testing.T, f workflowPreparationFixture, provider *workflowSubmissionProviderFixture, submission Submission) {
+func assertWorkflowSubmissionRetry(t *testing.T, f workflowPreparationFixture, provider *workflowSubmissionProviderFixture, submission workflowstate.Submission) {
 	t.Helper()
 
 	again, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))

@@ -20,7 +20,7 @@ type ResultReceipt struct {
 // ResultClosure is a successful set gate and its immutable reference.
 type ResultClosure struct {
 	Reference workflowstate.ClosingEvidence
-	Receipt   ClosingReceipt
+	Receipt   workflowstate.ClosingReceipt
 }
 
 // ResultInspection distinguishes evidence-backed completion from counters
@@ -122,7 +122,7 @@ func (s *Store) workflowResultClosure(closure InvocationClosure) (ResultClosure,
 		return ResultClosure{}, errors.Join(workflowstate.ErrConflict, err)
 	}
 
-	var receipt ClosingReceipt
+	var receipt workflowstate.ClosingReceipt
 	if err := json.Unmarshal(data, &receipt); err != nil {
 		return ResultClosure{}, err
 	}

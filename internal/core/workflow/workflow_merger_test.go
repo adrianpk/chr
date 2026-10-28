@@ -12,22 +12,22 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func nativeMergerInput(t *testing.T) (*Store, MergerInput, time.Time) {
+func nativeMergerInput(t *testing.T) (*Store, workflowstate.MergerInput, time.Time) {
 	t.Helper()
 
 	store := workflowTestStore(t)
 	now := time.Now().UTC()
-	input := MergerInput{
-		MergerIdentity: MergerIdentity{
+	input := workflowstate.MergerInput{
+		MergerIdentity: workflowstate.MergerIdentity{
 			ProtocolVersion: 1, ID: "merger-attempt-1", InvocationID: "native-run-1",
 			EntryID: contenthash.Sum([]byte("entry")), Unit: workflowstate.Ref{Kind: "slice", ID: "slice-1"},
 			CandidateRevision: 2, CandidateHash: contenthash.Sum([]byte("candidate")), ClaimGeneration: 3,
 			ScopeHash: contenthash.Sum([]byte("scope")), Reason: "preparation_conflict",
-		}, MergerGit: MergerGit{
+		}, MergerGit: workflowstate.MergerGit{
 			Repository: "https://forge.example.test/testing/native", SourceRef: "refs/heads/chr/work/source", TargetRef: "refs/heads/dev",
 			Source: strings.Repeat("1", 40), Base: strings.Repeat("2", 40), Method: "merge",
 			OwnedWorkspaceID: contenthash.Sum([]byte("owned-checkout")),
-		}, MergerScope: MergerScope{AllowedPaths: []string{"src", "docs"}, ProtectedPaths: []string{"src/validation.go", "Makefile"}}, MergerValidation: MergerValidation{ValidationCommands: [][]string{{"go", "test", "./..."}}}, MergerLimits: MergerLimits{
+		}, MergerScope: workflowstate.MergerScope{AllowedPaths: []string{"src", "docs"}, ProtectedPaths: []string{"src/validation.go", "Makefile"}}, MergerValidation: workflowstate.MergerValidation{ValidationCommands: [][]string{{"go", "test", "./..."}}}, MergerLimits: workflowstate.MergerLimits{
 			CapacityReservationID: "worker-slot-1", BudgetReservationID: "merger-call-1",
 			RemainingAttempts: 3, WorkerTimeoutSeconds: 120, AdmittedAt: now, Deadline: now.Add(time.Minute),
 		},
@@ -38,8 +38,8 @@ func nativeMergerInput(t *testing.T) (*Store, MergerInput, time.Time) {
 	source := retainNativeRecordEvidence(t, store, input.InvocationID, "merger-intent", "Preserve source API behavior")
 	target := retainNativeRecordEvidence(t, store, input.InvocationID, "merger-target", "Preserve target validation")
 	input.IntentRefs, input.TargetChangeRefs = []workflowstate.EvidenceRef{source}, []workflowstate.EvidenceRef{target}
-	input.Requirements = []MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
-	input.Conflicts = []MergerConflict{{ID: "conflict-1", Path: "src/service.go", Kind: "text", Evidence: source, RequirementIDs: []string{"source-api", "target-validation"}}}
+	input.Requirements = []workflowstate.MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
+	input.Conflicts = []workflowstate.MergerConflict{{ID: "conflict-1", Path: "src/service.go", Kind: "text", Evidence: source, RequirementIDs: []string{"source-api", "target-validation"}}}
 
 	sealed, err := SealWorkflowMergerInput(input, now)
 	if err != nil {
@@ -49,10 +49,10 @@ func nativeMergerInput(t *testing.T) (*Store, MergerInput, time.Time) {
 	return store, sealed, now
 }
 
-func nativeMergerResolved(input MergerInput) MergerResult {
-	return MergerResult{
+func nativeMergerResolved(input workflowstate.MergerInput) workflowstate.MergerResult {
+	return workflowstate.MergerResult{
 		ProtocolVersion: 1, InputHash: input.InputHash, Outcome: "resolved", ChangedPaths: []string{"src/service.go"},
-		ResolutionNotes:       []MergerResolution{{ConflictID: "conflict-1", Path: "src/service.go", Rationale: "Retain the source API and target validation at the shared call site.", RequirementIDs: []string{"source-api", "target-validation"}}},
+		ResolutionNotes:       []workflowstate.MergerResolution{{ConflictID: "conflict-1", Path: "src/service.go", Rationale: "Retain the source API and target validation at the shared call site.", RequirementIDs: []string{"source-api", "target-validation"}}},
 		PreservedRequirements: []string{"source-api", "target-validation"},
 	}
 }
@@ -80,7 +80,7 @@ func TestNativeMergerProtocol(t *testing.T) {
 
 			result.Outcome = outcome
 			if outcome == "needs_decision" {
-				result.DecisionRequests = []MergerDecision{{ID: "decision-1", Issue: "Which API constraint controls this incompatible behavior?", RequirementIDs: []string{"source-api", "target-validation"}, Options: []string{"Keep the source API requirement", "Keep the target API requirement"}, Authority: "workflow_operator"}}
+				result.DecisionRequests = []workflowstate.MergerDecision{{ID: "decision-1", Issue: "Which API constraint controls this incompatible behavior?", RequirementIDs: []string{"source-api", "target-validation"}, Options: []string{"Keep the source API requirement", "Keep the target API requirement"}, Authority: "workflow_operator"}}
 			}
 
 			if outcome == "failed" {
@@ -169,7 +169,7 @@ func TestNativeMergerFence(t *testing.T) {
 // unsupported output-only metering or a report larger than the granted call.
 func TestNativeMergerUsage(t *testing.T) {
 	_, input, now := nativeMergerInput(t)
-	input.TokenAllowance = &TokenAllowance{Maximum: 100, Input: 60, Output: 40, WholeCall: true, CapabilityRevision: contenthash.Sum([]byte("harness")), Deadline: input.Deadline}
+	input.TokenAllowance = &workflowstate.TokenAllowance{Maximum: 100, Input: 60, Output: 40, WholeCall: true, CapabilityRevision: contenthash.Sum([]byte("harness")), Deadline: input.Deadline}
 
 	input, err := SealWorkflowMergerInput(input, now)
 	if err != nil {
@@ -178,16 +178,16 @@ func TestNativeMergerUsage(t *testing.T) {
 
 	cases := []struct {
 		name  string
-		usage *MergerUsage
+		usage *workflowstate.MergerUsage
 		valid bool
 	}{
 		{"unknown", nil, true},
-		{"whole call", &MergerUsage{Input: 60, Output: 40, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, true},
-		{"overspend", &MergerUsage{Input: 60, Output: 41, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
-		{"negative", &MergerUsage{Input: -1, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
-		{"overflow", &MergerUsage{Input: math.MaxInt64, Output: 1, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
-		{"output only", &MergerUsage{Output: 20, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
-		{"other harness", &MergerUsage{Input: 20, WholeCall: true, CapabilityRevision: contenthash.Sum([]byte("other"))}, false},
+		{"whole call", &workflowstate.MergerUsage{Input: 60, Output: 40, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, true},
+		{"overspend", &workflowstate.MergerUsage{Input: 60, Output: 41, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
+		{"negative", &workflowstate.MergerUsage{Input: -1, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
+		{"overflow", &workflowstate.MergerUsage{Input: math.MaxInt64, Output: 1, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
+		{"output only", &workflowstate.MergerUsage{Output: 20, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
+		{"other harness", &workflowstate.MergerUsage{Input: 20, WholeCall: true, CapabilityRevision: contenthash.Sum([]byte("other"))}, false},
 	}
 
 	for _, test := range cases {

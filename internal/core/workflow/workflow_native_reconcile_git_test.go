@@ -160,7 +160,7 @@ func nativeUnknownExchange(ctx context.Context, request GitPublication, transpor
 	return result, context.DeadlineExceeded
 }
 
-func checkNativeGitOutcome(t *testing.T, f nativeSubmissionFixture, publisher *nativeDispatchPublisherFixture, remote, name string, result GitPublicationResult, retained Submission) {
+func checkNativeGitOutcome(t *testing.T, f nativeSubmissionFixture, publisher *nativeDispatchPublisherFixture, remote, name string, result GitPublicationResult, retained workflowstate.Submission) {
 	t.Helper()
 
 	if retained.Native.ReceiptRef != nil || retained.State == "confirmed" {

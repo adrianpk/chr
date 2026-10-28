@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type serviceWorkflowSubmissionFixture struct {
@@ -14,14 +15,14 @@ type serviceWorkflowSubmissionFixture struct {
 	unpublished bool
 }
 
-func (p *serviceWorkflowSubmissionFixture) SubmitWorkflowIntegration(_ context.Context, submission workflowcore.Submission) (workflowcore.SubmissionResponse, error) {
+func (p *serviceWorkflowSubmissionFixture) SubmitWorkflowIntegration(_ context.Context, submission workflowstate.Submission) (workflowstate.SubmissionResponse, error) {
 	p.submissions = append(p.submissions, submission.ID)
 
-	return workflowcore.SubmissionResponse{}, context.DeadlineExceeded
+	return workflowstate.SubmissionResponse{}, context.DeadlineExceeded
 }
 
-func (p *serviceWorkflowSubmissionFixture) ObserveWorkflowSubmission(_ context.Context, submission workflowcore.Submission) (workflowcore.SubmissionObservation, error) {
-	return workflowcore.SubmissionObservation{SubmissionID: submission.ID, Unpublished: p.unpublished}, nil
+func (p *serviceWorkflowSubmissionFixture) ObserveWorkflowSubmission(_ context.Context, submission workflowstate.Submission) (workflowstate.SubmissionObservation, error) {
+	return workflowstate.SubmissionObservation{SubmissionID: submission.ID, Unpublished: p.unpublished}, nil
 }
 
 // TestServiceWorkflowSubmission exercises the central operation's durable intent,

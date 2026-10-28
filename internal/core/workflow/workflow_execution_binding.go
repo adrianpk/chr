@@ -14,7 +14,7 @@ type workflowExecutionScope struct {
 	Members     []Member
 	Sets        []InputImage
 	Cursor      int
-	Lane        *Lane
+	Lane        *workflowstate.Lane
 }
 
 func workflowExecutionScopeHash(run workflowInvocationFile) (string, error) {

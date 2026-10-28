@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeMethodObjects rejects actual prepared objects with false combined
@@ -21,7 +22,7 @@ func TestNativeMethodObjects(t *testing.T) {
 	}
 }
 
-func nativeAlteredTree(t *testing.T, directory string, proof IntegrationProof) IntegrationProof {
+func nativeAlteredTree(t *testing.T, directory string, proof workflowstate.IntegrationProof) workflowstate.IntegrationProof {
 	t.Helper()
 
 	entry := proof.Provenance.Prepared[0]
@@ -60,11 +61,11 @@ func nativeAlteredTree(t *testing.T, directory string, proof IntegrationProof) I
 func TestNativeMethodMetadata(t *testing.T) {
 	cases := []struct {
 		name string
-		edit func(*IntegrationProof)
+		edit func(*workflowstate.IntegrationProof)
 	}{
-		{"source_tree", func(p *IntegrationProof) { p.SourceTree = p.PreparedTree }},
+		{"source_tree", func(p *workflowstate.IntegrationProof) { p.SourceTree = p.PreparedTree }},
 		{"date", nativeAlteredPreparationDate},
-		{"signature", func(p *IntegrationProof) {
+		{"signature", func(p *workflowstate.IntegrationProof) {
 			p.Provenance.Preparation.Signatures[0].SignatureHash = contenthash.Sum([]byte("forged signature"))
 		}},
 	}
@@ -92,7 +93,7 @@ func TestNativeMethodMetadata(t *testing.T) {
 	}
 }
 
-func nativeAlteredPreparationDate(proof *IntegrationProof) {
+func nativeAlteredPreparationDate(proof *workflowstate.IntegrationProof) {
 	p := proof.Provenance.Preparation
 	p.InitialCommitterDate, p.CommitterDate = "1700000000 +0000", "1700000000 +0000"
 

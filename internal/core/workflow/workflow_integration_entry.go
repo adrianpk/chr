@@ -11,14 +11,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// IntegrationBinding pins an invocation to one guarded queue image.
-type IntegrationBinding struct {
-	EntryID  string                    `json:"entry_id"`
-	Unit     workflowstate.Ref         `json:"unit"`
-	Revision uint64                    `json:"revision"`
-	EntryRef workflowstate.EvidenceRef `json:"entry_ref"`
-}
-
 // IntegrationBlocker records the only permitted reconciliation resume.
 type IntegrationBlocker struct {
 	Reason         string `json:"reason"`
@@ -29,7 +21,7 @@ type IntegrationBlocker struct {
 // IntegrationEntry is owned by an invocation, never by a queue index.
 type IntegrationEntry struct {
 	DecisionRef *workflowstate.EvidenceRef `json:"decision_ref,omitempty"`
-	Identity
+	workflowstate.Identity
 	SchemaVersion       int                        `json:"schema_version"`
 	InvocationID        string                     `json:"invocation_id"`
 	Unit                workflowstate.Ref          `json:"unit"`
@@ -121,7 +113,7 @@ func newWorkflowIntegrationEntry(run workflowInvocationFile, request Integration
 
 	now := time.Now().UTC()
 	entry := IntegrationEntry{
-		Identity:      Identity{ID: workflowIntegrationEntryID(run, request.Unit), ProjectID: run.ProjectID, Namespace: run.Namespace, Revision: 1, CreatedAt: now, UpdatedAt: now},
+		Identity:      workflowstate.Identity{ID: workflowIntegrationEntryID(run, request.Unit), ProjectID: run.ProjectID, Namespace: run.Namespace, Revision: 1, CreatedAt: now, UpdatedAt: now},
 		SchemaVersion: 1, InvocationID: run.ID, Unit: request.Unit, CoordinatorID: coordinator.ID,
 		Repository: repository, TargetRef: request.TargetRef,
 		QueueSequence: sequence, AdmissionKey: request.AdmissionKey, FrozenScopeHash: hash,

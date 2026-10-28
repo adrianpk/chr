@@ -41,7 +41,7 @@ func testWorkflowLooseResumeTarget(t *testing.T, reason string) {
 
 	provider := PullRequestProvider(workflowFrontierProvider{f.provider, f.remote})
 	if reason == "provider moved" {
-		provider = &workflowPRProviderFixture{pr: PullRequestSnapshot{HeadCommit: f.target}}
+		provider = &workflowPRProviderFixture{pr: workflowstate.PullRequestSnapshot{HeadCommit: f.target}}
 	}
 
 	ports := ResumePorts{Provider: provider, Target: f.git, TargetBranch: "dev"}

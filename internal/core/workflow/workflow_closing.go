@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -24,7 +25,7 @@ type SetClosureRequest struct {
 // SetClosureResult distinguishes retained failures from confirmed closure.
 type SetClosureResult struct {
 	Set        Record
-	Receipt    ClosingReceipt
+	Receipt    workflowstate.ClosingReceipt
 	ReceiptRef string
 	Outcome    string
 }
@@ -55,7 +56,9 @@ func (s *Store) CloseWorkflowSet(ctx context.Context, request SetClosureRequest,
 	}
 	defer func() { err = errors.Join(err, claim.worker.releaseReservation()) }()
 
-	receipt, gateErr := s.executeWorkflowClosing(ctx, claim)
+	var gate workflowcloseout.Gate = workflowClosingGate{store: s, claim: claim}
+
+	receipt, gateErr := gate.Execute(ctx)
 
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Minute)
 	defer cancel()
@@ -75,7 +78,7 @@ type workflowClosingClaim struct {
 	worker *Claim
 	set    Record
 	state  workflowClosingAttempt
-	input  ClosingInput
+	input  workflowstate.ClosingInput
 	data   []byte
 }
 
@@ -87,7 +90,7 @@ type workflowClosingAttempt struct {
 	BudgetID     string                        `json:"budget_id"`
 	OwnerRoot    string                        `json:"owner_root"`
 	InvocationID string                        `json:"invocation_id,omitempty"`
-	Owner        ProcessIdentity               `json:"owner"`
+	Owner        workflowstate.ProcessIdentity `json:"owner"`
 	TokenHash    string                        `json:"token_hash"`
 	LeaseUntil   time.Time                     `json:"lease_until"`
 	Input        workflowstate.ClosingEvidence `json:"input"`

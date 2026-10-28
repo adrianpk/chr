@@ -143,7 +143,7 @@ func testWorkflowReviewApproval(t *testing.T, mode workflowstate.ReviewMode) {
 	}
 }
 
-func checkWorkflowReviewProjection(t *testing.T, store *Store, tasks []Record, binding ReviewBinding) {
+func checkWorkflowReviewProjection(t *testing.T, store *Store, tasks []Record, binding workflowstate.ReviewBinding) {
 	t.Helper()
 
 	for _, task := range tasks {
@@ -158,7 +158,7 @@ func checkWorkflowReviewProjection(t *testing.T, store *Store, tasks []Record, b
 	}
 }
 
-func checkWorkflowReviewAuthorized(t *testing.T, store *Store, id string, provider *workflowReviewProviderFixture, binding ReviewBinding) {
+func checkWorkflowReviewAuthorized(t *testing.T, store *Store, id string, provider *workflowReviewProviderFixture, binding workflowstate.ReviewBinding) {
 	t.Helper()
 
 	if binding.State == "authorized" {
@@ -168,7 +168,7 @@ func checkWorkflowReviewAuthorized(t *testing.T, store *Store, id string, provid
 	}
 }
 
-func checkWorkflowApprovalRetry(t *testing.T, store *Store, id string, provider *workflowReviewProviderFixture, binding ReviewBinding) {
+func checkWorkflowApprovalRetry(t *testing.T, store *Store, id string, provider *workflowReviewProviderFixture, binding workflowstate.ReviewBinding) {
 	t.Helper()
 
 	retained := workflowTestRead(t, store, id)

@@ -65,7 +65,7 @@ func (reader workflowIntegrationReader) commitMergerRepairStep(ctx context.Conte
 		return err
 	}
 
-	state.History = append(state.History, IntegrationCommit{Source: state.CurrentSource, Commit: commit, Tree: state.Tree, Parent: state.PreparedParent})
+	state.History = append(state.History, workflowstate.IntegrationCommit{Source: state.CurrentSource, Commit: commit, Tree: state.Tree, Parent: state.PreparedParent})
 	state.OriginalParent, state.PreparedParent = state.CurrentSource, commit
 	state.ReplayIndex++
 

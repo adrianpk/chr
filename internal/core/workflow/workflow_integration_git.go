@@ -31,21 +31,21 @@ func NewWorkflowIntegrationGit(repository, transport string) OSWorkflowIntegrati
 }
 
 // VerifyWorkflowIntegration fetches the canonical target and proves its result.
-func (git OSWorkflowIntegrationGit) VerifyWorkflowIntegration(ctx context.Context, query IntegrationQuery) (IntegrationProof, error) {
+func (git OSWorkflowIntegrationGit) VerifyWorkflowIntegration(ctx context.Context, query workflowstate.IntegrationQuery) (workflowstate.IntegrationProof, error) {
 	return git.verifyIntegration(ctx, query, nil)
 }
 
 // VerifyPreparedWorkflowIntegration preserves the retained proof schema while
 // checking original attribution and every prepared object on the remote target.
-func (git OSWorkflowIntegrationGit) VerifyPreparedWorkflowIntegration(ctx context.Context, query IntegrationQuery, expected IntegrationProof) (IntegrationProof, error) {
+func (git OSWorkflowIntegrationGit) VerifyPreparedWorkflowIntegration(ctx context.Context, query workflowstate.IntegrationQuery, expected workflowstate.IntegrationProof) (workflowstate.IntegrationProof, error) {
 	if err := validateWorkflowIntegrationProof(query, expected); err != nil {
-		return IntegrationProof{}, err
+		return workflowstate.IntegrationProof{}, err
 	}
 
 	return git.verifyIntegration(ctx, query, &expected)
 }
 
-func (git OSWorkflowIntegrationGit) verifyIntegration(ctx context.Context, query IntegrationQuery, expected *IntegrationProof) (proof IntegrationProof, err error) {
+func (git OSWorkflowIntegrationGit) verifyIntegration(ctx context.Context, query workflowstate.IntegrationQuery, expected *workflowstate.IntegrationProof) (proof workflowstate.IntegrationProof, err error) {
 	if err := git.validateQuery(query); err != nil {
 		return proof, err
 	}
@@ -89,7 +89,7 @@ func (git OSWorkflowIntegrationGit) verifyIntegration(ctx context.Context, query
 	return reader.verifyRetained(ctx, query, expected)
 }
 
-func (reader workflowIntegrationReader) readRetainedIntegrationResult(ctx context.Context, query IntegrationQuery) error {
+func (reader workflowIntegrationReader) readRetainedIntegrationResult(ctx context.Context, query workflowstate.IntegrationQuery) error {
 	if _, err := reader.Output(ctx, "cat-file", "-e", query.ResultCommit+"^{commit}"); err == nil {
 		return nil
 	}
@@ -99,7 +99,7 @@ func (reader workflowIntegrationReader) readRetainedIntegrationResult(ctx contex
 	return err
 }
 
-func (git OSWorkflowIntegrationGit) validateQuery(query IntegrationQuery) error {
+func (git OSWorkflowIntegrationGit) validateQuery(query workflowstate.IntegrationQuery) error {
 	repository, err := workflowCanonicalRepository(git.repository)
 	if err != nil || repository != query.Repository || git.transport == "" || strings.HasPrefix(git.transport, "-") || strings.ContainsAny(git.transport, "\x00\r\n") {
 		return fmt.Errorf("canonical integration transport identity mismatch")
@@ -118,12 +118,12 @@ func (git OSWorkflowIntegrationGit) validateQuery(query IntegrationQuery) error 
 	return nil
 }
 
-func (reader workflowIntegrationReader) verify(ctx context.Context, query IntegrationQuery) (IntegrationProof, error) {
+func (reader workflowIntegrationReader) verify(ctx context.Context, query workflowstate.IntegrationQuery) (workflowstate.IntegrationProof, error) {
 	return reader.verifyRetained(ctx, query, nil)
 }
 
-func (reader workflowIntegrationReader) verifyRetained(ctx context.Context, query IntegrationQuery, expected *IntegrationProof) (IntegrationProof, error) {
-	proof := IntegrationProof{IntegrationQuery: query}
+func (reader workflowIntegrationReader) verifyRetained(ctx context.Context, query workflowstate.IntegrationQuery, expected *workflowstate.IntegrationProof) (workflowstate.IntegrationProof, error) {
+	proof := workflowstate.IntegrationProof{IntegrationQuery: query}
 	if expected != nil {
 		proof = *expected
 		proof.History = nil
@@ -186,7 +186,7 @@ func (reader workflowIntegrationReader) preparedTree(ctx context.Context, origin
 	return line, nil
 }
 
-func (reader workflowIntegrationReader) observeIntegrationTarget(ctx context.Context, proof *IntegrationProof) error {
+func (reader workflowIntegrationReader) observeIntegrationTarget(ctx context.Context, proof *workflowstate.IntegrationProof) error {
 	target, err := reader.Output(ctx, "rev-parse", "refs/heads/target^{commit}")
 	if err != nil {
 		return err
@@ -214,12 +214,12 @@ func (reader workflowIntegrationReader) observeIntegrationTarget(ctx context.Con
 	return nil
 }
 
-func workflowRetainedProofMatches(proof IntegrationProof, expected *IntegrationProof) bool {
+func workflowRetainedProofMatches(proof workflowstate.IntegrationProof, expected *workflowstate.IntegrationProof) bool {
 	return expected == nil || (proof.HistoryHash == expected.HistoryHash && proof.BaseCommit == expected.BaseCommit && proof.PreparedTree == expected.PreparedTree)
 }
 
 type workflowIntegrationReader struct {
 	projectcore.GitReader
-	preparation *IntegrationPreparation
+	preparation *workflowstate.IntegrationPreparation
 	signing     *SSHCommitSigning
 }

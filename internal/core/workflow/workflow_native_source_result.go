@@ -1,5 +1,7 @@
 package workflow
 
+import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+
 // The additional contract retains a forge's original-source attribution while
 // requiring independent exact-result publication and complete rebase history.
 const workflowNativeSourceResultContract = "github_same_pr_git_source_attribution/v2"
@@ -8,7 +10,7 @@ func workflowNativeObservationContractMatches(expected, actual string) bool {
 	return expected == actual || expected == "github_same_pr_git_merge/v1" && actual == workflowNativeSourceResultContract
 }
 
-func workflowNativeSourceResultCompatible(contract string, proof IntegrationProof, pr PullRequestSnapshot) bool {
+func workflowNativeSourceResultCompatible(contract string, proof workflowstate.IntegrationProof, pr workflowstate.PullRequestSnapshot) bool {
 	if contract != workflowNativeSourceResultContract || proof.Method != "rebase" || pr.ResultCommit != proof.SourceCommit || proof.SourceCommit == proof.ResultCommit {
 		return false
 	}
@@ -22,7 +24,7 @@ func workflowNativeSourceResultCompatible(contract string, proof IntegrationProo
 	return validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) == nil
 }
 
-func workflowNativeSourceResultRepository(pr PullRequestSnapshot, repository string) bool {
+func workflowNativeSourceResultRepository(pr workflowstate.PullRequestSnapshot, repository string) bool {
 	reference, err := DetectReviewProviderReference(pr.URL)
 
 	return err == nil && reference.Provider == ReviewProviderGitHub && pr.Repository == repository && pr.HeadRepository == repository

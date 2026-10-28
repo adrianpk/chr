@@ -10,9 +10,9 @@ import (
 
 // PublishWorkflowNativeSubmission journals the host dispatch before invoking the
 // exact atomic Git publisher once. A transport result is not a delivery receipt.
-func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider, publisher GitPublisher) (Submission, GitPublicationResult, error) {
+func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider, publisher GitPublisher) (workflowstate.Submission, GitPublicationResult, error) {
 	if provider == nil || publisher == nil {
-		return Submission{}, GitPublicationResult{}, ErrWorkflowAtomicGuard
+		return workflowstate.Submission{}, GitPublicationResult{}, ErrWorkflowAtomicGuard
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
@@ -41,7 +41,7 @@ func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard Integ
 	return finished, result, errors.Join(err, finishErr)
 }
 
-func (s *Store) prepareWorkflowNativeDispatch(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider) (submission Submission, request GitPublication, err error) {
+func (s *Store) prepareWorkflowNativeDispatch(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider) (submission workflowstate.Submission, request GitPublication, err error) {
 	err = s.withLock(ctx, func() error {
 		run, owner, readErr := s.locateWorkflowInvocation(ctx, guard.InvocationID)
 		if readErr != nil {
@@ -67,7 +67,7 @@ func (s *Store) prepareWorkflowNativeDispatch(ctx context.Context, guard Integra
 	return submission, request, err
 }
 
-func (s *Store) authorizeWorkflowNativeDispatch(ctx context.Context, submission Submission, provider PublicationGuardProvider) (Submission, GitPublication, error) {
+func (s *Store) authorizeWorkflowNativeDispatch(ctx context.Context, submission workflowstate.Submission, provider PublicationGuardProvider) (workflowstate.Submission, GitPublication, error) {
 	run, err := s.readWorkflowInvocation(submission.InvocationID)
 	if err != nil {
 		return submission, GitPublication{}, err
@@ -97,14 +97,14 @@ func (s *Store) authorizeWorkflowNativeDispatch(ctx context.Context, submission 
 	return dispatched, request, err
 }
 
-func (s *Store) workflowNativeDispatchRequest(candidate IntegrationCandidate) (GitPublication, error) {
+func (s *Store) workflowNativeDispatchRequest(candidate workflowstate.IntegrationCandidate) (GitPublication, error) {
 	if candidate.Native == nil {
 		return GitPublication{}, workflowstate.ErrConflict
 	}
 
 	binding := candidate.Native.NativeRecordBinding
 
-	var capability NativeCapability
+	var capability workflowstate.NativeCapability
 	if err := s.readWorkflowNativeEvidence(binding.InvocationID, binding.CapabilityRef, &capability); err != nil {
 		return GitPublication{}, err
 	}

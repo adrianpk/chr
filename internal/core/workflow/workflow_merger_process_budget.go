@@ -71,7 +71,7 @@ func (s *Store) commitWorkflowMergerProcedureStart(run *workflowInvocationFile, 
 
 	command := processes[len(processes)-1].Command
 
-	allowed := slices.ContainsFunc(prepared.input.Merger.Conflicts, func(c MergerConflict) bool {
+	allowed := slices.ContainsFunc(prepared.input.Merger.Conflicts, func(c workflowstate.MergerConflict) bool {
 		return workflowMergerProcedureRequired(c) && (slices.Equal(command, c.RegenerationCommand) || slices.Equal(command, c.ValidationCommand))
 	})
 	if !allowed {

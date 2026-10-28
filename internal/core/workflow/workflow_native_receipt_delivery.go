@@ -71,7 +71,7 @@ func (s *Store) confirmWorkflowNativeReceipt(ctx context.Context, run workflowIn
 	return receipt, nil
 }
 
-func (s *Store) retainWorkflowNativeReceipt(ctx context.Context, run workflowInvocationFile, submission Submission) (Record, error) {
+func (s *Store) retainWorkflowNativeReceipt(ctx context.Context, run workflowInvocationFile, submission workflowstate.Submission) (Record, error) {
 	observation, ref, err := s.workflowNativeReceiptObservation(submission)
 	if err != nil {
 		return Record{}, err
@@ -94,7 +94,7 @@ func (s *Store) retainWorkflowNativeReceipt(ctx context.Context, run workflowInv
 	return s.writeRecord(ctx, record, 0)
 }
 
-func (s *Store) workflowNativeReceiptObservation(submission Submission) (NativePublicationObservation, workflowstate.EvidenceRef, error) {
+func (s *Store) workflowNativeReceiptObservation(submission workflowstate.Submission) (NativePublicationObservation, workflowstate.EvidenceRef, error) {
 	var observation NativePublicationObservation
 
 	native := submission.Native
@@ -114,15 +114,15 @@ func (s *Store) workflowNativeReceiptObservation(submission Submission) (NativeP
 	return observation, ref, nil
 }
 
-func workflowNativeReceiptID(run workflowInvocationFile, submission Submission) string {
+func workflowNativeReceiptID(run workflowInvocationFile, submission workflowstate.Submission) string {
 	return "delivery-" + contenthash.Sum([]byte(run.ID+"\x00"+submission.CandidateID+"\x00"+submission.ID))
 }
 
-func workflowNativeReceiptPath(run workflowInvocationFile, submission Submission) string {
+func workflowNativeReceiptPath(run workflowInvocationFile, submission workflowstate.Submission) string {
 	return filepath.ToSlash(filepath.Join("run", run.ID, "evidence", workflowNativeReceiptID(run, submission)+".json"))
 }
 
-func (s *Store) workflowNativeReceipt(run workflowInvocationFile, submission Submission, observation NativePublicationObservation, ref workflowstate.EvidenceRef) (Record, error) {
+func (s *Store) workflowNativeReceipt(run workflowInvocationFile, submission workflowstate.Submission, observation NativePublicationObservation, ref workflowstate.EvidenceRef) (Record, error) {
 	reference, err := DetectReviewProviderReference(submission.Native.CanonicalPR)
 	if err != nil {
 		return Record{}, err
@@ -144,13 +144,13 @@ func (s *Store) workflowNativeReceipt(run workflowInvocationFile, submission Sub
 		receipt.ValidationRefs = append(receipt.ValidationRefs, validation.Path)
 	}
 
-	identity := Identity{ID: workflowNativeReceiptID(run, submission), ProjectID: run.ProjectID, Namespace: run.Namespace, Revision: 1, CreatedAt: now, UpdatedAt: now}
+	identity := workflowstate.Identity{ID: workflowNativeReceiptID(run, submission), ProjectID: run.ProjectID, Namespace: run.Namespace, Revision: 1, CreatedAt: now, UpdatedAt: now}
 	record := Record{Identity: identity, Kind: "receipt", Path: workflowNativeReceiptPath(run, submission), Receipt: receipt}
 
 	return record, record.Validate()
 }
 
-func (s *Store) checkWorkflowNativeRetainedReceipt(run workflowInvocationFile, submission Submission, record Record) error {
+func (s *Store) checkWorkflowNativeRetainedReceipt(run workflowInvocationFile, submission workflowstate.Submission, record Record) error {
 	if record.ID != workflowNativeReceiptID(run, submission) || record.ProjectID != run.ProjectID || record.Namespace != run.Namespace || !workflowNativeSubmissionReceiptMatches(submission, record) {
 		return workflowstate.ErrConflict
 	}

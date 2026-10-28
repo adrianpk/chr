@@ -8,24 +8,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// IntegrationReplay records retained intent, including empty replays.
-// The source/prepared attribution lists retain both parents and author metadata.
-type IntegrationReplay struct {
-	Source        string `json:"source"`
-	Commit        string `json:"commit"`
-	EmptyDecision string `json:"empty_decision"`
-}
-
-// IntegrationFix attributes a separate prepared commit to an actionable
-// finding. Candidate validation and review bind the entire resulting sequence.
-type IntegrationFix struct {
-	Commit  string                      `json:"commit"`
-	Finding workflowstate.ReviewFinding `json:"finding"`
-}
-
-func (reader workflowIntegrationReader) integrationProvenance(ctx context.Context, proof IntegrationProof) (*IntegrationProvenance, error) {
+func (reader workflowIntegrationReader) integrationProvenance(ctx context.Context, proof workflowstate.IntegrationProof) (*workflowstate.IntegrationProvenance, error) {
 	var (
-		p   *IntegrationProvenance
+		p   *workflowstate.IntegrationProvenance
 		err error
 	)
 
@@ -42,7 +27,7 @@ func (reader workflowIntegrationReader) integrationProvenance(ctx context.Contex
 	return p, reader.addPreparationMetadata(ctx, proof, p)
 }
 
-func (reader workflowIntegrationReader) rebaseProvenance(ctx context.Context, proof IntegrationProof) (*IntegrationProvenance, error) {
+func (reader workflowIntegrationReader) rebaseProvenance(ctx context.Context, proof workflowstate.IntegrationProof) (*workflowstate.IntegrationProvenance, error) {
 	p, err := reader.combinedProvenance(ctx, proof)
 	if err != nil {
 		return nil, err
@@ -67,17 +52,17 @@ func (reader workflowIntegrationReader) rebaseProvenance(ctx context.Context, pr
 		}
 
 		p.Prepared = append(p.Prepared, prepared)
-		p.Replays = append(p.Replays, IntegrationReplay{Source: entry.Source, Commit: entry.Commit, EmptyDecision: decision})
+		p.Replays = append(p.Replays, workflowstate.IntegrationReplay{Source: entry.Source, Commit: entry.Commit, EmptyDecision: decision})
 	}
 
 	if err := reader.appendRebaseFixAttributions(ctx, p); err != nil {
 		return nil, err
 	}
 
-	return p, validateWorkflowIntegrationProvenance(IntegrationProof{IntegrationQuery: proof.IntegrationQuery, BaseCommit: proof.BaseCommit, PreparedTree: proof.PreparedTree, History: proof.History, Provenance: p})
+	return p, validateWorkflowIntegrationProvenance(workflowstate.IntegrationProof{IntegrationQuery: proof.IntegrationQuery, BaseCommit: proof.BaseCommit, PreparedTree: proof.PreparedTree, History: proof.History, Provenance: p})
 }
 
-func (reader workflowIntegrationReader) replayEmptyDecision(ctx context.Context, source, prepared IntegrationAttribution) (string, error) {
+func (reader workflowIntegrationReader) replayEmptyDecision(ctx context.Context, source, prepared workflowstate.IntegrationAttribution) (string, error) {
 	originalTree, err := reader.tree(ctx, source.Parents[0])
 	if err != nil {
 		return "", err
@@ -99,7 +84,7 @@ func (reader workflowIntegrationReader) replayEmptyDecision(ctx context.Context,
 	return "already_applied", nil
 }
 
-func (reader workflowIntegrationReader) appendRebaseFixAttributions(ctx context.Context, p *IntegrationProvenance) error {
+func (reader workflowIntegrationReader) appendRebaseFixAttributions(ctx context.Context, p *workflowstate.IntegrationProvenance) error {
 	for _, fix := range p.IntegrationFixes {
 		entry, err := reader.commitAttribution(ctx, fix.Commit)
 		if err != nil {
@@ -112,7 +97,7 @@ func (reader workflowIntegrationReader) appendRebaseFixAttributions(ctx context.
 	return nil
 }
 
-func validateWorkflowRebaseProvenance(proof IntegrationProof, p IntegrationProvenance) error {
+func validateWorkflowRebaseProvenance(proof workflowstate.IntegrationProof, p workflowstate.IntegrationProvenance) error {
 	if len(proof.History) != len(p.Source) {
 		return workflowstate.ErrConflict
 	}
@@ -148,19 +133,19 @@ func validateWorkflowRebaseProvenance(proof IntegrationProof, p IntegrationProve
 	return nil
 }
 
-func validWorkflowReplayMapping(history IntegrationCommit, replay IntegrationReplay, source, prepared IntegrationAttribution, originalParent, preparedParent string) bool {
+func validWorkflowReplayMapping(history workflowstate.IntegrationCommit, replay workflowstate.IntegrationReplay, source, prepared workflowstate.IntegrationAttribution, originalParent, preparedParent string) bool {
 	if !validWorkflowIntegrationAttribution(prepared) || !slices.Equal(source.Parents, []string{originalParent}) || !slices.Equal(prepared.Parents, []string{preparedParent}) {
 		return false
 	}
 
-	if !workflowReplayAttributionMatches(source, prepared) || history != (IntegrationCommit{Source: source.Commit, Commit: prepared.Commit, Tree: prepared.Tree, Parent: preparedParent}) {
+	if !workflowReplayAttributionMatches(source, prepared) || history != (workflowstate.IntegrationCommit{Source: source.Commit, Commit: prepared.Commit, Tree: prepared.Tree, Parent: preparedParent}) {
 		return false
 	}
 
 	return replay.Source == source.Commit && replay.Commit == prepared.Commit && slices.Contains([]string{"nonempty", "source_empty", "already_applied"}, replay.EmptyDecision)
 }
 
-func validWorkflowIntegrationFix(fix IntegrationFix, entry IntegrationAttribution, parent string) bool {
+func validWorkflowIntegrationFix(fix workflowstate.IntegrationFix, entry workflowstate.IntegrationAttribution, parent string) bool {
 	if fix.Commit != entry.Commit || !validWorkflowIntegrationAttribution(entry) || !slices.Equal(entry.Parents, []string{parent}) {
 		return false
 	}
@@ -168,6 +153,6 @@ func validWorkflowIntegrationFix(fix IntegrationFix, entry IntegrationAttributio
 	return workflowstate.ValidateReviewFinding(fix.Finding) == nil && fix.Finding.Category != workflowstate.AgenticReviewFindingCosmetic
 }
 
-func workflowReplayAttributionMatches(source, prepared IntegrationAttribution) bool {
+func workflowReplayAttributionMatches(source, prepared workflowstate.IntegrationAttribution) bool {
 	return prepared.Author == source.Author && prepared.MessageHash == source.MessageHash && prepared.Encoding == source.Encoding
 }

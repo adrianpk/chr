@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowReviewInputs(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowSliceObservation, ReviewInput, error) {
+func (s *Store) workflowReviewInputs(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowSliceObservation, workflowstate.ReviewInput, error) {
 	observation, input, err := s.workflowReviewSourceInputs(ctx, run, provider)
 	if err != nil {
 		return observation, input, err
@@ -36,51 +36,51 @@ func (s *Store) workflowReviewInputs(ctx context.Context, run workflowInvocation
 	return observation, input, err
 }
 
-func (s *Store) workflowReviewSourceInputs(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowSliceObservation, ReviewInput, error) {
+func (s *Store) workflowReviewSourceInputs(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowSliceObservation, workflowstate.ReviewInput, error) {
 	if err := checkWorkflowReviewReady(run, provider); err != nil {
-		return workflowSliceObservation{}, ReviewInput{}, err
+		return workflowSliceObservation{}, workflowstate.ReviewInput{}, err
 	}
 
 	if _, err := s.readWorkflowPullRequestObservation(*run.PullRequest); err != nil {
-		return workflowSliceObservation{}, ReviewInput{}, err
+		return workflowSliceObservation{}, workflowstate.ReviewInput{}, err
 	}
 
 	observation, err := s.observeWorkflowSlice(ctx, run)
 	if err != nil {
-		return observation, ReviewInput{}, err
+		return observation, workflowstate.ReviewInput{}, err
 	}
 
 	candidate, err := s.readWorkflowSliceCandidate(ctx, run, observation)
 	if err != nil {
-		return observation, ReviewInput{}, err
+		return observation, workflowstate.ReviewInput{}, err
 	}
 
 	policy, err := s.workflowReviewPolicy(run)
 	if err != nil {
-		return observation, ReviewInput{}, err
+		return observation, workflowstate.ReviewInput{}, err
 	}
 
 	pr, target, err := observeWorkflowReviewPR(ctx, run, provider)
 	if err != nil {
-		return observation, ReviewInput{}, err
+		return observation, workflowstate.ReviewInput{}, err
 	}
 
 	if err := s.checkWorkflowReviewAfterIO(ctx, run, observation, policy); err != nil {
-		return observation, ReviewInput{}, err
+		return observation, workflowstate.ReviewInput{}, err
 	}
 
-	input := ReviewInput{Schema: "chr-workflow-review-input/v1", InvocationID: run.ID, Unit: candidate.UnitInput().Unit, CandidateID: candidate.ID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, Slice: candidate.UnitInput(), PullRequest: pr, TargetCommit: target, Policy: policy}
+	input := workflowstate.ReviewInput{Schema: "chr-workflow-review-input/v1", InvocationID: run.ID, Unit: candidate.UnitInput().Unit, CandidateID: candidate.ID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, Slice: candidate.UnitInput(), PullRequest: pr, TargetCommit: target, Policy: policy}
 
 	return observation, input, nil
 }
 
-func observeWorkflowReviewPR(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (PullRequestSnapshot, string, error) {
+func observeWorkflowReviewPR(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowstate.PullRequestSnapshot, string, error) {
 	pr, err := provider.ReadWorkflowPullRequest(ctx, run.PullRequest.URL)
 	if err != nil {
 		return pr, "", err
 	}
 
-	if reason := workflowPullRequestMismatch(*run.PullRequest, []PullRequestSnapshot{pr}); reason != "" || pr.Merged {
+	if reason := workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}); reason != "" || pr.Merged {
 		return pr, "", fmt.Errorf("%w: canonical PR is changed or requires delivery observation", workflowstate.ErrConflict)
 	}
 
@@ -109,7 +109,7 @@ func (s *Store) checkWorkflowReviewAfterIO(ctx context.Context, run workflowInvo
 	return nil
 }
 
-func workflowReviewInputBytes(input ReviewInput) ([]byte, error) {
+func workflowReviewInputBytes(input workflowstate.ReviewInput) ([]byte, error) {
 	data, err := json.MarshalIndent(input, "", "  ")
 	if err != nil || len(data) >= workflowstate.FileLimit {
 		return nil, fmt.Errorf("review input exceeds file bounds")
@@ -118,19 +118,19 @@ func workflowReviewInputBytes(input ReviewInput) ([]byte, error) {
 	return append(data, '\n'), nil
 }
 
-func workflowReviewInputHash(input ReviewInput) (string, error) {
+func workflowReviewInputHash(input workflowstate.ReviewInput) (string, error) {
 	data, err := workflowReviewInputBytes(input)
 
 	return contenthash.Sum(data), err
 }
 
-func (s *Store) checkWorkflowReviewGrant(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (ReviewInput, error) {
+func (s *Store) checkWorkflowReviewGrant(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowstate.ReviewInput, error) {
 	if run.Review == nil || run.Review.State != "authorized" {
-		return ReviewInput{}, fmt.Errorf("exact candidate review is not authorized")
+		return workflowstate.ReviewInput{}, fmt.Errorf("exact candidate review is not authorized")
 	}
 
 	if _, _, err := s.readWorkflowReview(run); err != nil {
-		return ReviewInput{}, err
+		return workflowstate.ReviewInput{}, err
 	}
 
 	_, input, err := s.workflowReviewInputs(ctx, run, provider)
@@ -146,9 +146,9 @@ func (s *Store) checkWorkflowReviewGrant(ctx context.Context, run workflowInvoca
 	return input, nil
 }
 
-func (s *Store) approveWorkflowSlice(ctx context.Context, run workflowInvocationFile, bindingHash string, provider PullRequestProvider, control *workflowControlCommit) (ReviewBinding, error) {
+func (s *Store) approveWorkflowSlice(ctx context.Context, run workflowInvocationFile, bindingHash string, provider PullRequestProvider, control *workflowControlCommit) (workflowstate.ReviewBinding, error) {
 	if run.Review == nil || bindingHash != run.Review.InputHash || !slices.Contains([]string{"waiting_approval", "human_required", "authorized"}, run.Review.State) {
-		return ReviewBinding{}, fmt.Errorf("%w: approval does not name the current human decision", workflowstate.ErrConflict)
+		return workflowstate.ReviewBinding{}, fmt.Errorf("%w: approval does not name the current human decision", workflowstate.ErrConflict)
 	}
 
 	if _, _, err := s.readWorkflowReview(run); err != nil {
@@ -174,7 +174,7 @@ func (s *Store) approveWorkflowSlice(ctx context.Context, run workflowInvocation
 		return *run.Review, err
 	}
 
-	decision := ReviewDecision{BindingHash: hash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Explicit human approval of this exact candidate and current policy."}}
+	decision := workflowstate.ReviewDecision{BindingHash: hash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Explicit human approval of this exact candidate and current policy."}}
 	err = s.persistWorkflowReviewDecision(&run, observation, decision, "authorized", files...)
 
 	return *run.Review, err

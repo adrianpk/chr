@@ -35,7 +35,7 @@ func TestNativeMergerEvidence(t *testing.T) {
 	}
 }
 
-func mutateNativeMergerEvidence(t *testing.T, mode, path string, store *Store, input *MergerInput) {
+func mutateNativeMergerEvidence(t *testing.T, mode, path string, store *Store, input *workflowstate.MergerInput) {
 	t.Helper()
 
 	switch mode {
@@ -93,7 +93,7 @@ func TestNativeMergerCheckpoint(t *testing.T) {
 	}
 }
 
-func nativeMergerCheckpoint(t *testing.T, store *Store, input *MergerInput) {
+func nativeMergerCheckpoint(t *testing.T, store *Store, input *workflowstate.MergerInput) {
 	t.Helper()
 
 	input.Method = "rebase"
@@ -101,12 +101,12 @@ func nativeMergerCheckpoint(t *testing.T, store *Store, input *MergerInput) {
 	prepared := strings.Repeat("4", 40)
 	manifest := NativeSourceManifest{Schema: "chr-native-source/v1", Repository: input.Repository, SourceRef: input.SourceRef, OriginalSource: input.Source, Commits: []string{previous, input.Source}}
 	input.SourceManifestRef = retainNativeRecordEvidence(t, store, input.InvocationID, "replay-source", manifest)
-	checkpoint := MergerCheckpoint{ReplayIndex: 1, OriginalCommit: input.Source, PreparedParent: prepared, Predecessors: []IntegrationReplay{{Source: previous, Commit: prepared, EmptyDecision: "already_applied"}}}
+	checkpoint := workflowstate.MergerCheckpoint{ReplayIndex: 1, OriginalCommit: input.Source, PreparedParent: prepared, Predecessors: []workflowstate.IntegrationReplay{{Source: previous, Commit: prepared, EmptyDecision: "already_applied"}}}
 	checkpoint.Evidence = retainNativeRecordEvidence(t, store, input.InvocationID, "checkpoint", checkpoint)
 	input.HistoryCheckpoint = &checkpoint
 }
 
-func mutateNativeMergerCheckpoint(mode string, input *MergerInput) {
+func mutateNativeMergerCheckpoint(mode string, input *workflowstate.MergerInput) {
 	switch mode {
 	case "wrong step":
 		input.HistoryCheckpoint.OriginalCommit = strings.Repeat("5", 40)

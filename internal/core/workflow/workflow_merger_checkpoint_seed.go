@@ -5,9 +5,10 @@ import (
 	"path/filepath"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) seedWorkflowMergerCheckpoint(ctx context.Context, input MergerInput, lane Lane) (Lane, error) {
+func (s *Store) seedWorkflowMergerCheckpoint(ctx context.Context, input workflowstate.MergerInput, lane workflowstate.Lane) (workflowstate.Lane, error) {
 	state, err := s.readWorkflowMergerCheckpoint(input)
 	if err != nil {
 		return lane, err

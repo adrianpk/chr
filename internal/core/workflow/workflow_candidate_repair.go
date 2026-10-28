@@ -21,10 +21,10 @@ type CandidateRepairBinding struct {
 // CandidateRepair records the host result and its exact findings before
 // a bounded merger may act. Failed gate results remain non-candidates.
 type CandidateRepair struct {
-	Schema      string                      `json:"schema"`
-	Reason      string                      `json:"reason"`
-	Candidate   IntegrationCandidate        `json:"candidate"`
-	FindingRefs []workflowstate.EvidenceRef `json:"finding_refs"`
+	Schema      string                             `json:"schema"`
+	Reason      string                             `json:"reason"`
+	Candidate   workflowstate.IntegrationCandidate `json:"candidate"`
+	FindingRefs []workflowstate.EvidenceRef        `json:"finding_refs"`
 }
 
 // ReadWorkflowCandidateRepair returns retained findings for host request
@@ -97,7 +97,7 @@ func (s *Store) repairWorkflowNativeReview(ctx context.Context, run workflowInvo
 	return s.retainWorkflowCandidateRepair(ctx, &run, candidate, "actionable_review_finding", []workflowstate.EvidenceRef{ref})
 }
 
-func workflowCandidateRepairFindingMatches(b CandidateRepairBinding, review *ReviewBinding) bool {
+func workflowCandidateRepairFindingMatches(b CandidateRepairBinding, review *workflowstate.ReviewBinding) bool {
 	return review != nil && b.Unit == review.Unit && b.FindingRef == (workflowstate.EvidenceRef{Path: review.ResultRef, Hash: review.ResultHash})
 }
 

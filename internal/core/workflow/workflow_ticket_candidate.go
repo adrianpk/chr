@@ -14,7 +14,7 @@ import (
 
 // UnitInput returns the actual ticket or slice integration contract. Independent
 // candidates have a ticket input and never persist a slice or set identity.
-func (candidate SliceCandidate) UnitInput() SliceInput {
+func (candidate SliceCandidate) UnitInput() workflowstate.SliceInput {
 	if candidate.Ticket != nil {
 		return *candidate.Ticket
 	}
@@ -102,18 +102,18 @@ func (s *Store) workflowTicketCandidate(ctx context.Context, run workflowInvocat
 		return SliceCandidate{}, err
 	}
 
-	var result TaskResult
+	var result workflowstate.TaskResult
 	if err := json.Unmarshal(data, &result); err != nil {
 		return SliceCandidate{}, err
 	}
 
-	input := SliceInput{Unit: run.Lane.Unit, ContractHash: observation.tasks[0].Task.ContractHash, Tasks: []SliceTaskProof{proof}}
+	input := workflowstate.SliceInput{Unit: run.Lane.Unit, ContractHash: observation.tasks[0].Task.ContractHash, Tasks: []workflowstate.SliceTaskProof{proof}}
 	candidate := SliceCandidate{Schema: "chr-ticket-candidate/v1", ID: workflowTicketCandidateID(run.ID, proof), InvocationID: run.ID, Ticket: &input, Target: run.ExecutionSelection().Target, Lane: *run.Lane, Result: result}
 
 	return candidate, s.checkWorkflowTicketCandidate(ctx, run, observation, candidate)
 }
 
-func workflowTicketCandidateID(id string, proof SliceTaskProof) string {
+func workflowTicketCandidateID(id string, proof workflowstate.SliceTaskProof) string {
 	return contenthash.Sum([]byte(id + "\x00" + proof.EvidenceHash + "\x00" + proof.InputHash))
 }
 
@@ -159,7 +159,7 @@ func (s *Store) checkWorkflowTicketCandidate(ctx context.Context, run workflowIn
 		return err
 	}
 
-	var result TaskResult
+	var result workflowstate.TaskResult
 	if err := json.Unmarshal(data, &result); err != nil {
 		return err
 	}
@@ -167,7 +167,7 @@ func (s *Store) checkWorkflowTicketCandidate(ctx context.Context, run workflowIn
 	return checkWorkflowTicketResult(run, proof, result, candidate.Result)
 }
 
-func checkWorkflowTicketResult(run workflowInvocationFile, proof SliceTaskProof, result, candidate TaskResult) error {
+func checkWorkflowTicketResult(run workflowInvocationFile, proof workflowstate.SliceTaskProof, result, candidate workflowstate.TaskResult) error {
 	expected, err := json.Marshal(result)
 	if err != nil {
 		return err
@@ -195,7 +195,7 @@ func workflowTicketCandidateInputMatches(unit workflowstate.Ref, contractHash st
 	return input.Unit == unit && input.SetID == "" && input.ContractRef == "" && input.ContractHash == contractHash && len(input.Tasks) == 1 && workflowCandidateHasNoSlice(candidate.Slice)
 }
 
-func workflowCandidateHasNoSlice(input SliceInput) bool {
+func workflowCandidateHasNoSlice(input workflowstate.SliceInput) bool {
 	return input.Unit == (workflowstate.Ref{}) && len(input.Tasks) == 0 && input.SetID == "" && input.ContractHash == "" && input.ContractRef == ""
 }
 
@@ -206,7 +206,7 @@ func (s *Store) workflowTicketValidationInput(ctx context.Context, run workflowI
 	}
 
 	input.ExecutionMode = "aggregate"
-	input.Slice = &SliceInput{Unit: run.Lane.Unit, ContractHash: observation.tasks[0].Task.ContractHash, Tasks: []SliceTaskProof{proof}}
+	input.Slice = &workflowstate.SliceInput{Unit: run.Lane.Unit, ContractHash: observation.tasks[0].Task.ContractHash, Tasks: []workflowstate.SliceTaskProof{proof}}
 	input.EvidenceHashes[proof.EvidenceRef], input.EvidenceHashes[proof.InputRef] = proof.EvidenceHash, proof.InputHash
 	input.Prerequisites = append(input.Prerequisites, InputImage{Path: observation.tasks[0].Path, Revision: observation.tasks[0].Revision, SourceHash: observation.tasks[0].SourceHash})
 

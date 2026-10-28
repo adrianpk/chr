@@ -11,11 +11,12 @@ import (
 	"time"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // RunWorkflowManual supervises one harness and reconciles its exact Git report.
 // The harness receives frozen public inputs; the host keeps claim credentials.
-func (s service) RunWorkflowManual(ctx context.Context, id string, harness []string) (result workflowcore.TaskResult, err error) {
+func (s service) RunWorkflowManual(ctx context.Context, id string, harness []string) (result workflowstate.TaskResult, err error) {
 	if err := validateWorkflowManualHarness(harness); err != nil {
 		return result, err
 	}
@@ -73,7 +74,7 @@ func (s service) checkpointWorkflowManual(ctx context.Context, claim *workflowco
 	return errors.Join(failure, s.CheckpointWorkflow(cleanup, claim))
 }
 
-func parseWorkflowManualReport(command workflowcore.CommandResult) (workflowcore.ManualCandidate, error) {
+func parseWorkflowManualReport(command workflowstate.CommandResult) (workflowcore.ManualCandidate, error) {
 	if command.Truncated || len(command.Stdout) > 4096 {
 		return workflowcore.ManualCandidate{}, fmt.Errorf("manual candidate report exceeds 4096 bytes")
 	}

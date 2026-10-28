@@ -44,7 +44,7 @@ func serviceWorkflowDeliveryExtentFixture(t *testing.T, extent string) (service,
 		t.Fatal(err)
 	}
 
-	provider := &serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{URL: repository + "/pulls/7", Repository: repository, HeadRepository: repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}
+	provider := &serviceWorkflowPRFixture{pr: workflowstate.PullRequestSnapshot{URL: repository + "/pulls/7", Repository: repository, HeadRepository: repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}
 	operations.workflowPullRequests = provider
 
 	content := workflowcore.SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}

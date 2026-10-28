@@ -31,7 +31,7 @@ func TestWorkflowIntegrationCredentials(t *testing.T) {
 	t.Cleanup(server.Close)
 	workflowPreparationCredential(t, f, server.URL)
 
-	query := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit, Lane: Lane{Unit: workflowstate.Ref{Kind: "ticket", ID: "TST-1"}, Branch: "refs/heads/chr/workflow/credential-preparation", Worktree: filepath.Join(t.TempDir(), "prepared"), BaseCommit: f.request.Git.BaseCommit, HeadCommit: f.request.Git.BaseCommit}}
+	query := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit, Lane: workflowstate.Lane{Unit: workflowstate.Ref{Kind: "ticket", ID: "TST-1"}, Branch: "refs/heads/chr/workflow/credential-preparation", Worktree: filepath.Join(t.TempDir(), "prepared"), BaseCommit: f.request.Git.BaseCommit, HeadCommit: f.request.Git.BaseCommit}}
 	query.SourceDirectory, query.ResultCommit = f.request.Directory, ""
 	transport := server.URL + "/" + filepath.Base(f.remote)
 

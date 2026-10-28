@@ -1,8 +1,12 @@
 package workflow
 
-import "context"
+import (
+	"context"
 
-func (s *Store) workflowNativePreparationTargetMoved(ctx context.Context, run workflowInvocationFile, candidate IntegrationCandidate, provider PublicationGuardProvider) bool {
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
+
+func (s *Store) workflowNativePreparationTargetMoved(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, provider PublicationGuardProvider) bool {
 	if candidate.Input.Native == nil || s.checkWorkflowNativePreparationFence(run, candidate.Input.Native) != nil || s.checkWorkflowPreparationGit(ctx, candidate) != nil {
 		return false
 	}

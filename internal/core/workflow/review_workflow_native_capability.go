@@ -17,13 +17,13 @@ import (
 // WorkflowNativeIntegrationCapability rechecks current host grants, actual
 // receive-pack capability and the existing forge's effective repository policy.
 // The legacy merge API remains source-only and is never enabled by this profile.
-func (adapter RemoteReviewAdapter) WorkflowNativeIntegrationCapability(ctx context.Context, request NativeCapabilityRequest, policies NativePolicyReader, git GitPublicationInspector) (NativeCapability, error) {
+func (adapter RemoteReviewAdapter) WorkflowNativeIntegrationCapability(ctx context.Context, request NativeCapabilityRequest, policies NativePolicyReader, git GitPublicationInspector) (workflowstate.NativeCapability, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
 	capability := newWorkflowNativeCapability(request)
 	if request.Config.PublicationProfile != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
-		capability.Unsupported = []NativeUnsupported{{"profile_disabled", "Explicitly select git_atomic_dual_ref."}}
+		capability.Unsupported = []workflowstate.NativeUnsupported{{Condition: "profile_disabled", Decision: "Explicitly select git_atomic_dual_ref."}}
 
 		return sealWorkflowNativeCapability(capability)
 	}
@@ -54,7 +54,7 @@ func (adapter RemoteReviewAdapter) WorkflowNativeIntegrationCapability(ctx conte
 	return adapter.finishWorkflowNativeCapability(ctx, request, policy, git, capability)
 }
 
-func sameWorkflowNativeSourcePR(current, retained PullRequestSnapshot) bool {
+func sameWorkflowNativeSourcePR(current, retained workflowstate.PullRequestSnapshot) bool {
 	// GitHub computes a speculative merge_commit_sha while an open PR is still
 	// unmerged. It is not a source/base change or evidence of delivered P.
 	current.ResultCommit, retained.ResultCommit = "", ""
@@ -62,9 +62,9 @@ func sameWorkflowNativeSourcePR(current, retained PullRequestSnapshot) bool {
 	return current == retained
 }
 
-func newWorkflowNativeCapability(request NativeCapabilityRequest) NativeCapability {
-	return NativeCapability{
-		PublicationCapability: PublicationCapability{Repository: request.Publication.Repository, PullRequestURL: request.PullRequest.URL, Method: request.Publication.Git.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef},
+func newWorkflowNativeCapability(request NativeCapabilityRequest) workflowstate.NativeCapability {
+	return workflowstate.NativeCapability{
+		PublicationCapability: workflowstate.PublicationCapability{Repository: request.Publication.Repository, PullRequestURL: request.PullRequest.URL, Method: request.Publication.Git.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef},
 		SourceRef:             request.Publication.SourceRef, TargetRef: request.Publication.TargetRef, AdapterVersion: workflowNativeAdapterVersion,
 		OriginalSourceCommit: request.Publication.Git.SourceCommit, ExpectedBaseCommit: request.Publication.Git.BaseCommit, PreparedResultCommit: request.Publication.Git.ResultCommit,
 	}
@@ -78,7 +78,7 @@ func workflowNativeSourceBinding(request NativeCapabilityRequest) bool {
 		pr.State == "open" && !pr.Merged && pr.HeadCommit == publication.Git.SourceCommit && pr.BaseCommit == publication.Git.BaseCommit
 }
 
-func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Context, request NativeCapabilityRequest, policy NativePolicy, git GitPublicationInspector, capability NativeCapability) (NativeCapability, error) {
+func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Context, request NativeCapabilityRequest, policy NativePolicy, git GitPublicationInspector, capability workflowstate.NativeCapability) (workflowstate.NativeCapability, error) {
 	observation, err := adapter.readWorkflowNativePolicy(ctx, request.PullRequest, request.Publication.Git.Method)
 	if err != nil {
 		return capability, err
@@ -104,7 +104,7 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 
 	capability.Unsupported = append(capability.Unsupported, observation.unsupported...)
 	if !workflowNativeObservationContractMatches(observation.contract, policy.ObservationContract) {
-		capability.Unsupported = append(capability.Unsupported, NativeUnsupported{"observation_uncertified", "Certify same-original-PR Git merge observation on this repository."})
+		capability.Unsupported = append(capability.Unsupported, workflowstate.NativeUnsupported{Condition: "observation_uncertified", Decision: "Certify same-original-PR Git merge observation on this repository."})
 	}
 
 	if len(capability.Unsupported) != 0 {
@@ -114,10 +114,10 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 	return inspectWorkflowNativeCapability(ctx, request, git, capability)
 }
 
-func inspectWorkflowNativeCapability(ctx context.Context, request NativeCapabilityRequest, git GitPublicationInspector, capability NativeCapability) (NativeCapability, error) {
+func inspectWorkflowNativeCapability(ctx context.Context, request NativeCapabilityRequest, git GitPublicationInspector, capability workflowstate.NativeCapability) (workflowstate.NativeCapability, error) {
 	advertisement, err := git.InspectWorkflowGitPublication(ctx, request.Publication)
 	if errors.Is(err, ErrWorkflowAtomicGuard) {
-		capability.Unsupported = append(capability.Unsupported, NativeUnsupported{"atomic_transport_unavailable", "Select a server supporting atomic dual-ref transactions."})
+		capability.Unsupported = append(capability.Unsupported, workflowstate.NativeUnsupported{Condition: "atomic_transport_unavailable", Decision: "Select a server supporting atomic dual-ref transactions."})
 
 		return sealWorkflowNativeCapability(capability)
 	}
@@ -138,7 +138,7 @@ func inspectWorkflowNativeCapability(ctx context.Context, request NativeCapabili
 
 // RecheckWorkflowNativeCapability invalidates a retained grant on any relevant
 // policy, role, ownership, method, transport or canonical PR change before intent.
-func (adapter RemoteReviewAdapter) RecheckWorkflowNativeCapability(ctx context.Context, request NativeCapabilityRequest, prior NativeCapability, policies NativePolicyReader, git GitPublicationInspector) error {
+func (adapter RemoteReviewAdapter) RecheckWorkflowNativeCapability(ctx context.Context, request NativeCapabilityRequest, prior workflowstate.NativeCapability, policies NativePolicyReader, git GitPublicationInspector) error {
 	current, err := adapter.WorkflowNativeIntegrationCapability(ctx, request, policies, git)
 	if err != nil {
 		return err
@@ -151,7 +151,7 @@ func (adapter RemoteReviewAdapter) RecheckWorkflowNativeCapability(ctx context.C
 	return nil
 }
 
-func changedWorkflowNativeCapability(prior, current NativeCapability) string {
+func changedWorkflowNativeCapability(prior, current workflowstate.NativeCapability) string {
 	fields := []struct{ name, prior, current string }{
 		{"policy", prior.PolicyFingerprint, current.PolicyFingerprint},
 		{"server capability", prior.ServerCapabilityFingerprint, current.ServerCapabilityFingerprint},
@@ -168,7 +168,7 @@ func changedWorkflowNativeCapability(prior, current NativeCapability) string {
 	return "source, target, method or profile"
 }
 
-func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context, pr PullRequestSnapshot, method string) (workflowNativePolicyObservation, error) {
+func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowNativePolicyObservation, error) {
 	resolvedReview, err := adapter.resolve(pr.URL)
 	if err != nil {
 		return workflowNativePolicyObservation{}, err

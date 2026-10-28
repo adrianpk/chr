@@ -6,7 +6,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) checkWorkflowNativeDispatchCompletion(submission Submission) error {
+func (s *Store) checkWorkflowNativeDispatchCompletion(submission workflowstate.Submission) error {
 	native := submission.Native
 	if native.DispatchCompletionRef == nil {
 		return nil
@@ -42,7 +42,7 @@ func (s *Store) checkWorkflowNativeDispatchCompletion(submission Submission) err
 	return nil
 }
 
-func workflowNativeCompletionMatches(submission Submission, completion NativeDispatchCompletion) bool {
+func workflowNativeCompletionMatches(submission workflowstate.Submission, completion NativeDispatchCompletion) bool {
 	native := submission.Native
 	if native.DispatchIdentity == nil {
 		return false
@@ -51,7 +51,7 @@ func workflowNativeCompletionMatches(submission Submission, completion NativeDis
 	return completion.SchemaVersion == 1 && completion.SubmissionID == submission.ID && completion.Identity == *native.DispatchIdentity && native.DispatchState == "quiescent" && !completion.FinishedAt.Before(native.IntentTime)
 }
 
-func (s *Store) checkWorkflowNativeGitObservations(submission Submission) error {
+func (s *Store) checkWorkflowNativeGitObservations(submission workflowstate.Submission) error {
 	for _, ref := range submission.Native.GitObservationRefs {
 		var observation NativeGitObservation
 		if err := s.readWorkflowNativeEvidence(submission.InvocationID, ref, &observation); err != nil {
@@ -70,7 +70,7 @@ func (s *Store) checkWorkflowNativeGitObservations(submission Submission) error 
 	return nil
 }
 
-func validateWorkflowNativeGitObservation(submission Submission, observation NativeGitObservation) error {
+func validateWorkflowNativeGitObservation(submission workflowstate.Submission, observation NativeGitObservation) error {
 	if !validWorkflowNativeGitObservationHeader(submission, observation) {
 		return workflowstate.ErrConflict
 	}
@@ -91,11 +91,11 @@ func validateWorkflowNativeGitObservation(submission Submission, observation Nat
 	return validateWorkflowIntegrationProof(proof.IntegrationQuery, *proof)
 }
 
-func validWorkflowNativeGitObservationHeader(submission Submission, observation NativeGitObservation) bool {
+func validWorkflowNativeGitObservationHeader(submission workflowstate.Submission, observation NativeGitObservation) bool {
 	return observation.SchemaVersion == 1 && observation.SubmissionID == submission.ID && workflowCommitID(observation.SourceCommit) && workflowCommitID(observation.TargetCommit) && validWorkflowNativeFingerprint(observation.CandidateRevision)
 }
 
-func (s *Store) workflowNativeGitApplied(submission Submission) bool {
+func (s *Store) workflowNativeGitApplied(submission workflowstate.Submission) bool {
 	native := submission.Native
 	for _, ref := range native.GitObservationRefs {
 		var observation NativeGitObservation
@@ -107,7 +107,7 @@ func (s *Store) workflowNativeGitApplied(submission Submission) bool {
 	return false
 }
 
-func (s *Store) checkWorkflowNativeDefiniteNonApplication(submission Submission, proof NativeNonApplicationProof) error {
+func (s *Store) checkWorkflowNativeDefiniteNonApplication(submission workflowstate.Submission, proof NativeNonApplicationProof) error {
 	native := submission.Native
 	if !validWorkflowNativeNonApplicationHeader(submission, proof) {
 		return workflowstate.ErrConflict
@@ -136,13 +136,13 @@ func (s *Store) checkWorkflowNativeDefiniteNonApplication(submission Submission,
 	return nil
 }
 
-func validWorkflowNativeNonApplicationHeader(submission Submission, proof NativeNonApplicationProof) bool {
+func validWorkflowNativeNonApplicationHeader(submission workflowstate.Submission, proof NativeNonApplicationProof) bool {
 	native := submission.Native
 
 	return proof.SchemaVersion == 1 && proof.SubmissionID == submission.ID && proof.CannotApply && native.TransportResponseRef != nil && len(native.GitObservationRefs) > 0
 }
 
-func workflowNativeDefiniteResponse(native NativeSubmission, result GitPublicationResult) bool {
+func workflowNativeDefiniteResponse(native workflowstate.NativeSubmission, result GitPublicationResult) bool {
 	if result.State == "not_sent" {
 		return !result.CommandsSent
 	}
@@ -150,7 +150,7 @@ func workflowNativeDefiniteResponse(native NativeSubmission, result GitPublicati
 	return result.State == "rejected" && result.CommandsSent && native.CommandManifestRef != nil && native.AdvertisementRef != nil
 }
 
-func workflowNativeNonApplicationObservation(native NativeSubmission, proof NativeNonApplicationProof, observation NativeGitObservation) bool {
+func workflowNativeNonApplicationObservation(native workflowstate.NativeSubmission, proof NativeNonApplicationProof, observation NativeGitObservation) bool {
 	changed := observation.SourceCommit != native.OriginalSource || observation.TargetCommit != native.ValidatedBase
 	refsMatch := [2]string{proof.ObservedSource, proof.ObservedTarget} == [2]string{observation.SourceCommit, observation.TargetCommit}
 

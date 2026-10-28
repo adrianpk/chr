@@ -142,7 +142,7 @@ func startPiIsolationInvocation(t *testing.T, operations service, key, target st
 }
 
 type piIsolationResult struct {
-	task workflowcore.TaskResult
+	task workflowstate.TaskResult
 	err  error
 }
 
@@ -227,7 +227,7 @@ func checkPiIsolationOverflow(t *testing.T, operations service, original workflo
 	}
 }
 
-func checkPiIsolationResult(t *testing.T, operations service, result workflowcore.TaskResult, states, labels map[string]bool) {
+func checkPiIsolationResult(t *testing.T, operations service, result workflowstate.TaskResult, states, labels map[string]bool) {
 	t.Helper()
 
 	text := result.Validation[0].Stdout

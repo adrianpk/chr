@@ -124,13 +124,13 @@ func (s *Store) readWorkflowClosedSet(set Record) (SetClosureResult, error) {
 	return SetClosureResult{Set: set, Receipt: receipt, ReceiptRef: state.Result.Ref, Outcome: state.Outcome}, nil
 }
 
-func (s *Store) readWorkflowClosingReceipt(state workflowClosingAttempt) (ClosingReceipt, error) {
+func (s *Store) readWorkflowClosingReceipt(state workflowClosingAttempt) (workflowstate.ClosingReceipt, error) {
 	data, err := s.workflowClosingRead(state.Result.Ref)
 	if err != nil || contenthash.Sum(data) != state.Result.Hash {
-		return ClosingReceipt{}, errorsOrConflict(err)
+		return workflowstate.ClosingReceipt{}, errorsOrConflict(err)
 	}
 
-	var receipt ClosingReceipt
+	var receipt workflowstate.ClosingReceipt
 	if err := json.Unmarshal(data, &receipt); err != nil {
 		return receipt, err
 	}
@@ -152,7 +152,7 @@ func (s *Store) checkWorkflowClosingResult(state workflowClosingAttempt) error {
 		return err
 	}
 
-	var input ClosingInput
+	var input workflowstate.ClosingInput
 	if err := json.Unmarshal(data, &input); err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func (s *Store) checkWorkflowClosingResult(state workflowClosingAttempt) error {
 	return validateWorkflowClosingResults(input.Validation, receipt)
 }
 
-func validateWorkflowClosingResults(gate workflowstate.Validation, receipt ClosingReceipt) error {
+func validateWorkflowClosingResults(gate workflowstate.Validation, receipt workflowstate.ClosingReceipt) error {
 	if len(receipt.Validation) > len(gate.Commands) || receipt.Outcome == "completed" && len(receipt.Validation) != len(gate.Commands) {
 		return workflowstate.ErrConflict
 	}

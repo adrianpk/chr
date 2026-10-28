@@ -40,27 +40,27 @@ type InputImage struct {
 
 // Attempt exposes stable ownership facts without private credentials.
 type Attempt struct {
-	CapacitySlot   int              `json:"capacity_slot,omitempty"`
-	ID             string           `json:"id"`
-	Purpose        string           `json:"purpose,omitempty"`
-	TaskKey        string           `json:"task_key"`
-	Generation     uint64           `json:"generation"`
-	InputRevision  uint64           `json:"input_revision"`
-	ContractHash   string           `json:"contract_hash"`
-	LeaseUntil     time.Time        `json:"lease_until"`
-	StartedAt      time.Time        `json:"started_at"`
-	FinishedAt     time.Time        `json:"finished_at,omitempty"`
-	Outcome        string           `json:"outcome"`
-	Lane           *Lane            `json:"lane,omitempty"`
-	InputRef       string           `json:"input_ref,omitempty"`
-	InputHash      string           `json:"input_hash,omitempty"`
-	ResultRef      string           `json:"result_ref,omitempty"`
-	ResultHash     string           `json:"result_hash,omitempty"`
-	OwnerProcess   *ProcessIdentity `json:"owner_process,omitempty"`
-	Processes      []Process        `json:"processes"`
-	Replaces       string           `json:"replaces"`
-	CheckpointRef  string           `json:"checkpoint_ref"`
-	CheckpointHash string           `json:"checkpoint_hash"`
+	CapacitySlot   int                            `json:"capacity_slot,omitempty"`
+	ID             string                         `json:"id"`
+	Purpose        string                         `json:"purpose,omitempty"`
+	TaskKey        string                         `json:"task_key"`
+	Generation     uint64                         `json:"generation"`
+	InputRevision  uint64                         `json:"input_revision"`
+	ContractHash   string                         `json:"contract_hash"`
+	LeaseUntil     time.Time                      `json:"lease_until"`
+	StartedAt      time.Time                      `json:"started_at"`
+	FinishedAt     time.Time                      `json:"finished_at,omitempty"`
+	Outcome        string                         `json:"outcome"`
+	Lane           *workflowstate.Lane            `json:"lane,omitempty"`
+	InputRef       string                         `json:"input_ref,omitempty"`
+	InputHash      string                         `json:"input_hash,omitempty"`
+	ResultRef      string                         `json:"result_ref,omitempty"`
+	ResultHash     string                         `json:"result_hash,omitempty"`
+	OwnerProcess   *workflowstate.ProcessIdentity `json:"owner_process,omitempty"`
+	Processes      []Process                      `json:"processes"`
+	Replaces       string                         `json:"replaces"`
+	CheckpointRef  string                         `json:"checkpoint_ref"`
+	CheckpointHash string                         `json:"checkpoint_hash"`
 }
 
 // Invocation is the public durable checkpoint, not an execution token.
@@ -69,7 +69,7 @@ type Invocation struct {
 	InvocationIntegration
 	InvocationScope
 	InvocationProgress
-	Identity
+	workflowstate.Identity
 	InvocationInput
 	InvocationExecution
 	InvocationCandidate
@@ -87,9 +87,9 @@ type InvocationAdmission struct {
 
 // InvocationIntegration groups the retained integration fields without changing their wire order.
 type InvocationIntegration struct {
-	IntegrationBudget  *IntegrationBudgetBinding `json:"integration_budget,omitempty"`
-	Integration        *IntegrationBinding       `json:"integration_binding,omitempty"`
-	IntegrationEntries []IntegrationBinding      `json:"integration_entries,omitempty"`
+	IntegrationBudget  *IntegrationBudgetBinding          `json:"integration_budget,omitempty"`
+	Integration        *workflowstate.IntegrationBinding  `json:"integration_binding,omitempty"`
+	IntegrationEntries []workflowstate.IntegrationBinding `json:"integration_entries,omitempty"`
 }
 
 // InvocationScope groups the retained scope fields without changing their wire order.
@@ -124,15 +124,15 @@ type InvocationInput struct {
 
 // InvocationExecution groups the retained execution fields without changing their wire order.
 type InvocationExecution struct {
-	Cursor               int       `json:"cursor"`
-	Status               string    `json:"status"`
-	Outcome              string    `json:"outcome"`
-	Attempts             []Attempt `json:"attempts"`
-	Blocker              *Blocker  `json:"blocker,omitempty"`
-	Lane                 *Lane     `json:"lane,omitempty"`
-	StopIntent           string    `json:"stop_intent"`
-	ResumeStatus         string    `json:"resume_status"`
-	CapacityResumeStatus string    `json:"capacity_resume_status,omitempty"`
+	Cursor               int                 `json:"cursor"`
+	Status               string              `json:"status"`
+	Outcome              string              `json:"outcome"`
+	Attempts             []Attempt           `json:"attempts"`
+	Blocker              *Blocker            `json:"blocker,omitempty"`
+	Lane                 *workflowstate.Lane `json:"lane,omitempty"`
+	StopIntent           string              `json:"stop_intent"`
+	ResumeStatus         string              `json:"resume_status"`
+	CapacityResumeStatus string              `json:"capacity_resume_status,omitempty"`
 }
 
 // InvocationCandidate groups the retained candidate fields without changing their wire order.
@@ -152,10 +152,10 @@ type InvocationDelivery struct {
 
 // InvocationReview groups the retained review fields without changing their wire order.
 type InvocationReview struct {
-	ReviewRestriction workflowstate.ReviewMode `json:"review_restriction,omitempty"`
-	Review            *ReviewBinding           `json:"review_binding,omitempty"`
-	ReviewCount       int                      `json:"review_count,omitempty"`
-	ReviewRepairs     []ReviewRepairBudget     `json:"review_repairs,omitempty"`
+	ReviewRestriction workflowstate.ReviewMode     `json:"review_restriction,omitempty"`
+	Review            *workflowstate.ReviewBinding `json:"review_binding,omitempty"`
+	ReviewCount       int                          `json:"review_count,omitempty"`
+	ReviewRepairs     []ReviewRepairBudget         `json:"review_repairs,omitempty"`
 }
 
 // InvocationPreparation groups the retained preparation fields without changing their wire order.
@@ -471,7 +471,7 @@ func (s *Store) createWorkflowInvocation(ctx context.Context, request StartReque
 	return s.readWorkflowInvocation(run.ID)
 }
 
-func newWorkflowInvocation(root string, identity Identity, request StartRequest, hash string, preview Preview) workflowInvocationFile {
+func newWorkflowInvocation(root string, identity workflowstate.Identity, request StartRequest, hash string, preview Preview) workflowInvocationFile {
 	invocation := Invocation{Identity: identity, InvocationInput: InvocationInput{Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded}, InvocationExecution: InvocationExecution{Status: "pending"}}
 
 	invocation.HarnessBinding = harnesscore.CloneBinding(request.HarnessBinding)

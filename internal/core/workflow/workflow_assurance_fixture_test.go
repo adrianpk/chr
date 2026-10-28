@@ -20,14 +20,14 @@ type workflowAssuranceProvider struct {
 	*nativePreparationProviderFixture
 	t             *testing.T
 	remote        string
-	prs           map[string]PullRequestSnapshot
+	prs           map[string]workflowstate.PullRequestSnapshot
 	creates       int
 	calls         int
 	lostPublisher GitPublisher
 }
 
-func (p *workflowAssuranceProvider) FindWorkflowPullRequests(_ context.Context, query PullRequestQuery) ([]PullRequestSnapshot, error) {
-	var found []PullRequestSnapshot
+func (p *workflowAssuranceProvider) FindWorkflowPullRequests(_ context.Context, query PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error) {
+	var found []workflowstate.PullRequestSnapshot
 
 	for _, pr := range p.prs {
 		if pr.Repository == query.Repository && pr.HeadBranch == query.HeadBranch && pr.BaseBranch == query.BaseBranch {
@@ -38,19 +38,19 @@ func (p *workflowAssuranceProvider) FindWorkflowPullRequests(_ context.Context, 
 	return found, nil
 }
 
-func (p *workflowAssuranceProvider) CreateWorkflowPullRequest(ctx context.Context, request PullRequestRequest) (PullRequestSnapshot, error) {
+func (p *workflowAssuranceProvider) CreateWorkflowPullRequest(ctx context.Context, request PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
 	head, err := p.ReadWorkflowBranch(ctx, request.Repository, request.HeadBranch)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	base, err := p.ReadWorkflowBranch(ctx, request.Repository, request.BaseBranch)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	p.creates++
-	p.pr = PullRequestSnapshot{URL: fmt.Sprintf("%s/pulls/%d", request.Repository, p.creates), Repository: request.Repository, HeadRepository: request.Repository, HeadBranch: request.HeadBranch, BaseBranch: request.BaseBranch, HeadCommit: head, BaseCommit: base, State: "open"}
+	p.pr = workflowstate.PullRequestSnapshot{URL: fmt.Sprintf("%s/pulls/%d", request.Repository, p.creates), Repository: request.Repository, HeadRepository: request.Repository, HeadBranch: request.HeadBranch, BaseBranch: request.BaseBranch, HeadCommit: head, BaseCommit: base, State: "open"}
 	p.prs[p.pr.URL] = p.pr
 
 	return p.pr, nil
@@ -62,7 +62,7 @@ func (p *workflowAssuranceProvider) ReadWorkflowBranch(ctx context.Context, _, b
 	return strings.TrimSpace(string(output)), err
 }
 
-func (p *workflowAssuranceProvider) ReadWorkflowPullRequest(ctx context.Context, address string) (PullRequestSnapshot, error) {
+func (p *workflowAssuranceProvider) ReadWorkflowPullRequest(ctx context.Context, address string) (workflowstate.PullRequestSnapshot, error) {
 	pr, found := p.prs[address]
 	if !found {
 		return pr, workflowstate.ErrConflict
@@ -143,7 +143,7 @@ func workflowAssurancePorts(t *testing.T, store *Store, target string) (Continua
 	base := &workflowPRProviderFixture{}
 	review := &workflowReviewProviderFixture{workflowPRProviderFixture: base, target: target}
 	preparation := &workflowPreparationProviderFixture{workflowReviewProviderFixture: review, guarded: true, revision: "assurance-v1"}
-	provider := &workflowAssuranceProvider{nativePreparationProviderFixture: &nativePreparationProviderFixture{preparation, "assurance-policy-v1"}, t: t, remote: remote, prs: map[string]PullRequestSnapshot{}}
+	provider := &workflowAssuranceProvider{nativePreparationProviderFixture: &nativePreparationProviderFixture{preparation, "assurance-policy-v1"}, t: t, remote: remote, prs: map[string]workflowstate.PullRequestSnapshot{}}
 	observer := NewWorkflowIntegrationGit(repository, remote)
 	ports := ContinuationPorts{Publication: PublicationPorts{Provider: provider, Preparer: NewWorkflowPreparationGit(repository, remote), Observer: observer, NativePublisher: provider, NativeObserver: provider}, Target: observer, Source: observer}
 

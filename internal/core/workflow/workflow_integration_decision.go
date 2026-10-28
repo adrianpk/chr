@@ -15,8 +15,8 @@ type IntegrationDecisions struct {
 	Revision          uint64                            `json:"revision"`
 	CandidateRevision uint64                            `json:"candidate_revision"`
 	State             string                            `json:"state"`
-	Input             MergerInput                       `json:"input"`
-	Requests          []MergerDecision                  `json:"requests"`
+	Input             workflowstate.MergerInput         `json:"input"`
+	Requests          []workflowstate.MergerDecision    `json:"requests"`
 	Answers           []workflowstate.IntegrationAnswer `json:"answers"`
 	Previous          *workflowstate.EvidenceRef        `json:"previous,omitempty"`
 }
@@ -26,8 +26,8 @@ type IntegrationDecisions struct {
 type IntegrationDecisionRequest struct {
 	IntegrationBudgetGuard
 	ID        string
-	Input     MergerInput
-	Decisions []MergerDecision
+	Input     workflowstate.MergerInput
+	Decisions []workflowstate.MergerDecision
 }
 
 // IntegrationAnswerRequest binds an answer to the displayed record

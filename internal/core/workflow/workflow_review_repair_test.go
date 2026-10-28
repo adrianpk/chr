@@ -52,7 +52,7 @@ func checkWorkflowReviewRepairStep(t *testing.T, store *Store, hierarchy Materia
 	}
 }
 
-func checkWorkflowReviewRepairState(t *testing.T, retained Invocation, binding ReviewBinding, count int) {
+func checkWorkflowReviewRepairState(t *testing.T, retained Invocation, binding workflowstate.ReviewBinding, count int) {
 	t.Helper()
 
 	if binding.State != "needs_repair" || retained.Cursor != 2 || retained.Status != "pending" || retained.CandidateRef != "" {

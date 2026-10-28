@@ -7,26 +7,28 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeCertificationEvidence struct {
-	Schema            string               `json:"schema"`
-	Method            string               `json:"method"`
-	Scenario          string               `json:"scenario"`
-	Transport         string               `json:"transport,omitempty"`
-	Policy            json.RawMessage      `json:"remote_policy,omitempty"`
-	HTTPStatus        int                  `json:"http_status,omitempty"`
-	Posts             int                  `json:"publication_posts,omitempty"`
-	Server            string               `json:"server_api_profile"`
-	Role              string               `json:"credential_role"`
-	StartedAt         time.Time            `json:"started_at"`
-	FinishedAt        time.Time            `json:"finished_at"`
-	Passed            bool                 `json:"passed"`
-	ReceiptCompatible bool                 `json:"receipt_observation_compatible"`
-	ObservedSource    string               `json:"observed_source,omitempty"`
-	ObservedTarget    string               `json:"observed_target,omitempty"`
-	ContendedPR       *PullRequestSnapshot `json:"contended_pull_request,omitempty"`
-	Native            nativeLiveEvidence   `json:"native"`
+	Schema            string                             `json:"schema"`
+	Method            string                             `json:"method"`
+	Scenario          string                             `json:"scenario"`
+	Transport         string                             `json:"transport,omitempty"`
+	Policy            json.RawMessage                    `json:"remote_policy,omitempty"`
+	HTTPStatus        int                                `json:"http_status,omitempty"`
+	Posts             int                                `json:"publication_posts,omitempty"`
+	Server            string                             `json:"server_api_profile"`
+	Role              string                             `json:"credential_role"`
+	StartedAt         time.Time                          `json:"started_at"`
+	FinishedAt        time.Time                          `json:"finished_at"`
+	Passed            bool                               `json:"passed"`
+	ReceiptCompatible bool                               `json:"receipt_observation_compatible"`
+	ObservedSource    string                             `json:"observed_source,omitempty"`
+	ObservedTarget    string                             `json:"observed_target,omitempty"`
+	ContendedPR       *workflowstate.PullRequestSnapshot `json:"contended_pull_request,omitempty"`
+	Native            nativeLiveEvidence                 `json:"native"`
 }
 
 func readNativeCertificationRef(t *testing.T, profile nativeLiveProfile, dir, ref string) string {
@@ -51,7 +53,7 @@ func checkNativeReceiptCompatibility(t *testing.T, evidence *nativeCertification
 	}
 
 	git := *observed.Git
-	b := NativeRecordBinding{
+	b := workflowstate.NativeRecordBinding{
 		SourceRepository: git.Repository, SourceRef: binding.Capability.SourceRef, TargetRef: binding.Capability.TargetRef,
 		Method: git.Method, OriginalSource: git.SourceCommit, ValidatedBase: git.BaseCommit,
 		PreparedResult: git.ResultCommit, PublishedSource: git.ResultCommit, PreparedTree: git.PreparedTree,

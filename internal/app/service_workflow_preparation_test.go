@@ -7,12 +7,13 @@ import (
 	"testing"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type serviceWorkflowPreparationFixture struct{ *serviceWorkflowReviewFixture }
 
-func (p *serviceWorkflowPreparationFixture) WorkflowIntegrationCapability(_ context.Context, pr workflowcore.PullRequestSnapshot, method string) (workflowcore.PublicationCapability, error) {
-	return workflowcore.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: "fixture_atomic_source_base", Revision: strings.Repeat("a", 64), AtomicSourceBase: true, ExactResult: true}, nil
+func (p *serviceWorkflowPreparationFixture) WorkflowIntegrationCapability(_ context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowstate.PublicationCapability, error) {
+	return workflowstate.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: "fixture_atomic_source_base", Revision: strings.Repeat("a", 64), AtomicSourceBase: true, ExactResult: true}, nil
 }
 
 // TestServiceWorkflowPreparation uses the central service to prepare a real

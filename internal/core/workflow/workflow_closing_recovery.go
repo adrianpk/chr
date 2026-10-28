@@ -58,7 +58,7 @@ func (s *Store) reconcileWorkflowClosing(ctx context.Context, set Record, contro
 	}
 	defer func() { err = errors.Join(err, reservation.releaseReservation()) }()
 
-	run := workflowInvocationFile{Invocation: Invocation{Identity: Identity{ID: workflowClosingOwnerID(set)}, InvocationExecution: InvocationExecution{Attempts: []Attempt{attempt}}}}
+	run := workflowInvocationFile{Invocation: Invocation{Identity: workflowstate.Identity{ID: workflowClosingOwnerID(set)}, InvocationExecution: InvocationExecution{Attempts: []Attempt{attempt}}}}
 
 	locks, err := s.recoveredWorkflowLocks(ctx, run)
 	if err != nil {

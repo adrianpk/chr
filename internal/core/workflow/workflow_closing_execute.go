@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) executeWorkflowClosing(ctx context.Context, claim *workflowClosingClaim) (ClosingReceipt, error) {
+func (s *Store) executeWorkflowClosing(ctx context.Context, claim *workflowClosingClaim) (workflowstate.ClosingReceipt, error) {
 	ctx, cancel := context.WithDeadline(ctx, claim.state.LeaseUntil)
 	defer cancel()
 
@@ -22,7 +22,7 @@ func (s *Store) executeWorkflowClosing(ctx context.Context, claim *workflowClosi
 		ctx = watched
 	}
 
-	receipt := ClosingReceipt{ClosingInput: claim.input, Input: claim.state.Input, Waiver: claim.input.Validation.WaiverReason}
+	receipt := workflowstate.ClosingReceipt{ClosingInput: claim.input, Input: claim.state.Input, Waiver: claim.input.Validation.WaiverReason}
 	receipt.Schema, receipt.Outcome = "chr-set-closure/v1", "closing_validation_failed"
 
 	worktree, err := s.prepareWorkflowClosingCheckout(ctx, claim)
@@ -74,7 +74,7 @@ func (s *Store) prepareWorkflowClosingCheckout(ctx context.Context, claim *workf
 	return worktree, checkWorkflowClosingCheckout(ctx, worktree, claim.input)
 }
 
-func checkWorkflowClosingCheckout(ctx context.Context, directory string, input ClosingInput) error {
+func checkWorkflowClosingCheckout(ctx context.Context, directory string, input workflowstate.ClosingInput) error {
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: directory}}
 	for expression, expected := range map[string]string{"HEAD^{commit}": input.Target.Commit, "HEAD^{tree}": input.Tree} {
 		actual, err := reader.Output(ctx, "rev-parse", "--verify", expression)
@@ -92,7 +92,7 @@ func checkWorkflowClosingCheckout(ctx context.Context, directory string, input C
 }
 
 func workflowClosingPrepared(claim *workflowClosingClaim, directory string) workflowPreparedTask {
-	return workflowPreparedTask{input: TaskInput{Lane: Lane{Worktree: directory}}, inputRef: claim.state.Input.Ref, inputHash: claim.state.Input.Hash, data: claim.data, leaseUntil: claim.state.LeaseUntil}
+	return workflowPreparedTask{input: TaskInput{Lane: workflowstate.Lane{Worktree: directory}}, inputRef: claim.state.Input.Ref, inputHash: claim.state.Input.Hash, data: claim.data, leaseUntil: claim.state.LeaseUntil}
 }
 
 func workflowClosingLeaseSeconds(validation workflowstate.Validation) time.Duration {

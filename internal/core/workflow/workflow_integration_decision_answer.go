@@ -90,7 +90,7 @@ func checkWorkflowDecisionFence(run workflowInvocationFile, entry IntegrationEnt
 }
 
 func workflowDecisionsResolved(record IntegrationDecisions) bool {
-	return len(record.Requests) > 0 && !slices.ContainsFunc(record.Requests, func(d MergerDecision) bool { return !workflowDecisionResolved(record.Answers, d.ID) })
+	return len(record.Requests) > 0 && !slices.ContainsFunc(record.Requests, func(d workflowstate.MergerDecision) bool { return !workflowDecisionResolved(record.Answers, d.ID) })
 }
 
 func workflowDecisionResolved(answers []workflowstate.IntegrationAnswer, id string) bool {

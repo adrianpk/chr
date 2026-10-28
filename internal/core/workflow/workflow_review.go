@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -16,45 +17,6 @@ const (
 // ErrWorkflowReviewRepairBudget requires an explicit operator action.
 var ErrWorkflowReviewRepairBudget = errors.New("automatic review repair budget exhausted")
 
-// ReviewInput binds a decision to host validation and canonical inputs.
-type ReviewInput struct {
-	Schema          string                     `json:"schema"`
-	InvocationID    string                     `json:"invocation_id"`
-	Unit            workflowstate.Ref          `json:"unit"`
-	CandidateID     string                     `json:"candidate_id"`
-	CandidateRef    string                     `json:"candidate_ref"`
-	CandidateHash   string                     `json:"candidate_hash"`
-	Slice           SliceInput                 `json:"slice"`
-	PullRequest     PullRequestSnapshot        `json:"pull_request"`
-	TargetCommit    string                     `json:"target_commit"`
-	Policy          workflowstate.ReviewPolicy `json:"policy"`
-	PreparationRef  string                     `json:"preparation_ref,omitempty"`
-	PreparationHash string                     `json:"preparation_hash,omitempty"`
-	PreparedGit     *IntegrationProof          `json:"prepared_git,omitempty"`
-	Native          *NativeReviewInput         `json:"native,omitempty"`
-}
-
-// ReviewDecision is returned by the distinct supervised review role.
-// Its binding hash must name the exact input supplied on stdin.
-type ReviewDecision struct {
-	BindingHash   string                            `json:"binding_hash"`
-	Result        workflowstate.AgenticReviewResult `json:"result"`
-	RepairTaskKey string                            `json:"repair_task_key,omitempty"`
-}
-
-// ReviewBinding retains one current decision and immutable evidence.
-type ReviewBinding struct {
-	Round         int               `json:"round"`
-	Unit          workflowstate.Ref `json:"unit"`
-	State         string            `json:"state"`
-	InputRef      string            `json:"input_ref"`
-	InputHash     string            `json:"input_hash"`
-	ResultRef     string            `json:"result_ref"`
-	ResultHash    string            `json:"result_hash"`
-	DecisionCount int               `json:"decision_count"`
-	RepairTaskKey string            `json:"repair_task_key"`
-}
-
 // ReviewRepairBudget survives candidate replacement and continuation.
 type ReviewRepairBudget struct {
 	Unit     workflowstate.Ref `json:"unit"`
@@ -64,16 +26,16 @@ type ReviewRepairBudget struct {
 // ReviewWorkflowSlice applies current policy. Human review retains a wait;
 // trusted mode grants validated inputs; agentic mode runs a separate owned role.
 // It never publishes a target or completes a task.
-func (s *Store) ReviewWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, reviewer []string) (result ReviewBinding, err error) {
+func (s *Store) ReviewWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, reviewer []string) (result workflowstate.ReviewBinding, err error) {
 	return s.reviewWorkflowSlice(ctx, id, provider, reviewer, nil)
 }
 
 // ReviewWorkflowSliceWithHarness shares the invocation ceiling with executor and merger calls.
-func (s *Store) ReviewWorkflowSliceWithHarness(ctx context.Context, id string, provider PullRequestProvider, harness AgentHarness) (ReviewBinding, error) {
+func (s *Store) ReviewWorkflowSliceWithHarness(ctx context.Context, id string, provider PullRequestProvider, harness AgentHarness) (workflowstate.ReviewBinding, error) {
 	return s.reviewWorkflowSlice(ctx, id, provider, harness.Command, &harness)
 }
 
-func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, reviewer []string, harness *AgentHarness) (result ReviewBinding, err error) {
+func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, reviewer []string, harness *AgentHarness) (result workflowstate.ReviewBinding, err error) {
 	claim, prepared, binding, err := s.prepareWorkflowReview(ctx, id, provider, reviewer, harness)
 
 	if err != nil || claim == nil {
@@ -110,7 +72,9 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 	cleanup, finish := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer finish()
 
-	result, err = s.finishWorkflowReview(cleanup, claim, prepared, provider, decision, errors.Join(executionErr, parseErr), watched.Err() != nil)
+	var decisions workflowreview.Decisions = workflowReviewDecisions{store: s, claim: claim, prepared: prepared, provider: provider}
+
+	result, err = decisions.Accept(cleanup, workflowreview.Completion{Decision: decision, Failure: errors.Join(executionErr, parseErr), Interrupted: watched.Err() != nil})
 	if err == nil && result.State == "needs_repair" {
 		err = s.repairWorkflowReviewedSlice(ctx, id, decision.RepairTaskKey, provider)
 	}
@@ -120,7 +84,7 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 
 // ApproveWorkflowSlice authorizes only the displayed immutable binding. The
 // current policy, validated candidate, canonical PR and target are read again.
-func (s *Store) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string, provider PullRequestProvider, expected ...uint64) (result ReviewBinding, err error) {
+func (s *Store) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string, provider PullRequestProvider, expected ...uint64) (result workflowstate.ReviewBinding, err error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 
@@ -144,7 +108,7 @@ func (s *Store) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string
 
 // CheckWorkflowReviewGrant re-observes the exact authorized inputs. Publication
 // must call this immediately before recording a guarded submission.
-func (s *Store) CheckWorkflowReviewGrant(ctx context.Context, id string, provider PullRequestProvider) (input ReviewInput, err error) {
+func (s *Store) CheckWorkflowReviewGrant(ctx context.Context, id string, provider PullRequestProvider) (input workflowstate.ReviewInput, err error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 

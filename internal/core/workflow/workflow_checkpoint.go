@@ -12,16 +12,16 @@ import (
 
 // AttemptCheckpoint preserves a stopped attempt without validation proof.
 type AttemptCheckpoint struct {
-	Schema     string      `json:"schema"`
-	AttemptID  string      `json:"attempt_id"`
-	Generation uint64      `json:"generation"`
-	Reason     string      `json:"reason"`
-	FinishedAt time.Time   `json:"finished_at"`
-	Processes  []Process   `json:"processes"`
-	Result     *TaskResult `json:"result"`
+	Schema     string                    `json:"schema"`
+	AttemptID  string                    `json:"attempt_id"`
+	Generation uint64                    `json:"generation"`
+	Reason     string                    `json:"reason"`
+	FinishedAt time.Time                 `json:"finished_at"`
+	Processes  []Process                 `json:"processes"`
+	Result     *workflowstate.TaskResult `json:"result"`
 }
 
-func (s *Store) checkpointWorkflowAttempt(run workflowInvocationFile, record Record, reason string, result *TaskResult, extra ...workflowstate.FileChange) error {
+func (s *Store) checkpointWorkflowAttempt(run workflowInvocationFile, record Record, reason string, result *workflowstate.TaskResult, extra ...workflowstate.FileChange) error {
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	if err := workflowAttemptQuiescent(*attempt); err != nil {
 		return err

@@ -10,11 +10,11 @@ import (
 )
 
 type serviceWorkflowPRFixture struct {
-	pr      workflowcore.PullRequestSnapshot
+	pr      workflowstate.PullRequestSnapshot
 	creates int
 }
 
-func (p *serviceWorkflowPRFixture) FindWorkflowPullRequests(context.Context, workflowcore.PullRequestQuery) ([]workflowcore.PullRequestSnapshot, error) {
+func (p *serviceWorkflowPRFixture) FindWorkflowPullRequests(context.Context, workflowcore.PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error) {
 	return nil, nil
 }
 
@@ -22,11 +22,11 @@ func (p *serviceWorkflowPRFixture) ReadWorkflowBranch(context.Context, string, s
 	return p.pr.HeadCommit, nil
 }
 
-func (p *serviceWorkflowPRFixture) ReadWorkflowPullRequest(context.Context, string) (workflowcore.PullRequestSnapshot, error) {
+func (p *serviceWorkflowPRFixture) ReadWorkflowPullRequest(context.Context, string) (workflowstate.PullRequestSnapshot, error) {
 	return p.pr, nil
 }
 
-func (p *serviceWorkflowPRFixture) CreateWorkflowPullRequest(context.Context, workflowcore.PullRequestRequest) (workflowcore.PullRequestSnapshot, error) {
+func (p *serviceWorkflowPRFixture) CreateWorkflowPullRequest(context.Context, workflowcore.PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
 	p.creates++
 
 	return p.pr, nil
@@ -53,7 +53,7 @@ func TestServiceWorkflowSlicePR(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	provider := &serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}
+	provider := &serviceWorkflowPRFixture{pr: workflowstate.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}
 	operations.workflowPullRequests = provider
 
 	content := workflowcore.SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}

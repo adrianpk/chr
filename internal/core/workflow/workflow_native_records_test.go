@@ -35,7 +35,7 @@ func retainNativeRecordEvidence(t *testing.T, store *Store, id, name string, val
 	return ref
 }
 
-func nativeRecordCandidate(t *testing.T, method string) (*Store, IntegrationCandidate) {
+func nativeRecordCandidate(t *testing.T, method string) (*Store, workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	f := newWorkflowPreparationFixture(t, method, workflowPreparationGate("test -f result.txt && if test -f target.txt; then printf combined; else printf source; fi"))
@@ -50,7 +50,7 @@ func nativeRecordCandidate(t *testing.T, method string) (*Store, IntegrationCand
 	}
 
 	proof, pr := candidate.Input.Git, candidate.Input.Source.PullRequest
-	cap := NativeCapability{PublicationCapability: PublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true}, SourceRef: "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-fixture/v1", PolicyFingerprint: contenthash.Sum([]byte("policy")), ServerCapabilityFingerprint: contenthash.Sum([]byte("server")), CredentialIdentityFingerprint: contenthash.Sum([]byte("publisher")), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowNativeAdapterVersion, OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit}
+	cap := workflowstate.NativeCapability{PublicationCapability: workflowstate.PublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true}, SourceRef: "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-fixture/v1", PolicyFingerprint: contenthash.Sum([]byte("policy")), ServerCapabilityFingerprint: contenthash.Sum([]byte("server")), CredentialIdentityFingerprint: contenthash.Sum([]byte("publisher")), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowNativeAdapterVersion, OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit}
 
 	cap, err = sealWorkflowNativeCapability(cap)
 	if err != nil {
@@ -73,14 +73,14 @@ func nativeRecordCandidate(t *testing.T, method string) (*Store, IntegrationCand
 	input.Preparation = &candidate.Input
 	inputRef := retainNativeRecordEvidence(t, f.store, candidate.InvocationID, "input", input)
 	candidate.Validation.InputRef, candidate.Validation.InputHash = inputRef.Path, inputRef.Hash
-	b := NativeRecordBinding{SchemaVersion: 1, EntryID: "entry-1", InvocationID: candidate.InvocationID, Unit: candidate.Input.Source.Unit, CanonicalPR: pr.URL, SourceRepository: pr.Repository, SourceRef: cap.SourceRef, TargetRef: cap.TargetRef, ObjectFormat: "sha1", OriginalSource: proof.SourceCommit, PublishedSource: proof.ResultCommit, ValidatedBase: proof.BaseCommit, PreparedResult: proof.ResultCommit, PreparedTree: proof.PreparedTree, Method: method, ContractHash: candidate.Input.Source.Slice.ContractHash, PolicyHash: cap.PolicyFingerprint, CapabilityHash: cap.Revision, Extensions: map[string]json.RawMessage{"future_optional": json.RawMessage(`{"retained":true}`)}}
+	b := workflowstate.NativeRecordBinding{SchemaVersion: 1, EntryID: "entry-1", InvocationID: candidate.InvocationID, Unit: candidate.Input.Source.Unit, CanonicalPR: pr.URL, SourceRepository: pr.Repository, SourceRef: cap.SourceRef, TargetRef: cap.TargetRef, ObjectFormat: "sha1", OriginalSource: proof.SourceCommit, PublishedSource: proof.ResultCommit, ValidatedBase: proof.BaseCommit, PreparedResult: proof.ResultCommit, PreparedTree: proof.PreparedTree, Method: method, ContractHash: candidate.Input.Source.Slice.ContractHash, PolicyHash: cap.PolicyFingerprint, CapabilityHash: cap.Revision, Extensions: map[string]json.RawMessage{"future_optional": json.RawMessage(`{"retained":true}`)}}
 	commits := strings.Fields(workflowIntegrationCommand(t, candidate.Lane.Worktree, "rev-list", "--reverse", "--first-parent", proof.OriginCommit+".."+proof.SourceCommit))
 	b.SourceManifestRef = retainNativeRecordEvidence(t, f.store, b.InvocationID, "source", NativeSourceManifest{Schema: "chr-native-source/v1", Repository: b.SourceRepository, SourceRef: b.SourceRef, OriginalSource: b.OriginalSource, Commits: commits})
 	b.HistoryManifestRef = retainNativeRecordEvidence(t, f.store, b.InvocationID, "history", NativeHistoryManifest{Schema: "chr-native-history/v1", Git: proof})
 	b.PreparationRef = retainNativeRecordEvidence(t, f.store, b.InvocationID, "preparation", candidate.Input)
 	b.CapabilityRef = retainNativeRecordEvidence(t, f.store, b.InvocationID, "capability", cap)
 	b.ValidationRefs = []workflowstate.EvidenceRef{retainNativeRecordEvidence(t, f.store, b.InvocationID, "validation", candidate.Validation)}
-	candidate.Native = &NativeCandidate{NativeRecordBinding: b}
+	candidate.Native = &workflowstate.NativeCandidate{NativeRecordBinding: b}
 
 	candidate.Native.CandidateHash, err = NativeCandidateHash(candidate)
 	if err != nil {
@@ -105,7 +105,7 @@ func TestNativeRecordMethods(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			var again IntegrationCandidate
+			var again workflowstate.IntegrationCandidate
 			if err := json.Unmarshal(data, &again); err != nil {
 				t.Fatal(err)
 			}
@@ -124,23 +124,23 @@ func TestNativeRecordGuards(t *testing.T) {
 
 	cases := []struct {
 		name   string
-		change func(*IntegrationCandidate)
+		change func(*workflowstate.IntegrationCandidate)
 	}{
-		{"unsupported", func(c *IntegrationCandidate) { c.Schema = "chr-integration-candidate/v3" }},
-		{"downgrade", func(c *IntegrationCandidate) { c.Schema = "chr-integration-candidate/v1" }},
-		{"missing", func(c *IntegrationCandidate) { c.Native = nil }},
-		{"version", func(c *IntegrationCandidate) { c.Native.SchemaVersion = 2 }},
-		{"source", func(c *IntegrationCandidate) { c.Native.OriginalSource = c.Native.PublishedSource }},
-		{"owner", func(c *IntegrationCandidate) { c.Native.InvocationID = "other" }},
-		{"unit", func(c *IntegrationCandidate) { c.Native.Unit.ID += "other" }},
-		{"method", func(c *IntegrationCandidate) { c.Native.Method = "squash" }},
-		{"format", func(c *IntegrationCandidate) { c.Native.ObjectFormat = "sha256" }},
-		{"path", func(c *IntegrationCandidate) {
+		{"unsupported", func(c *workflowstate.IntegrationCandidate) { c.Schema = "chr-integration-candidate/v3" }},
+		{"downgrade", func(c *workflowstate.IntegrationCandidate) { c.Schema = "chr-integration-candidate/v1" }},
+		{"missing", func(c *workflowstate.IntegrationCandidate) { c.Native = nil }},
+		{"version", func(c *workflowstate.IntegrationCandidate) { c.Native.SchemaVersion = 2 }},
+		{"source", func(c *workflowstate.IntegrationCandidate) { c.Native.OriginalSource = c.Native.PublishedSource }},
+		{"owner", func(c *workflowstate.IntegrationCandidate) { c.Native.InvocationID = "other" }},
+		{"unit", func(c *workflowstate.IntegrationCandidate) { c.Native.Unit.ID += "other" }},
+		{"method", func(c *workflowstate.IntegrationCandidate) { c.Native.Method = "squash" }},
+		{"format", func(c *workflowstate.IntegrationCandidate) { c.Native.ObjectFormat = "sha256" }},
+		{"path", func(c *workflowstate.IntegrationCandidate) {
 			c.Native.HistoryManifestRef.Path = "run/other/evidence/proof.json"
 		}},
-		{"escape", func(c *IntegrationCandidate) { c.Native.HistoryManifestRef.Path += "/../proof.json" }},
-		{"hash", func(c *IntegrationCandidate) { c.Native.CapabilityRef.Hash = strings.Repeat("a", 64) }},
-		{"extension", func(c *IntegrationCandidate) {
+		{"escape", func(c *workflowstate.IntegrationCandidate) { c.Native.HistoryManifestRef.Path += "/../proof.json" }},
+		{"hash", func(c *workflowstate.IntegrationCandidate) { c.Native.CapabilityRef.Hash = strings.Repeat("a", 64) }},
+		{"extension", func(c *workflowstate.IntegrationCandidate) {
 			c.Native.Extensions = map[string]json.RawMessage{"changed": json.RawMessage(`true`)}
 		}},
 	}
@@ -160,7 +160,7 @@ func TestNativeRecordGuards(t *testing.T) {
 	testNativeRecordEvidence(t, store, original)
 }
 
-func testNativeRecordEvidence(t *testing.T, store *Store, candidate IntegrationCandidate) {
+func testNativeRecordEvidence(t *testing.T, store *Store, candidate workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	ref := candidate.Native.HistoryManifestRef
@@ -204,9 +204,9 @@ func TestNativeRecordVersions(t *testing.T) {
 
 	cases := []struct {
 		name   string
-		change func(*testing.T, *IntegrationCandidate)
+		change func(*testing.T, *workflowstate.IntegrationCandidate)
 	}{
-		{"source", func(t *testing.T, c *IntegrationCandidate) {
+		{"source", func(t *testing.T, c *workflowstate.IntegrationCandidate) {
 			b := &c.Native.NativeRecordBinding
 
 			var source NativeSourceManifest
@@ -217,14 +217,14 @@ func TestNativeRecordVersions(t *testing.T) {
 			source.Schema = "chr-native-source/v2"
 			b.SourceManifestRef = retainNativeRecordEvidence(t, store, b.InvocationID, "unsupported-source", source)
 		}},
-		{"history", func(t *testing.T, c *IntegrationCandidate) {
+		{"history", func(t *testing.T, c *workflowstate.IntegrationCandidate) {
 			b := &c.Native.NativeRecordBinding
 			b.HistoryManifestRef = retainNativeRecordEvidence(t, store, b.InvocationID, "unsupported-history", NativeHistoryManifest{Schema: "chr-native-history/v2", Git: c.Input.Git})
 		}},
-		{"capability", func(t *testing.T, c *IntegrationCandidate) {
+		{"capability", func(t *testing.T, c *workflowstate.IntegrationCandidate) {
 			b := &c.Native.NativeRecordBinding
 
-			var cap NativeCapability
+			var cap workflowstate.NativeCapability
 			if err := store.readWorkflowNativeEvidence(b.InvocationID, b.CapabilityRef, &cap); err != nil {
 				t.Fatal(err)
 			}
@@ -232,7 +232,7 @@ func TestNativeRecordVersions(t *testing.T) {
 			cap.AdapterVersion = "chr-native-publication/v2"
 			b.CapabilityRef = retainNativeRecordEvidence(t, store, b.InvocationID, "unsupported-capability", cap)
 		}},
-		{"validation", func(t *testing.T, c *IntegrationCandidate) {
+		{"validation", func(t *testing.T, c *workflowstate.IntegrationCandidate) {
 			b := &c.Native.NativeRecordBinding
 			result := c.Validation
 			result.Schema = "chr-integration-validation/v2"

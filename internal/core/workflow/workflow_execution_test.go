@@ -40,7 +40,7 @@ func workflowExecutionGateFixture(t *testing.T, gate workflowstate.Validation) (
 	return store, hierarchy, request
 }
 
-func workflowTestExecute(t *testing.T, store *Store, id, mode string) TaskResult {
+func workflowTestExecute(t *testing.T, store *Store, id, mode string) workflowstate.TaskResult {
 	t.Helper()
 
 	claim := workflowTestClaim(t, store, id)
@@ -66,7 +66,7 @@ func TestWorkflowTaskExact(t *testing.T) {
 	checkWorkflowTaskExact(t, store, hierarchy, request, run, proof)
 }
 
-func checkWorkflowTaskExact(t *testing.T, store *Store, hierarchy MaterializationResult, request StartRequest, run StartResult, proof TaskResult) {
+func checkWorkflowTaskExact(t *testing.T, store *Store, hierarchy MaterializationResult, request StartRequest, run StartResult, proof workflowstate.TaskResult) {
 	t.Helper()
 
 	retry := workflowTestStart(t, store, request)

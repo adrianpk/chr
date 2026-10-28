@@ -13,7 +13,7 @@ import (
 
 // ReadWorkflowNativePolicy combines a private target certificate with retained
 // host ownership of one exact source. A branch prefix never supplies authority.
-func (adapter *NativeReviewAdapter) ReadWorkflowNativePolicy(ctx context.Context, pr PullRequestSnapshot, method string) (NativePolicy, error) {
+func (adapter *NativeReviewAdapter) ReadWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (NativePolicy, error) {
 	run, owner, profile, err := adapter.nativePublisher(ctx)
 	if err != nil {
 		return NativePolicy{}, err
@@ -71,7 +71,7 @@ func workflowNativePublicationOwner(run workflowInvocationFile) bool {
 	return run.Lane != nil && run.PullRequest != nil && run.PullRequest.State == "bound" && run.PullRequest.CandidateHash == run.CandidateHash && run.StopIntent == "" && run.Status != "paused" && !workflowInvocationTerminal(run.Status)
 }
 
-func workflowNativeOwnedPR(run workflowInvocationFile, pr PullRequestSnapshot) bool {
+func workflowNativeOwnedPR(run workflowInvocationFile, pr workflowstate.PullRequestSnapshot) bool {
 	binding := run.PullRequest
 
 	return binding.URL == pr.URL && binding.Request.Repository == pr.Repository && pr.HeadRepository == pr.Repository && binding.Request.HeadBranch == pr.HeadBranch && binding.Request.BaseBranch == pr.BaseBranch && run.Lane.Branch == "refs/heads/"+pr.HeadBranch && binding.Unit == run.Lane.Unit && binding.SourceCommit == pr.HeadCommit && pr.State == "open" && !pr.Merged
@@ -80,7 +80,7 @@ func workflowNativeOwnedPR(run workflowInvocationFile, pr PullRequestSnapshot) b
 func workflowNativeOwnershipRevision(run workflowInvocationFile, profile NativePublisherProfile) (string, error) {
 	image, err := json.Marshal(struct {
 		Project, Namespace, Invocation, Owner, Request, PullRequest, Candidate string
-		Lane                                                                   Lane
+		Lane                                                                   workflowstate.Lane
 		Publisher                                                              NativePublisherProfile
 	}{run.ProjectID, run.Namespace, run.ID, run.OwnerRoot, run.RequestKey, run.PullRequest.ID, run.CandidateHash, *run.Lane, profile})
 

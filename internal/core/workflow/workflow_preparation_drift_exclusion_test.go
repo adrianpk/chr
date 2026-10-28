@@ -15,9 +15,9 @@ type nativeDriftExclusionGit struct {
 	key, target string
 }
 
-func (git nativeDriftExclusionGit) PrepareWorkflowIntegration(ctx context.Context, query PreparationQuery) (IntegrationProof, error) {
+func (git nativeDriftExclusionGit) PrepareWorkflowIntegration(ctx context.Context, query PreparationQuery) (workflowstate.IntegrationProof, error) {
 	if err := git.store.guardWorkflowSubmissionTarget(ctx, git.key, git.target); err != nil {
-		return IntegrationProof{}, err
+		return workflowstate.IntegrationProof{}, err
 	}
 
 	return git.OSWorkflowPreparationGit.PrepareWorkflowIntegration(ctx, query)
@@ -60,13 +60,13 @@ func TestNativeDriftExclusion(t *testing.T) {
 	}
 }
 
-func nativeDriftSealDispatch(t *testing.T, submit nativeSubmissionFixture, submission Submission, target string) {
+func nativeDriftSealDispatch(t *testing.T, submit nativeSubmissionFixture, submission workflowstate.Submission, target string) {
 	t.Helper()
 
 	nativeDriftSealInputs(t, submit, submission, submit.candidate.Input.Git.SourceCommit, target)
 }
 
-func nativeDriftSealInputs(t *testing.T, submit nativeSubmissionFixture, submission Submission, source, target string) {
+func nativeDriftSealInputs(t *testing.T, submit nativeSubmissionFixture, submission workflowstate.Submission, source, target string) {
 	t.Helper()
 
 	store, id := submit.store, submit.entry.InvocationID

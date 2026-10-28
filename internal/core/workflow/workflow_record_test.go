@@ -12,7 +12,7 @@ func workflowTestTask(id string) Record {
 	now := time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)
 
 	return Record{
-		Identity: Identity{ID: id, ProjectID: "project-1", Namespace: "default", Revision: 1, CreatedAt: now, UpdatedAt: now},
+		Identity: workflowstate.Identity{ID: id, ProjectID: "project-1", Namespace: "default", Revision: 1, CreatedAt: now, UpdatedAt: now},
 		Kind:     "ticket", Path: "ticket/" + id + "/metadata.json", Body: []byte("# Original body\n"),
 		Task: &Task{Schema: WorkflowSchema, Key: id, Status: string(ticketcore.StatusReadyForDev), Phase: "pending", ContractHash: "contract-1"},
 	}

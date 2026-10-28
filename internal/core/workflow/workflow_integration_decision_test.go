@@ -104,7 +104,7 @@ func TestNativeDecisionAnswer(t *testing.T) {
 	nativeDecisionResolvedInput(t, f, request.Input, completed)
 }
 
-func nativeDecisionResolvedInput(t *testing.T, f workflowPreparationFixture, input MergerInput, record IntegrationDecisions) {
+func nativeDecisionResolvedInput(t *testing.T, f workflowPreparationFixture, input workflowstate.MergerInput, record IntegrationDecisions) {
 	t.Helper()
 
 	run, err := f.store.readWorkflowInvocation(f.run.ID)
@@ -215,11 +215,11 @@ func TestNativeDecisionContext(t *testing.T) {
 
 	cases := []struct {
 		name   string
-		change func(*MergerInput)
+		change func(*workflowstate.MergerInput)
 	}{
-		{"paths", func(input *MergerInput) { input.AllowedPaths = append(input.AllowedPaths, "other.txt") }},
-		{"requirements", func(input *MergerInput) { input.Requirements[0].ConflictsWith = nil }},
-		{"gate", func(input *MergerInput) { input.ValidationCommands = [][]string{{"true"}} }},
+		{"paths", func(input *workflowstate.MergerInput) { input.AllowedPaths = append(input.AllowedPaths, "other.txt") }},
+		{"requirements", func(input *workflowstate.MergerInput) { input.Requirements[0].ConflictsWith = nil }},
+		{"gate", func(input *workflowstate.MergerInput) { input.ValidationCommands = [][]string{{"true"}} }},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

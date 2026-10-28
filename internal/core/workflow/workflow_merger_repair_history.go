@@ -6,9 +6,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validateWorkflowRepairHistory(proof IntegrationProof) error {
+func validateWorkflowRepairHistory(proof workflowstate.IntegrationProof) error {
 	for _, repair := range proof.Provenance.Repairs {
-		index := slices.IndexFunc(proof.History, func(entry IntegrationCommit) bool { return entry.Source == repair.Source })
+		index := slices.IndexFunc(proof.History, func(entry workflowstate.IntegrationCommit) bool { return entry.Source == repair.Source })
 		if index < 0 || proof.History[index].Parent != repair.PreparedParent {
 			return workflowstate.ErrConflict
 		}

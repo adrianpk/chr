@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeObservationFixture(t *testing.T, fixture nativeCapabilityFixture) NativePublicationBinding {
@@ -43,21 +44,21 @@ func checkNativeObservationCases(t *testing.T, fixture nativeCapabilityFixture, 
 
 	cases := []struct {
 		name, state, condition string
-		change                 func(*PullRequestSnapshot)
+		change                 func(*workflowstate.PullRequestSnapshot)
 	}{
-		{"original_head_lag", "observing", "", func(_ *PullRequestSnapshot) {}},
-		{"published_head_lag", "observing", "", func(pr *PullRequestSnapshot) { pr.HeadCommit = binding.Git.ResultCommit }},
-		{"closed", "reconciliation_required", "canonical_pr_closed_unmerged", func(pr *PullRequestSnapshot) { pr.State = "closed" }},
-		{"retargeted", "reconciliation_required", "canonical_pr_retargeted", func(pr *PullRequestSnapshot) { pr.BaseBranch = "main" }},
-		{"different_pr", "reconciliation_required", "canonical_pr_identity_changed", func(pr *PullRequestSnapshot) { pr.URL += "0" }},
-		{"foreign_head", "reconciliation_required", "canonical_source_changed", func(pr *PullRequestSnapshot) { pr.HeadCommit = strings.Repeat("d", 40) }},
-		{"wrong_result", "reconciliation_required", "canonical_pr_result_mismatch", func(pr *PullRequestSnapshot) {
+		{"original_head_lag", "observing", "", func(_ *workflowstate.PullRequestSnapshot) {}},
+		{"published_head_lag", "observing", "", func(pr *workflowstate.PullRequestSnapshot) { pr.HeadCommit = binding.Git.ResultCommit }},
+		{"closed", "reconciliation_required", "canonical_pr_closed_unmerged", func(pr *workflowstate.PullRequestSnapshot) { pr.State = "closed" }},
+		{"retargeted", "reconciliation_required", "canonical_pr_retargeted", func(pr *workflowstate.PullRequestSnapshot) { pr.BaseBranch = "main" }},
+		{"different_pr", "reconciliation_required", "canonical_pr_identity_changed", func(pr *workflowstate.PullRequestSnapshot) { pr.URL += "0" }},
+		{"foreign_head", "reconciliation_required", "canonical_source_changed", func(pr *workflowstate.PullRequestSnapshot) { pr.HeadCommit = strings.Repeat("d", 40) }},
+		{"wrong_result", "reconciliation_required", "canonical_pr_result_mismatch", func(pr *workflowstate.PullRequestSnapshot) {
 			pr.State, pr.Merged, pr.ResultCommit = "closed", true, binding.Git.SourceCommit
 		}},
-		{"merged_original_head", "merged", "", func(pr *PullRequestSnapshot) {
+		{"merged_original_head", "merged", "", func(pr *workflowstate.PullRequestSnapshot) {
 			pr.State, pr.Merged, pr.ResultCommit = "closed", true, binding.Git.ResultCommit
 		}},
-		{"merged_published_head", "merged", "", func(pr *PullRequestSnapshot) {
+		{"merged_published_head", "merged", "", func(pr *workflowstate.PullRequestSnapshot) {
 			pr.State, pr.Merged, pr.ResultCommit, pr.HeadCommit = "closed", true, binding.Git.ResultCommit, binding.Git.ResultCommit
 		}},
 	}
@@ -121,7 +122,7 @@ func TestNativeLaterSource(t *testing.T) {
 	checkNativeLaterAttribution(t, fixture, binding, prior, later)
 }
 
-func checkNativeLaterAttribution(t *testing.T, fixture nativeCapabilityFixture, binding NativePublicationBinding, prior IntegrationProof, later string) {
+func checkNativeLaterAttribution(t *testing.T, fixture nativeCapabilityFixture, binding NativePublicationBinding, prior workflowstate.IntegrationProof, later string) {
 	t.Helper()
 
 	git := NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote)

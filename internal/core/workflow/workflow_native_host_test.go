@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -200,12 +201,12 @@ func TestNativeHostDenials(t *testing.T) {
 	host := newNativeHostFixture(t)
 	for _, test := range []struct {
 		name   string
-		change func(*PullRequestSnapshot)
+		change func(*workflowstate.PullRequestSnapshot)
 	}{
-		{"source", func(pr *PullRequestSnapshot) { pr.HeadBranch = "human-owned" }},
-		{"fork", func(pr *PullRequestSnapshot) { pr.HeadRepository = "https://forge.example/other/repo" }},
-		{"target", func(pr *PullRequestSnapshot) { pr.BaseBranch = "main" }},
-		{"identity", func(pr *PullRequestSnapshot) { pr.URL += "0" }},
+		{"source", func(pr *workflowstate.PullRequestSnapshot) { pr.HeadBranch = "human-owned" }},
+		{"fork", func(pr *workflowstate.PullRequestSnapshot) { pr.HeadRepository = "https://forge.example/other/repo" }},
+		{"target", func(pr *workflowstate.PullRequestSnapshot) { pr.BaseBranch = "main" }},
+		{"identity", func(pr *workflowstate.PullRequestSnapshot) { pr.URL += "0" }},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			pr := host.f.provider.pr

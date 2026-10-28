@@ -9,7 +9,7 @@ import (
 
 // BeginWorkflowMergerCombinedRepair freezes a clean merge/squash baseline for
 // semantic repair. Rebase repair must name its original replay step instead.
-func (git OSWorkflowPreparationGit) BeginWorkflowMergerCombinedRepair(ctx context.Context, query PreparationQuery, proof IntegrationProof) (MergerRepairState, error) {
+func (git OSWorkflowPreparationGit) BeginWorkflowMergerCombinedRepair(ctx context.Context, query PreparationQuery, proof workflowstate.IntegrationProof) (MergerRepairState, error) {
 	if !validWorkflowCombinedRepairQuery(git, query, proof) {
 		return MergerRepairState{}, workflowstate.ErrConflict
 	}
@@ -40,6 +40,6 @@ func (git OSWorkflowPreparationGit) BeginWorkflowMergerCombinedRepair(ctx contex
 	return state, reader.materializeMergerTree(ctx, state.PreparedParent, state.Tree)
 }
 
-func validWorkflowCombinedRepairQuery(git OSWorkflowPreparationGit, query PreparationQuery, proof IntegrationProof) bool {
+func validWorkflowCombinedRepairQuery(git OSWorkflowPreparationGit, query PreparationQuery, proof workflowstate.IntegrationProof) bool {
 	return slices.Contains([]string{"merge", "squash"}, query.Method) && git.validateQuery(query) == nil && checkWorkflowPreparedProof(query, proof) == nil && proof.Provenance != nil && proof.Provenance.Preparation != nil
 }

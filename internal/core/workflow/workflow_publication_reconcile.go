@@ -33,20 +33,20 @@ func workflowDeliverySubmissionID(run workflowInvocationFile) string {
 	return run.PullRequest.ID
 }
 
-func checkWorkflowVerifiedPR(ctx context.Context, run workflowInvocationFile, proof IntegrationProof, provider PullRequestProvider) error {
+func checkWorkflowVerifiedPR(ctx context.Context, run workflowInvocationFile, proof workflowstate.IntegrationProof, provider PullRequestProvider) error {
 	pr, err := provider.ReadWorkflowPullRequest(ctx, run.PullRequest.URL)
 	if err != nil {
 		return err
 	}
 
-	if workflowPullRequestMismatch(*run.PullRequest, []PullRequestSnapshot{pr}) != "" || !pr.Merged || pr.ResultCommit != proof.ResultCommit || pr.BaseCommit != proof.ObservedTarget {
+	if workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}) != "" || !pr.Merged || pr.ResultCommit != proof.ResultCommit || pr.BaseCommit != proof.ObservedTarget {
 		return workflowstate.ErrConflict
 	}
 
 	return nil
 }
 
-func (s *Store) reconcileWorkflowPublishedSubmission(ctx context.Context, run *workflowInvocationFile, pr PullRequestSnapshot, provider PullRequestProvider, git IntegrationGit) error {
+func (s *Store) reconcileWorkflowPublishedSubmission(ctx context.Context, run *workflowInvocationFile, pr workflowstate.PullRequestSnapshot, provider PullRequestProvider, git IntegrationGit) error {
 	journal, err := s.loadWorkflowSubmissionJournal(ctx, *run)
 	if err != nil || len(journal.Attempts) == 0 {
 		return err
@@ -75,7 +75,7 @@ func (s *Store) reconcileWorkflowPublishedSubmission(ctx context.Context, run *w
 	return s.projectWorkflowSubmission(run, journal)
 }
 
-func (s *Store) retainWorkflowSubmissionObservation(ctx context.Context, journal *workflowSubmissionJournal, observed Submission) error {
+func (s *Store) retainWorkflowSubmissionObservation(ctx context.Context, journal *workflowSubmissionJournal, observed workflowstate.Submission) error {
 	last := &journal.Attempts[len(journal.Attempts)-1]
 	if last.ID != observed.ID {
 		return workflowstate.ErrConflict
@@ -143,11 +143,11 @@ func (s *Store) checkWorkflowDeliveryEvidence(run workflowInvocationFile) error 
 	return nil
 }
 
-func workflowSubmissionMatchesCandidate(run workflowInvocationFile, submission Submission) bool {
+func workflowSubmissionMatchesCandidate(run workflowInvocationFile, submission workflowstate.Submission) bool {
 	return run.PullRequest != nil && submission.CandidateID == run.PullRequest.CandidateID && submission.CandidateHash == run.CandidateHash
 }
 
-func checkWorkflowSupersededSubmission(ctx context.Context, run workflowInvocationFile, submission Submission, provider PublicationProvider) error {
+func checkWorkflowSupersededSubmission(ctx context.Context, run workflowInvocationFile, submission workflowstate.Submission, provider PublicationProvider) error {
 	if submission.State != "unpublished" {
 		return ErrWorkflowObservationRequired
 	}
@@ -170,7 +170,7 @@ func checkWorkflowSupersededTarget(ctx context.Context, run workflowInvocationFi
 		return err
 	}
 
-	if workflowPullRequestMismatch(*run.PullRequest, []PullRequestSnapshot{pr}) != "" || pr.Merged {
+	if workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}) != "" || pr.Merged {
 		return ErrWorkflowObservationRequired
 	}
 

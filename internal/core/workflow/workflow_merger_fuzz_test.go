@@ -16,7 +16,7 @@ func FuzzNativeMergerJSON(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, data []byte) {
-		var result MergerResult
+		var result workflowstate.MergerResult
 		if err := decodeWorkflowMergerResult(data, &result); err != nil && !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("untrusted decoder escaped its error contract", err)
 		}

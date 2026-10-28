@@ -40,23 +40,23 @@ type MergerHarnessCertificate struct {
 // capacity, remaining attempts and deadline are supplied again by the host.
 type MergerRequest struct {
 	IntegrationBudgetGuard
-	Input MergerInput
+	Input workflowstate.MergerInput
 }
 
 // MergerAttempt retains a proposal independently of candidate approval.
 type MergerAttempt struct {
-	Acceptance    *MergerAcceptance         `json:"acceptance,omitempty"`
-	SchemaVersion int                       `json:"schema_version"`
-	Input         MergerInput               `json:"input"`
-	HarnessRef    workflowstate.EvidenceRef `json:"harness_ref"`
-	Harness       CommandResult             `json:"harness"`
-	Proposal      *MergerResult             `json:"proposal"`
-	Checks        []CommandResult           `json:"checks"`
-	TrustedUsage  *MergerUsage              `json:"trusted_usage,omitempty"`
-	Failure       string                    `json:"failure,omitempty"`
+	Acceptance    *MergerAcceptance             `json:"acceptance,omitempty"`
+	SchemaVersion int                           `json:"schema_version"`
+	Input         workflowstate.MergerInput     `json:"input"`
+	HarnessRef    workflowstate.EvidenceRef     `json:"harness_ref"`
+	Harness       workflowstate.CommandResult   `json:"harness"`
+	Proposal      *workflowstate.MergerResult   `json:"proposal"`
+	Checks        []workflowstate.CommandResult `json:"checks"`
+	TrustedUsage  *workflowstate.MergerUsage    `json:"trusted_usage,omitempty"`
+	Failure       string                        `json:"failure,omitempty"`
 }
 
-func (s *Store) checkWorkflowMergerHarness(ctx context.Context, input MergerInput, harness MergerHarness) (MergerHarnessCertificate, error) {
+func (s *Store) checkWorkflowMergerHarness(ctx context.Context, input workflowstate.MergerInput, harness MergerHarness) (MergerHarnessCertificate, error) {
 	var certificate MergerHarnessCertificate
 	if err := ctx.Err(); err != nil {
 		return certificate, err
@@ -126,7 +126,7 @@ func checkWorkflowMergerCertificate(certificate MergerHarnessCertificate, comman
 	return nil
 }
 
-func checkWorkflowMergerTokenCapability(input MergerInput, certificate MergerHarnessCertificate) error {
+func checkWorkflowMergerTokenCapability(input workflowstate.MergerInput, certificate MergerHarnessCertificate) error {
 	if allowance := input.TokenAllowance; allowance != nil && (!certificate.EnforcesWholeCall || !certificate.ReportsWholeCall || certificate.Accounting != workflowTokenAccounting || allowance.CapabilityRevision != certificate.CapabilityRevision) {
 		return fmt.Errorf("%w: whole-call token enforcement required", ErrWorkflowIntegrationBudget)
 	}

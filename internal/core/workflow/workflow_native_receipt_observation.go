@@ -32,7 +32,7 @@ func (s *Store) workflowNativeReceiptBinding(receipt Record) (NativePublicationB
 
 	native := receipt.Receipt.Native
 
-	var candidate IntegrationCandidate
+	var candidate workflowstate.IntegrationCandidate
 	if err := s.readWorkflowNativeEvidence(native.InvocationID, native.CandidateRef, &candidate); err != nil {
 		return binding, err
 	}

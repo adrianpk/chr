@@ -9,9 +9,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, state MergerRepairState, attempt *MergerAttempt) (IntegrationTreeRepair, error) {
+func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, state MergerRepairState, attempt *MergerAttempt) (workflowstate.IntegrationTreeRepair, error) {
 	input, proposal := attempt.Input, *attempt.Proposal
-	repair := IntegrationTreeRepair{Input: input, Proposal: proposal, OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}
+	repair := workflowstate.IntegrationTreeRepair{Input: input, Proposal: proposal, OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: prepared.input.Lane.Worktree, Environment: workflowMergerEnvironment(filepath.Dir(prepared.input.Lane.Worktree))}}
 
 	tree, err := workflowMergerSnapshot(ctx, reader, state)
@@ -55,7 +55,7 @@ func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claim *Claim, p
 	return repair, validateWorkflowTreeRepair(workflowMergerRepairProof(state), repair)
 }
 
-func (reader workflowIntegrationReader) checkMergerGeneratedEdits(ctx context.Context, input MergerInput, baseline, proposal string) error {
+func (reader workflowIntegrationReader) checkMergerGeneratedEdits(ctx context.Context, input workflowstate.MergerInput, baseline, proposal string) error {
 	for _, conflict := range input.Conflicts {
 		if !workflowMergerProcedureRequired(conflict) {
 			continue

@@ -2,7 +2,7 @@ package workflow
 
 import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 
-func checkWorkflowMergerHarnessUsage(input MergerInput, certificate MergerHarnessCertificate, usage *MergerUsage) error {
+func checkWorkflowMergerHarnessUsage(input workflowstate.MergerInput, certificate MergerHarnessCertificate, usage *workflowstate.MergerUsage) error {
 	if usage == nil {
 		return nil
 	}

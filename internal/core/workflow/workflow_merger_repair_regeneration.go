@@ -3,9 +3,11 @@ package workflow
 import (
 	"context"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func importWorkflowMergerRepairTrees(ctx context.Context, git MergerRepairGit, state MergerRepairState, directory string, repair IntegrationTreeRepair) error {
+func importWorkflowMergerRepairTrees(ctx context.Context, git MergerRepairGit, state MergerRepairState, directory string, repair workflowstate.IntegrationTreeRepair) error {
 	trees := []string{repair.ProposalTree, repair.ResolvedTree}
 	for _, evidence := range repair.Regeneration {
 		trees = append(trees, evidence.InputTree, evidence.OutputTree)
@@ -22,7 +24,7 @@ func importWorkflowMergerRepairTrees(ctx context.Context, git MergerRepairGit, s
 	return nil
 }
 
-func (reader workflowIntegrationReader) verifyMergerRegenerationTrees(ctx context.Context, repair IntegrationTreeRepair) error {
+func (reader workflowIntegrationReader) verifyMergerRegenerationTrees(ctx context.Context, repair workflowstate.IntegrationTreeRepair) error {
 	if repair.ProposalTree != "" {
 		if err := reader.checkMergerObservedPaths(ctx, repair.Input, repair.Proposal, repair.BaselineTree, repair.ProposalTree, false); err != nil {
 			return err

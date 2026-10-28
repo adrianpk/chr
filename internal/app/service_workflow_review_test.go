@@ -70,7 +70,7 @@ func serviceWorkflowReviewReady(t *testing.T) (service, string, *serviceWorkflow
 	}
 
 	repo := request.Selection.Target.Repository
-	provider := &serviceWorkflowReviewFixture{serviceWorkflowPRFixture: &serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{URL: repo + "/pulls/7", Repository: repo, HeadRepository: repo, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}}
+	provider := &serviceWorkflowReviewFixture{serviceWorkflowPRFixture: &serviceWorkflowPRFixture{pr: workflowstate.PullRequestSnapshot{URL: repo + "/pulls/7", Repository: repo, HeadRepository: repo, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}}
 	operations.workflowPullRequests = provider
 
 	content := workflowcore.SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}

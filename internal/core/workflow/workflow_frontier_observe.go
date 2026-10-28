@@ -7,9 +7,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) observeWorkflowFrontier(ctx context.Context, run workflowInvocationFile, receipt Record, candidate SliceCandidate, ports FrontierPorts) (workflowstate.PreviewTarget, IntegrationProof, error) {
+func (s *Store) observeWorkflowFrontier(ctx context.Context, run workflowInvocationFile, receipt Record, candidate SliceCandidate, ports FrontierPorts) (workflowstate.PreviewTarget, workflowstate.IntegrationProof, error) {
 	if ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
-		return workflowstate.PreviewTarget{}, IntegrationProof{}, ErrWorkflowObservationRequired
+		return workflowstate.PreviewTarget{}, workflowstate.IntegrationProof{}, ErrWorkflowObservationRequired
 	}
 
 	binding := run.PullRequest
@@ -17,11 +17,11 @@ func (s *Store) observeWorkflowFrontier(ctx context.Context, run workflowInvocat
 
 	target, err := ports.Target.ObserveWorkflowTarget(ctx, query)
 	if err != nil {
-		return target, IntegrationProof{}, err
+		return target, workflowstate.IntegrationProof{}, err
 	}
 
 	if target.Repository != run.Selection.Target.Repository || !workflowCommitID(target.Commit) {
-		return target, IntegrationProof{}, workflowstate.ErrConflict
+		return target, workflowstate.IntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	proof, err := s.workflowFrontierReceiptProof(ctx, run, receipt, candidate, target, ports)
@@ -37,7 +37,7 @@ func (s *Store) observeWorkflowFrontier(ctx context.Context, run workflowInvocat
 	return target, proof, s.checkWorkflowTarget(ctx, target)
 }
 
-func (s *Store) workflowFrontierReceiptProof(ctx context.Context, run workflowInvocationFile, receipt Record, candidate SliceCandidate, target workflowstate.PreviewTarget, ports FrontierPorts) (IntegrationProof, error) {
+func (s *Store) workflowFrontierReceiptProof(ctx context.Context, run workflowInvocationFile, receipt Record, candidate SliceCandidate, target workflowstate.PreviewTarget, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
 	if receipt.Receipt.Native == nil {
 		return observeWorkflowFrontierProof(ctx, run, receipt, candidate, target, ports)
 	}
@@ -46,24 +46,24 @@ func (s *Store) workflowFrontierReceiptProof(ctx context.Context, run workflowIn
 
 	retained, retainErr := s.retainWorkflowNativeReceiptObservation(ctx, run, observation)
 	if failure := errors.Join(err, retainErr); failure != nil {
-		return IntegrationProof{}, failure
+		return workflowstate.IntegrationProof{}, failure
 	}
 
 	if retained.Blocker != nil || observation.State != "merged" || observation.Git == nil || !workflowFrontierReceiptProofMatches(*observation.Git, receipt, target) {
-		return IntegrationProof{}, ErrWorkflowObservationRequired
+		return workflowstate.IntegrationProof{}, ErrWorkflowObservationRequired
 	}
 
 	return *observation.Git, nil
 }
 
-func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFile, receipt Record, candidate SliceCandidate, target workflowstate.PreviewTarget, ports FrontierPorts) (IntegrationProof, error) {
+func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFile, receipt Record, candidate SliceCandidate, target workflowstate.PreviewTarget, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
 	pr, err := ports.Provider.ReadWorkflowPullRequest(ctx, run.PullRequest.URL)
 	if err != nil {
-		return IntegrationProof{}, err
+		return workflowstate.IntegrationProof{}, err
 	}
 
-	if workflowPullRequestMismatch(*run.PullRequest, []PullRequestSnapshot{pr}) != "" || !pr.Merged || pr.ResultCommit != receipt.Receipt.ResultCommit || pr.BaseCommit != target.Commit {
-		return IntegrationProof{}, workflowstate.ErrConflict
+	if workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}) != "" || !pr.Merged || pr.ResultCommit != receipt.Receipt.ResultCommit || pr.BaseCommit != target.Commit {
+		return workflowstate.IntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	integration := workflowIntegrationQuery(run, candidate, pr, receipt.Receipt.Method)
@@ -84,6 +84,6 @@ func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFil
 	return proof, nil
 }
 
-func workflowFrontierReceiptProofMatches(proof IntegrationProof, receipt Record, target workflowstate.PreviewTarget) bool {
+func workflowFrontierReceiptProofMatches(proof workflowstate.IntegrationProof, receipt Record, target workflowstate.PreviewTarget) bool {
 	return proof.ObservedTarget == target.Commit && proof.HistoryHash == receipt.Receipt.HistoryProof && proof.VerifiedTree == receipt.Receipt.VerifiedTree
 }

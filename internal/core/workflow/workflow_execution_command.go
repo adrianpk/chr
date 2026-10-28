@@ -17,17 +17,17 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowRunCommand(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string) (result CommandResult, err error) {
+func workflowRunCommand(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string) (result workflowstate.CommandResult, err error) {
 	run, err := claim.store.ReadWorkflow(ctx, claim.InvocationID)
 	if err != nil {
-		return CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 
 	index := len(run.Attempts[len(run.Attempts)-1].Processes)
 
 	stdout, stderr, err := claim.store.workflowProcessOutput(claim, index)
 	if err != nil {
-		return CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 
 	defer func() {
@@ -36,7 +36,7 @@ func workflowRunCommand(ctx context.Context, claim *Claim, prepared workflowPrep
 
 	gate, permit, err := os.Pipe()
 	if err != nil {
-		return CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 
 	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
@@ -46,11 +46,11 @@ func workflowRunCommand(ctx context.Context, claim *Claim, prepared workflowPrep
 
 	process.Stdout, process.Stderr = stdout, stderr
 	if err := process.Start(); err != nil {
-		return CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 
 	if err := guard.remember(process.Process.Pid); err != nil {
-		return CommandResult{}, errors.Join(err, permit.Close(), process.Wait())
+		return workflowstate.CommandResult{}, errors.Join(err, permit.Close(), process.Wait())
 	}
 
 	return runWorkflowSupervisedProcess(ctx, claim, prepared, command, process, permit, index, stdout, stderr)
@@ -79,12 +79,12 @@ func workflowCommandGroupStopped(pid int) bool {
 		return false
 	}
 
-	alive, err := workflowProcessGroupAlive(Process{Identity: ProcessIdentity{BootID: strings.TrimSpace(string(boot))}, GroupID: pid})
+	alive, err := workflowProcessGroupAlive(Process{Identity: workflowstate.ProcessIdentity{BootID: strings.TrimSpace(string(boot))}, GroupID: pid})
 
 	return err == nil && !alive
 }
 
-func runWorkflowSupervisedProcess(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string, process *exec.Cmd, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) (CommandResult, error) {
+func runWorkflowSupervisedProcess(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string, process *exec.Cmd, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) (workflowstate.CommandResult, error) {
 	ownership, registered, registerErr := claim.store.registerWorkflowProcess(ctx, claim, prepared, command, process.Process.Pid)
 	if registerErr == nil && registered != index {
 		registerErr = workflowstate.ErrConflict
@@ -97,7 +97,7 @@ func runWorkflowSupervisedProcess(ctx context.Context, claim *Claim, prepared wo
 	closeErr := permit.Close()
 	err := errors.Join(registerErr, closeErr, process.Wait())
 
-	result := CommandResult{Command: slices.Clone(command), ExitCode: -1, Stdout: stdout.Buffer.String(), Stderr: stderr.Buffer.String(), Truncated: stdout.Truncated || stderr.Truncated}
+	result := workflowstate.CommandResult{Command: slices.Clone(command), ExitCode: -1, Stdout: stdout.Buffer.String(), Stderr: stderr.Buffer.String(), Truncated: stdout.Truncated || stderr.Truncated}
 	if process.ProcessState != nil {
 		result.ExitCode = process.ProcessState.ExitCode()
 	}

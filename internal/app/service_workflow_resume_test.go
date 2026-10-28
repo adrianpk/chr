@@ -115,7 +115,7 @@ func serviceWorkflowConfirmDependency(t *testing.T, operations *service, outside
 	serviceWorkflowDependencyReceipt(t, *operations, outside, request.Selection.Target.Repository, target, tree)
 
 	operations.workflowIntegrationGit = workflowcore.NewWorkflowIntegrationGit(request.Selection.Target.Repository, remote)
-	operations.workflowPullRequests = &serviceWorkflowReviewFixture{&serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{BaseBranch: "dev", BaseCommit: target}}}
+	operations.workflowPullRequests = &serviceWorkflowReviewFixture{&serviceWorkflowPRFixture{pr: workflowstate.PullRequestSnapshot{BaseBranch: "dev", BaseCommit: target}}}
 }
 
 func serviceWorkflowDependencyGit(t *testing.T, project string, args ...string) string {
@@ -138,7 +138,7 @@ func serviceWorkflowDependencyReceipt(t *testing.T, operations service, outside 
 	}
 
 	now := time.Now().UTC()
-	identity := workflowcore.Identity{ID: "dependency-receipt", ProjectID: outside.ProjectID, Namespace: outside.Namespace, Revision: 1, CreatedAt: now, UpdatedAt: now}
+	identity := workflowstate.Identity{ID: "dependency-receipt", ProjectID: outside.ProjectID, Namespace: outside.Namespace, Revision: 1, CreatedAt: now, UpdatedAt: now}
 
 	receipt, err := store.CreateReceipt(t.Context(), workflowcore.Record{Identity: identity, Kind: "receipt", Path: "run/dependency/evidence/receipt.json", Receipt: &workflowcore.Receipt{Schema: workflowcore.WorkflowSchema, Unit: workflowstate.Ref{Kind: "ticket", ID: outside.Task.Key}, CandidateID: "candidate", SubmissionID: "submission", Provider: "forgejo", Repository: repository, PullRequest: repository + "/pulls/1", Method: "rebase", SourceCommit: commit, BaseCommit: commit, PreparedTree: tree, HistoryProof: "host-verification", ResultCommit: commit, VerifiedTree: tree, ObservedTarget: commit, VerificationRef: "host-proof", ValidationRefs: []string{"host-validation"}, ConfirmedAt: now}})
 	if err != nil {

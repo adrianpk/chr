@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -17,14 +18,14 @@ func TestNativeReceiptDelivery(t *testing.T) {
 
 	cases := []struct {
 		name   string
-		change func(*PullRequestSnapshot)
+		change func(*workflowstate.PullRequestSnapshot)
 	}{
-		{"pending", func(_ *PullRequestSnapshot) {}},
-		{"closed", func(pr *PullRequestSnapshot) { pr.State = "closed" }},
-		{"result", func(pr *PullRequestSnapshot) {
+		{"pending", func(_ *workflowstate.PullRequestSnapshot) {}},
+		{"closed", func(pr *workflowstate.PullRequestSnapshot) { pr.State = "closed" }},
+		{"result", func(pr *workflowstate.PullRequestSnapshot) {
 			pr.State, pr.Merged, pr.ResultCommit = "closed", true, b.OriginalSource
 		}},
-		{"merged", func(pr *PullRequestSnapshot) {
+		{"merged", func(pr *workflowstate.PullRequestSnapshot) {
 			pr.State, pr.Merged, pr.ResultCommit = "closed", true, b.PreparedResult
 		}},
 	}
@@ -37,7 +38,7 @@ func TestNativeReceiptDelivery(t *testing.T) {
 	}
 }
 
-func testNativeReceiptObservation(t *testing.T, fixture nativeCanonicalFixture, pr PullRequestSnapshot, merged bool) {
+func testNativeReceiptObservation(t *testing.T, fixture nativeCanonicalFixture, pr workflowstate.PullRequestSnapshot, merged bool) {
 	t.Helper()
 
 	f := fixture.f
@@ -70,7 +71,7 @@ func testNativeReceiptObservation(t *testing.T, fixture nativeCanonicalFixture, 
 	}
 }
 
-func checkNativeReceiptDelivery(t *testing.T, f nativeSubmissionFixture, submission Submission, receipt Record, failure error) {
+func checkNativeReceiptDelivery(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission, receipt Record, failure error) {
 	t.Helper()
 
 	if failure != nil || receipt.Receipt == nil || receipt.Receipt.Native == nil {
@@ -92,7 +93,7 @@ func checkNativeReceiptDelivery(t *testing.T, f nativeSubmissionFixture, submiss
 	checkNativeReceiptRetained(t, f, submission, receipt)
 }
 
-func checkNativeReceiptRetained(t *testing.T, f nativeSubmissionFixture, submission Submission, receipt Record) {
+func checkNativeReceiptRetained(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission, receipt Record) {
 	t.Helper()
 
 	confirmed, err := f.store.ReadWorkflowSubmission(t.Context(), submission.InvocationID)

@@ -44,14 +44,14 @@ func workflowNativeSourceRevisionRequired(config workspaceconfig.Config, run wor
 	return config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef && run.Integration != nil && run.PullRequest != nil
 }
 
-func workflowNativeSourceIdentityMatches(binding PullRequestBinding, pr PullRequestSnapshot) bool {
+func workflowNativeSourceIdentityMatches(binding PullRequestBinding, pr workflowstate.PullRequestSnapshot) bool {
 	observed := pr
 	observed.HeadRepository, observed.HeadCommit = binding.Request.Repository, binding.SourceCommit
 
-	return workflowPullRequestMismatch(binding, []PullRequestSnapshot{observed}) == ""
+	return workflowPullRequestMismatch(binding, []workflowstate.PullRequestSnapshot{observed}) == ""
 }
 
-func (s *Store) freezeWorkflowNativeSourceRevision(ctx context.Context, run *workflowInvocationFile, pr PullRequestSnapshot, head string) error {
+func (s *Store) freezeWorkflowNativeSourceRevision(ctx context.Context, run *workflowInvocationFile, pr workflowstate.PullRequestSnapshot, head string) error {
 	entry, err := s.readWorkflowIntegrationEntry(*run, *run.Integration)
 	if err != nil {
 		return err
@@ -72,8 +72,8 @@ func (s *Store) freezeWorkflowNativeSourceRevision(ctx context.Context, run *wor
 	// A new advertised source has no host task proof for the frozen scope.
 	// Retain both observations for an explicit ownership/scope decision.
 	observation := struct {
-		PullRequest PullRequestSnapshot `json:"pull_request"`
-		SourceHead  string              `json:"source_head"`
+		PullRequest workflowstate.PullRequestSnapshot `json:"pull_request"`
+		SourceHead  string                            `json:"source_head"`
 	}{pr, head}
 
 	file, _, err := workflowNativePreparationEvidenceFile(run.ID, observation)
@@ -92,7 +92,7 @@ func (s *Store) freezeWorkflowNativeSourceRevision(ctx context.Context, run *wor
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
+	updateWorkflowIntegrationBinding(run, workflowstate.IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
 
 	return errors.Join(workflowstate.ErrConflict, s.commitWorkflowPullRequestFiles(run, []workflowstate.FileChange{queue}, file))
 }

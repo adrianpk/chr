@@ -21,8 +21,8 @@ func nativeMergerAcceptanceFixture(t *testing.T, id, method string) (workflowPre
 	request.Input.Method = method
 	writeWorkspaceConfig(t, f.store.layout.ProjectDir(), "review:\n  mode: trusted_auto_merge\nwork:\n  merge_strategy: "+method+"\n")
 
-	query := PreparationQuery{IntegrationQuery: IntegrationQuery{Repository: request.Input.Repository, TargetBranch: "dev", Method: method, SourceCommit: request.Input.Source, SourceTree: workflowIntegrationCommand(t, f.run.Lane.Worktree, "rev-parse", request.Input.Source+"^{tree}"), OriginCommit: f.run.Lane.BaseCommit, SourceDirectory: f.run.Lane.Worktree}, BaseCommit: f.base}
-	query.Lane = Lane{Unit: request.Input.Unit, Branch: "refs/heads/chr/workflow/checkpoint", Worktree: filepath.Join(t.TempDir(), "checkpoint"), BaseCommit: f.base, HeadCommit: f.base}
+	query := PreparationQuery{IntegrationQuery: workflowstate.IntegrationQuery{Repository: request.Input.Repository, TargetBranch: "dev", Method: method, SourceCommit: request.Input.Source, SourceTree: workflowIntegrationCommand(t, f.run.Lane.Worktree, "rev-parse", request.Input.Source+"^{tree}"), OriginCommit: f.run.Lane.BaseCommit, SourceDirectory: f.run.Lane.Worktree}, BaseCommit: f.base}
+	query.Lane = workflowstate.Lane{Unit: request.Input.Unit, Branch: "refs/heads/chr/workflow/checkpoint", Worktree: filepath.Join(t.TempDir(), "checkpoint"), BaseCommit: f.base, HeadCommit: f.base}
 
 	state, err := f.git.BeginWorkflowMergerRepair(t.Context(), query)
 	if err != nil || state.Result != nil {
@@ -109,7 +109,7 @@ func (git nativeMergerAcceptanceGit) CheckWorkflowMergerCheckpoint(ctx context.C
 	return git.OSWorkflowPreparationGit.CheckWorkflowMergerCheckpoint(ctx, state)
 }
 
-func (git nativeMergerAcceptanceGit) ContinueWorkflowMergerRepair(ctx context.Context, state MergerRepairState, repair IntegrationTreeRepair) (MergerRepairState, error) {
+func (git nativeMergerAcceptanceGit) ContinueWorkflowMergerRepair(ctx context.Context, state MergerRepairState, repair workflowstate.IntegrationTreeRepair) (MergerRepairState, error) {
 	next, err := git.OSWorkflowPreparationGit.ContinueWorkflowMergerRepair(ctx, state, repair)
 	if err == nil && git.afterCommit != nil {
 		git.afterCommit()
@@ -118,7 +118,7 @@ func (git nativeMergerAcceptanceGit) ContinueWorkflowMergerRepair(ctx context.Co
 	return next, err
 }
 
-func nativeMergerProposalDirectory(t *testing.T, f workflowPreparationFixture, input MergerInput) string {
+func nativeMergerProposalDirectory(t *testing.T, f workflowPreparationFixture, input workflowstate.MergerInput) string {
 	t.Helper()
 
 	common, err := projectcore.ResolveRepositoryDirectory(t.Context(), f.store.layout.ProjectDir())
@@ -134,34 +134,34 @@ func nativeMergerProposalDirectory(t *testing.T, f workflowPreparationFixture, i
 func TestNativeMergerAcceptanceReject(t *testing.T) {
 	cases := []struct {
 		name   string
-		mutate func(*testing.T, workflowPreparationFixture, MergerInput, string)
+		mutate func(*testing.T, workflowPreparationFixture, workflowstate.MergerInput, string)
 	}{
-		{"source side", func(t *testing.T, _ workflowPreparationFixture, input MergerInput, dir string) {
+		{"source side", func(t *testing.T, _ workflowPreparationFixture, input workflowstate.MergerInput, dir string) {
 			content := workflowIntegrationCommand(t, dir, "show", input.Source+":result.txt")
 			nativeMergerWrite(t, dir, "result.txt", content)
 		}},
-		{"target side", func(t *testing.T, _ workflowPreparationFixture, input MergerInput, dir string) {
+		{"target side", func(t *testing.T, _ workflowPreparationFixture, input workflowstate.MergerInput, dir string) {
 			content := workflowIntegrationCommand(t, dir, "show", input.Base+":result.txt")
 			nativeMergerWrite(t, dir, "result.txt", content)
 		}},
-		{"missing file", func(t *testing.T, _ workflowPreparationFixture, _ MergerInput, dir string) {
+		{"missing file", func(t *testing.T, _ workflowPreparationFixture, _ workflowstate.MergerInput, dir string) {
 			if err := os.Remove(filepath.Join(dir, "result.txt")); err != nil {
 				t.Fatal(err)
 			}
 		}},
-		{"undeclared file", func(t *testing.T, _ workflowPreparationFixture, _ MergerInput, dir string) {
+		{"undeclared file", func(t *testing.T, _ workflowPreparationFixture, _ workflowstate.MergerInput, dir string) {
 			nativeMergerWrite(t, dir, "extra.txt", "hidden edit")
 		}},
-		{"gate edit", func(t *testing.T, _ workflowPreparationFixture, _ MergerInput, dir string) {
+		{"gate edit", func(t *testing.T, _ workflowPreparationFixture, _ workflowstate.MergerInput, dir string) {
 			nativeMergerWrite(t, dir, "Makefile", "test:\n\ttrue\n")
 		}},
-		{"markers", func(t *testing.T, _ workflowPreparationFixture, _ MergerInput, dir string) {
+		{"markers", func(t *testing.T, _ workflowPreparationFixture, _ workflowstate.MergerInput, dir string) {
 			nativeMergerWrite(t, dir, "result.txt", "<<<<<<< ours\nA\n=======\nB\n>>>>>>> theirs\n")
 		}},
-		{"binary edit", func(t *testing.T, _ workflowPreparationFixture, _ MergerInput, dir string) {
+		{"binary edit", func(t *testing.T, _ workflowPreparationFixture, _ workflowstate.MergerInput, dir string) {
 			nativeMergerWrite(t, dir, "result.txt", "unexpected\x00binary")
 		}},
-		{"symlink", func(t *testing.T, _ workflowPreparationFixture, _ MergerInput, dir string) {
+		{"symlink", func(t *testing.T, _ workflowPreparationFixture, _ workflowstate.MergerInput, dir string) {
 			if err := os.Remove(filepath.Join(dir, "result.txt")); err != nil {
 				t.Fatal(err)
 			}
@@ -220,7 +220,7 @@ func testNativeMergerAcceptance(t *testing.T, method string) {
 	checkNativeMergerAcceptanceRetained(t, f, attempt)
 }
 
-func testNativeMergerAcceptanceReject(t *testing.T, mutate func(*testing.T, workflowPreparationFixture, MergerInput, string)) {
+func testNativeMergerAcceptanceReject(t *testing.T, mutate func(*testing.T, workflowPreparationFixture, workflowstate.MergerInput, string)) {
 	t.Helper()
 
 	f, request, harness, state := nativeMergerAcceptanceFixture(t, "merger-reject", "merge")

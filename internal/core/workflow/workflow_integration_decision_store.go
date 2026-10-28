@@ -129,7 +129,7 @@ func (s *Store) commitWorkflowDecisionRecord(run *workflowInvocationFile, entry 
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
+	updateWorkflowIntegrationBinding(run, workflowstate.IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
 
 	return s.commitWorkflowPullRequestFiles(run, append([]workflowstate.FileChange{entryFile}, extra...), file)
 }
@@ -166,12 +166,12 @@ func (s *Store) workflowMergerDecisionFiles(ctx context.Context, run *workflowIn
 		return nil, err
 	}
 
-	updateWorkflowIntegrationBinding(run, IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
+	updateWorkflowIntegrationBinding(run, workflowstate.IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
 
 	return []workflowstate.FileChange{file, entryFile}, nil
 }
 
-func checkWorkflowMergerDecisionBinding(entry IntegrationEntry, input MergerInput) error {
+func checkWorkflowMergerDecisionBinding(entry IntegrationEntry, input workflowstate.MergerInput) error {
 	if input.OperatorDecisionRef == nil {
 		return nil
 	}
@@ -183,7 +183,7 @@ func checkWorkflowMergerDecisionBinding(entry IntegrationEntry, input MergerInpu
 	return nil
 }
 
-func (s *Store) checkWorkflowMergerOperatorEvidence(input MergerInput) error {
+func (s *Store) checkWorkflowMergerOperatorEvidence(input workflowstate.MergerInput) error {
 	if input.OperatorDecisionRef == nil {
 		if len(input.OperatorAnswers) != 0 {
 			return workflowstate.ErrConflict
@@ -216,7 +216,7 @@ func (s *Store) checkWorkflowMergerOperatorEvidence(input MergerInput) error {
 	return nil
 }
 
-func workflowDecisionContextEqual(original, next MergerInput) bool {
+func workflowDecisionContextEqual(original, next workflowstate.MergerInput) bool {
 	return original.SourceManifestRef == next.SourceManifestRef && original.ValidationContractRef == next.ValidationContractRef &&
 		reflect.DeepEqual(original.AllowedPaths, next.AllowedPaths) && reflect.DeepEqual(original.ProtectedPaths, next.ProtectedPaths) &&
 		reflect.DeepEqual(original.ValidationCommands, next.ValidationCommands) && reflect.DeepEqual(original.Requirements, next.Requirements) &&

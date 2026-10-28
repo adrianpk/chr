@@ -10,7 +10,7 @@ import (
 
 // ContinueWorkflowMergerRepair consumes a host-accepted repair and resumes its
 // original replay step. It cannot run validation or grant candidate approval.
-func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Context, state MergerRepairState, repair IntegrationTreeRepair) (MergerRepairState, error) {
+func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Context, state MergerRepairState, repair workflowstate.IntegrationTreeRepair) (MergerRepairState, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
@@ -49,7 +49,7 @@ func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Con
 	return state, err
 }
 
-func checkWorkflowRepairPredecessors(state MergerRepairState, input MergerInput) error {
+func checkWorkflowRepairPredecessors(state MergerRepairState, input workflowstate.MergerInput) error {
 	if input.Method != "rebase" {
 		return nil
 	}

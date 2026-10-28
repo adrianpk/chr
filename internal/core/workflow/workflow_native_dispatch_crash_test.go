@@ -10,6 +10,7 @@ import (
 	"time"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeFaultProcess is the owned host subprocess for publication crashes.
@@ -162,7 +163,7 @@ func checkNativeFaultCrash(t *testing.T, stage string) {
 	checkNativeFaultApplication(t, f, submission, remote, stage)
 }
 
-func checkNativeFaultRetained(t *testing.T, f nativeSubmissionFixture, submission Submission) {
+func checkNativeFaultRetained(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission) {
 	t.Helper()
 
 	if submission.Native.DispatchIdentity != nil {
@@ -212,7 +213,7 @@ func expireNativeFaultLease(t *testing.T, f nativeSubmissionFixture) {
 	}
 }
 
-func checkNativeFaultApplication(t *testing.T, f nativeSubmissionFixture, submission Submission, remote, stage string) {
+func checkNativeFaultApplication(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission, remote, stage string) {
 	t.Helper()
 
 	if stage == "applied" || stage == "response" {
@@ -225,7 +226,7 @@ func checkNativeFaultApplication(t *testing.T, f nativeSubmissionFixture, submis
 	}
 }
 
-func finishNativeFaultLease(t *testing.T, f nativeSubmissionFixture, command *exec.Cmd, release string, submission Submission) {
+func finishNativeFaultLease(t *testing.T, f nativeSubmissionFixture, command *exec.Cmd, release string, submission workflowstate.Submission) {
 	t.Helper()
 
 	if err := os.WriteFile(release, []byte("release"), 0o600); err != nil {

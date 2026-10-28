@@ -44,7 +44,7 @@ func (s *Store) reserveWorkflowAgentInput(ctx context.Context, run *workflowInvo
 		return nil, err
 	}
 
-	allowance := TokenAllowance{Maximum: maximum, Input: harness.InputTokens, Output: harness.OutputTokens, CapabilityRevision: certificate.CapabilityRevision, WholeCall: true, Deadline: run.Attempts[len(run.Attempts)-1].LeaseUntil}
+	allowance := workflowstate.TokenAllowance{Maximum: maximum, Input: harness.InputTokens, Output: harness.OutputTokens, CapabilityRevision: certificate.CapabilityRevision, WholeCall: true, Deadline: run.Attempts[len(run.Attempts)-1].LeaseUntil}
 
 	r := IntegrationReservation{ID: "agent-" + input.AttemptID, Kind: "agent_call", Role: role, EntryID: workflowIntegrationEntryID(*run, input.Lane.Unit), Unit: input.Lane.Unit, ClaimGeneration: input.Generation, AttemptID: input.AttemptID, Allowance: allowance, State: "reserved"}
 	if err := validateWorkflowIntegrationReservation(r); err != nil {

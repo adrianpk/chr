@@ -120,7 +120,7 @@ func (s *Store) checkWorkflowInputsPrepared(ctx context.Context, run workflowInv
 	return s.checkWorkflowSetImages(run)
 }
 
-func workflowMemberImageMatches(record Record, input Member, identity Identity) bool {
+func workflowMemberImageMatches(record Record, input Member, identity workflowstate.Identity) bool {
 	if record.ProjectID != identity.ProjectID || record.Namespace != identity.Namespace || record.Task == nil {
 		return false
 	}

@@ -12,7 +12,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) readWorkflowIntegrationEntry(run workflowInvocationFile, binding IntegrationBinding) (IntegrationEntry, error) {
+func (s *Store) readWorkflowIntegrationEntry(run workflowInvocationFile, binding workflowstate.IntegrationBinding) (IntegrationEntry, error) {
 	var entry IntegrationEntry
 
 	data, err := s.readWorkflowReviewImage(binding.EntryRef.Path, binding.EntryRef.Hash)
@@ -36,7 +36,7 @@ func (s *Store) readWorkflowIntegrationEntry(run workflowInvocationFile, binding
 	return entry, nil
 }
 
-func workflowIntegrationEntryMatches(run workflowInvocationFile, binding IntegrationBinding, entry IntegrationEntry) bool {
+func workflowIntegrationEntryMatches(run workflowInvocationFile, binding workflowstate.IntegrationBinding, entry IntegrationEntry) bool {
 	repository, err := workflowCanonicalRepository(run.ExecutionSelection().Target.Repository)
 	if err != nil {
 		return false
@@ -231,7 +231,7 @@ func (s *Store) commitWorkflowIntegrationEntryFiles(run *workflowInvocationFile,
 		return err
 	}
 
-	binding := IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}}
+	binding := workflowstate.IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}}
 	updateWorkflowIntegrationBinding(run, binding)
 
 	run.Revision++
@@ -245,7 +245,7 @@ func (s *Store) commitWorkflowIntegrationEntryFiles(run *workflowInvocationFile,
 	return s.commitFiles(append(files, file, invocation))
 }
 
-func updateWorkflowIntegrationBinding(run *workflowInvocationFile, binding IntegrationBinding) {
+func updateWorkflowIntegrationBinding(run *workflowInvocationFile, binding workflowstate.IntegrationBinding) {
 	for i, old := range run.IntegrationEntries {
 		if old.EntryID == binding.EntryID {
 			run.IntegrationEntries[i] = binding
@@ -274,7 +274,7 @@ func (s *Store) commitWorkflowIntegrationAdmission(ctx context.Context, run *wor
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
+	updateWorkflowIntegrationBinding(run, workflowstate.IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
 
 	run.Revision++
 	run.UpdatedAt = time.Now().UTC()

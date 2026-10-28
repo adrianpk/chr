@@ -166,7 +166,7 @@ func checkWorkflowDeliveryProof(t *testing.T, fixture workflowIntegrationFixture
 	checkWorkflowPRTasks(t, fixture.store, fixture.hierarchy.Tasks[:3])
 }
 
-func checkWorkflowDeliveryGit(t *testing.T, fixture workflowIntegrationFixture, proof IntegrationProof) {
+func checkWorkflowDeliveryGit(t *testing.T, fixture workflowIntegrationFixture, proof workflowstate.IntegrationProof) {
 	t.Helper()
 
 	if proof.BaseCommit != fixture.base || proof.ResultCommit != fixture.result || proof.ObservedTarget != fixture.target || proof.PreparedTree != proof.VerifiedTree || proof.SourceCommit != fixture.run.Lane.HeadCommit || proof.SourceDirectory != "" {
@@ -239,7 +239,7 @@ type workflowIntegrationHook struct {
 	after func()
 }
 
-func (hook workflowIntegrationHook) VerifyWorkflowIntegration(ctx context.Context, query IntegrationQuery) (IntegrationProof, error) {
+func (hook workflowIntegrationHook) VerifyWorkflowIntegration(ctx context.Context, query workflowstate.IntegrationQuery) (workflowstate.IntegrationProof, error) {
 	proof, err := hook.git.VerifyWorkflowIntegration(ctx, query)
 	hook.after()
 

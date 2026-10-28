@@ -7,6 +7,7 @@ import (
 
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -72,7 +73,7 @@ func alterPiWorkerFixture(scenario string, input workflowcore.TaskInput, options
 	case "changed runtime":
 		options.Image = "sha256:" + strings.Repeat("b", 64)
 	case "merger":
-		input.Merger = &workflowcore.MergerInput{}
+		input.Merger = &workflowstate.MergerInput{}
 	case "finite budget":
 		input.AgentCall = &workflowcore.AgentCall{}
 	}

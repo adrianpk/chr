@@ -13,7 +13,7 @@ import (
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-func (s *Store) beginWorkflowSubmission(ctx context.Context, id string, provider PublicationProvider, git IntegrationGit) (submission Submission, submit bool, err error) {
+func (s *Store) beginWorkflowSubmission(ctx context.Context, id string, provider PublicationProvider, git IntegrationGit) (submission workflowstate.Submission, submit bool, err error) {
 	if provider == nil || git == nil {
 		return submission, false, fmt.Errorf("guarded publisher and canonical Git observer required")
 	}
@@ -32,14 +32,14 @@ func (s *Store) beginWorkflowSubmission(ctx context.Context, id string, provider
 	return submission, submit, err
 }
 
-func (s *Store) prepareWorkflowSubmission(ctx context.Context, run *workflowInvocationFile, provider PublicationProvider, git IntegrationGit) (Submission, bool, error) {
+func (s *Store) prepareWorkflowSubmission(ctx context.Context, run *workflowInvocationFile, provider PublicationProvider, git IntegrationGit) (workflowstate.Submission, bool, error) {
 	journal, err := s.loadWorkflowSubmissionJournal(ctx, *run)
 	if err != nil {
-		return Submission{}, false, err
+		return workflowstate.Submission{}, false, err
 	}
 
 	if journal.Schema == "chr-integration-journal/v2" {
-		return Submission{}, false, ErrWorkflowObservationRequired
+		return workflowstate.Submission{}, false, ErrWorkflowObservationRequired
 	}
 
 	previous, retry, err := s.checkWorkflowSubmissionRetry(ctx, run, &journal, provider, git)
@@ -48,18 +48,18 @@ func (s *Store) prepareWorkflowSubmission(ctx context.Context, run *workflowInvo
 	}
 
 	if err := s.checkWorkflowSubmissionAdmission(run, journal); err != nil {
-		return Submission{}, false, err
+		return workflowstate.Submission{}, false, err
 	}
 
 	guard, err := s.checkWorkflowLegacyPublicationGuard(ctx, run, provider)
 	if err != nil {
-		return Submission{}, false, err
+		return workflowstate.Submission{}, false, err
 	}
 
 	if journal.Key == "" {
 		journal, err = newWorkflowSubmissionJournal(*run, guard)
 		if err != nil {
-			return Submission{}, false, err
+			return workflowstate.Submission{}, false, err
 		}
 	}
 
@@ -79,9 +79,9 @@ func (s *Store) loadWorkflowSubmissionJournal(ctx context.Context, run workflowI
 	return journal, err
 }
 
-func (s *Store) checkWorkflowSubmissionRetry(ctx context.Context, run *workflowInvocationFile, journal *workflowSubmissionJournal, provider PublicationProvider, git IntegrationGit) (Submission, bool, error) {
+func (s *Store) checkWorkflowSubmissionRetry(ctx context.Context, run *workflowInvocationFile, journal *workflowSubmissionJournal, provider PublicationProvider, git IntegrationGit) (workflowstate.Submission, bool, error) {
 	if len(journal.Attempts) == 0 {
-		return Submission{}, true, nil
+		return workflowstate.Submission{}, true, nil
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
@@ -104,7 +104,7 @@ func (s *Store) checkWorkflowSubmissionRetry(ctx context.Context, run *workflowI
 	return s.observeWorkflowSubmissionRetry(ctx, run, journal, provider, git)
 }
 
-func (s *Store) observeWorkflowSubmissionRetry(ctx context.Context, run *workflowInvocationFile, journal *workflowSubmissionJournal, provider PublicationProvider, git IntegrationGit) (Submission, bool, error) {
+func (s *Store) observeWorkflowSubmissionRetry(ctx context.Context, run *workflowInvocationFile, journal *workflowSubmissionJournal, provider PublicationProvider, git IntegrationGit) (workflowstate.Submission, bool, error) {
 	last := journal.Attempts[len(journal.Attempts)-1]
 
 	observed, err := observeWorkflowSubmission(ctx, last, provider, git)
@@ -146,25 +146,25 @@ func workflowIntegrationAttemptLimit(policy workflowstate.ExecutionPolicy) int {
 	return policy.MaxIntegrationAttempts
 }
 
-func newWorkflowSubmissionJournal(run workflowInvocationFile, guard PublicationGuard) (workflowSubmissionJournal, error) {
+func newWorkflowSubmissionJournal(run workflowInvocationFile, guard workflowstate.PublicationGuard) (workflowSubmissionJournal, error) {
 	target, err := workflowSubmissionTargetKey(guard.PullRequest)
 
 	return workflowSubmissionJournal{Schema: "chr-integration-journal/v1", Key: workflowSubmissionJournalKey(run), OwnerRoot: run.OwnerRoot, Namespace: run.Namespace, InvocationID: run.ID, Unit: run.Lane.Unit, TargetKey: target}, err
 }
 
-func (s *Store) persistWorkflowSubmissionIntent(ctx context.Context, run *workflowInvocationFile, journal workflowSubmissionJournal, guard PublicationGuard) (Submission, bool, error) {
+func (s *Store) persistWorkflowSubmissionIntent(ctx context.Context, run *workflowInvocationFile, journal workflowSubmissionJournal, guard workflowstate.PublicationGuard) (workflowstate.Submission, bool, error) {
 	if err := s.guardWorkflowSubmissionTarget(ctx, journal.Key, journal.TargetKey); err != nil {
-		return Submission{}, false, err
+		return workflowstate.Submission{}, false, err
 	}
 
 	candidate, err := s.readWorkflowPreparation(*run)
 	if err != nil {
-		return Submission{}, false, err
+		return workflowstate.Submission{}, false, err
 	}
 
 	now := time.Now().UTC()
 	number := len(journal.Attempts) + 1
-	submission := Submission{ID: workflowSubmissionID(journal.Key, number, guard.PreparationHash), InvocationID: run.ID, Unit: run.Lane.Unit, Attempt: number, CandidateID: run.PullRequest.CandidateID, CandidateHash: run.CandidateHash, Guard: guard, PreparedLane: candidate.Lane, State: "awaiting_observation", SubmittedAt: now, UpdatedAt: now}
+	submission := workflowstate.Submission{ID: workflowSubmissionID(journal.Key, number, guard.PreparationHash), InvocationID: run.ID, Unit: run.Lane.Unit, Attempt: number, CandidateID: run.PullRequest.CandidateID, CandidateHash: run.CandidateHash, Guard: guard, PreparedLane: candidate.Lane, State: "awaiting_observation", SubmittedAt: now, UpdatedAt: now}
 	journal.Attempts = append(journal.Attempts, submission)
 	// This single atomic image contains intent, consumed budget and exclusion.
 	// The invocation projection is written afterwards; a crash cannot free it.
@@ -208,7 +208,7 @@ func workflowSubmissionProjection(journal workflowSubmissionJournal) SubmissionB
 	return SubmissionBinding{JournalKey: journal.Key, JournalHash: journal.sourceHash, TargetKey: journal.TargetKey, ID: last.ID, Unit: journal.Unit, Attempt: last.Attempt, State: last.State, ExternalDelivery: last.ExternalDelivery}
 }
 
-func (s *Store) checkWorkflowLegacyPublicationGuard(ctx context.Context, run *workflowInvocationFile, provider PublicationGuardProvider) (PublicationGuard, error) {
+func (s *Store) checkWorkflowLegacyPublicationGuard(ctx context.Context, run *workflowInvocationFile, provider PublicationGuardProvider) (workflowstate.PublicationGuard, error) {
 	guard, err := s.checkWorkflowPublicationGuard(ctx, *run, provider)
 	if err != nil {
 		if errors.Is(err, ErrWorkflowAtomicGuard) {

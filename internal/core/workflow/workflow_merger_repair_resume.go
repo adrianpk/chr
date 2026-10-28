@@ -35,7 +35,7 @@ func (git OSWorkflowPreparationGit) resumeMergerRepairReader(ctx context.Context
 	return reader, nil
 }
 
-func validWorkflowRepairPreparation(p, policy IntegrationPreparation) bool {
+func validWorkflowRepairPreparation(p, policy workflowstate.IntegrationPreparation) bool {
 	if !validWorkflowCommitDate(p.InitialCommitterDate) || !validWorkflowCommitDate(p.CommitterDate) || p.RequiredSignatures != policy.RequiredSignatures || !workflowNativeJSONEqual(p.Signing, policy.Signing) {
 		return false
 	}
@@ -89,7 +89,7 @@ func workflowMergerRepairEndMatches(state MergerRepairState, original, parent st
 	return original == state.OriginalParent && parent == state.PreparedParent
 }
 
-func (reader workflowIntegrationReader) verifyMergerReplayObject(ctx context.Context, entry IntegrationCommit, p IntegrationPreparation) error {
+func (reader workflowIntegrationReader) verifyMergerReplayObject(ctx context.Context, entry workflowstate.IntegrationCommit, p workflowstate.IntegrationPreparation) error {
 	source, err := reader.commitAttribution(ctx, entry.Source)
 	if err != nil {
 		return err

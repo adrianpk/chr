@@ -29,38 +29,38 @@ func (s *Store) observeWorkflowClosingTarget(ctx context.Context, request SetClo
 	return target, s.checkWorkflowTarget(ctx, target)
 }
 
-func (s *Store) workflowClosingSliceProof(ctx context.Context, input ClosingInput, descriptor workflowstate.WorkflowSlice, ports FrontierPorts) (ClosingSlice, error) {
+func (s *Store) workflowClosingSliceProof(ctx context.Context, input workflowstate.ClosingInput, descriptor workflowstate.WorkflowSlice, ports FrontierPorts) (workflowstate.ClosingSlice, error) {
 	if descriptor.Phase != "integrated" || descriptor.DeliveryRef == "" {
-		return ClosingSlice{}, fmt.Errorf("%w: all actual slices must integrate", workflowstate.ErrConflict)
+		return workflowstate.ClosingSlice{}, fmt.Errorf("%w: all actual slices must integrate", workflowstate.ErrConflict)
 	}
 
 	receipt, err := s.readRecord(descriptor.DeliveryRef)
 	if err != nil {
-		return ClosingSlice{}, err
+		return workflowstate.ClosingSlice{}, err
 	}
 
 	proof, hash, err := s.workflowClosingDeliveryProof(ctx, receipt)
 	if err != nil {
-		return ClosingSlice{}, err
+		return workflowstate.ClosingSlice{}, err
 	}
 
 	if err := s.workflowClosingSliceMembers(ctx, descriptor, receipt, proof); err != nil {
-		return ClosingSlice{}, err
+		return workflowstate.ClosingSlice{}, err
 	}
 
 	fresh, err := s.observeWorkflowClosingSlice(ctx, input, receipt, proof, ports)
 	if err != nil {
-		return ClosingSlice{}, err
+		return workflowstate.ClosingSlice{}, err
 	}
 
 	refs := append([]string{descriptor.ContractRef, receipt.Path, receipt.Receipt.VerificationRef}, receipt.Receipt.ValidationRefs...)
 
 	refs = append(refs, workflowClosingNativeEvidence(receipt, proof)...)
 	if err := s.workflowClosingEvidenceHashes(input.EvidenceHashes, refs); err != nil {
-		return ClosingSlice{}, err
+		return workflowstate.ClosingSlice{}, err
 	}
 
-	return ClosingSlice{ID: descriptor.ID, Order: descriptor.Order, Receipt: workflowstate.ClosingEvidence{Ref: receipt.Path, Hash: receipt.SourceHash}, Verification: workflowstate.ClosingEvidence{Ref: receipt.Receipt.VerificationRef, Hash: hash}, Proof: fresh}, nil
+	return workflowstate.ClosingSlice{ID: descriptor.ID, Order: descriptor.Order, Receipt: workflowstate.ClosingEvidence{Ref: receipt.Path, Hash: receipt.SourceHash}, Verification: workflowstate.ClosingEvidence{Ref: receipt.Receipt.VerificationRef, Hash: hash}, Proof: fresh}, nil
 }
 
 func (s *Store) workflowClosingDeliveryProof(ctx context.Context, receipt Record) (SliceDeliveryProof, string, error) {
@@ -89,7 +89,7 @@ func (s *Store) workflowClosingDeliveryProof(ctx context.Context, receipt Record
 	return proof, contenthash.Sum(data), nil
 }
 
-func (s *Store) observeWorkflowClosingSlice(ctx context.Context, input ClosingInput, receipt Record, retained SliceDeliveryProof, ports FrontierPorts) (IntegrationProof, error) {
+func (s *Store) observeWorkflowClosingSlice(ctx context.Context, input workflowstate.ClosingInput, receipt Record, retained SliceDeliveryProof, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
 	if receipt.Receipt.Native != nil {
 		return s.observeWorkflowClosingNativeSlice(ctx, input, receipt, ports)
 	}
@@ -97,21 +97,21 @@ func (s *Store) observeWorkflowClosingSlice(ctx context.Context, input ClosingIn
 	return s.observeWorkflowClosingLegacySlice(ctx, input, receipt, retained, ports)
 }
 
-func (s *Store) observeWorkflowClosingLegacySlice(ctx context.Context, input ClosingInput, receipt Record, retained SliceDeliveryProof, ports FrontierPorts) (IntegrationProof, error) {
+func (s *Store) observeWorkflowClosingLegacySlice(ctx context.Context, input workflowstate.ClosingInput, receipt Record, retained SliceDeliveryProof, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
 	pr, err := ports.Provider.ReadWorkflowPullRequest(ctx, receipt.Receipt.PullRequest)
 	if err != nil {
-		return IntegrationProof{}, err
+		return workflowstate.IntegrationProof{}, err
 	}
 
 	if !workflowClosingPRMatches(input, receipt, retained, pr) {
-		return IntegrationProof{}, workflowstate.ErrConflict
+		return workflowstate.IntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	query := retained.Git.IntegrationQuery
 
 	query.SourceDirectory = s.layout.ProjectDir()
 	if query.Repository != input.Target.Repository || query.TargetBranch != input.Branch {
-		return IntegrationProof{}, workflowstate.ErrConflict
+		return workflowstate.IntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	proof, err := ports.Observer.VerifyWorkflowIntegration(ctx, query)
@@ -163,6 +163,6 @@ func (s *Store) workflowClosingSliceMembers(ctx context.Context, descriptor work
 	return err
 }
 
-func workflowClosingPRMatches(input ClosingInput, receipt Record, retained SliceDeliveryProof, pr PullRequestSnapshot) bool {
+func workflowClosingPRMatches(input workflowstate.ClosingInput, receipt Record, retained SliceDeliveryProof, pr workflowstate.PullRequestSnapshot) bool {
 	return pr.Merged && pr.URL == receipt.Receipt.PullRequest && pr.Repository == input.Target.Repository && pr.HeadRepository == pr.Repository && pr.BaseBranch == input.Branch && pr.ResultCommit == receipt.Receipt.ResultCommit && pr.HeadCommit == receipt.Receipt.SourceCommit && pr.HeadBranch == retained.PullRequest.HeadBranch && pr.BaseCommit == input.Target.Commit
 }

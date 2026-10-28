@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *Store) prepareWorkflowMerger(ctx context.Context, request MergerRequest, harness MergerHarness, provider PullRequestProvider) (claim *Claim, prepared workflowPreparedTask, err error) {
@@ -31,7 +33,7 @@ func (s *Store) prepareWorkflowMerger(ctx context.Context, request MergerRequest
 	return claim, prepared, err
 }
 
-func (s *Store) claimWorkflowMerger(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, input MergerInput, harness MergerHarness, seed string) (claim *Claim, prepared workflowPreparedTask, err error) {
+func (s *Store) claimWorkflowMerger(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, input workflowstate.MergerInput, harness MergerHarness, seed string) (claim *Claim, prepared workflowPreparedTask, err error) {
 	if err := checkWorkflowIntegrationCounterCharge(budget, IntegrationReservation{Kind: "agent_call", Role: "merger", Unit: entry.Unit}, "merger"); err != nil {
 		return nil, prepared, err
 	}
@@ -76,7 +78,7 @@ func (s *Store) claimWorkflowMerger(ctx context.Context, run workflowInvocationF
 	return s.persistWorkflowMergerClaim(ctx, run, record, claim, budget, input, harness, lane, root)
 }
 
-func workflowMergerReservation(run *workflowInvocationFile, budget IntegrationBudget, input *MergerInput, claim *Claim) (IntegrationReservation, error) {
+func workflowMergerReservation(run *workflowInvocationFile, budget IntegrationBudget, input *workflowstate.MergerInput, claim *Claim) (IntegrationReservation, error) {
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	attempt.LeaseUntil = minWorkflowMergerDeadline(attempt.LeaseUntil, input.Deadline)
 	input.AdmittedAt, input.Deadline = attempt.StartedAt, attempt.LeaseUntil

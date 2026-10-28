@@ -144,7 +144,7 @@ func workflowSliceCandidateMatchesRun(run workflowInvocationFile, candidate Slic
 	return candidate.Ticket == nil && candidate.Schema == "chr-slice-candidate/v1" && candidate.InvocationID == run.ID && candidate.Target == run.ExecutionSelection().Target && candidate.Lane == *run.Lane && candidate.UnitInput().Unit == run.Lane.Unit
 }
 
-func workflowSliceCandidateMatchesContract(observation workflowSliceObservation, input SliceInput) bool {
+func workflowSliceCandidateMatchesContract(observation workflowSliceObservation, input workflowstate.SliceInput) bool {
 	return input.SetID == observation.set.ID && input.ContractRef == observation.descriptor.ContractRef && input.ContractHash == observation.descriptor.ContractHash
 }
 
@@ -177,6 +177,6 @@ func (s *Store) checkWorkflowSliceCandidateProofs(ctx context.Context, run workf
 	return nil
 }
 
-func workflowSliceResultMatchesLane(result TaskResult, lane Lane) bool {
+func workflowSliceResultMatchesLane(result workflowstate.TaskResult, lane workflowstate.Lane) bool {
 	return result.Successful && result.Schema == "chr-slice-validation/v1" && result.Commit == lane.HeadCommit
 }

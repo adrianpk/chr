@@ -12,18 +12,10 @@ import (
 // the exact host-prepared P. The preliminary guard cannot authorize publication.
 type NativePreparationProvider interface {
 	PublicationGuardProvider
-	WorkflowPreparedNativeCapability(context.Context, PullRequestSnapshot, IntegrationProof) (NativeCapability, error)
+	WorkflowPreparedNativeCapability(context.Context, workflowstate.PullRequestSnapshot, workflowstate.IntegrationProof) (workflowstate.NativeCapability, error)
 }
 
-// NativePreparationInput freezes the queue owner and full capability
-// before the host gate executes. Agent output cannot replace this input.
-type NativePreparationInput struct {
-	Entry           IntegrationBinding `json:"entry"`
-	ClaimGeneration uint64             `json:"claim_generation"`
-	Capability      NativeCapability   `json:"capability"`
-}
-
-func (s *Store) checkWorkflowNativePreparationAdmission(run workflowInvocationFile, source ReviewInput, capability PublicationCapability, provider PublicationGuardProvider) error {
+func (s *Store) checkWorkflowNativePreparationAdmission(run workflowInvocationFile, source workflowstate.ReviewInput, capability workflowstate.PublicationCapability, provider PublicationGuardProvider) error {
 	native, err := workflowNativePreparationProfile(s.layout.ProjectDir(), capability)
 	if err != nil || !native {
 		return err
@@ -45,7 +37,7 @@ func (s *Store) checkWorkflowNativePreparationAdmission(run workflowInvocationFi
 	return workflowNativePreparationEntryReady(run, entry)
 }
 
-func workflowNativePreparationProfile(project string, capability PublicationCapability) (bool, error) {
+func workflowNativePreparationProfile(project string, capability workflowstate.PublicationCapability) (bool, error) {
 	config, err := workspaceconfig.Load(project)
 	if err != nil {
 		return false, err
@@ -59,7 +51,7 @@ func workflowNativePreparationProfile(project string, capability PublicationCapa
 	return native, nil
 }
 
-func workflowNativePreparationOwnerMatches(entry IntegrationEntry, source ReviewInput) bool {
+func workflowNativePreparationOwnerMatches(entry IntegrationEntry, source workflowstate.ReviewInput) bool {
 	return entry.Unit == source.Unit && entry.Repository == source.PullRequest.HeadRepository && entry.TargetRef == "refs/heads/"+source.PullRequest.BaseBranch && entry.StopIntent == "" && entry.ClaimGeneration > 0
 }
 
@@ -79,7 +71,7 @@ func workflowNativePreparationEntryReady(run workflowInvocationFile, entry Integ
 	return nil
 }
 
-func (s *Store) bindWorkflowNativePreparation(ctx context.Context, run workflowInvocationFile, input *PreparationInput, provider PublicationGuardProvider) error {
+func (s *Store) bindWorkflowNativePreparation(ctx context.Context, run workflowInvocationFile, input *workflowstate.PreparationInput, provider PublicationGuardProvider) error {
 	if input.Capability.Mechanism != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		return nil
 	}
@@ -100,12 +92,12 @@ func (s *Store) bindWorkflowNativePreparation(ctx context.Context, run workflowI
 	}
 
 	input.Capability = capability.PublicationCapability
-	input.Native = &NativePreparationInput{Entry: *run.Integration, ClaimGeneration: entry.ClaimGeneration, Capability: capability}
+	input.Native = &workflowstate.NativePreparationInput{Entry: *run.Integration, ClaimGeneration: entry.ClaimGeneration, Capability: capability}
 
 	return s.checkWorkflowNativePreparationFence(run, input.Native)
 }
 
-func validateWorkflowPreparedNativeCapability(input PreparationInput, capability NativeCapability) error {
+func validateWorkflowPreparedNativeCapability(input workflowstate.PreparationInput, capability workflowstate.NativeCapability) error {
 	if err := validateWorkflowNativeCapability(capability); err != nil {
 		return err
 	}
@@ -125,14 +117,14 @@ func validateWorkflowPreparedNativeCapability(input PreparationInput, capability
 	return validateWorkflowPublicationCapability(input.Source, capability.PublicationCapability)
 }
 
-func observeWorkflowPreparedCapability(ctx context.Context, provider PublicationGuardProvider, input PreparationInput) (PublicationCapability, error) {
+func observeWorkflowPreparedCapability(ctx context.Context, provider PublicationGuardProvider, input workflowstate.PreparationInput) (workflowstate.PublicationCapability, error) {
 	if input.Native == nil {
 		return observeWorkflowPublicationCapability(ctx, provider, input.Source)
 	}
 
 	observer, ok := provider.(NativePreparationProvider)
 	if !ok {
-		return PublicationCapability{}, ErrWorkflowAtomicGuard
+		return workflowstate.PublicationCapability{}, ErrWorkflowAtomicGuard
 	}
 
 	capability, err := observeWorkflowPreparedNativeCapability(ctx, observer, input)
@@ -143,14 +135,14 @@ func observeWorkflowPreparedCapability(ctx context.Context, provider Publication
 	return capability.PublicationCapability, nil
 }
 
-func observeWorkflowPreparedNativeCapability(ctx context.Context, provider NativePreparationProvider, input PreparationInput) (NativeCapability, error) {
+func observeWorkflowPreparedNativeCapability(ctx context.Context, provider NativePreparationProvider, input workflowstate.PreparationInput) (workflowstate.NativeCapability, error) {
 	head, err := provider.ReadWorkflowBranch(ctx, input.Source.PullRequest.Repository, input.Source.PullRequest.HeadBranch)
 	if err != nil {
-		return NativeCapability{}, err
+		return workflowstate.NativeCapability{}, err
 	}
 
 	if head != input.Git.SourceCommit {
-		return NativeCapability{}, workflowstate.ErrConflict
+		return workflowstate.NativeCapability{}, workflowstate.ErrConflict
 	}
 
 	capability, err := provider.WorkflowPreparedNativeCapability(ctx, input.Source.PullRequest, input.Git)
@@ -165,7 +157,7 @@ func workflowNativePreparedEntryMatches(run workflowInvocationFile, entry Integr
 	return entry.CandidateRef != nil && entry.CandidateRef.Path == run.Preparation.ResultRef && entry.CandidateRef.Hash == run.Preparation.ResultHash
 }
 
-func (s *Store) cachedWorkflowPreparationCapability(ctx context.Context, run workflowInvocationFile, candidate IntegrationCandidate, preliminary PublicationCapability, provider PublicationGuardProvider) (PublicationCapability, error) {
+func (s *Store) cachedWorkflowPreparationCapability(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, preliminary workflowstate.PublicationCapability, provider PublicationGuardProvider) (workflowstate.PublicationCapability, error) {
 	native := candidate.Input.Native
 	if native == nil {
 		return preliminary, nil
@@ -187,7 +179,7 @@ func (s *Store) cachedWorkflowPreparationCapability(ctx context.Context, run wor
 	return observeWorkflowPreparedCapability(ctx, provider, candidate.Input)
 }
 
-func (s *Store) checkWorkflowNativePreparationFence(run workflowInvocationFile, native *NativePreparationInput) error {
+func (s *Store) checkWorkflowNativePreparationFence(run workflowInvocationFile, native *workflowstate.NativePreparationInput) error {
 	if native == nil {
 		return nil
 	}

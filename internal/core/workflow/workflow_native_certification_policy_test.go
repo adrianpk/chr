@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -20,7 +21,7 @@ type nativeMethodProbePolicy struct {
 	https bool
 }
 
-func (reader nativeMethodProbePolicy) ReadWorkflowNativePolicy(ctx context.Context, pr PullRequestSnapshot, method string) (NativePolicy, error) {
+func (reader nativeMethodProbePolicy) ReadWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (NativePolicy, error) {
 	if err := ctx.Err(); err != nil {
 		return NativePolicy{}, err
 	}
@@ -62,7 +63,7 @@ func (reader nativeMethodProbePolicy) methodPolicy(profile nativeLiveProfile, me
 	return reader.policy(profile, method)
 }
 
-func admitNativeMethodProbe(t *testing.T, state string, adapter RemoteReviewAdapter, profile nativeLiveProfile, request GitPublication, pr PullRequestSnapshot, publisher OSWorkflowGitPublisher) NativeCapability {
+func admitNativeMethodProbe(t *testing.T, state string, adapter RemoteReviewAdapter, profile nativeLiveProfile, request GitPublication, pr workflowstate.PullRequestSnapshot, publisher OSWorkflowGitPublisher) workflowstate.NativeCapability {
 	t.Helper()
 
 	policy := nativeMethodProbePolicy{nativeLivePolicyReader: nativeLivePolicyReader{state: state, profile: profile, publication: request}, https: strings.HasPrefix(publisher.transport, "https://")}

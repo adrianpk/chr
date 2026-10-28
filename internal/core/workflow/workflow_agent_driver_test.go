@@ -144,7 +144,7 @@ func nativeAgentModelResult(t *testing.T, input TaskInput) string {
 		return "worker complete"
 	}
 
-	decision := ReviewDecision{BindingHash: input.ReviewHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Inspect the current candidate and validation evidence."}}
+	decision := workflowstate.ReviewDecision{BindingHash: input.ReviewHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Inspect the current candidate and validation evidence."}}
 
 	data, err := json.Marshal(decision)
 	if err != nil {
@@ -189,7 +189,7 @@ func nativeAgentUsageMode(t *testing.T, mode string, response *AgentResponse) {
 	}
 }
 
-func checkNativeAgentOutcome(t *testing.T, result TaskResult, err error, mode string) {
+func checkNativeAgentOutcome(t *testing.T, result workflowstate.TaskResult, err error, mode string) {
 	t.Helper()
 
 	if mode == "success" {

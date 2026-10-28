@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeMergerUnmetered preserves finite attempts and runtime without
@@ -49,7 +50,7 @@ func TestNativeMergerSettlement(t *testing.T) {
 	certificate.EnforcesWholeCall, certificate.ReportsWholeCall = true, true
 	certificate.Accounting = workflowTokenAccounting
 	harness.Certificate = retainNativeRecordEvidence(t, f.store, f.run.ID, "metered-harness", certificate)
-	request.Input.TokenAllowance = &TokenAllowance{Maximum: 100, Input: 60, Output: 40, CapabilityRevision: certificate.CapabilityRevision, WholeCall: true, Deadline: request.Input.Deadline}
+	request.Input.TokenAllowance = &workflowstate.TokenAllowance{Maximum: 100, Input: 60, Output: 40, CapabilityRevision: certificate.CapabilityRevision, WholeCall: true, Deadline: request.Input.Deadline}
 
 	var err error
 
@@ -80,10 +81,10 @@ func TestNativeMergerSettlement(t *testing.T) {
 func TestNativeMergerMeterGuards(t *testing.T) {
 	_, input, _ := nativeMergerInput(t)
 	revision := contenthash.Sum([]byte("meter/v1"))
-	input.TokenAllowance = &TokenAllowance{Maximum: 100, Input: 60, Output: 40, WholeCall: true, CapabilityRevision: revision, Deadline: input.Deadline}
+	input.TokenAllowance = &workflowstate.TokenAllowance{Maximum: 100, Input: 60, Output: 40, WholeCall: true, CapabilityRevision: revision, Deadline: input.Deadline}
 	certificate := MergerHarnessCertificate{ReportsWholeCall: true, CapabilityRevision: revision}
 
-	cases := map[string]MergerUsage{
+	cases := map[string]workflowstate.MergerUsage{
 		"partial":        {Input: 20, Output: 10, WholeCall: false, CapabilityRevision: revision},
 		"revision":       {Input: 20, Output: 10, WholeCall: true, CapabilityRevision: contenthash.Sum([]byte("meter/v2"))},
 		"input ceiling":  {Input: 61, Output: 10, WholeCall: true, CapabilityRevision: revision},
@@ -99,7 +100,7 @@ func TestNativeMergerMeterGuards(t *testing.T) {
 
 	certificate.ReportsWholeCall = false
 
-	usage := MergerUsage{Input: 20, Output: 10, WholeCall: true, CapabilityRevision: revision}
+	usage := workflowstate.MergerUsage{Input: 20, Output: 10, WholeCall: true, CapabilityRevision: revision}
 	if err := checkWorkflowMergerHarnessUsage(input, certificate, &usage); err == nil {
 		t.Fatal("uncertified accounting accepted")
 	}

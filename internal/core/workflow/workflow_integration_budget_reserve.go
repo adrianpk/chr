@@ -76,7 +76,7 @@ func checkWorkflowIntegrationCallDeadline(policy workflowstate.ExecutionPolicy, 
 	}
 
 	deadline := reservation.Allowance.Deadline
-	if reservation.Allowance == (TokenAllowance{}) {
+	if reservation.Allowance == (workflowstate.TokenAllowance{}) {
 		deadline = reservation.RuntimeDeadline
 
 		if budget.TokenLimit != nil {

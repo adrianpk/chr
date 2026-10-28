@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func nativeRecordReceipt(t *testing.T, store *Store, candidate IntegrationCandidate) Record {
+func nativeRecordReceipt(t *testing.T, store *Store, candidate workflowstate.IntegrationCandidate) Record {
 	t.Helper()
 
 	b := candidate.Native.NativeRecordBinding
@@ -18,7 +18,7 @@ func nativeRecordReceipt(t *testing.T, store *Store, candidate IntegrationCandid
 	workflowIntegrationCommand(t, candidate.Lane.Worktree, "init", "--bare", "--quiet", remote)
 	workflowIntegrationCommand(t, candidate.Lane.Worktree, "push", remote, b.OriginalSource+":"+b.SourceRef, b.ValidatedBase+":"+b.TargetRef)
 
-	var capability NativeCapability
+	var capability workflowstate.NativeCapability
 	if err := store.readWorkflowNativeEvidence(b.InvocationID, b.CapabilityRef, &capability); err != nil {
 		t.Fatal(err)
 	}

@@ -1,6 +1,10 @@
 package workflow
 
-import "testing"
+import (
+	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // TestNativeTargetDrift rebuilds each Git method against an external target
 // writer, retaining source task proofs while rejecting the old review grant.
@@ -58,7 +62,7 @@ func nativeDriftMoveTarget(t *testing.T, f *nativePreparationFixture, content st
 	f.f.base, f.provider.pr.BaseCommit, f.provider.target = base, base, base
 }
 
-func nativeDriftRetained(t *testing.T, f nativePreparationFixture, before Invocation, fresh IntegrationCandidate) {
+func nativeDriftRetained(t *testing.T, f nativePreparationFixture, before Invocation, fresh workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	store, id := f.f.store, f.f.run.ID

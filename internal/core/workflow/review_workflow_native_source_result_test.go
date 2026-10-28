@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeSourceResult reproduces a GitHub indirect rebase whose original PR
@@ -33,7 +35,7 @@ func TestNativeSourceResult(t *testing.T) {
 	}
 }
 
-func nativeSourceResultFixture(t *testing.T) (nativeCapabilityFixture, NativePublicationBinding, PullRequestSnapshot) {
+func nativeSourceResultFixture(t *testing.T) (nativeCapabilityFixture, NativePublicationBinding, workflowstate.PullRequestSnapshot) {
 	t.Helper()
 
 	fixture := newNativeCapabilityFixture(t, "github")
@@ -51,21 +53,21 @@ func nativeSourceResultFixture(t *testing.T) (nativeCapabilityFixture, NativePub
 func TestNativeSourceResultGuards(t *testing.T) {
 	cases := []struct {
 		name, state string
-		change      func(*NativePublicationBinding, *PullRequestSnapshot)
+		change      func(*NativePublicationBinding, *workflowstate.PullRequestSnapshot)
 	}{
-		{"source_metadata_lag", "observing", func(b *NativePublicationBinding, pr *PullRequestSnapshot) {
+		{"source_metadata_lag", "observing", func(b *NativePublicationBinding, pr *workflowstate.PullRequestSnapshot) {
 			pr.HeadCommit = b.Git.SourceCommit
 		}},
-		{"source_metadata_deadline", "reconciliation_required", func(b *NativePublicationBinding, pr *PullRequestSnapshot) {
+		{"source_metadata_deadline", "reconciliation_required", func(b *NativePublicationBinding, pr *workflowstate.PullRequestSnapshot) {
 			pr.HeadCommit, b.ObservationDeadline = b.Git.SourceCommit, time.Now().Add(-time.Minute)
 		}},
-		{"foreign_result", "reconciliation_required", func(_ *NativePublicationBinding, pr *PullRequestSnapshot) {
+		{"foreign_result", "reconciliation_required", func(_ *NativePublicationBinding, pr *workflowstate.PullRequestSnapshot) {
 			pr.ResultCommit = strings.Repeat("e", 40)
 		}},
-		{"retargeted", "reconciliation_required", func(_ *NativePublicationBinding, pr *PullRequestSnapshot) { pr.BaseBranch = "other" }},
-		{"closed_unmerged", "reconciliation_required", func(_ *NativePublicationBinding, pr *PullRequestSnapshot) { pr.Merged = false }},
-		{"foreign_pr", "reconciliation_required", func(_ *NativePublicationBinding, pr *PullRequestSnapshot) { pr.URL += "0" }},
-		{"lost_response", "merged", func(b *NativePublicationBinding, _ *PullRequestSnapshot) {
+		{"retargeted", "reconciliation_required", func(_ *NativePublicationBinding, pr *workflowstate.PullRequestSnapshot) { pr.BaseBranch = "other" }},
+		{"closed_unmerged", "reconciliation_required", func(_ *NativePublicationBinding, pr *workflowstate.PullRequestSnapshot) { pr.Merged = false }},
+		{"foreign_pr", "reconciliation_required", func(_ *NativePublicationBinding, pr *workflowstate.PullRequestSnapshot) { pr.URL += "0" }},
+		{"lost_response", "merged", func(b *NativePublicationBinding, _ *workflowstate.PullRequestSnapshot) {
 			b.Publication.State, b.Publication.PublishedSourceCommit = "unknown", ""
 		}},
 	}
@@ -224,7 +226,7 @@ func TestNativeSourceReceipt(t *testing.T) {
 func nativeSourceResultReceipt(binding NativePublicationBinding, observed NativePublicationObservation) Receipt {
 	proof := *observed.Git
 	native := &NativeReceipt{
-		NativeRecordBinding: NativeRecordBinding{CanonicalPR: binding.PullRequest.URL, SourceRepository: proof.Repository, SourceRef: binding.Capability.SourceRef, TargetRef: binding.Capability.TargetRef, Method: proof.Method, OriginalSource: proof.SourceCommit, PublishedSource: proof.ResultCommit, ValidatedBase: proof.BaseCommit, PreparedResult: proof.ResultCommit, PreparedTree: proof.PreparedTree},
+		NativeRecordBinding: workflowstate.NativeRecordBinding{CanonicalPR: binding.PullRequest.URL, SourceRepository: proof.Repository, SourceRef: binding.Capability.SourceRef, TargetRef: binding.Capability.TargetRef, Method: proof.Method, OriginalSource: proof.SourceCommit, PublishedSource: proof.ResultCommit, ValidatedBase: proof.BaseCommit, PreparedResult: proof.ResultCommit, PreparedTree: proof.PreparedTree},
 		ActualMergeResult:   observed.PullRequest.ResultCommit, ObservationContract: observed.ObservationContract,
 	}
 
@@ -256,7 +258,7 @@ func checkNativeSourceReceiptDenials(t *testing.T, receipt Receipt, observed Nat
 		t.Run(test.name, func(t *testing.T) {
 			copyReceipt, copyObservation := receipt, observed
 			native, proof := *receipt.Native, *observed.Git
-			proof.History = append([]IntegrationCommit(nil), proof.History...)
+			proof.History = append([]workflowstate.IntegrationCommit(nil), proof.History...)
 			copyReceipt.Native, copyObservation.Git = &native, &proof
 			test.change(&copyReceipt, &copyObservation)
 

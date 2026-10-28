@@ -16,7 +16,7 @@ func GitPublicationRevision(request GitPublication) (string, error) {
 	data, err := json.Marshal(struct {
 		Schema, Repository, SourceRepository, SourceRef, TargetRef, OwnershipRevision string
 		SourceRewriteAuthorized                                                       bool
-		Git                                                                           IntegrationProof
+		Git                                                                           workflowstate.IntegrationProof
 	}{"chr-git-publication/v1", request.Repository, request.SourceRepository, request.SourceRef, request.TargetRef, request.OwnershipRevision, request.SourceRewriteAuthorized, request.Git})
 
 	return contenthash.Sum(data), err
@@ -54,7 +54,7 @@ func (git OSWorkflowGitPublisher) validatePublicationProof(ctx context.Context, 
 	return reader.verifyPublicationHistory(ctx, proof)
 }
 
-func validWorkflowPublicationProofObjects(proof IntegrationProof) bool {
+func validWorkflowPublicationProofObjects(proof workflowstate.IntegrationProof) bool {
 	for _, id := range []string{proof.SourceTree, proof.OriginCommit, proof.PreparedTree} {
 		if !workflowCommitID(id) || len(id) != len(proof.ResultCommit) {
 			return false
@@ -82,7 +82,7 @@ func validateWorkflowPublicationOwnership(request GitPublication) error {
 	return nil
 }
 
-func (reader workflowIntegrationReader) verifyPublicationHistory(ctx context.Context, proof IntegrationProof) error {
+func (reader workflowIntegrationReader) verifyPublicationHistory(ctx context.Context, proof workflowstate.IntegrationProof) error {
 	actual := proof
 
 	actual.History = nil

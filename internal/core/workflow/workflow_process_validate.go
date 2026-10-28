@@ -46,7 +46,7 @@ func validateWorkflowAttemptOwner(attempt Attempt) error {
 	return nil
 }
 
-func validWorkflowProcessIdentity(identity ProcessIdentity) bool {
+func validWorkflowProcessIdentity(identity workflowstate.ProcessIdentity) bool {
 	birth, err := strconv.ParseUint(identity.StartTicks, 10, 64)
 
 	return identity.PID > 0 && len(identity.BootID) == 36 && err == nil && birth > 0

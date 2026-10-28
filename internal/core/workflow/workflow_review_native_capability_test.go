@@ -13,24 +13,26 @@ import (
 func TestNativeReviewCapabilities(t *testing.T) {
 	cases := []struct {
 		name   string
-		change func(*NativeCapability)
+		change func(*workflowstate.NativeCapability)
 	}{
-		{"policy", func(c *NativeCapability) { c.PolicyFingerprint = contenthash.Sum([]byte("changed")) }},
-		{"ownership", func(c *NativeCapability) { c.OwnershipRevision = "changed/v2" }},
-		{"server", func(c *NativeCapability) { c.ServerCapabilityFingerprint = contenthash.Sum([]byte("changed")) }},
-		{"publisher", func(c *NativeCapability) {
+		{"policy", func(c *workflowstate.NativeCapability) { c.PolicyFingerprint = contenthash.Sum([]byte("changed")) }},
+		{"ownership", func(c *workflowstate.NativeCapability) { c.OwnershipRevision = "changed/v2" }},
+		{"server", func(c *workflowstate.NativeCapability) {
+			c.ServerCapabilityFingerprint = contenthash.Sum([]byte("changed"))
+		}},
+		{"publisher", func(c *workflowstate.NativeCapability) {
 			c.CredentialIdentityFingerprint = contenthash.Sum([]byte("changed"))
 		}},
-		{"observation", func(c *NativeCapability) { c.ObservationContract = "github_same_pr_git_merge/v1" }},
-		{"adapter", func(c *NativeCapability) { c.AdapterVersion = "unsupported/v2" }},
-		{"source ref", func(c *NativeCapability) { c.SourceRef += "-changed" }},
-		{"source", func(c *NativeCapability) { c.OriginalSourceCommit = c.ExpectedBaseCommit }},
-		{"base", func(c *NativeCapability) { c.ExpectedBaseCommit = c.OriginalSourceCommit }},
-		{"result", func(c *NativeCapability) { c.PreparedResultCommit = c.OriginalSourceCommit }},
-		{"signing", func(c *NativeCapability) {
+		{"observation", func(c *workflowstate.NativeCapability) { c.ObservationContract = "github_same_pr_git_merge/v1" }},
+		{"adapter", func(c *workflowstate.NativeCapability) { c.AdapterVersion = "unsupported/v2" }},
+		{"source ref", func(c *workflowstate.NativeCapability) { c.SourceRef += "-changed" }},
+		{"source", func(c *workflowstate.NativeCapability) { c.OriginalSourceCommit = c.ExpectedBaseCommit }},
+		{"base", func(c *workflowstate.NativeCapability) { c.ExpectedBaseCommit = c.OriginalSourceCommit }},
+		{"result", func(c *workflowstate.NativeCapability) { c.PreparedResultCommit = c.OriginalSourceCommit }},
+		{"signing", func(c *workflowstate.NativeCapability) {
 			c.RequiredSignatures, c.SigningProfile = true, contenthash.Sum([]byte("signer"))
 		}},
-		{"atomic", func(c *NativeCapability) { c.AtomicSourceBase = false }},
+		{"atomic", func(c *workflowstate.NativeCapability) { c.AtomicSourceBase = false }},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
@@ -42,7 +44,7 @@ func TestNativeReviewCapabilities(t *testing.T) {
 	}
 }
 
-func nativeReviewRejectEntryPoints(t *testing.T, f nativePreparationFixture, binding ReviewBinding, provider PullRequestProvider) {
+func nativeReviewRejectEntryPoints(t *testing.T, f nativePreparationFixture, binding workflowstate.ReviewBinding, provider PullRequestProvider) {
 	t.Helper()
 
 	store, id := f.f.store, f.f.run.ID

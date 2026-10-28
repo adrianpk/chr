@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeMergerRegenerationFixture(t *testing.T, failing bool) (workflowPreparationFixture, MergerRequest, MergerHarness) {
@@ -112,7 +114,7 @@ func TestNativeMergerHostRegenerationFailure(t *testing.T) {
 	checkNativeMergerAcceptanceRetainedProcedures(t, f)
 }
 
-func checkNativeMergerRegenerationChain(t *testing.T, repair IntegrationTreeRepair) {
+func checkNativeMergerRegenerationChain(t *testing.T, repair workflowstate.IntegrationTreeRepair) {
 	t.Helper()
 
 	if len(repair.Regeneration) != 2 || repair.ProposalTree == repair.BaselineTree || repair.Regeneration[0].InputTree != repair.ProposalTree || repair.Regeneration[0].OutputTree != repair.Regeneration[1].InputTree || repair.Regeneration[1].OutputTree != repair.ResolvedTree {

@@ -135,11 +135,11 @@ func validateWorkflowIntegrationBindings(run workflowInvocationFile) error {
 	return nil
 }
 
-func validWorkflowIntegrationBinding(run workflowInvocationFile, binding IntegrationBinding) bool {
+func validWorkflowIntegrationBinding(run workflowInvocationFile, binding workflowstate.IntegrationBinding) bool {
 	return binding.EntryID == workflowIntegrationEntryID(run, binding.Unit) && binding.Revision > 0 && binding.EntryRef.Path == workflowIntegrationEntryPath(run.ID, binding.EntryID)
 }
 
-func workflowIntegrationCurrentBinding(run workflowInvocationFile, binding IntegrationBinding) bool {
+func workflowIntegrationCurrentBinding(run workflowInvocationFile, binding workflowstate.IntegrationBinding) bool {
 	return run.Integration != nil && *run.Integration == binding
 }
 

@@ -1,6 +1,10 @@
 package workflow
 
-import "testing"
+import (
+	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // TestGuidedUseCaseRecoveryResumeMarker preserves interrupted set-closing
 // recovery while allowing an interrupted task or validation to continue normally.
@@ -10,8 +14,8 @@ func TestGuidedUseCaseRecoveryResumeMarker(t *testing.T) {
 		change func(*workflowInvocationFile)
 		want   string
 	}{
-		{"task", func(run *workflowInvocationFile) { run.Lane = &Lane{} }, "resumed"},
-		{"validation", func(run *workflowInvocationFile) { run.Cursor = 1; run.Lane = &Lane{} }, "resumed"},
+		{"task", func(run *workflowInvocationFile) { run.Lane = &workflowstate.Lane{} }, "resumed"},
+		{"validation", func(run *workflowInvocationFile) { run.Cursor = 1; run.Lane = &workflowstate.Lane{} }, "resumed"},
 		{"closing", func(run *workflowInvocationFile) { run.Cursor, run.ConfirmedCursor = 1, 1 }, "interrupted"},
 		{"operator pause", func(run *workflowInvocationFile) { run.Outcome = "paused" }, "paused"},
 	} {

@@ -80,6 +80,16 @@ and package README checks pass. All seven focused journal/crash-recovery checks
 pass through the existing QA fixture-owning runner. The signature policy remains 9,305 declarations,
 ceiling six, 162 exact debts and one external exception.
 
-Stage ports/policy separation, assigned signature and typed mode changes, D08
+T12.3 now connects integrate.Validation, merge.Evidence, review.Decisions,
+forge.Responses and closeout.Gate to their actual production operations. Private
+bindings retain claim/prepared/provider or journal/closing identities; all 908
+Store methods and existing mutation/recovery authority remain local. Sixty shared
+protocol types and two evidence enumerators retain exact tokens, wire order/tags
+and nil/empty values. Twenty AST cases enforce state-only stage imports. Focused
+real stage, stop/lost-response, wire/storage, policy/admission and dependency tests
+pass; strict lint is clean with 9,316 production declarations, unchanged ceiling
+six, 162 exact debts and one external exception.
+
+Assigned signature and typed mode changes, D08
 receipt semantics, final caller reconciliation, exact-head controller validation
 and canonical PR preparation remain open. The ticket stays in_progress.

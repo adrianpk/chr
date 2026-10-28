@@ -106,7 +106,7 @@ func TestNativeDecisionBatch(t *testing.T) {
 	nativeDecisionBatchAnswers(t, f, record, questions)
 }
 
-func nativeDecisionBatchAnswers(t *testing.T, f workflowPreparationFixture, record IntegrationDecisions, questions []MergerDecision) {
+func nativeDecisionBatchAnswers(t *testing.T, f workflowPreparationFixture, record IntegrationDecisions, questions []workflowstate.MergerDecision) {
 	t.Helper()
 
 	answer := nativeDecisionAnswer(t, f.store, f.run.ID, record)

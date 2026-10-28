@@ -12,13 +12,13 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) retainWorkflowNativeSend(ctx context.Context, submission Submission, request GitPublication, advertisement GitPublicationAdvertisement) error {
-	_, err := s.updateWorkflowNativeDispatch(ctx, submission, func(owner *Store, native *NativeSubmission) error {
+func (s *Store) retainWorkflowNativeSend(ctx context.Context, submission workflowstate.Submission, request GitPublication, advertisement GitPublicationAdvertisement) error {
+	_, err := s.updateWorkflowNativeDispatch(ctx, submission, func(owner *Store, native *workflowstate.NativeSubmission) error {
 		if err := owner.checkWorkflowNativeSendStop(native.InvocationID); err != nil {
 			return err
 		}
 
-		var capability NativeCapability
+		var capability workflowstate.NativeCapability
 		if err := owner.readWorkflowNativeEvidence(native.InvocationID, native.CapabilityRef, &capability); err != nil {
 			return err
 		}
@@ -50,17 +50,17 @@ func (s *Store) retainWorkflowNativeSend(ctx context.Context, submission Submiss
 	return err
 }
 
-func workflowNativeCommandManifest(submission Submission) NativeCommandManifest {
+func workflowNativeCommandManifest(submission workflowstate.Submission) NativeCommandManifest {
 	native := submission.Native
 
 	return NativeCommandManifest{SchemaVersion: 1, SubmissionID: submission.ID, Atomic: true, SourceRef: native.SourceRef, ExpectedSource: native.OriginalSource, NewSource: native.PreparedResult, TargetRef: native.TargetRef, ExpectedTarget: native.ValidatedBase, NewTarget: native.PreparedResult}
 }
 
-func (s *Store) completeWorkflowNativeDispatch(ctx context.Context, submission Submission, result GitPublicationResult) (Submission, error) {
+func (s *Store) completeWorkflowNativeDispatch(ctx context.Context, submission workflowstate.Submission, result GitPublicationResult) (workflowstate.Submission, error) {
 	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
 
-	return s.updateWorkflowNativeDispatch(ctx, submission, func(owner *Store, native *NativeSubmission) error {
+	return s.updateWorkflowNativeDispatch(ctx, submission, func(owner *Store, native *workflowstate.NativeSubmission) error {
 		if !validWorkflowNativeResponse(*native, result) {
 			return workflowstate.ErrConflict
 		}
@@ -82,7 +82,7 @@ func (s *Store) completeWorkflowNativeDispatch(ctx context.Context, submission S
 	})
 }
 
-func (s *Store) retainWorkflowNativeDispatchResponse(submission Submission, native *NativeSubmission, result GitPublicationResult) error {
+func (s *Store) retainWorkflowNativeDispatchResponse(submission workflowstate.Submission, native *workflowstate.NativeSubmission, result GitPublicationResult) error {
 	ref, err := s.writeWorkflowNativeDispatchEvidence(submission, result)
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ func (s *Store) retainWorkflowNativeDispatchResponse(submission Submission, nati
 	return nil
 }
 
-func (s *Store) writeWorkflowNativeDispatchEvidence(submission Submission, value any) (workflowstate.EvidenceRef, error) {
+func (s *Store) writeWorkflowNativeDispatchEvidence(submission workflowstate.Submission, value any) (workflowstate.EvidenceRef, error) {
 	data, err := json.Marshal(value)
 	if err != nil || len(data) >= workflowstate.FileLimit {
 		return workflowstate.EvidenceRef{}, workflowstate.ErrConflict
@@ -118,7 +118,7 @@ func (s *Store) writeWorkflowNativeDispatchEvidence(submission Submission, value
 	return ref, opsfile.WriteAtomic(path, data)
 }
 
-func (s *Store) updateWorkflowNativeDispatch(ctx context.Context, expected Submission, change func(*Store, *NativeSubmission) error) (submission Submission, err error) {
+func (s *Store) updateWorkflowNativeDispatch(ctx context.Context, expected workflowstate.Submission, change func(*Store, *workflowstate.NativeSubmission) error) (submission workflowstate.Submission, err error) {
 	submission = expected
 	err = s.withLock(ctx, func() error {
 		run, owner, err := s.locateWorkflowInvocation(ctx, expected.InvocationID)
@@ -151,7 +151,7 @@ func (s *Store) updateWorkflowNativeDispatch(ctx context.Context, expected Submi
 	return submission, err
 }
 
-func (s *Store) readWorkflowOwnedDispatch(ctx context.Context, run workflowInvocationFile, expected Submission) (workflowSubmissionJournal, IntegrationEntry, error) {
+func (s *Store) readWorkflowOwnedDispatch(ctx context.Context, run workflowInvocationFile, expected workflowstate.Submission) (workflowSubmissionJournal, IntegrationEntry, error) {
 	journal, err := s.readWorkflowSubmissionJournal(ctx, run)
 	if err != nil {
 		return journal, IntegrationEntry{}, err
@@ -175,7 +175,7 @@ func (s *Store) readWorkflowOwnedDispatch(ctx context.Context, run workflowInvoc
 	return journal, entry, err
 }
 
-func workflowNativeDispatchIntentMatches(last, expected Submission) bool {
+func workflowNativeDispatchIntentMatches(last, expected workflowstate.Submission) bool {
 	return last.ID == expected.ID && last.Native != nil && sameWorkflowNativeSubmissionIntent(*last.Native, *expected.Native) && last.Native.DispatchIdentity != nil
 }
 

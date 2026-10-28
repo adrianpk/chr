@@ -34,40 +34,17 @@ type NativePolicy struct {
 // NativePolicyReader rechecks trusted ownership, credential roles and
 // provider observation certification before each admission or intent check.
 type NativePolicyReader interface {
-	ReadWorkflowNativePolicy(context.Context, PullRequestSnapshot, string) (NativePolicy, error)
-}
-
-// NativeUnsupported identifies a condition and the required decision.
-type NativeUnsupported struct {
-	Condition string `json:"condition"`
-	Decision  string `json:"decision"`
-}
-
-// NativeCapability binds current policy and transport to the original PR.
-type NativeCapability struct {
-	PublicationCapability
-	SourceRef                     string              `json:"source_ref"`
-	TargetRef                     string              `json:"target_ref"`
-	OwnershipRevision             string              `json:"ownership_revision"`
-	PolicyFingerprint             string              `json:"policy_fingerprint"`
-	ServerCapabilityFingerprint   string              `json:"server_capability_fingerprint"`
-	CredentialIdentityFingerprint string              `json:"credential_identity_fingerprint"`
-	ObservationContract           string              `json:"observation_contract"`
-	AdapterVersion                string              `json:"adapter_version"`
-	OriginalSourceCommit          string              `json:"original_source_commit"`
-	ExpectedBaseCommit            string              `json:"expected_base_commit"`
-	PreparedResultCommit          string              `json:"prepared_result_commit"`
-	Unsupported                   []NativeUnsupported `json:"unsupported,omitempty"`
+	ReadWorkflowNativePolicy(context.Context, workflowstate.PullRequestSnapshot, string) (NativePolicy, error)
 }
 
 // NativeCapabilityRequest supplies the explicit profile and exact source.
 type NativeCapabilityRequest struct {
 	Config      workspaceconfig.WorkIntegrationConfig
-	PullRequest PullRequestSnapshot
+	PullRequest workflowstate.PullRequestSnapshot
 	Publication GitPublication
 }
 
-func workflowNativePolicyReasons(request NativeCapabilityRequest, policy NativePolicy) []NativeUnsupported {
+func workflowNativePolicyReasons(request NativeCapabilityRequest, policy NativePolicy) []workflowstate.NativeUnsupported {
 	publication := request.Publication
 	checks := []struct {
 		valid     bool
@@ -85,11 +62,11 @@ func workflowNativePolicyReasons(request NativeCapabilityRequest, policy NativeP
 		{slices.Contains(policy.CertifiedMethods, publication.Git.Method), "method_uncertified", "Certify the configured method for this observation profile."},
 	}
 
-	var reasons []NativeUnsupported
+	var reasons []workflowstate.NativeUnsupported
 
 	for _, check := range checks {
 		if !check.valid {
-			reasons = append(reasons, NativeUnsupported{check.condition, check.decision})
+			reasons = append(reasons, workflowstate.NativeUnsupported{Condition: check.condition, Decision: check.decision})
 		}
 	}
 
@@ -100,7 +77,7 @@ func validWorkflowNativeFingerprint(value string) bool {
 	return len(value) == 64 && workflowCommitID(value)
 }
 
-func sealWorkflowNativeCapability(capability NativeCapability) (NativeCapability, error) {
+func sealWorkflowNativeCapability(capability workflowstate.NativeCapability) (workflowstate.NativeCapability, error) {
 	capability.Revision = ""
 
 	data, err := json.Marshal(capability)

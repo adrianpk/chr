@@ -23,7 +23,7 @@ func (s *Store) checkWorkflowDecisionReplayAnswer(record IntegrationDecisions, a
 	return nil
 }
 
-func workflowMergerAnsweredPlan(plan MergerRepairPlan, input MergerInput, owners []string) (MergerRepairPlan, bool, error) {
+func workflowMergerAnsweredPlan(plan MergerRepairPlan, input workflowstate.MergerInput, owners []string) (MergerRepairPlan, bool, error) {
 	if input.OperatorDecisionRef == nil {
 		return plan, false, nil
 	}

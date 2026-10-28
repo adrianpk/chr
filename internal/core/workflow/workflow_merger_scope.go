@@ -50,11 +50,11 @@ func workflowMergerControlPath(path string) bool {
 	return false
 }
 
-func workflowMergerPathAllowed(input MergerInput, path string) bool {
+func workflowMergerPathAllowed(input workflowstate.MergerInput, path string) bool {
 	return validWorkflowMergerPath(path) && !workflowMergerControlPath(path) && workflowMergerPathWithin(path, input.AllowedPaths) && !workflowMergerPathWithin(path, input.ProtectedPaths)
 }
 
-func validateWorkflowMergerScope(input MergerInput) error {
+func validateWorkflowMergerScope(input workflowstate.MergerInput) error {
 	if len(input.AllowedPaths) == 0 {
 		return workflowstate.ErrConflict
 	}

@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func nativeReceiptMerged(t *testing.T, fixture nativeCanonicalFixture) Submission {
+func nativeReceiptMerged(t *testing.T, fixture nativeCanonicalFixture) workflowstate.Submission {
 	t.Helper()
 
 	f, b := fixture.f, fixture.f.candidate.Native.NativeRecordBinding
@@ -77,7 +77,7 @@ func TestNativeReceiptFences(t *testing.T) {
 	}
 }
 
-func checkNativeReceiptAbsent(t *testing.T, f nativeSubmissionFixture, submission Submission) {
+func checkNativeReceiptAbsent(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission) {
 	t.Helper()
 
 	run, err := f.store.readWorkflowInvocation(submission.InvocationID)

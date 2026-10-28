@@ -35,7 +35,7 @@ func (s *Store) checkWorkflowInvocationClosureEvidence(run workflowInvocationFil
 			return errorsOrConflict(err)
 		}
 
-		var receipt ClosingReceipt
+		var receipt workflowstate.ClosingReceipt
 		if err := json.Unmarshal(data, &receipt); err != nil {
 			return err
 		}

@@ -32,7 +32,7 @@ func (s *Store) workflowMergerAdmission(ctx context.Context, run workflowInvocat
 	return entry, budget, seed, err
 }
 
-func (s *Store) checkWorkflowMergerAdmissionInputs(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, input MergerInput, harness MergerHarness, provider PullRequestProvider) error {
+func (s *Store) checkWorkflowMergerAdmissionInputs(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, input workflowstate.MergerInput, harness MergerHarness, provider PullRequestProvider) error {
 	if !workflowMergerRunnable(run, entry) {
 		return ErrWorkflowOwned
 	}
@@ -68,7 +68,7 @@ func (s *Store) checkWorkflowMergerAdmissionInputs(ctx context.Context, run work
 	return checkWorkflowMergerBudget(budget, input)
 }
 
-func checkWorkflowMergerEntry(run workflowInvocationFile, entry IntegrationEntry, input MergerInput) error {
+func checkWorkflowMergerEntry(run workflowInvocationFile, entry IntegrationEntry, input workflowstate.MergerInput) error {
 	if run.Lane == nil || input.WorkerTimeoutSeconds != run.Policy.WorkerTimeoutSeconds {
 		return workflowstate.ErrConflict
 	}
@@ -91,7 +91,7 @@ func checkWorkflowMergerEntry(run workflowInvocationFile, entry IntegrationEntry
 	return nil
 }
 
-func (s *Store) workflowMergerSeed(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, input MergerInput) (string, error) {
+func (s *Store) workflowMergerSeed(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, input workflowstate.MergerInput) (string, error) {
 	policy, err := s.workflowReviewPolicy(run)
 	if err != nil || policy.Method != input.Method {
 		return "", workflowstate.ErrConflict
@@ -105,7 +105,7 @@ func (s *Store) workflowMergerSeed(ctx context.Context, run workflowInvocationFi
 		return input.Source, nil
 	}
 
-	var candidate IntegrationCandidate
+	var candidate workflowstate.IntegrationCandidate
 	if err := s.readWorkflowNativeEvidence(run.ID, *entry.CandidateRef, &candidate); err != nil {
 		return "", err
 	}

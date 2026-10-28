@@ -243,7 +243,7 @@ func nativeEntryNextNamespace(t *testing.T, store *Store) (*Store, IntegrationAd
 	}
 
 	record := snapshot.Records[0]
-	record.Identity, record.Path, record.SourceHash = Identity{}, "", ""
+	record.Identity, record.Path, record.SourceHash = workflowstate.Identity{}, "", ""
 	record.Task.Key = "PRJ-91"
 
 	record, err = peer.Create(t.Context(), "Other namespace task", record)

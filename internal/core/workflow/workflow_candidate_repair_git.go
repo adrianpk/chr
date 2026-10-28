@@ -10,9 +10,9 @@ import (
 
 // PrepareWorkflowRepairedIntegration independently verifies retained method
 // history and imports exactly the host-accepted P into a fresh gate checkout.
-func (git OSWorkflowPreparationGit) PrepareWorkflowRepairedIntegration(ctx context.Context, query PreparationQuery, state MergerRepairState) (IntegrationProof, error) {
+func (git OSWorkflowPreparationGit) PrepareWorkflowRepairedIntegration(ctx context.Context, query PreparationQuery, state MergerRepairState) (workflowstate.IntegrationProof, error) {
 	if !validWorkflowRepairedPreparationQuery(git, query, state) {
-		return IntegrationProof{}, workflowstate.ErrConflict
+		return workflowstate.IntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	proof := *state.Result
@@ -36,7 +36,7 @@ func (git OSWorkflowPreparationGit) PrepareWorkflowRepairedIntegration(ctx conte
 	return proof, attachWorkflowPreparation(ctx, reader, query, proof)
 }
 
-func checkWorkflowRepairedCheckout(ctx context.Context, reader workflowIntegrationReader, proof IntegrationProof) error {
+func checkWorkflowRepairedCheckout(ctx context.Context, reader workflowIntegrationReader, proof workflowstate.IntegrationProof) error {
 	head, err := reader.Output(ctx, "rev-parse", "HEAD")
 	if err != nil || head != proof.ResultCommit {
 		return errorsOrConflict(err)

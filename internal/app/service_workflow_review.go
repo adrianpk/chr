@@ -4,34 +4,35 @@ import (
 	"context"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ReviewWorkflowSlice uses the shared policy, evidence and supervised role path.
-func (s service) ReviewWorkflowSlice(ctx context.Context, id string, reviewer []string) (workflowcore.ReviewBinding, error) {
+func (s service) ReviewWorkflowSlice(ctx context.Context, id string, reviewer []string) (workflowstate.ReviewBinding, error) {
 	store, provider, err := s.workflowReviewDependencies(id)
 	if err != nil {
-		return workflowcore.ReviewBinding{}, err
+		return workflowstate.ReviewBinding{}, err
 	}
 
 	return store.ReviewWorkflowSlice(ctx, id, provider, reviewer)
 }
 
 // ApproveWorkflowSlice binds explicit approval to the current displayed hash.
-func (s service) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string, expected ...uint64) (workflowcore.ReviewBinding, error) {
+func (s service) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string, expected ...uint64) (workflowstate.ReviewBinding, error) {
 	store, provider, err := s.workflowReviewDependencies(id)
 	if err != nil {
-		return workflowcore.ReviewBinding{}, err
+		return workflowstate.ReviewBinding{}, err
 	}
 
 	return store.ApproveWorkflowSlice(ctx, id, bindingHash, provider, expected...)
 }
 
 // CheckWorkflowReviewGrant rechecks authorization for a guarded publication.
-func (s service) CheckWorkflowReviewGrant(ctx context.Context, id string) (workflowcore.ReviewInput, error) {
+func (s service) CheckWorkflowReviewGrant(ctx context.Context, id string) (workflowstate.ReviewInput, error) {
 	store, provider, err := s.workflowReviewDependencies(id)
 	if err != nil {
-		return workflowcore.ReviewInput{}, err
+		return workflowstate.ReviewInput{}, err
 	}
 
 	return store.CheckWorkflowReviewGrant(ctx, id, provider)

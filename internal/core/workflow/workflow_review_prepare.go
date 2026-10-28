@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider PullRequestProvider, reviewer []string, harness *AgentHarness) (claim *Claim, prepared workflowPreparedTask, binding ReviewBinding, err error) {
+func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider PullRequestProvider, reviewer []string, harness *AgentHarness) (claim *Claim, prepared workflowPreparedTask, binding workflowstate.ReviewBinding, err error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 
@@ -60,7 +60,7 @@ func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider P
 	return claim, prepared, binding, err
 }
 
-func (s *Store) ensureWorkflowReviewInput(run *workflowInvocationFile, observation workflowSliceObservation, input ReviewInput) error {
+func (s *Store) ensureWorkflowReviewInput(run *workflowInvocationFile, observation workflowSliceObservation, input workflowstate.ReviewInput) error {
 	hash, err := workflowReviewInputHash(input)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func (s *Store) ensureWorkflowReviewInput(run *workflowInvocationFile, observati
 	return s.replaceWorkflowReviewInput(run, observation, input)
 }
 
-func (s *Store) replaceWorkflowReviewInput(run *workflowInvocationFile, observation workflowSliceObservation, input ReviewInput) error {
+func (s *Store) replaceWorkflowReviewInput(run *workflowInvocationFile, observation workflowSliceObservation, input workflowstate.ReviewInput) error {
 	if err := s.persistWorkflowReviewInput(run, observation, input); err != nil {
 		return err
 	}
@@ -97,14 +97,14 @@ func (s *Store) replaceWorkflowReviewInput(run *workflowInvocationFile, observat
 	return err
 }
 
-func (s *Store) prepareWorkflowReviewPolicy(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input ReviewInput, reviewer []string, harness *AgentHarness) (*Claim, workflowPreparedTask, error) {
+func (s *Store) prepareWorkflowReviewPolicy(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input workflowstate.ReviewInput, reviewer []string, harness *AgentHarness) (*Claim, workflowPreparedTask, error) {
 	switch input.Policy.Mode {
 	case workflowstate.ReviewHuman:
 		run.Review.State, run.Outcome = "waiting_approval", "slice_review_waiting_approval"
 
 		return nil, workflowPreparedTask{}, s.commitWorkflowState(run)
 	case workflowstate.ReviewTrustedAutoMerge:
-		decision := ReviewDecision{BindingHash: run.Review.InputHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Required host validation accepted under current trusted policy."}}
+		decision := workflowstate.ReviewDecision{BindingHash: run.Review.InputHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Required host validation accepted under current trusted policy."}}
 
 		return nil, workflowPreparedTask{}, s.persistWorkflowReviewDecision(run, observation, decision, "authorized")
 	case workflowstate.ReviewAgentic:
@@ -118,7 +118,7 @@ func (s *Store) prepareWorkflowReviewPolicy(ctx context.Context, run *workflowIn
 	}
 }
 
-func (s *Store) claimWorkflowReview(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input ReviewInput, reviewer []string, harness *AgentHarness) (claim *Claim, prepared workflowPreparedTask, err error) {
+func (s *Store) claimWorkflowReview(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input workflowstate.ReviewInput, reviewer []string, harness *AgentHarness) (claim *Claim, prepared workflowPreparedTask, err error) {
 	claim, err = s.reserveWorkflowRole(ctx, *run, workflowSliceReviewPurpose)
 	if err != nil {
 		return nil, prepared, err

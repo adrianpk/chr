@@ -25,7 +25,7 @@ func (reader workflowIntegrationReader) replayCommit(ctx context.Context, tree, 
 	return reader.attributedPreparationCommit(ctx, tree, parent, attribution.Author, attribution.Encoding, message)
 }
 
-func (reader workflowIntegrationReader) attributedPreparationCommit(ctx context.Context, tree, parent string, author IntegrationIdentity, encoding, message string) (string, error) {
+func (reader workflowIntegrationReader) attributedPreparationCommit(ctx context.Context, tree, parent string, author workflowstate.IntegrationIdentity, encoding, message string) (string, error) {
 	return reader.preparationObject(ctx, tree, []string{parent}, author, encoding, message)
 }
 
@@ -37,7 +37,7 @@ func (reader workflowIntegrationReader) preparationCommitterDate() string {
 	return fmt.Sprintf("%d +0000", time.Now().Unix())
 }
 
-func (reader workflowIntegrationReader) preparationObject(ctx context.Context, tree string, parents []string, author IntegrationIdentity, encoding, message string) (string, error) {
+func (reader workflowIntegrationReader) preparationObject(ctx context.Context, tree string, parents []string, author workflowstate.IntegrationIdentity, encoding, message string) (string, error) {
 	if !validWorkflowPreparationObject(tree, parents, author, encoding) {
 		return "", workflowstate.ErrConflict
 	}
@@ -69,7 +69,7 @@ func (reader workflowIntegrationReader) preparationObject(ctx context.Context, t
 	return strings.TrimSpace(id), err
 }
 
-func validWorkflowPreparationObject(tree string, parents []string, author IntegrationIdentity, encoding string) bool {
+func validWorkflowPreparationObject(tree string, parents []string, author workflowstate.IntegrationIdentity, encoding string) bool {
 	if !workflowCommitID(tree) || !validWorkflowCommitIdentity(author) || strings.ContainsAny(encoding, "\x00\r\n") || len(parents) < 1 || len(parents) > 2 {
 		return false
 	}
@@ -83,7 +83,7 @@ func validWorkflowPreparationObject(tree string, parents []string, author Integr
 	return true
 }
 
-func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, proof IntegrationProof, tree string, finding workflowstate.ReviewFinding) (IntegrationProof, error) {
+func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, proof workflowstate.IntegrationProof, tree string, finding workflowstate.ReviewFinding) (workflowstate.IntegrationProof, error) {
 	if !validWorkflowRebaseFixInput(proof, finding) {
 		return proof, workflowstate.ErrConflict
 	}
@@ -100,7 +100,7 @@ func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, pr
 		return proof, workflowstate.ErrConflict
 	}
 
-	author := IntegrationIdentity{Name: "Workflow Host", Email: "workflow@example.invalid", Date: fmt.Sprintf("%d +0000", time.Now().Unix())}
+	author := workflowstate.IntegrationIdentity{Name: "Workflow Host", Email: "workflow@example.invalid", Date: fmt.Sprintf("%d +0000", time.Now().Unix())}
 
 	commit, err := reader.attributedPreparationCommit(ctx, tree, proof.ResultCommit, author, "", "fix(integration): "+finding.Title+"\n\n"+finding.Detail+"\n")
 	if err != nil {
@@ -108,7 +108,7 @@ func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, pr
 	}
 
 	p := *proof.Provenance
-	p.IntegrationFixes = append(append([]IntegrationFix{}, p.IntegrationFixes...), IntegrationFix{Commit: commit, Finding: finding})
+	p.IntegrationFixes = append(append([]workflowstate.IntegrationFix{}, p.IntegrationFixes...), workflowstate.IntegrationFix{Commit: commit, Finding: finding})
 	proof.Provenance = &p
 	proof.ResultCommit, proof.PreparedTree, proof.VerifiedTree = commit, tree, tree
 
@@ -125,7 +125,7 @@ func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, pr
 	return proof, reader.verifyPublicationHistory(ctx, proof)
 }
 
-func (reader workflowIntegrationReader) requireRebaseFixSigner(proof IntegrationProof) error {
+func (reader workflowIntegrationReader) requireRebaseFixSigner(proof workflowstate.IntegrationProof) error {
 	p := proof.Provenance.Preparation
 	if p == nil || !p.RequiredSignatures {
 		return nil
@@ -139,6 +139,6 @@ func (reader workflowIntegrationReader) requireRebaseFixSigner(proof Integration
 	return nil
 }
 
-func validWorkflowRebaseFixInput(proof IntegrationProof, finding workflowstate.ReviewFinding) bool {
+func validWorkflowRebaseFixInput(proof workflowstate.IntegrationProof, finding workflowstate.ReviewFinding) bool {
 	return proof.Method == "rebase" && proof.Provenance != nil && validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) == nil && workflowstate.ValidateReviewFinding(finding) == nil && finding.Category != workflowstate.AgenticReviewFindingCosmetic
 }

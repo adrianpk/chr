@@ -20,7 +20,7 @@ func workflowTaskUnit(record Record) workflowstate.Ref {
 	return workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}
 }
 
-func (s *Store) retainedWorkflowLane(ctx context.Context, run workflowInvocationFile, record Record) (*Lane, error) {
+func (s *Store) retainedWorkflowLane(ctx context.Context, run workflowInvocationFile, record Record) (*workflowstate.Lane, error) {
 	unit := workflowTaskUnit(record)
 	if run.Lane != nil && run.Lane.Unit == unit {
 		lane := *run.Lane
@@ -78,14 +78,14 @@ func (s *Store) workflowLaneSelection(ctx context.Context, run workflowInvocatio
 	return request, nil
 }
 
-func (s *Store) newWorkflowLane(run workflowInvocationFile, record Record) Lane {
+func (s *Store) newWorkflowLane(run workflowInvocationFile, record Record) workflowstate.Lane {
 	unit := workflowTaskUnit(record)
 	id := contenthash.Sum([]byte(run.Namespace + "\x00" + unit.Kind + "\x00" + unit.ID))[:24]
 
-	return Lane{Unit: unit, Branch: "refs/heads/chr/workflow/" + id, Worktree: filepath.Join(s.layout.WorktreeRoot(), "workflow-"+id), BaseCommit: run.ExecutionSelection().Target.Commit, HeadCommit: run.ExecutionSelection().Target.Commit}
+	return workflowstate.Lane{Unit: unit, Branch: "refs/heads/chr/workflow/" + id, Worktree: filepath.Join(s.layout.WorktreeRoot(), "workflow-"+id), BaseCommit: run.ExecutionSelection().Target.Commit, HeadCommit: run.ExecutionSelection().Target.Commit}
 }
 
-func (s *Store) ensureWorkflowLane(ctx context.Context, lane Lane) error {
+func (s *Store) ensureWorkflowLane(ctx context.Context, lane workflowstate.Lane) error {
 	git := executioncore.OSWorktreeGit{}
 	branch := strings.TrimPrefix(lane.Branch, "refs/heads/")
 
@@ -126,7 +126,7 @@ func (s *Store) ensureWorkflowLane(ctx context.Context, lane Lane) error {
 	return err
 }
 
-func (s *Store) observeWorkflowLane(ctx context.Context, lane Lane) (string, error) {
+func (s *Store) observeWorkflowLane(ctx context.Context, lane workflowstate.Lane) (string, error) {
 	commit, tree, err := s.workflowLaneCandidate(ctx, lane)
 	if err == nil && commit != lane.HeadCommit {
 		err = fmt.Errorf("%w: retained lane moved without a checkpoint", workflowstate.ErrConflict)
@@ -135,7 +135,7 @@ func (s *Store) observeWorkflowLane(ctx context.Context, lane Lane) (string, err
 	return tree, err
 }
 
-func (s *Store) workflowLaneCandidate(ctx context.Context, lane Lane) (string, string, error) {
+func (s *Store) workflowLaneCandidate(ctx context.Context, lane workflowstate.Lane) (string, string, error) {
 	if err := s.checkWorkflowLaneRegistration(ctx, lane); err != nil {
 		return "", "", err
 	}
@@ -169,7 +169,7 @@ func errorsOrConflict(err error) error {
 	return workflowstate.ErrConflict
 }
 
-func (s *Store) checkWorkflowLaneRegistration(ctx context.Context, lane Lane) error {
+func (s *Store) checkWorkflowLaneRegistration(ctx context.Context, lane workflowstate.Lane) error {
 	if !validWorkflowLane(lane) {
 		return workflowstate.ErrConflict
 	}
@@ -198,6 +198,6 @@ func (s *Store) checkWorkflowLaneRegistration(ctx context.Context, lane Lane) er
 	return fmt.Errorf("%w: lane branch or worktree registration changed", workflowstate.ErrConflict)
 }
 
-func validWorkflowLane(lane Lane) bool {
+func validWorkflowLane(lane workflowstate.Lane) bool {
 	return (lane.Unit.Kind == "slice" || lane.Unit.Kind == "ticket") && lane.Unit.ID != "" && strings.HasPrefix(lane.Branch, "refs/heads/chr/workflow/") && filepath.IsAbs(lane.Worktree) && workflowCommitID(lane.BaseCommit) && workflowCommitID(lane.HeadCommit)
 }

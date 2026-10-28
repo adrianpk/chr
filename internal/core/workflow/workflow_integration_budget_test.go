@@ -46,7 +46,7 @@ func nativeBudgetGuard(t *testing.T, store *Store, id string) IntegrationBudgetG
 }
 
 func nativeBudgetReservation(entry IntegrationEntry, id, role string, input, output int64) IntegrationReservation {
-	return IntegrationReservation{ID: id, Kind: "agent_call", Role: role, EntryID: entry.ID, Unit: entry.Unit, ClaimGeneration: entry.ClaimGeneration, AttemptID: id, State: "reserved", Allowance: TokenAllowance{Maximum: input + output, Input: input, Output: output, CapabilityRevision: contenthash.Sum([]byte("whole-call-meter/v1")), WholeCall: true, Deadline: time.Now().UTC().Add(time.Hour)}}
+	return IntegrationReservation{ID: id, Kind: "agent_call", Role: role, EntryID: entry.ID, Unit: entry.Unit, ClaimGeneration: entry.ClaimGeneration, AttemptID: id, State: "reserved", Allowance: workflowstate.TokenAllowance{Maximum: input + output, Input: input, Output: output, CapabilityRevision: contenthash.Sum([]byte("whole-call-meter/v1")), WholeCall: true, Deadline: time.Now().UTC().Add(time.Hour)}}
 }
 
 // TestNativeBudgetRace prevents concurrent roles from oversubscribing one ceiling

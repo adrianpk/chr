@@ -14,7 +14,7 @@ import (
 type MergerRepairGit interface {
 	CheckWorkflowMergerCheckpoint(context.Context, MergerRepairState) error
 	ImportWorkflowMergerTree(context.Context, MergerRepairState, string, string) error
-	ContinueWorkflowMergerRepair(context.Context, MergerRepairState, IntegrationTreeRepair) (MergerRepairState, error)
+	ContinueWorkflowMergerRepair(context.Context, MergerRepairState, workflowstate.IntegrationTreeRepair) (MergerRepairState, error)
 }
 
 // MergerCheckpointRecord binds a private replay checkpoint to the queue
@@ -86,7 +86,7 @@ func workflowMergerCandidateHash(run workflowInvocationFile, entry IntegrationEn
 	return run.CandidateHash
 }
 
-func (s *Store) readWorkflowMergerCheckpoint(input MergerInput) (MergerRepairState, error) {
+func (s *Store) readWorkflowMergerCheckpoint(input workflowstate.MergerInput) (MergerRepairState, error) {
 	var record MergerCheckpointRecord
 	if input.RepairCheckpointRef == nil {
 		return record.State, workflowstate.ErrConflict
@@ -120,7 +120,7 @@ func (s *Store) checkWorkflowMergerCheckpointOwner(run workflowInvocationFile, e
 	return nil
 }
 
-func workflowMergerCheckpointMatches(record MergerCheckpointRecord, input MergerInput) bool {
+func workflowMergerCheckpointMatches(record MergerCheckpointRecord, input workflowstate.MergerInput) bool {
 	expected := [5]string{input.InvocationID, input.EntryID, input.CandidateHash, input.ScopeHash, input.Repository}
 
 	actual := [5]string{record.InvocationID, record.EntryID, record.CandidateHash, record.ScopeHash, record.State.Query.Repository}

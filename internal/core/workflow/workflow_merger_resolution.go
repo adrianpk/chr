@@ -11,7 +11,7 @@ func validWorkflowMergerText(text string) bool {
 	return strings.TrimSpace(text) != "" && len(text) <= 4096 && !strings.ContainsRune(text, '\x00')
 }
 
-func validateWorkflowMergerResolutions(result MergerResult, input MergerInput) error {
+func validateWorkflowMergerResolutions(result workflowstate.MergerResult, input workflowstate.MergerInput) error {
 	if len(result.ResolutionNotes) > len(input.Conflicts) {
 		return workflowstate.ErrConflict
 	}
@@ -19,7 +19,7 @@ func validateWorkflowMergerResolutions(result MergerResult, input MergerInput) e
 	seen := map[string]bool{}
 
 	for _, note := range result.ResolutionNotes {
-		index := slices.IndexFunc(input.Conflicts, func(c MergerConflict) bool { return c.ID == note.ConflictID })
+		index := slices.IndexFunc(input.Conflicts, func(c workflowstate.MergerConflict) bool { return c.ID == note.ConflictID })
 		if index < 0 || seen[note.ConflictID] || !validWorkflowMergerText(note.Rationale) {
 			return workflowstate.ErrConflict
 		}
@@ -34,7 +34,7 @@ func validateWorkflowMergerResolutions(result MergerResult, input MergerInput) e
 	return validateWorkflowMergerDecisions(result.DecisionRequests, input)
 }
 
-func validateWorkflowMergerResolution(note MergerResolution, conflict MergerConflict, input MergerInput) error {
+func validateWorkflowMergerResolution(note workflowstate.MergerResolution, conflict workflowstate.MergerConflict, input workflowstate.MergerInput) error {
 	if note.Path != conflict.Path || !slices.Equal(note.RegenerationCommand, conflict.RegenerationCommand) {
 		return workflowstate.ErrConflict
 	}
@@ -52,7 +52,7 @@ func validateWorkflowMergerResolution(note MergerResolution, conflict MergerConf
 	return nil
 }
 
-func validateWorkflowMergerDecisions(decisions []MergerDecision, input MergerInput) error {
+func validateWorkflowMergerDecisions(decisions []workflowstate.MergerDecision, input workflowstate.MergerInput) error {
 	if len(decisions) > 16 {
 		return workflowstate.ErrConflict
 	}
@@ -94,7 +94,7 @@ func validWorkflowMergerOptions(options []string) bool {
 	return true
 }
 
-func validateWorkflowMergerOutcome(result MergerResult, input MergerInput) error {
+func validateWorkflowMergerOutcome(result workflowstate.MergerResult, input workflowstate.MergerInput) error {
 	switch result.Outcome {
 	case "resolved":
 		return validateWorkflowMergerResolved(result, input)
@@ -111,7 +111,7 @@ func validateWorkflowMergerOutcome(result MergerResult, input MergerInput) error
 	return nil
 }
 
-func validateWorkflowMergerResolved(result MergerResult, input MergerInput) error {
+func validateWorkflowMergerResolved(result workflowstate.MergerResult, input workflowstate.MergerInput) error {
 	if len(result.DecisionRequests) > 0 || result.Failure != "" || len(result.ChangedPaths) == 0 || len(result.ResolutionNotes) != len(input.Conflicts) || len(result.PreservedRequirements) != len(input.Requirements) {
 		return workflowstate.ErrConflict
 	}

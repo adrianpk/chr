@@ -17,28 +17,28 @@ import (
 func TestWorkflowPreparationGuard(t *testing.T) {
 	cases := []struct {
 		name   string
-		change func(*testing.T, workflowPreparationFixture, IntegrationCandidate)
+		change func(*testing.T, workflowPreparationFixture, workflowstate.IntegrationCandidate)
 	}{
-		{"base", func(t *testing.T, f workflowPreparationFixture, _ IntegrationCandidate) {
+		{"base", func(t *testing.T, f workflowPreparationFixture, _ workflowstate.IntegrationCandidate) {
 			t.Helper()
 
 			f.provider.target = contenthash.Sum([]byte("moved"))[:40]
 			f.provider.pr.BaseCommit = f.provider.target
 		}},
-		{"protection", func(_ *testing.T, f workflowPreparationFixture, _ IntegrationCandidate) {
+		{"protection", func(_ *testing.T, f workflowPreparationFixture, _ workflowstate.IntegrationCandidate) {
 			f.provider.revision = "guard-v2"
 		}},
-		{"source", func(_ *testing.T, f workflowPreparationFixture, _ IntegrationCandidate) {
+		{"source", func(_ *testing.T, f workflowPreparationFixture, _ workflowstate.IntegrationCandidate) {
 			f.provider.pr.HeadCommit = contenthash.Sum([]byte("changed-source"))[:40]
 		}},
-		{"lane", func(t *testing.T, _ workflowPreparationFixture, c IntegrationCandidate) {
+		{"lane", func(t *testing.T, _ workflowPreparationFixture, c workflowstate.IntegrationCandidate) {
 			t.Helper()
 
 			if err := os.WriteFile(filepath.Join(c.Lane.Worktree, "target.txt"), []byte("changed"), 0o600); err != nil {
 				t.Fatal(err)
 			}
 		}},
-		{"evidence", func(t *testing.T, f workflowPreparationFixture, _ IntegrationCandidate) {
+		{"evidence", func(t *testing.T, f workflowPreparationFixture, _ workflowstate.IntegrationCandidate) {
 			t.Helper()
 
 			run := workflowTestRead(t, f.store, f.run.ID)
@@ -97,14 +97,14 @@ func TestWorkflowPreparationProviderPaths(t *testing.T) {
 			t.Run(url+"/"+method, func(t *testing.T) {
 				runner := newFakeRemoteReviewRunner()
 				adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
-				pr := PullRequestSnapshot{URL: url, Repository: "https://example.invalid/owner/repo"}
+				pr := workflowstate.PullRequestSnapshot{URL: url, Repository: "https://example.invalid/owner/repo"}
 
 				capability, err := adapter.WorkflowIntegrationCapability(t.Context(), pr, method)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				if err := validateWorkflowPublicationCapability(ReviewInput{PullRequest: pr, Policy: workflowstate.ReviewPolicy{Method: method}}, capability); !errors.Is(err, ErrWorkflowAtomicGuard) {
+				if err := validateWorkflowPublicationCapability(workflowstate.ReviewInput{PullRequest: pr, Policy: workflowstate.ReviewPolicy{Method: method}}, capability); !errors.Is(err, ErrWorkflowAtomicGuard) {
 					t.Fatalf("provider falsely claimed guard: %v", err)
 				}
 
@@ -121,7 +121,7 @@ type workflowPreparationGitHook struct {
 	after func()
 }
 
-func (g workflowPreparationGitHook) PrepareWorkflowIntegration(ctx context.Context, query PreparationQuery) (IntegrationProof, error) {
+func (g workflowPreparationGitHook) PrepareWorkflowIntegration(ctx context.Context, query PreparationQuery) (workflowstate.IntegrationProof, error) {
 	proof, err := g.git.PrepareWorkflowIntegration(ctx, query)
 	if err == nil {
 		g.after()

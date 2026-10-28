@@ -31,31 +31,31 @@ func (p *serviceWorkEntryProvider) ReadWorkflowBranch(ctx context.Context, repos
 	return strings.TrimSpace(string(output)), err
 }
 
-func (p *serviceWorkEntryProvider) CreateWorkflowPullRequest(ctx context.Context, request workflowcore.PullRequestRequest) (workflowcore.PullRequestSnapshot, error) {
+func (p *serviceWorkEntryProvider) CreateWorkflowPullRequest(ctx context.Context, request workflowcore.PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
 	head, err := p.ReadWorkflowBranch(ctx, request.Repository, request.HeadBranch)
 	if err != nil {
-		return workflowcore.PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	base, err := p.ReadWorkflowBranch(ctx, request.Repository, request.BaseBranch)
 	if err != nil {
-		return workflowcore.PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	p.creates++
-	p.pr = workflowcore.PullRequestSnapshot{URL: p.repository + "/pulls/7", Repository: p.repository, HeadRepository: p.repository, HeadBranch: request.HeadBranch, BaseBranch: request.BaseBranch, HeadCommit: head, BaseCommit: base, State: "open"}
+	p.pr = workflowstate.PullRequestSnapshot{URL: p.repository + "/pulls/7", Repository: p.repository, HeadRepository: p.repository, HeadBranch: request.HeadBranch, BaseBranch: request.BaseBranch, HeadCommit: head, BaseCommit: base, State: "open"}
 
 	return p.pr, nil
 }
 
-func (p *serviceWorkEntryProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (workflowcore.PullRequestSnapshot, error) {
+func (p *serviceWorkEntryProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (workflowstate.PullRequestSnapshot, error) {
 	if url != p.pr.URL {
-		return workflowcore.PullRequestSnapshot{}, workflowstate.ErrConflict
+		return workflowstate.PullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 
 	head, err := p.ReadWorkflowBranch(ctx, p.repository, p.pr.HeadBranch)
 	if err != nil {
-		return workflowcore.PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	base, err := p.ReadWorkflowBranch(ctx, p.repository, p.pr.BaseBranch)

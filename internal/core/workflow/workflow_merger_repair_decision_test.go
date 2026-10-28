@@ -3,6 +3,8 @@ package workflow
 import (
 	"slices"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeMergerDecisions prevents incompatible intent or unsupported file
@@ -85,9 +87,9 @@ func TestNativeMergerRegeneration(t *testing.T) {
 		t.Fatal("model procedure declaration substituted for host observations")
 	}
 
-	evidence := MergerRegenerationEvidence{ConflictID: repair.Input.Conflicts[0].ID, Command: CommandResult{Command: []string{"make", "regenerate"}}, Validation: CommandResult{Command: slices.Clone(repair.Input.ValidationCommands[0])}, InputTree: repair.BaselineTree, OutputTree: repair.ResolvedTree}
+	evidence := workflowstate.MergerRegenerationEvidence{ConflictID: repair.Input.Conflicts[0].ID, Command: workflowstate.CommandResult{Command: []string{"make", "regenerate"}}, Validation: workflowstate.CommandResult{Command: slices.Clone(repair.Input.ValidationCommands[0])}, InputTree: repair.BaselineTree, OutputTree: repair.ResolvedTree}
 
-	repair.Regeneration = []MergerRegenerationEvidence{evidence}
+	repair.Regeneration = []workflowstate.MergerRegenerationEvidence{evidence}
 	if validateWorkflowTreeRepair(proof, repair) != nil {
 		t.Fatal("complete host procedure observations were rejected")
 	}

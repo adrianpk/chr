@@ -9,10 +9,10 @@ import (
 
 type nativeReviewProviderFixture struct {
 	*nativePreparationProviderFixture
-	change func(*NativeCapability)
+	change func(*workflowstate.NativeCapability)
 }
 
-func (p *nativeReviewProviderFixture) WorkflowPreparedNativeCapability(ctx context.Context, pr PullRequestSnapshot, proof IntegrationProof) (NativeCapability, error) {
+func (p *nativeReviewProviderFixture) WorkflowPreparedNativeCapability(ctx context.Context, pr workflowstate.PullRequestSnapshot, proof workflowstate.IntegrationProof) (workflowstate.NativeCapability, error) {
 	capability, err := p.nativePreparationProviderFixture.WorkflowPreparedNativeCapability(ctx, pr, proof)
 	if err != nil {
 		return capability, err
@@ -23,7 +23,7 @@ func (p *nativeReviewProviderFixture) WorkflowPreparedNativeCapability(ctx conte
 	return sealWorkflowNativeCapability(capability)
 }
 
-func nativeReviewFixture(t *testing.T, mode workflowstate.ReviewMode) (nativePreparationFixture, IntegrationCandidate) {
+func nativeReviewFixture(t *testing.T, mode workflowstate.ReviewMode) (nativePreparationFixture, workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	f := newNativePreparationFixture(t, "rebase", workflowPreparationGate("test -f result.txt"))
@@ -103,7 +103,7 @@ func nativeReviewMode(t *testing.T, mode workflowstate.ReviewMode) {
 	assertWorkflowPreparationSource(t, f.f)
 }
 
-func nativeReviewRetained(t *testing.T, store *Store, id string, f nativePreparationFixture, candidate IntegrationCandidate) {
+func nativeReviewRetained(t *testing.T, store *Store, id string, f nativePreparationFixture, candidate workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	input, err := store.CheckWorkflowReviewGrant(t.Context(), id, f.provider)
@@ -112,7 +112,7 @@ func nativeReviewRetained(t *testing.T, store *Store, id string, f nativePrepara
 	}
 }
 
-func nativeReviewAuthorize(t *testing.T, f nativePreparationFixture) ReviewBinding {
+func nativeReviewAuthorize(t *testing.T, f nativePreparationFixture) workflowstate.ReviewBinding {
 	t.Helper()
 
 	binding, err := f.f.store.ReviewWorkflowSlice(t.Context(), f.f.run.ID, f.provider, workflowReviewWorker("pass", "", ""))

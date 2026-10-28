@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validateWorkflowTreeRepairs(proof IntegrationProof) error {
+func validateWorkflowTreeRepairs(proof workflowstate.IntegrationProof) error {
 	if proof.Provenance == nil {
 		return nil
 	}
@@ -25,7 +25,7 @@ func validateWorkflowTreeRepairs(proof IntegrationProof) error {
 	return nil
 }
 
-func validateWorkflowTreeRepair(proof IntegrationProof, repair IntegrationTreeRepair) error {
+func validateWorkflowTreeRepair(proof workflowstate.IntegrationProof, repair workflowstate.IntegrationTreeRepair) error {
 	if repair.CompletedAt.IsZero() || validateWorkflowMergerInput(repair.Input, repair.CompletedAt) != nil {
 		return workflowstate.ErrConflict
 	}
@@ -52,7 +52,7 @@ func validateWorkflowTreeRepair(proof IntegrationProof, repair IntegrationTreeRe
 	return validateWorkflowRepairRegeneration(repair)
 }
 
-func validateWorkflowRepairRegeneration(repair IntegrationTreeRepair) error {
+func validateWorkflowRepairRegeneration(repair workflowstate.IntegrationTreeRepair) error {
 	seen := map[string]bool{}
 
 	tree := repair.ProposalTree
@@ -86,7 +86,7 @@ func validateWorkflowRepairRegeneration(repair IntegrationTreeRepair) error {
 	return nil
 }
 
-func validWorkflowRegenerationEvidence(conflict MergerConflict, evidence MergerRegenerationEvidence, tree string) bool {
+func validWorkflowRegenerationEvidence(conflict workflowstate.MergerConflict, evidence workflowstate.MergerRegenerationEvidence, tree string) bool {
 	if !slices.Equal(conflict.RegenerationCommand, evidence.Command.Command) || !slices.Equal(conflict.ValidationCommand, evidence.Validation.Command) {
 		return false
 	}
@@ -94,7 +94,7 @@ func validWorkflowRegenerationEvidence(conflict MergerConflict, evidence MergerR
 	return evidence.Command.ExitCode == 0 && evidence.Validation.ExitCode == 0 && workflowCommitID(evidence.InputTree) && workflowCommitID(evidence.OutputTree) && evidence.OutputTree == tree && !evidence.Command.Truncated && !evidence.Validation.Truncated
 }
 
-func validateWorkflowRepairPosition(repair IntegrationTreeRepair, original, parent, source, tree string) error {
+func validateWorkflowRepairPosition(repair workflowstate.IntegrationTreeRepair, original, parent, source, tree string) error {
 	if repair.OriginalParent != original || repair.PreparedParent != parent || repair.Source != source || repair.BaselineTree != tree {
 		return workflowstate.ErrConflict
 	}
@@ -124,8 +124,8 @@ func workflowMergerChangedPaths(data string) ([]string, error) {
 	return paths, nil
 }
 
-func validateWorkflowRegenerationStep(input MergerInput, evidence MergerRegenerationEvidence, seen map[string]bool, tree string) error {
-	index := slices.IndexFunc(input.Conflicts, func(c MergerConflict) bool { return c.ID == evidence.ConflictID })
+func validateWorkflowRegenerationStep(input workflowstate.MergerInput, evidence workflowstate.MergerRegenerationEvidence, seen map[string]bool, tree string) error {
+	index := slices.IndexFunc(input.Conflicts, func(c workflowstate.MergerConflict) bool { return c.ID == evidence.ConflictID })
 	if index < 0 || seen[evidence.ConflictID] {
 		return workflowstate.ErrConflict
 	}

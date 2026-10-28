@@ -11,8 +11,8 @@ import (
 
 type unavailableNativePreparation struct{}
 
-func (unavailableNativePreparation) PrepareWorkflowIntegration(context.Context, PreparationQuery) (IntegrationProof, error) {
-	return IntegrationProof{}, errors.New("publisher credential unavailable")
+func (unavailableNativePreparation) PrepareWorkflowIntegration(context.Context, PreparationQuery) (workflowstate.IntegrationProof, error) {
+	return workflowstate.IntegrationProof{}, errors.New("publisher credential unavailable")
 }
 
 // An explicit, revision-bound continuation retries only failed preparation.

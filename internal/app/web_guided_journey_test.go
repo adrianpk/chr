@@ -13,26 +13,26 @@ import (
 	"testing"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // The owned canonical fixture applies the exact prepared Git result but loses
 // its response. Native observation must reconcile that intent without resubmit.
 type guidedWebPublicationFixture struct{ *serviceWorkEntryProvider }
 
-func (p *guidedWebPublicationFixture) SubmitWorkflowIntegration(ctx context.Context, submission workflowcore.Submission) (workflowcore.SubmissionResponse, error) {
+func (p *guidedWebPublicationFixture) SubmitWorkflowIntegration(ctx context.Context, submission workflowstate.Submission) (workflowstate.SubmissionResponse, error) {
 	proof := submission.Guard.Git
 	branch := "refs/heads/" + p.pr.BaseBranch
 
 	command := exec.CommandContext(ctx, "git", "-C", submission.PreparedLane.Worktree, "push", "--force-with-lease="+branch+":"+proof.BaseCommit, p.remote, proof.ResultCommit+":"+branch)
 	if output, err := command.CombinedOutput(); err != nil {
-		return workflowcore.SubmissionResponse{}, fmt.Errorf("fixture publication: %w: %s", err, output)
+		return workflowstate.SubmissionResponse{}, fmt.Errorf("fixture publication: %w: %s", err, output)
 	}
 
 	p.submissions = append(p.submissions, submission.ID)
 	p.pr.State, p.pr.Merged, p.pr.ResultCommit = "closed", true, proof.ResultCommit
 
-	return workflowcore.SubmissionResponse{}, context.DeadlineExceeded
+	return workflowstate.SubmissionResponse{}, context.DeadlineExceeded
 }
 
 func guidedWebJourneyFixture(t *testing.T, loseAdmission bool) (webViewProvider, *guidedWorkHost, *guidedWebPublicationFixture) {

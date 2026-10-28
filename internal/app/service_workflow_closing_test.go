@@ -33,7 +33,7 @@ func TestServiceWorkflowClosing(t *testing.T) {
 	serviceWorkflowDeliveryGit(t, project, "push", remote, target+":refs/heads/dev")
 
 	operations.workflowIntegrationGit = workflowcore.NewWorkflowIntegrationGit(repository, remote)
-	operations.workflowPullRequests = &serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{HeadCommit: target}}
+	operations.workflowPullRequests = &serviceWorkflowPRFixture{pr: workflowstate.PullRequestSnapshot{HeadCommit: target}}
 	request := workflowcore.SetClosureRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: repository, Branch: "dev"}
 
 	closed, err := operations.CloseWorkflowSet(t.Context(), request)

@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowNativeReceiptProjection(run *workflowInvocationFile, entry IntegrationEntry, last Submission) (workflowNativeProjection, error) {
+func (s *Store) workflowNativeReceiptProjection(run *workflowInvocationFile, entry IntegrationEntry, last workflowstate.Submission) (workflowNativeProjection, error) {
 	projection := workflowNativeProjection{entry: entry}
 	if last.State != "confirmed" || entry.State == "integrated" || entry.State == "blocked" {
 		return projection, nil
@@ -36,7 +36,7 @@ func (s *Store) workflowNativeReceiptProjection(run *workflowInvocationFile, ent
 	return workflowNativeProjection{entry: entry, files: files, changed: true}, nil
 }
 
-func (s *Store) projectWorkflowNativeReceipt(run *workflowInvocationFile, entry *IntegrationEntry, last Submission) ([]workflowstate.FileChange, error) {
+func (s *Store) projectWorkflowNativeReceipt(run *workflowInvocationFile, entry *IntegrationEntry, last workflowstate.Submission) ([]workflowstate.FileChange, error) {
 	if last.State != "confirmed" {
 		return nil, nil
 	}
@@ -150,7 +150,7 @@ func (s *Store) readWorkflowNativeDeliveryRecord(run workflowInvocationFile, ref
 }
 
 func (s *Store) checkWorkflowNativeDeliverySource(run workflowInvocationFile, record Record) error {
-	var candidate IntegrationCandidate
+	var candidate workflowstate.IntegrationCandidate
 	if err := s.readWorkflowNativeEvidence(run.ID, record.Receipt.Native.CandidateRef, &candidate); err != nil {
 		return err
 	}

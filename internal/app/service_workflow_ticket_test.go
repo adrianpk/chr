@@ -82,7 +82,7 @@ func TestServiceWorkflowTicket(t *testing.T) {
 func checkServiceWorkflowTicketPR(t *testing.T, operations service, id string, request workflowcore.StartRequest, candidate workflowcore.SliceCandidate) {
 	t.Helper()
 
-	provider := &serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}}
+	provider := &serviceWorkflowPRFixture{pr: workflowstate.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}}
 	operations.workflowPullRequests = provider
 
 	content := workflowcore.SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver independent task", Body: "Deliver its host-validated candidate."}

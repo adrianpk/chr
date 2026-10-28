@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (reader workflowIntegrationReader) verifyMethod(ctx context.Context, proof *IntegrationProof) error {
+func (reader workflowIntegrationReader) verifyMethod(ctx context.Context, proof *workflowstate.IntegrationProof) error {
 	if proof.Method == "rebase" {
 		return reader.verifyRebase(ctx, proof)
 	}
@@ -36,7 +36,7 @@ func (reader workflowIntegrationReader) verifyMethod(ctx context.Context, proof 
 	}
 
 	proof.VerifiedTree, err = reader.tree(ctx, proof.ResultCommit)
-	proof.History = []IntegrationCommit{{Source: proof.SourceCommit, Commit: proof.ResultCommit, Tree: proof.VerifiedTree, Parent: proof.BaseCommit}}
+	proof.History = []workflowstate.IntegrationCommit{{Source: proof.SourceCommit, Commit: proof.ResultCommit, Tree: proof.VerifiedTree, Parent: proof.BaseCommit}}
 
 	if err != nil {
 		return err
@@ -45,7 +45,7 @@ func (reader workflowIntegrationReader) verifyMethod(ctx context.Context, proof 
 	return reader.verifyCombinedProvenance(ctx, proof)
 }
 
-func workflowIntegrationParentsMatch(proof IntegrationProof, parents []string) bool {
+func workflowIntegrationParentsMatch(proof workflowstate.IntegrationProof, parents []string) bool {
 	switch proof.Method {
 	case "merge":
 		return len(parents) == 2 && parents[1] == proof.SourceCommit
@@ -56,7 +56,7 @@ func workflowIntegrationParentsMatch(proof IntegrationProof, parents []string) b
 	}
 }
 
-func (reader workflowIntegrationReader) verifyBase(ctx context.Context, proof IntegrationProof) error {
+func (reader workflowIntegrationReader) verifyBase(ctx context.Context, proof workflowstate.IntegrationProof) error {
 	if _, err := reader.Output(ctx, "merge-base", "--is-ancestor", proof.OriginCommit, proof.BaseCommit); err != nil {
 		return fmt.Errorf("integration base does not contain the frozen target: %w", err)
 	}
@@ -64,7 +64,7 @@ func (reader workflowIntegrationReader) verifyBase(ctx context.Context, proof In
 	return nil
 }
 
-func validateWorkflowIntegrationHistory(proof IntegrationProof) error {
+func validateWorkflowIntegrationHistory(proof workflowstate.IntegrationProof) error {
 	if proof.Method != "rebase" && len(proof.History) != 1 {
 		return workflowstate.ErrConflict
 	}
@@ -86,7 +86,7 @@ func validateWorkflowIntegrationHistory(proof IntegrationProof) error {
 	return validateWorkflowIntegrationProvenance(proof)
 }
 
-func validWorkflowIntegrationCommit(entry IntegrationCommit) bool {
+func validWorkflowIntegrationCommit(entry workflowstate.IntegrationCommit) bool {
 	for _, id := range []string{entry.Source, entry.Commit, entry.Tree, entry.Parent} {
 		if !workflowCommitID(id) {
 			return false
@@ -96,7 +96,7 @@ func validWorkflowIntegrationCommit(entry IntegrationCommit) bool {
 	return true
 }
 
-func (reader workflowIntegrationReader) verifyRebase(ctx context.Context, proof *IntegrationProof) error {
+func (reader workflowIntegrationReader) verifyRebase(ctx context.Context, proof *workflowstate.IntegrationProof) error {
 	sources, err := reader.linearSource(ctx, *proof)
 	if err != nil {
 		return err
@@ -124,7 +124,7 @@ func (reader workflowIntegrationReader) verifyRebase(ctx context.Context, proof 
 			return fmt.Errorf("rebase ordered commit tree differs from the prepared source change")
 		}
 
-		proof.History = append(proof.History, IntegrationCommit{Source: source, Commit: results[i], Tree: tree, Parent: base})
+		proof.History = append(proof.History, workflowstate.IntegrationCommit{Source: source, Commit: results[i], Tree: tree, Parent: base})
 		proof.PreparedTree, proof.VerifiedTree = tree, actual
 		previousSource, base = source, results[i]
 	}
@@ -132,7 +132,7 @@ func (reader workflowIntegrationReader) verifyRebase(ctx context.Context, proof 
 	return reader.verifyRebaseProvenance(ctx, proof)
 }
 
-func (reader workflowIntegrationReader) linearSource(ctx context.Context, proof IntegrationProof) ([]string, error) {
+func (reader workflowIntegrationReader) linearSource(ctx context.Context, proof workflowstate.IntegrationProof) ([]string, error) {
 	line, err := reader.Output(ctx, "rev-list", "--reverse", "--first-parent", "--max-count=4097", proof.OriginCommit+".."+proof.SourceCommit)
 
 	commits := strings.Fields(line)
@@ -154,17 +154,17 @@ func (reader workflowIntegrationReader) linearSource(ctx context.Context, proof 
 	return commits, nil
 }
 
-func workflowIntegrationHistoryHash(proof IntegrationProof) (string, error) {
+func workflowIntegrationHistoryHash(proof workflowstate.IntegrationProof) (string, error) {
 	data, err := json.Marshal(struct {
 		Method, Source, Base, Tree string
-		History                    []IntegrationCommit
-		Provenance                 *IntegrationProvenance `json:",omitempty"`
+		History                    []workflowstate.IntegrationCommit
+		Provenance                 *workflowstate.IntegrationProvenance `json:",omitempty"`
 	}{proof.Method, proof.SourceCommit, proof.BaseCommit, proof.PreparedTree, proof.History, proof.Provenance})
 
 	return contenthash.Sum(data), err
 }
 
-func validateWorkflowIntegrationProof(query IntegrationQuery, proof IntegrationProof) error {
+func validateWorkflowIntegrationProof(query workflowstate.IntegrationQuery, proof workflowstate.IntegrationProof) error {
 	query.SourceDirectory = ""
 	if proof.IntegrationQuery != query || !slices.Contains([]string{"merge", "rebase", "squash"}, proof.Method) || proof.PreparedTree != proof.VerifiedTree || len(proof.History) == 0 || len(proof.History) > workflowstate.RecordLimit {
 		return workflowstate.ErrConflict

@@ -79,7 +79,7 @@ func TestNativeReplayProof(t *testing.T) {
 	publishNativeReplay(t, f, proof, lane.Worktree)
 }
 
-func checkNativeReplayMessages(t *testing.T, directory string, proof IntegrationProof) {
+func checkNativeReplayMessages(t *testing.T, directory string, proof workflowstate.IntegrationProof) {
 	t.Helper()
 
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: directory}}
@@ -103,7 +103,7 @@ func checkNativeReplayMessages(t *testing.T, directory string, proof Integration
 	}
 }
 
-func publishNativeReplay(t *testing.T, f workflowGitFixture, proof IntegrationProof, directory string) {
+func publishNativeReplay(t *testing.T, f workflowGitFixture, proof workflowstate.IntegrationProof, directory string) {
 	t.Helper()
 
 	f.request.Git, f.request.Directory = proof, directory
@@ -133,14 +133,16 @@ func publishNativeReplay(t *testing.T, f workflowGitFixture, proof IntegrationPr
 func TestNativeReplayGuard(t *testing.T) {
 	cases := []struct {
 		name string
-		edit func(*IntegrationProvenance)
+		edit func(*workflowstate.IntegrationProvenance)
 	}{
-		{"author", func(p *IntegrationProvenance) { p.Source[0].Author.Name = "Forged Author" }},
-		{"message", func(p *IntegrationProvenance) { p.Prepared[0].MessageHash = contenthash.Sum([]byte("forged")) }},
-		{"date", func(p *IntegrationProvenance) { p.Prepared[0].Author.Date = "978307200 +0000" }},
-		{"empty", func(p *IntegrationProvenance) { p.Replays[0].EmptyDecision = "source_empty" }},
-		{"order", func(p *IntegrationProvenance) { p.Replays[0], p.Replays[1] = p.Replays[1], p.Replays[0] }},
-		{"missing", func(p *IntegrationProvenance) { p.Prepared = p.Prepared[1:] }},
+		{"author", func(p *workflowstate.IntegrationProvenance) { p.Source[0].Author.Name = "Forged Author" }},
+		{"message", func(p *workflowstate.IntegrationProvenance) {
+			p.Prepared[0].MessageHash = contenthash.Sum([]byte("forged"))
+		}},
+		{"date", func(p *workflowstate.IntegrationProvenance) { p.Prepared[0].Author.Date = "978307200 +0000" }},
+		{"empty", func(p *workflowstate.IntegrationProvenance) { p.Replays[0].EmptyDecision = "source_empty" }},
+		{"order", func(p *workflowstate.IntegrationProvenance) { p.Replays[0], p.Replays[1] = p.Replays[1], p.Replays[0] }},
+		{"missing", func(p *workflowstate.IntegrationProvenance) { p.Prepared = p.Prepared[1:] }},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -152,7 +154,7 @@ func TestNativeReplayGuard(t *testing.T) {
 	}
 }
 
-func rejectNativeReplay(t *testing.T, f workflowGitFixture, proof IntegrationProof, directory string) {
+func rejectNativeReplay(t *testing.T, f workflowGitFixture, proof workflowstate.IntegrationProof, directory string) {
 	t.Helper()
 
 	var err error
@@ -175,7 +177,7 @@ func rejectNativeReplay(t *testing.T, f workflowGitFixture, proof IntegrationPro
 	checkWorkflowGitRefs(t, f, proof.SourceCommit, proof.BaseCommit)
 }
 
-func nativeReplayFix(t *testing.T, proof IntegrationProof, lane Lane) IntegrationProof {
+func nativeReplayFix(t *testing.T, proof workflowstate.IntegrationProof, lane workflowstate.Lane) workflowstate.IntegrationProof {
 	t.Helper()
 
 	if err := os.WriteFile(filepath.Join(lane.Worktree, "repair.txt"), []byte("Required integration repair\n"), 0o600); err != nil {
@@ -263,7 +265,7 @@ func rejectNativePreparation(t *testing.T, f workflowGitFixture) {
 	head := workflowIntegrationCommand(t, f.request.Directory, "rev-parse", "HEAD")
 	q := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	q.SourceDirectory = f.request.Directory
-	q.Lane = Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/rejected", Worktree: filepath.Join(t.TempDir(), "rejected"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
+	q.Lane = workflowstate.Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/rejected", Worktree: filepath.Join(t.TempDir(), "rejected"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
 	git := NewWorkflowPreparationGit(q.Repository, f.remote)
 
 	if _, err := git.PrepareWorkflowIntegration(t.Context(), q); err == nil {
@@ -277,7 +279,7 @@ func rejectNativePreparation(t *testing.T, f workflowGitFixture) {
 	checkWorkflowGitRefs(t, f, q.SourceCommit, q.BaseCommit)
 }
 
-func checkNativeReplayAttribution(t *testing.T, proof IntegrationProof) {
+func checkNativeReplayAttribution(t *testing.T, proof workflowstate.IntegrationProof) {
 	t.Helper()
 
 	p := proof.Provenance
@@ -289,7 +291,7 @@ func checkNativeReplayAttribution(t *testing.T, proof IntegrationProof) {
 	}
 }
 
-func checkNativeReplayFix(t *testing.T, original, fixed IntegrationProof) {
+func checkNativeReplayFix(t *testing.T, original, fixed workflowstate.IntegrationProof) {
 	t.Helper()
 
 	p := fixed.Provenance

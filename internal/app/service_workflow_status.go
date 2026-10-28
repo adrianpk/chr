@@ -34,7 +34,7 @@ type WorkflowWorkStatus struct {
 	WorkflowWorkBindings
 	Integration *WorkflowIntegrationStatus `json:"integration,omitempty"`
 	WorkflowWorkLifecycle
-	workflowcore.Identity
+	workflowstate.Identity
 	WorkflowWorkSelection
 	WorkflowWorkOutcome
 	WorkflowWorkScope

@@ -40,7 +40,7 @@ type PublicationBarrier struct {
 	TargetKey    string
 	Namespace    string
 	InvocationID string
-	Submission   Submission
+	Submission   workflowstate.Submission
 }
 
 // IntegrationQueueQuery selects a bounded page of authoritative units.
@@ -208,7 +208,7 @@ func (s *Store) QueryWorkflowIntegrationSubmissions(ctx context.Context, q Submi
 	return result, integrationRecordError("publication journals", err)
 }
 
-func workflowSubmissionQueryMatches(j workflowSubmissionJournal, s Submission, q SubmissionQuery) bool {
+func workflowSubmissionQueryMatches(j workflowSubmissionJournal, s workflowstate.Submission, q SubmissionQuery) bool {
 	owner := workflowSubmissionQueryOwner(j, q)
 	identity := (q.SubmissionID == "" || q.SubmissionID == s.ID) && (q.Unit.ID == "" || q.Unit == j.Unit)
 
@@ -220,7 +220,7 @@ func workflowSubmissionQueryMatches(j workflowSubmissionJournal, s Submission, q
 	return owner && identity && (q.CandidateHash == "" || q.CandidateHash == hash)
 }
 
-func workflowPublicationBarrier(j workflowSubmissionJournal, submission Submission) PublicationBarrier {
+func workflowPublicationBarrier(j workflowSubmissionJournal, submission workflowstate.Submission) PublicationBarrier {
 	return PublicationBarrier{JournalKey: j.Key, JournalHash: j.sourceHash, TargetKey: j.TargetKey, Namespace: j.Namespace, InvocationID: j.InvocationID, Submission: submission}
 }
 

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowSubmissionCorruption rejects deleted, unknown, symlinked and
@@ -45,7 +46,7 @@ func testWorkflowSubmissionCorruption(t *testing.T, changed string) {
 	}
 }
 
-func corruptWorkflowSubmission(t *testing.T, f workflowPreparationFixture, first Submission, changed string) workflowSubmissionJournal {
+func corruptWorkflowSubmission(t *testing.T, f workflowPreparationFixture, first workflowstate.Submission, changed string) workflowSubmissionJournal {
 	t.Helper()
 
 	run, err := f.store.readWorkflowInvocation(f.run.ID)
@@ -68,7 +69,7 @@ func corruptWorkflowSubmission(t *testing.T, f workflowPreparationFixture, first
 	return journal
 }
 
-func editWorkflowSubmissionJournal(t *testing.T, path string, journal *workflowSubmissionJournal, first Submission, changed string) {
+func editWorkflowSubmissionJournal(t *testing.T, path string, journal *workflowSubmissionJournal, first workflowstate.Submission, changed string) {
 	t.Helper()
 
 	switch changed {
@@ -88,7 +89,7 @@ func editWorkflowSubmissionJournal(t *testing.T, path string, journal *workflowS
 		journal.Schema = "chr-integration-journal/v99"
 	case "sealed":
 		journal.Attempts[0].State = "unpublished"
-		journal.Attempts[0].Unpublished = &SubmissionObservation{SubmissionID: first.ID, Unpublished: true}
+		journal.Attempts[0].Unpublished = &workflowstate.SubmissionObservation{SubmissionID: first.ID, Unpublished: true}
 	}
 
 	data, err := json.Marshal(journal)

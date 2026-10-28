@@ -27,27 +27,13 @@ type PullRequestRequest struct {
 	Body  string `json:"body"`
 }
 
-// PullRequestSnapshot contains provider facts, never worker completion claims.
-type PullRequestSnapshot struct {
-	URL            string `json:"url"`
-	Repository     string `json:"repository"`
-	HeadRepository string `json:"head_repository"`
-	HeadBranch     string `json:"head_branch"`
-	BaseBranch     string `json:"base_branch"`
-	HeadCommit     string `json:"head_commit"`
-	BaseCommit     string `json:"base_commit"`
-	State          string `json:"state"`
-	Merged         bool   `json:"merged"`
-	ResultCommit   string `json:"result_commit"`
-}
-
 // PullRequestProvider isolates canonical provider observation and PR creation.
 // Find includes closed PRs and fork heads; callers must reject ambiguous identities.
 // Implementations must respect context deadlines and bound their response buffers.
 type PullRequestProvider interface {
-	FindWorkflowPullRequests(context.Context, PullRequestQuery) ([]PullRequestSnapshot, error)
-	ReadWorkflowPullRequest(context.Context, string) (PullRequestSnapshot, error)
-	CreateWorkflowPullRequest(context.Context, PullRequestRequest) (PullRequestSnapshot, error)
+	FindWorkflowPullRequests(context.Context, PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error)
+	ReadWorkflowPullRequest(context.Context, string) (workflowstate.PullRequestSnapshot, error)
+	CreateWorkflowPullRequest(context.Context, PullRequestRequest) (workflowstate.PullRequestSnapshot, error)
 	ReadWorkflowBranch(context.Context, string, string) (string, error)
 }
 
@@ -81,7 +67,7 @@ type PullRequestBinding struct {
 // EnsureWorkflowSlicePullRequest creates or reuses one unit-owned canonical PR.
 // Provider IO is bounded and serialized by the common repository mutation lock;
 // it holds no worker capacity reservation. Uncertain creation never resubmits.
-func (s *Store) EnsureWorkflowSlicePullRequest(ctx context.Context, id string, request SlicePullRequestRequest, provider PullRequestProvider) (result PullRequestSnapshot, err error) {
+func (s *Store) EnsureWorkflowSlicePullRequest(ctx context.Context, id string, request SlicePullRequestRequest, provider PullRequestProvider) (result workflowstate.PullRequestSnapshot, err error) {
 	if provider == nil || !validWorkflowPullRequestContent(request) {
 		return result, fmt.Errorf("workflow PR provider, target branch and bounded content are required")
 	}

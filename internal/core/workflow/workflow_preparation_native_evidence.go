@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) sealWorkflowNativePreparation(run workflowInvocationFile, candidate *IntegrationCandidate) error {
+func (s *Store) sealWorkflowNativePreparation(run workflowInvocationFile, candidate *workflowstate.IntegrationCandidate) error {
 	input := candidate.Input
 	if input.Native == nil {
 		return nil
@@ -23,7 +23,7 @@ func (s *Store) sealWorkflowNativePreparation(run workflowInvocationFile, candid
 	}
 
 	candidate.Schema = workflowNativeCandidateSchema
-	candidate.Native = &NativeCandidate{NativeRecordBinding: binding}
+	candidate.Native = &workflowstate.NativeCandidate{NativeRecordBinding: binding}
 
 	candidate.Native.CandidateHash, err = NativeCandidateHash(*candidate)
 	if err != nil {
@@ -43,7 +43,7 @@ func (s *Store) sealWorkflowNativePreparation(run workflowInvocationFile, candid
 	return s.commitFiles(files)
 }
 
-func workflowNativePreparationRecord(candidate IntegrationCandidate) NativeRecordBinding {
+func workflowNativePreparationRecord(candidate workflowstate.IntegrationCandidate) workflowstate.NativeRecordBinding {
 	input, proof := candidate.Input, candidate.Input.Git
 	capability := input.Native.Capability
 
@@ -52,7 +52,7 @@ func workflowNativePreparationRecord(candidate IntegrationCandidate) NativeRecor
 		format = "sha256"
 	}
 
-	return NativeRecordBinding{
+	return workflowstate.NativeRecordBinding{
 		SchemaVersion: 1, EntryID: input.Native.Entry.EntryID, InvocationID: candidate.InvocationID, Unit: input.Source.Unit,
 		CanonicalPR: input.Source.PullRequest.URL, SourceRepository: proof.Repository, SourceRef: capability.SourceRef, TargetRef: capability.TargetRef,
 		ObjectFormat: format, OriginalSource: proof.SourceCommit, PublishedSource: proof.ResultCommit, ValidatedBase: proof.BaseCommit,
@@ -62,7 +62,7 @@ func workflowNativePreparationRecord(candidate IntegrationCandidate) NativeRecor
 	}
 }
 
-func workflowNativePreparationEvidence(candidate *IntegrationCandidate, b *NativeRecordBinding) ([]workflowstate.FileChange, error) {
+func workflowNativePreparationEvidence(candidate *workflowstate.IntegrationCandidate, b *workflowstate.NativeRecordBinding) ([]workflowstate.FileChange, error) {
 	proof := candidate.Input.Git
 	if proof.Provenance == nil || len(proof.Provenance.Source) == 0 {
 		return nil, fmt.Errorf("%w: native validation requires the original source manifest", workflowstate.ErrConflict)
@@ -112,7 +112,7 @@ func workflowNativePreparationEvidenceFile(id string, value any) (workflowstate.
 	return workflowstate.FileChange{Path: ref.Path, After: data}, ref, nil
 }
 
-func (s *Store) workflowNativePreparedEntryChange(run *workflowInvocationFile, candidate IntegrationCandidate) (workflowstate.FileChange, error) {
+func (s *Store) workflowNativePreparedEntryChange(run *workflowInvocationFile, candidate workflowstate.IntegrationCandidate) (workflowstate.FileChange, error) {
 	if err := s.checkWorkflowNativePreparationFence(*run, candidate.Input.Native); err != nil {
 		return workflowstate.FileChange{}, err
 	}
@@ -138,7 +138,7 @@ func (s *Store) workflowNativePreparedEntryChange(run *workflowInvocationFile, c
 		return file, err
 	}
 
-	updateWorkflowIntegrationBinding(run, IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
+	updateWorkflowIntegrationBinding(run, workflowstate.IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
 
 	return file, nil
 }

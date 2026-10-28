@@ -65,6 +65,12 @@ var leafImports = map[string]map[string]bool{
 	"internal/core/contenthash":      {},
 	"internal/core/ops/namespace":    {},
 	"internal/core/workflow": {
+		coreImportPath + "workflow/closeout":  true,
+		coreImportPath + "workflow/forge":     true,
+		coreImportPath + "workflow/integrate": true,
+		coreImportPath + "workflow/merge":     true,
+		coreImportPath + "workflow/review":    true,
+
 		coreImportPath + "authoring":            true,
 		coreImportPath + "authoring/generation": true,
 		coreImportPath + "authoring/state":      true,
@@ -85,7 +91,12 @@ var leafImports = map[string]map[string]bool{
 		coreImportPath + "workspace":            true,
 		coreImportPath + "workspace/config":     true,
 	},
-	"internal/core/workflow/state": {coreImportPath + "contenthash": true, coreImportPath + "ops/metadata": true, coreImportPath + "harness": true},
+	"internal/core/workflow/closeout":  {coreImportPath + "workflow/state": true},
+	"internal/core/workflow/forge":     {coreImportPath + "workflow/state": true},
+	"internal/core/workflow/integrate": {coreImportPath + "workflow/state": true},
+	"internal/core/workflow/merge":     {coreImportPath + "workflow/state": true},
+	"internal/core/workflow/review":    {coreImportPath + "workflow/state": true},
+	"internal/core/workflow/state":     {coreImportPath + "contenthash": true, coreImportPath + "ops/metadata": true, coreImportPath + "harness": true},
 }
 
 func checkLeafDependencies(importsByFile map[string][]string) []string {

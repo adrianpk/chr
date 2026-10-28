@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func observeWorkflowSubmission(ctx context.Context, submission Submission, provider PublicationProvider, git IntegrationGit) (Submission, error) {
+func observeWorkflowSubmission(ctx context.Context, submission workflowstate.Submission, provider PublicationProvider, git IntegrationGit) (workflowstate.Submission, error) {
 	if provider == nil || git == nil {
 		return submission, fmt.Errorf("canonical publication provider and Git observer required")
 	}
@@ -44,7 +44,7 @@ func observeWorkflowSubmission(ctx context.Context, submission Submission, provi
 	return submission, nil
 }
 
-func workflowSubmissionPRMatches(submission Submission, pr PullRequestSnapshot) bool {
+func workflowSubmissionPRMatches(submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot) bool {
 	if submission.Native != nil {
 		return workflowNativeSubmissionPRMatches(submission, pr)
 	}
@@ -60,7 +60,7 @@ func workflowSubmissionPRMatches(submission Submission, pr PullRequestSnapshot) 
 	return pr.State == "open" || pr.State == "closed"
 }
 
-func checkWorkflowUnpublishedObservation(ctx context.Context, submission Submission, provider PullRequestProvider) error {
+func checkWorkflowUnpublishedObservation(ctx context.Context, submission workflowstate.Submission, provider PullRequestProvider) error {
 	pr, err := provider.ReadWorkflowPullRequest(ctx, submission.Guard.PullRequest.URL)
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func checkWorkflowUnpublishedObservation(ctx context.Context, submission Submiss
 	return nil
 }
 
-func observeWorkflowSubmittedDelivery(ctx context.Context, submission Submission, pr PullRequestSnapshot, provider PullRequestProvider, git IntegrationGit) (Submission, error) {
+func observeWorkflowSubmittedDelivery(ctx context.Context, submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot, provider PullRequestProvider, git IntegrationGit) (workflowstate.Submission, error) {
 	query := submission.Guard.Git.IntegrationQuery
 	query.ResultCommit, query.SourceDirectory = pr.ResultCommit, submission.PreparedLane.Worktree
 
@@ -111,7 +111,7 @@ func observeWorkflowSubmittedDelivery(ctx context.Context, submission Submission
 	return submission, nil
 }
 
-func checkWorkflowSubmittedObservation(ctx context.Context, submission Submission, provider PullRequestProvider) error {
+func checkWorkflowSubmittedObservation(ctx context.Context, submission workflowstate.Submission, provider PullRequestProvider) error {
 	pr, err := provider.ReadWorkflowPullRequest(ctx, submission.Guard.PullRequest.URL)
 	if err != nil {
 		return err
@@ -133,7 +133,7 @@ func checkWorkflowSubmittedObservation(ctx context.Context, submission Submissio
 	return nil
 }
 
-func workflowNativeSubmissionPRMatches(submission Submission, pr PullRequestSnapshot) bool {
+func workflowNativeSubmissionPRMatches(submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot) bool {
 	native := submission.Native
 	expected := [5]string{native.CanonicalPR, native.SourceRepository, native.SourceRepository, native.SourceRef, native.TargetRef}
 	actual := [5]string{pr.URL, pr.Repository, pr.HeadRepository, "refs/heads/" + pr.HeadBranch, "refs/heads/" + pr.BaseBranch}
@@ -143,13 +143,13 @@ func workflowNativeSubmissionPRMatches(submission Submission, pr PullRequestSnap
 	return expected == actual && workflowCommitID(pr.HeadCommit) && pr.Merged && pr.State == "closed" && pr.ResultCommit == native.PreparedResult
 }
 
-func workflowLegacySubmissionPRIdentityMatches(submission Submission, pr PullRequestSnapshot) bool {
+func workflowLegacySubmissionPRIdentityMatches(submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot) bool {
 	expected := submission.Guard.PullRequest
 
 	return pr.URL == expected.URL && pr.Repository == expected.Repository && pr.HeadRepository == expected.HeadRepository && pr.HeadBranch == expected.HeadBranch && pr.BaseBranch == expected.BaseBranch && pr.HeadCommit == expected.HeadCommit
 }
 
-func observeWorkflowSubmissionGit(ctx context.Context, git IntegrationGit, query IntegrationQuery, expected IntegrationProof) (IntegrationProof, error) {
+func observeWorkflowSubmissionGit(ctx context.Context, git IntegrationGit, query workflowstate.IntegrationQuery, expected workflowstate.IntegrationProof) (workflowstate.IntegrationProof, error) {
 	if query.ResultCommit == expected.ResultCommit {
 		return observeWorkflowPreparedGit(ctx, git, query, expected)
 	}

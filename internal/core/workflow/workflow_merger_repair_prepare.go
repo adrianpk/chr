@@ -91,12 +91,12 @@ func (git OSWorkflowPreparationGit) importMergerRepairObjects(ctx context.Contex
 	return err
 }
 
-func workflowMergerRepairProof(state MergerRepairState) IntegrationProof {
-	proof := IntegrationProof{IntegrationQuery: state.Query.IntegrationQuery, BaseCommit: state.Query.BaseCommit, ObservedTarget: state.Query.BaseCommit}
+func workflowMergerRepairProof(state MergerRepairState) workflowstate.IntegrationProof {
+	proof := workflowstate.IntegrationProof{IntegrationQuery: state.Query.IntegrationQuery, BaseCommit: state.Query.BaseCommit, ObservedTarget: state.Query.BaseCommit}
 
 	proof.SourceDirectory = ""
 	if len(state.Repairs) > 0 {
-		proof.Provenance = &IntegrationProvenance{Repairs: state.Repairs}
+		proof.Provenance = &workflowstate.IntegrationProvenance{Repairs: state.Repairs}
 	}
 
 	return proof

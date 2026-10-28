@@ -28,7 +28,7 @@ func TestNativeSubmissionApplied(t *testing.T) {
 	nativeSubmissionConfirmReceipt(t, f, pending, record)
 }
 
-func nativeSubmissionConfirmReceipt(t *testing.T, f nativeSubmissionFixture, pending Submission, record Record) {
+func nativeSubmissionConfirmReceipt(t *testing.T, f nativeSubmissionFixture, pending workflowstate.Submission, record Record) {
 	t.Helper()
 
 	submission := pending
@@ -64,7 +64,7 @@ func nativeSubmissionConfirmReceipt(t *testing.T, f nativeSubmissionFixture, pen
 	}
 }
 
-func nativeSubmissionApplied(t *testing.T, f nativeSubmissionFixture, submission Submission, record Record) NativeSubmissionUpdate {
+func nativeSubmissionApplied(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission, record Record) NativeSubmissionUpdate {
 	t.Helper()
 
 	update := nativeSubmissionUpdate(t, f, submission)
@@ -77,7 +77,7 @@ func nativeSubmissionApplied(t *testing.T, f nativeSubmissionFixture, submission
 	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = "dispatching", "git_applied", &identity
 	native := update.Facts
 
-	var capability NativeCapability
+	var capability workflowstate.NativeCapability
 	if err := f.store.readWorkflowNativeEvidence(native.InvocationID, native.CapabilityRef, &capability); err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +122,7 @@ func TestNativeSubmissionNonApplication(t *testing.T) {
 	}
 }
 
-func nativeSubmissionPendingExcluded(t *testing.T, f nativeSubmissionFixture, submission Submission) {
+func nativeSubmissionPendingExcluded(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission) {
 	t.Helper()
 
 	guard := nativeBudgetGuard(t, f.store, f.entry.InvocationID)
@@ -137,7 +137,7 @@ func nativeSubmissionPendingExcluded(t *testing.T, f nativeSubmissionFixture, su
 	}
 }
 
-func nativeSubmissionDispatcher(t *testing.T) (ProcessIdentity, func()) {
+func nativeSubmissionDispatcher(t *testing.T) (workflowstate.ProcessIdentity, func()) {
 	t.Helper()
 
 	command := exec.Command("cat")

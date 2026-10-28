@@ -18,12 +18,12 @@ func nativePolicyQuery(t *testing.T, f workflowGitFixture) PreparationQuery {
 
 	q := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	q.SourceDirectory = f.request.Directory
-	q.Lane = Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/prepared", Worktree: filepath.Join(t.TempDir(), "prepared"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
+	q.Lane = workflowstate.Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/prepared", Worktree: filepath.Join(t.TempDir(), "prepared"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
 
 	return q
 }
 
-func nativeSigningFixture(t *testing.T) (SSHCommitSigning, CommitSigningProfile) {
+func nativeSigningFixture(t *testing.T) (SSHCommitSigning, workflowstate.CommitSigningProfile) {
 	t.Helper()
 
 	key := filepath.Join(t.TempDir(), "signing")
@@ -77,7 +77,7 @@ func TestNativePreparationSigning(t *testing.T) {
 	}
 }
 
-func checkNativeSigningObjects(t *testing.T, directory string, proof IntegrationProof, profile CommitSigningProfile) {
+func checkNativeSigningObjects(t *testing.T, directory string, proof workflowstate.IntegrationProof, profile workflowstate.CommitSigningProfile) {
 	t.Helper()
 
 	p := proof.Provenance.Preparation
@@ -238,7 +238,7 @@ func TestNativeCollisionBudget(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			p := &IntegrationPreparation{InitialCommitterDate: "1700000000 +0000"}
+			p := &workflowstate.IntegrationPreparation{InitialCommitterDate: "1700000000 +0000"}
 			calls := 0
 			build := func() (string, error) {
 				calls++

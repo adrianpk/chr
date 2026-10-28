@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowPublicationRevision preserves sealed attempt consumption across a
@@ -54,7 +56,7 @@ func testWorkflowPublicationRevision(t *testing.T, external bool) {
 	checkWorkflowPublicationRevision(t, f, p, first, progress, external)
 }
 
-func workflowPublicationSealedAttempt(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture) Submission {
+func workflowPublicationSealedAttempt(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture) workflowstate.Submission {
 	t.Helper()
 
 	p.unknown = true
@@ -74,7 +76,7 @@ func workflowPublicationSealedAttempt(t *testing.T, f workflowPreparationFixture
 	return submission
 }
 
-func checkWorkflowPublicationRevision(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture, first Submission, progress IntegrationProgress, external bool) {
+func checkWorkflowPublicationRevision(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture, first workflowstate.Submission, progress IntegrationProgress, external bool) {
 	t.Helper()
 
 	if external {

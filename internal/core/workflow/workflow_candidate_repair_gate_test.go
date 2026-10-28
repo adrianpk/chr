@@ -1,6 +1,10 @@
 package workflow
 
-import "testing"
+import (
+	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // TestNativeCandidateRepair composes actual semantic failure/review, a broker
 // merger, host Git acceptance, renewed gate and fresh candidate-bound review.
@@ -38,7 +42,7 @@ func nativeCandidateRepairGate(t *testing.T, method, reason string) {
 	checkNativeCandidateRevalidated(t, f, store, before, candidate, attempt)
 }
 
-func checkNativeCandidateRevalidated(t *testing.T, f nativePreparationFixture, store *Store, before Invocation, candidate IntegrationCandidate, attempt MergerAttempt) {
+func checkNativeCandidateRevalidated(t *testing.T, f nativePreparationFixture, store *Store, before Invocation, candidate workflowstate.IntegrationCandidate, attempt MergerAttempt) {
 	t.Helper()
 
 	id := f.f.run.ID
@@ -64,7 +68,7 @@ func checkNativeCandidateRevalidated(t *testing.T, f nativePreparationFixture, s
 	checkNativeCandidateReplay(t, candidate, attempt)
 }
 
-func checkNativeCandidateReplay(t *testing.T, candidate IntegrationCandidate, attempt MergerAttempt) {
+func checkNativeCandidateReplay(t *testing.T, candidate workflowstate.IntegrationCandidate, attempt MergerAttempt) {
 	t.Helper()
 
 	proof := candidate.Input.Git

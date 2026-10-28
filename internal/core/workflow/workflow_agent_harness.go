@@ -39,10 +39,10 @@ type AgentHarnessCertificate struct {
 
 // AgentCall seals a reservation and certified driver into task input.
 type AgentCall struct {
-	ReservationID string                    `json:"reservation_id"`
-	Role          string                    `json:"role"`
-	HarnessRef    workflowstate.EvidenceRef `json:"harness_ref"`
-	Allowance     TokenAllowance            `json:"allowance"`
+	ReservationID string                       `json:"reservation_id"`
+	Role          string                       `json:"role"`
+	HarnessRef    workflowstate.EvidenceRef    `json:"harness_ref"`
+	Allowance     workflowstate.TokenAllowance `json:"allowance"`
 }
 
 // AgentResponse is emitted by the trusted driver, separately from its

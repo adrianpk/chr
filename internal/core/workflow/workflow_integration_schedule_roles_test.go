@@ -188,8 +188,8 @@ func nativeRolePool(t *testing.T, purpose string) {
 	t.Helper()
 
 	store, _, _ := workflowClaimFixture(t)
-	firstRun := workflowInvocationFile{Invocation: Invocation{Identity: Identity{ID: "role-one"}}}
-	secondRun := workflowInvocationFile{Invocation: Invocation{Identity: Identity{ID: "role-two"}}}
+	firstRun := workflowInvocationFile{Invocation: Invocation{Identity: workflowstate.Identity{ID: "role-one"}}}
+	secondRun := workflowInvocationFile{Invocation: Invocation{Identity: workflowstate.Identity{ID: "role-two"}}}
 	// Merger payload and credential fencing remain with its role owner. This
 	// boundary certifies its pool reservation using the exact production purpose.
 	if purpose == workflowMergerPurpose {

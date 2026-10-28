@@ -11,12 +11,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func nativeCombinedPreparation(t *testing.T, f workflowGitFixture) (IntegrationProof, Lane) {
+func nativeCombinedPreparation(t *testing.T, f workflowGitFixture) (workflowstate.IntegrationProof, workflowstate.Lane) {
 	t.Helper()
 
 	q := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	q.SourceDirectory = f.request.Directory
-	q.Lane = Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/prepared", Worktree: filepath.Join(t.TempDir(), "combined"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
+	q.Lane = workflowstate.Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/prepared", Worktree: filepath.Join(t.TempDir(), "combined"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
 	git := NewWorkflowPreparationGit(q.Repository, f.remote)
 
 	proof, err := git.PrepareWorkflowIntegration(t.Context(), q)
@@ -70,7 +70,7 @@ func extendNativeCombinedSource(t *testing.T, f *workflowGitFixture) {
 	workflowIntegrationCommand(t, actor, "push", f.remote, "HEAD:"+f.request.SourceRef)
 }
 
-func checkNativeCombinedObjects(t *testing.T, directory string, proof IntegrationProof) {
+func checkNativeCombinedObjects(t *testing.T, directory string, proof workflowstate.IntegrationProof) {
 	t.Helper()
 
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: directory}}
@@ -98,13 +98,15 @@ func checkNativeCombinedObjects(t *testing.T, directory string, proof Integratio
 func TestNativeCombinedGuard(t *testing.T) {
 	cases := []struct {
 		name   string
-		change func(*IntegrationProvenance)
+		change func(*workflowstate.IntegrationProvenance)
 	}{
-		{"author", func(p *IntegrationProvenance) { p.Source[0].Author.Name = "Forged Author" }},
-		{"date", func(p *IntegrationProvenance) { p.Source[0].Author.Date = "1700000000 +0000" }},
-		{"message", func(p *IntegrationProvenance) { p.Source[0].MessageHash = contenthash.Sum([]byte("forged")) }},
-		{"diff", func(p *IntegrationProvenance) { p.CombinedDiffHash = contenthash.Sum([]byte("forged")) }},
-		{"committer", func(p *IntegrationProvenance) { p.Prepared[0].Committer.Name = "Forged Host" }},
+		{"author", func(p *workflowstate.IntegrationProvenance) { p.Source[0].Author.Name = "Forged Author" }},
+		{"date", func(p *workflowstate.IntegrationProvenance) { p.Source[0].Author.Date = "1700000000 +0000" }},
+		{"message", func(p *workflowstate.IntegrationProvenance) {
+			p.Source[0].MessageHash = contenthash.Sum([]byte("forged"))
+		}},
+		{"diff", func(p *workflowstate.IntegrationProvenance) { p.CombinedDiffHash = contenthash.Sum([]byte("forged")) }},
+		{"committer", func(p *workflowstate.IntegrationProvenance) { p.Prepared[0].Committer.Name = "Forged Host" }},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -142,7 +144,7 @@ func TestNativeCombinedLegacy(t *testing.T) {
 
 	data, err := json.Marshal(struct {
 		Method, Source, Base, Tree string
-		History                    []IntegrationCommit
+		History                    []workflowstate.IntegrationCommit
 	}{proof.Method, proof.SourceCommit, proof.BaseCommit, proof.PreparedTree, proof.History})
 	if err != nil || contenthash.Sum(data) != proof.HistoryHash || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) != nil {
 		t.Fatal("historical proof hash or read contract changed")

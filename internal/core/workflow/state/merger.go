@@ -1,39 +1,37 @@
-package workflow
+package state
 
 import (
 	"time"
-
-	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // MergerRequirement binds required source or target intent to evidence.
 type MergerRequirement struct {
-	ID            string                    `json:"id"`
-	Origin        string                    `json:"origin"`
-	Evidence      workflowstate.EvidenceRef `json:"evidence"`
-	ConflictsWith []string                  `json:"conflicts_with,omitempty"`
+	ID            string      `json:"id"`
+	Origin        string      `json:"origin"`
+	Evidence      EvidenceRef `json:"evidence"`
+	ConflictsWith []string    `json:"conflicts_with,omitempty"`
 }
 
 // MergerConflict describes a single actionable conflict. Regeneration
 // is permitted only through the repository-declared command, never a role edit.
 type MergerConflict struct {
-	ID                  string                    `json:"id"`
-	Path                string                    `json:"path"`
-	Kind                string                    `json:"kind"`
-	Evidence            workflowstate.EvidenceRef `json:"evidence"`
-	RequirementIDs      []string                  `json:"requirement_ids"`
-	RegenerationCommand []string                  `json:"regeneration_command,omitempty"`
-	ValidationCommand   []string                  `json:"validation_command,omitempty"`
+	ID                  string      `json:"id"`
+	Path                string      `json:"path"`
+	Kind                string      `json:"kind"`
+	Evidence            EvidenceRef `json:"evidence"`
+	RequirementIDs      []string    `json:"requirement_ids"`
+	RegenerationCommand []string    `json:"regeneration_command,omitempty"`
+	ValidationCommand   []string    `json:"validation_command,omitempty"`
 }
 
 // MergerCheckpoint names the original replay step and every predecessor.
 // A nil checkpoint means combined-tree repair, not a collapsed rebase history.
 type MergerCheckpoint struct {
-	ReplayIndex    int                       `json:"replay_index"`
-	OriginalCommit string                    `json:"original_commit"`
-	PreparedParent string                    `json:"prepared_parent"`
-	Predecessors   []IntegrationReplay       `json:"predecessors"`
-	Evidence       workflowstate.EvidenceRef `json:"evidence"`
+	ReplayIndex    int                 `json:"replay_index"`
+	OriginalCommit string              `json:"original_commit"`
+	PreparedParent string              `json:"prepared_parent"`
+	Predecessors   []IntegrationReplay `json:"predecessors"`
+	Evidence       EvidenceRef         `json:"evidence"`
 }
 
 // MergerInput is an immutable, credential-free contract for one role
@@ -50,23 +48,23 @@ type MergerInput struct {
 
 // MergerOperator groups the retained operator fields without changing their wire order.
 type MergerOperator struct {
-	OperatorDecisionRef *workflowstate.EvidenceRef        `json:"operator_decision_ref,omitempty"`
-	OperatorAnswers     []workflowstate.IntegrationAnswer `json:"operator_answers,omitempty"`
+	OperatorDecisionRef *EvidenceRef        `json:"operator_decision_ref,omitempty"`
+	OperatorAnswers     []IntegrationAnswer `json:"operator_answers,omitempty"`
 }
 
 // MergerIdentity groups the retained identity fields without changing their wire order.
 type MergerIdentity struct {
-	ProtocolVersion   int               `json:"protocol_version"`
-	ID                string            `json:"id"`
-	InvocationID      string            `json:"invocation_id"`
-	EntryID           string            `json:"entry_id"`
-	Unit              workflowstate.Ref `json:"unit"`
-	CandidateRevision uint64            `json:"candidate_revision"`
-	CandidateHash     string            `json:"candidate_hash"`
-	ClaimGeneration   uint64            `json:"claim_generation"`
-	InputHash         string            `json:"input_hash"`
-	ScopeHash         string            `json:"scope_hash"`
-	Reason            string            `json:"reason"`
+	ProtocolVersion   int    `json:"protocol_version"`
+	ID                string `json:"id"`
+	InvocationID      string `json:"invocation_id"`
+	EntryID           string `json:"entry_id"`
+	Unit              Ref    `json:"unit"`
+	CandidateRevision uint64 `json:"candidate_revision"`
+	CandidateHash     string `json:"candidate_hash"`
+	ClaimGeneration   uint64 `json:"claim_generation"`
+	InputHash         string `json:"input_hash"`
+	ScopeHash         string `json:"scope_hash"`
+	Reason            string `json:"reason"`
 }
 
 // MergerGit groups the retained git fields without changing their wire order.
@@ -82,14 +80,14 @@ type MergerGit struct {
 
 // MergerContext groups the retained context fields without changing their wire order.
 type MergerContext struct {
-	SourceManifestRef   workflowstate.EvidenceRef   `json:"source_manifest_ref"`
-	IntentRefs          []workflowstate.EvidenceRef `json:"intent_refs"`
-	TargetChangeRefs    []workflowstate.EvidenceRef `json:"target_change_refs"`
-	FindingRefs         []workflowstate.EvidenceRef `json:"finding_refs"`
-	Requirements        []MergerRequirement         `json:"requirements"`
-	Conflicts           []MergerConflict            `json:"conflicts"`
-	HistoryCheckpoint   *MergerCheckpoint           `json:"history_checkpoint,omitempty"`
-	RepairCheckpointRef *workflowstate.EvidenceRef  `json:"repair_checkpoint_ref,omitempty"`
+	SourceManifestRef   EvidenceRef         `json:"source_manifest_ref"`
+	IntentRefs          []EvidenceRef       `json:"intent_refs"`
+	TargetChangeRefs    []EvidenceRef       `json:"target_change_refs"`
+	FindingRefs         []EvidenceRef       `json:"finding_refs"`
+	Requirements        []MergerRequirement `json:"requirements"`
+	Conflicts           []MergerConflict    `json:"conflicts"`
+	HistoryCheckpoint   *MergerCheckpoint   `json:"history_checkpoint,omitempty"`
+	RepairCheckpointRef *EvidenceRef        `json:"repair_checkpoint_ref,omitempty"`
 }
 
 // MergerScope groups the retained scope fields without changing their wire order.
@@ -100,8 +98,8 @@ type MergerScope struct {
 
 // MergerValidation groups the retained validation fields without changing their wire order.
 type MergerValidation struct {
-	ValidationContractRef workflowstate.EvidenceRef `json:"validation_contract_ref"`
-	ValidationCommands    [][]string                `json:"validation_commands"`
+	ValidationContractRef EvidenceRef `json:"validation_contract_ref"`
+	ValidationCommands    [][]string  `json:"validation_commands"`
 }
 
 // MergerLimits groups the retained limits fields without changing their wire order.
@@ -147,14 +145,14 @@ type MergerUsage struct {
 // MergerResult is an untrusted proposal. It contains no approval,
 // receipt, method override, publication grant or process-control authority.
 type MergerResult struct {
-	ProtocolVersion       int                         `json:"protocol_version"`
-	InputHash             string                      `json:"input_hash"`
-	Outcome               string                      `json:"outcome"`
-	ChangedPaths          []string                    `json:"changed_paths"`
-	ResolutionNotes       []MergerResolution          `json:"resolution_notes"`
-	PreservedRequirements []string                    `json:"preserved_requirements"`
-	LocalCheckRefs        []workflowstate.EvidenceRef `json:"local_check_refs"`
-	DecisionRequests      []MergerDecision            `json:"decision_requests"`
-	Failure               string                      `json:"failure,omitempty"`
-	Usage                 *MergerUsage                `json:"usage,omitempty"`
+	ProtocolVersion       int                `json:"protocol_version"`
+	InputHash             string             `json:"input_hash"`
+	Outcome               string             `json:"outcome"`
+	ChangedPaths          []string           `json:"changed_paths"`
+	ResolutionNotes       []MergerResolution `json:"resolution_notes"`
+	PreservedRequirements []string           `json:"preserved_requirements"`
+	LocalCheckRefs        []EvidenceRef      `json:"local_check_refs"`
+	DecisionRequests      []MergerDecision   `json:"decision_requests"`
+	Failure               string             `json:"failure,omitempty"`
+	Usage                 *MergerUsage       `json:"usage,omitempty"`
 }

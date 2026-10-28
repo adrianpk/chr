@@ -38,7 +38,7 @@ func TestNativeRepairedTargetDrift(t *testing.T) {
 	nativeRepairedDriftFacts(t, f, store, fresh)
 }
 
-func nativeRepairedDriftFacts(t *testing.T, f nativePreparationFixture, store *Store, fresh IntegrationCandidate) {
+func nativeRepairedDriftFacts(t *testing.T, f nativePreparationFixture, store *Store, fresh workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	id := f.f.run.ID

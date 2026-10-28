@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -16,16 +17,16 @@ type serviceNativeReviewFixture struct {
 	policy string
 }
 
-func (p *serviceNativeReviewFixture) WorkflowIntegrationCapability(ctx context.Context, pr workflowcore.PullRequestSnapshot, method string) (workflowcore.PublicationCapability, error) {
+func (p *serviceNativeReviewFixture) WorkflowIntegrationCapability(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowstate.PublicationCapability, error) {
 	capability, err := p.serviceWorkflowPreparationFixture.WorkflowIntegrationCapability(ctx, pr, method)
 	capability.Mechanism = workspaceconfig.WorkflowPublicationGitAtomicDualRef
 
 	return capability, err
 }
 
-func (p *serviceNativeReviewFixture) WorkflowPreparedNativeCapability(_ context.Context, pr workflowcore.PullRequestSnapshot, proof workflowcore.IntegrationProof) (workflowcore.NativeCapability, error) {
-	capability := workflowcore.NativeCapability{
-		PublicationCapability: workflowcore.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
+func (p *serviceNativeReviewFixture) WorkflowPreparedNativeCapability(_ context.Context, pr workflowstate.PullRequestSnapshot, proof workflowstate.IntegrationProof) (workflowstate.NativeCapability, error) {
+	capability := workflowstate.NativeCapability{
+		PublicationCapability: workflowstate.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
 		SourceRef:             "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "service-review/v1",
 		OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit,
 		PolicyFingerprint: serviceNativeReviewHash([]byte(p.policy)), ServerCapabilityFingerprint: serviceNativeReviewHash([]byte("server")), CredentialIdentityFingerprint: serviceNativeReviewHash([]byte("publisher")),
@@ -122,7 +123,7 @@ func serviceNativeReviewAdmit(t *testing.T, operations service, id string) {
 	}
 }
 
-func serviceNativeReviewReject(t *testing.T, operations service, id string, binding workflowcore.ReviewBinding) {
+func serviceNativeReviewReject(t *testing.T, operations service, id string, binding workflowstate.ReviewBinding) {
 	t.Helper()
 
 	if _, err := operations.ApproveWorkflowSlice(t.Context(), id, binding.InputHash); err == nil {

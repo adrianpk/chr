@@ -220,14 +220,14 @@ func validWorkflowIntegrationReservationOwner(r IntegrationReservation) bool {
 	return workflowstate.ValidRequestKey(r.ID) && validWorkflowNativeFingerprint(r.EntryID) && workflowstate.ValidRequestKey(r.AttemptID) && r.Unit.ID != "" && slices.Contains([]string{"reserved", "launched", "unknown", "settled", "released_before_launch"}, r.State)
 }
 
-func validWorkflowTokenAllowance(a TokenAllowance) bool {
+func validWorkflowTokenAllowance(a workflowstate.TokenAllowance) bool {
 	maximum, err := workflowTokenSum(a.Input, a.Output)
 
 	return err == nil && maximum > 0 && a.Maximum == maximum && a.WholeCall && validWorkflowNativeFingerprint(a.CapabilityRevision) && !a.Deadline.IsZero()
 }
 
 func validWorkflowIntegrationCallAllowance(r IntegrationReservation) bool {
-	if r.Allowance == (TokenAllowance{}) {
+	if r.Allowance == (workflowstate.TokenAllowance{}) {
 		return r.Role == "merger" && !r.RuntimeDeadline.IsZero() && r.State != "settled"
 	}
 
@@ -235,7 +235,7 @@ func validWorkflowIntegrationCallAllowance(r IntegrationReservation) bool {
 }
 
 func validateWorkflowIntegrationAction(r IntegrationReservation) error {
-	if !slices.Contains([]string{"drift", "submission"}, r.Kind) || r.Role != "" || r.State != "reserved" || r.Allowance != (TokenAllowance{}) || !r.RuntimeDeadline.IsZero() {
+	if !slices.Contains([]string{"drift", "submission"}, r.Kind) || r.Role != "" || r.State != "reserved" || r.Allowance != (workflowstate.TokenAllowance{}) || !r.RuntimeDeadline.IsZero() {
 		return workflowstate.ErrConflict
 	}
 

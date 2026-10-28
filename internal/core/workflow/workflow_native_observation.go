@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // NativePublicationObserver reads canonical metadata and fetched Git
@@ -14,7 +16,7 @@ type NativePublicationObserver interface {
 
 // ObserveWorkflowNativeSubmission reconciles the retained intent once, including
 // an explicit observation after its polling deadline. It never issues receipts.
-func (s *Store) ObserveWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, observer NativePublicationObserver, git IntegrationGit) (Submission, error) {
+func (s *Store) ObserveWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, observer NativePublicationObserver, git IntegrationGit) (workflowstate.Submission, error) {
 	submission, _, _, err := s.observeWorkflowNativeSubmission(ctx, guard, observer, git, false)
 
 	return submission, err
@@ -22,7 +24,7 @@ func (s *Store) ObserveWorkflowNativeSubmission(ctx context.Context, guard Integ
 
 // PollWorkflowNativeSubmission polls with exponential backoff within the same
 // persisted deadline. Metadata lag retains exclusion and consumes no submission.
-func (s *Store) PollWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, observer NativePublicationObserver, git IntegrationGit) (Submission, error) {
+func (s *Store) PollWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, observer NativePublicationObserver, git IntegrationGit) (workflowstate.Submission, error) {
 	delay := 250 * time.Millisecond
 
 	for {
@@ -51,7 +53,7 @@ func (s *Store) PollWorkflowNativeSubmission(ctx context.Context, guard Integrat
 	}
 }
 
-func (s *Store) observeWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, observer NativePublicationObserver, git IntegrationGit, poll bool) (submission Submission, observation NativePublicationObservation, next IntegrationBudgetGuard, err error) {
+func (s *Store) observeWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, observer NativePublicationObserver, git IntegrationGit, poll bool) (submission workflowstate.Submission, observation NativePublicationObservation, next IntegrationBudgetGuard, err error) {
 	if observer == nil || git == nil {
 		return submission, observation, next, ErrWorkflowAtomicGuard
 	}

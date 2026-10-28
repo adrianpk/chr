@@ -16,7 +16,7 @@ type nativePolicyFixture struct {
 	calls  int
 }
 
-func (fixture *nativePolicyFixture) ReadWorkflowNativePolicy(_ context.Context, _ PullRequestSnapshot, _ string) (NativePolicy, error) {
+func (fixture *nativePolicyFixture) ReadWorkflowNativePolicy(_ context.Context, _ workflowstate.PullRequestSnapshot, _ string) (NativePolicy, error) {
 	fixture.calls++
 
 	return fixture.policy, nil
@@ -57,7 +57,7 @@ func newNativeCapabilityFixture(t *testing.T, forge string) nativeCapabilityFixt
 	publication.Repository, publication.SourceRepository, publication.Git.Repository = repository, repository, repository
 	sealWorkflowGitFixture(t, &publication)
 
-	pr := PullRequestSnapshot{URL: repository + marker + "7", Repository: repository, HeadRepository: repository, HeadBranch: strings.TrimPrefix(publication.SourceRef, "refs/heads/"), BaseBranch: "dev", HeadCommit: publication.Git.SourceCommit, BaseCommit: publication.Git.BaseCommit, State: "open"}
+	pr := workflowstate.PullRequestSnapshot{URL: repository + marker + "7", Repository: repository, HeadRepository: repository, HeadBranch: strings.TrimPrefix(publication.SourceRef, "refs/heads/"), BaseBranch: "dev", HeadCommit: publication.Git.SourceCommit, BaseCommit: publication.Git.BaseCommit, State: "open"}
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
 	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 	policy := NativePolicy{Repository: repository, SourceRef: publication.SourceRef, TargetRef: publication.TargetRef, OwnershipRevision: publication.OwnershipRevision, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, CredentialIdentityFingerprint: contenthash.Sum([]byte("fixture-role")), ObservationContract: contract, CertifiedMethods: []string{"rebase"}}
@@ -101,7 +101,7 @@ func nativePolicyCommand(t *testing.T, fixture nativeCapabilityFixture, suffix s
 	return remoteReviewCommandKey(config.CLI, workflowRemoteAPIArgs(fixture.request.PullRequest.Repository, reference, "GET", workflowRemoteRepositoryPath(reference)+suffix, false)...)
 }
 
-func setNativePRFixture(t *testing.T, fixture nativeCapabilityFixture, pr PullRequestSnapshot) {
+func setNativePRFixture(t *testing.T, fixture nativeCapabilityFixture, pr workflowstate.PullRequestSnapshot) {
 	t.Helper()
 
 	remote := workflowRemotePRJSON{URL: pr.URL, State: pr.State, Merged: pr.Merged, ResultCommit: pr.ResultCommit}
@@ -147,7 +147,7 @@ func TestNativeCapability(t *testing.T) {
 	}
 }
 
-func checkNativeCapability(t *testing.T, fixture nativeCapabilityFixture, capability NativeCapability, err error) {
+func checkNativeCapability(t *testing.T, fixture nativeCapabilityFixture, capability workflowstate.NativeCapability, err error) {
 	t.Helper()
 
 	if err != nil || !capability.AtomicSourceBase || !capability.ExactResult || len(capability.Unsupported) != 0 || capability.OriginalSourceCommit != fixture.request.Publication.Git.SourceCommit || capability.PreparedResultCommit != fixture.request.Publication.Git.ResultCommit {

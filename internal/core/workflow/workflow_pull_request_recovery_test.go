@@ -34,7 +34,7 @@ func TestWorkflowSlicePRCrashProcess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	provider := &workflowPRProviderFixture{pr: PullRequestSnapshot{URL: "https://forge.example/test/repo/pulls/7", Repository: candidate.Target.Repository, HeadRepository: candidate.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: candidate.Target.Commit, State: "open"}}
+	provider := &workflowPRProviderFixture{pr: workflowstate.PullRequestSnapshot{URL: "https://forge.example/test/repo/pulls/7", Repository: candidate.Target.Repository, HeadRepository: candidate.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: candidate.Target.Commit, State: "open"}}
 	provider.createHook = func() {
 		data, err := json.Marshal(provider.pr)
 		if err != nil {
@@ -114,7 +114,7 @@ func TestWorkflowSlicePRCrash(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			provider.found = []PullRequestSnapshot{provider.pr}
+			provider.found = []workflowstate.PullRequestSnapshot{provider.pr}
 			restarted := NewWorkflowStore(store.layout, store.projectID)
 
 			pr := workflowPREnsure(t, restarted, run.ID, provider)

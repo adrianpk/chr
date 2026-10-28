@@ -57,7 +57,7 @@ func validateWorkflowCurrentReviewBinding(run workflowInvocationFile) error {
 	return validateWorkflowReviewDecisionRefs(run.ID, *binding)
 }
 
-func validateWorkflowReviewDecisionRefs(id string, binding ReviewBinding) error {
+func validateWorkflowReviewDecisionRefs(id string, binding workflowstate.ReviewBinding) error {
 	if binding.DecisionCount == 0 {
 		if !slices.Contains([]string{"pending", "running", "waiting_approval", "stale"}, binding.State) || binding.ResultRef != "" || binding.ResultHash != "" {
 			return workflowstate.ErrConflict
@@ -73,8 +73,8 @@ func validateWorkflowReviewDecisionRefs(id string, binding ReviewBinding) error 
 	return nil
 }
 
-func parseWorkflowReviewDecision(stdout string, input *ReviewInput) (ReviewDecision, error) {
-	var decision ReviewDecision
+func parseWorkflowReviewDecision(stdout string, input *workflowstate.ReviewInput) (workflowstate.ReviewDecision, error) {
+	var decision workflowstate.ReviewDecision
 	if input == nil {
 		return decision, workflowstate.ErrConflict
 	}
@@ -93,7 +93,7 @@ func parseWorkflowReviewDecision(stdout string, input *ReviewInput) (ReviewDecis
 	return decision, validateWorkflowReviewDecision(decision, *input)
 }
 
-func validateWorkflowReviewDecision(decision ReviewDecision, input ReviewInput) error {
+func validateWorkflowReviewDecision(decision workflowstate.ReviewDecision, input workflowstate.ReviewInput) error {
 	hash, err := workflowReviewInputHash(input)
 	if err != nil || hash != decision.BindingHash {
 		return fmt.Errorf("%w: review decision names another candidate", workflowstate.ErrConflict)
@@ -118,8 +118,8 @@ func validateWorkflowReviewDecision(decision ReviewDecision, input ReviewInput) 
 	return validateWorkflowReviewRepairDecision(decision, input)
 }
 
-func validateWorkflowReviewRepairDecision(decision ReviewDecision, input ReviewInput) error {
-	if !slices.ContainsFunc(input.Slice.Tasks, func(task SliceTaskProof) bool { return task.Key == decision.RepairTaskKey }) {
+func validateWorkflowReviewRepairDecision(decision workflowstate.ReviewDecision, input workflowstate.ReviewInput) error {
+	if !slices.ContainsFunc(input.Slice.Tasks, func(task workflowstate.SliceTaskProof) bool { return task.Key == decision.RepairTaskKey }) {
 		return fmt.Errorf("review repair task is outside the retained slice")
 	}
 
@@ -132,10 +132,10 @@ func validateWorkflowReviewRepairDecision(decision ReviewDecision, input ReviewI
 	return nil
 }
 
-func (s *Store) readWorkflowReviewDecisions(run workflowInvocationFile, input ReviewInput) (ReviewDecision, error) {
+func (s *Store) readWorkflowReviewDecisions(run workflowInvocationFile, input workflowstate.ReviewInput) (workflowstate.ReviewDecision, error) {
 	ref, hash := run.Review.ResultRef, run.Review.ResultHash
 
-	var newest ReviewDecision
+	var newest workflowstate.ReviewDecision
 
 	for count := run.Review.DecisionCount; count > 0; count-- {
 		evidence, err := s.readWorkflowReviewEvidence(run, input, count, ref, hash)
@@ -165,7 +165,7 @@ func (s *Store) readWorkflowReviewDecisions(run workflowInvocationFile, input Re
 	return newest, nil
 }
 
-func (s *Store) readWorkflowReviewEvidence(run workflowInvocationFile, input ReviewInput, count int, ref, hash string) (workflowReviewEvidence, error) {
+func (s *Store) readWorkflowReviewEvidence(run workflowInvocationFile, input workflowstate.ReviewInput, count int, ref, hash string) (workflowReviewEvidence, error) {
 	var evidence workflowReviewEvidence
 	if ref != workflowReviewPath(run.ID, run.Review.Round, fmt.Sprintf("decision-%d.json", count)) {
 		return evidence, workflowstate.ErrConflict

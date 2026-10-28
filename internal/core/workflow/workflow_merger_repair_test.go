@@ -40,12 +40,12 @@ func nativeMergerRepairFixture(t *testing.T, method string) (workflowGitFixture,
 
 	query := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	query.SourceDirectory = f.request.Directory
-	query.Lane = Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/repair", Worktree: filepath.Join(t.TempDir(), "repair"), BaseCommit: query.BaseCommit, HeadCommit: query.BaseCommit}
+	query.Lane = workflowstate.Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/repair", Worktree: filepath.Join(t.TempDir(), "repair"), BaseCommit: query.BaseCommit, HeadCommit: query.BaseCommit}
 
 	return f, query
 }
 
-func nativeMergerTreeRepair(t *testing.T, state MergerRepairState, path, content string) IntegrationTreeRepair {
+func nativeMergerTreeRepair(t *testing.T, state MergerRepairState, path, content string) workflowstate.IntegrationTreeRepair {
 	t.Helper()
 
 	_, input, now := nativeMergerInput(t)
@@ -78,13 +78,13 @@ func nativeMergerTreeRepair(t *testing.T, state MergerRepairState, path, content
 
 	tree := workflowIntegrationCommand(t, state.Query.Lane.Worktree, "write-tree")
 
-	return IntegrationTreeRepair{Input: input, Proposal: proposal, CompletedAt: now.Add(time.Millisecond), OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree, ResolvedTree: tree}
+	return workflowstate.IntegrationTreeRepair{Input: input, Proposal: proposal, CompletedAt: now.Add(time.Millisecond), OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree, ResolvedTree: tree}
 }
 
-func nativeMergerReplayCheckpoint(t *testing.T, state MergerRepairState) *MergerCheckpoint {
+func nativeMergerReplayCheckpoint(t *testing.T, state MergerRepairState) *workflowstate.MergerCheckpoint {
 	t.Helper()
 
-	checkpoint := &MergerCheckpoint{ReplayIndex: state.ReplayIndex, OriginalCommit: state.CurrentSource, PreparedParent: state.PreparedParent, Evidence: workflowstate.EvidenceRef{}}
+	checkpoint := &workflowstate.MergerCheckpoint{ReplayIndex: state.ReplayIndex, OriginalCommit: state.CurrentSource, PreparedParent: state.PreparedParent, Evidence: workflowstate.EvidenceRef{}}
 	_, template, _ := nativeMergerInput(t)
 	checkpoint.Evidence = template.IntentRefs[0]
 
@@ -105,7 +105,7 @@ func nativeMergerReplayCheckpoint(t *testing.T, state MergerRepairState) *Merger
 			t.Fatal(err)
 		}
 
-		checkpoint.Predecessors = append(checkpoint.Predecessors, IntegrationReplay{Source: entry.Source, Commit: entry.Commit, EmptyDecision: decision})
+		checkpoint.Predecessors = append(checkpoint.Predecessors, workflowstate.IntegrationReplay{Source: entry.Source, Commit: entry.Commit, EmptyDecision: decision})
 	}
 
 	return checkpoint
@@ -185,13 +185,13 @@ func requireNativeMergerCheckpoint(t *testing.T, state MergerRepairState, index 
 func TestNativeMergerRepairGuards(t *testing.T) {
 	cases := []struct {
 		name   string
-		change func(*MergerRepairState, *IntegrationTreeRepair)
+		change func(*MergerRepairState, *workflowstate.IntegrationTreeRepair)
 	}{
-		{"original step", func(_ *MergerRepairState, r *IntegrationTreeRepair) { r.Source = r.Input.Source }},
-		{"prepared parent", func(_ *MergerRepairState, r *IntegrationTreeRepair) { r.PreparedParent = r.Input.Base }},
-		{"baseline", func(_ *MergerRepairState, r *IntegrationTreeRepair) { r.BaselineTree = r.ResolvedTree }},
-		{"actual diff", func(_ *MergerRepairState, r *IntegrationTreeRepair) { r.Proposal.ChangedPaths = nil }},
-		{"prefix object", func(s *MergerRepairState, _ *IntegrationTreeRepair) {
+		{"original step", func(_ *MergerRepairState, r *workflowstate.IntegrationTreeRepair) { r.Source = r.Input.Source }},
+		{"prepared parent", func(_ *MergerRepairState, r *workflowstate.IntegrationTreeRepair) { r.PreparedParent = r.Input.Base }},
+		{"baseline", func(_ *MergerRepairState, r *workflowstate.IntegrationTreeRepair) { r.BaselineTree = r.ResolvedTree }},
+		{"actual diff", func(_ *MergerRepairState, r *workflowstate.IntegrationTreeRepair) { r.Proposal.ChangedPaths = nil }},
+		{"prefix object", func(s *MergerRepairState, _ *workflowstate.IntegrationTreeRepair) {
 			s.History[0].Commit = s.Query.BaseCommit
 		}},
 	}

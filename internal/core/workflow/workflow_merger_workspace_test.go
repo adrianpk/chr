@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeMergerWorkspace exercises both Git object formats. The private
@@ -21,7 +22,7 @@ func TestNativeMergerWorkspace(t *testing.T) {
 
 			store := NewWorkflowStore(layout, "merger-workspace-fixture")
 			seed, _ := workflowSelectionCommit(t, store)
-			input := MergerInput{MergerIdentity: MergerIdentity{InvocationID: "fixture", EntryID: "entry", ID: "format-" + format}}
+			input := workflowstate.MergerInput{MergerIdentity: workflowstate.MergerIdentity{InvocationID: "fixture", EntryID: "entry", ID: "format-" + format}}
 			input.OwnedWorkspaceID = workflowMergerWorkspaceID(input)
 			before := workflowIntegrationCommand(t, dir, "status", "--porcelain")
 

@@ -12,7 +12,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) prepareWorkflowIntegrationValidation(ctx context.Context, id string, provider PublicationGuardProvider, git PreparationGit) (claim *Claim, prepared workflowPreparedTask, input PreparationInput, round int, cached *IntegrationCandidate, err error) {
+func (s *Store) prepareWorkflowIntegrationValidation(ctx context.Context, id string, provider PublicationGuardProvider, git PreparationGit) (claim *Claim, prepared workflowPreparedTask, input workflowstate.PreparationInput, round int, cached *workflowstate.IntegrationCandidate, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
@@ -49,22 +49,22 @@ func (s *Store) prepareWorkflowIntegrationValidation(ctx context.Context, id str
 	return claim, prepared, input, round, cached, err
 }
 
-func (s *Store) workflowPreparationPreflight(ctx context.Context, run *workflowInvocationFile, provider PublicationGuardProvider) (workflowSliceObservation, ReviewInput, PublicationCapability, error) {
+func (s *Store) workflowPreparationPreflight(ctx context.Context, run *workflowInvocationFile, provider PublicationGuardProvider) (workflowSliceObservation, workflowstate.ReviewInput, workflowstate.PublicationCapability, error) {
 	if !slices.Contains([]string{"waiting_integration", "waiting_review", "blocked"}, run.Status) {
-		return workflowSliceObservation{}, ReviewInput{}, PublicationCapability{}, ErrWorkflowOwned
+		return workflowSliceObservation{}, workflowstate.ReviewInput{}, workflowstate.PublicationCapability{}, ErrWorkflowOwned
 	}
 
 	if err := s.guardWorkflowPreparationWork(ctx, *run); err != nil {
-		return workflowSliceObservation{}, ReviewInput{}, PublicationCapability{}, err
+		return workflowSliceObservation{}, workflowstate.ReviewInput{}, workflowstate.PublicationCapability{}, err
 	}
 
 	if err := s.checkWorkflowNativeSourceRevision(ctx, run, provider); err != nil {
-		return workflowSliceObservation{}, ReviewInput{}, PublicationCapability{}, err
+		return workflowSliceObservation{}, workflowstate.ReviewInput{}, workflowstate.PublicationCapability{}, err
 	}
 
 	observation, source, err := s.workflowReviewSourceInputs(ctx, *run, provider)
 	if err != nil {
-		return observation, source, PublicationCapability{}, err
+		return observation, source, workflowstate.PublicationCapability{}, err
 	}
 
 	capability, err := observeWorkflowPublicationCapability(ctx, provider, source)
@@ -87,7 +87,7 @@ func (s *Store) workflowPreparationPreflight(ctx context.Context, run *workflowI
 	return observation, source, capability, err
 }
 
-func (s *Store) cachedWorkflowPreparation(ctx context.Context, run workflowInvocationFile, source ReviewInput, capability PublicationCapability, provider PublicationGuardProvider) (*IntegrationCandidate, error) {
+func (s *Store) cachedWorkflowPreparation(ctx context.Context, run workflowInvocationFile, source workflowstate.ReviewInput, capability workflowstate.PublicationCapability, provider PublicationGuardProvider) (*workflowstate.IntegrationCandidate, error) {
 	if run.Preparation == nil || run.Preparation.State != "validated" {
 		return nil, nil
 	}
@@ -122,7 +122,7 @@ func (s *Store) cachedWorkflowPreparation(ctx context.Context, run workflowInvoc
 	return &candidate, nil
 }
 
-func workflowPreparationInputsCurrent(run workflowInvocationFile, candidate IntegrationCandidate, hash string, capability PublicationCapability) bool {
+func workflowPreparationInputsCurrent(run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, hash string, capability workflowstate.PublicationCapability) bool {
 	return hash == run.Preparation.SourceHash && capability == candidate.Input.Capability
 }
 
@@ -137,7 +137,7 @@ func (s *Store) blockWorkflowPublication(run *workflowInvocationFile, reason err
 	return errors.Join(reason, s.commitWorkflowState(run))
 }
 
-func (s *Store) claimWorkflowIntegrationValidation(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, source ReviewInput, capability PublicationCapability, provider PublicationGuardProvider, git PreparationGit) (claim *Claim, prepared workflowPreparedTask, input PreparationInput, err error) {
+func (s *Store) claimWorkflowIntegrationValidation(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, source workflowstate.ReviewInput, capability workflowstate.PublicationCapability, provider PublicationGuardProvider, git PreparationGit) (claim *Claim, prepared workflowPreparedTask, input workflowstate.PreparationInput, err error) {
 	claim, err = s.reserveWorkflowRole(ctx, *run, workflowIntegrationValidationPurpose)
 	if err != nil {
 		return nil, prepared, input, err
@@ -181,31 +181,31 @@ func (s *Store) claimWorkflowIntegrationValidation(ctx context.Context, run *wor
 	return claim, prepared, input, err
 }
 
-func (s *Store) prepareWorkflowIntegrationGit(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, source ReviewInput, capability PublicationCapability, provider PublicationGuardProvider, git PreparationGit, lane Lane) (PreparationInput, Lane, error) {
+func (s *Store) prepareWorkflowIntegrationGit(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, source workflowstate.ReviewInput, capability workflowstate.PublicationCapability, provider PublicationGuardProvider, git PreparationGit, lane workflowstate.Lane) (workflowstate.PreparationInput, workflowstate.Lane, error) {
 	query, err := s.workflowPreparationQuery(ctx, *run, observation, source, lane)
 	if err != nil {
-		return PreparationInput{}, lane, err
+		return workflowstate.PreparationInput{}, lane, err
 	}
 
 	query.RequiredSignatures, query.SigningProfile = capability.RequiredSignatures, capability.SigningProfile
 
 	proof, refs, err := s.prepareWorkflowCandidateRepairGit(ctx, *run, git, query)
 	if err != nil {
-		return PreparationInput{}, lane, err
+		return workflowstate.PreparationInput{}, lane, err
 	}
 
 	if err := checkWorkflowPreparedProof(query, proof); err != nil {
-		return PreparationInput{}, lane, err
+		return workflowstate.PreparationInput{}, lane, err
 	}
 
 	lane.HeadCommit = proof.ResultCommit
 
-	input := PreparationInput{Source: source, Capability: capability, Git: proof, MergerAttemptRefs: refs}
+	input := workflowstate.PreparationInput{Source: source, Capability: capability, Git: proof, MergerAttemptRefs: refs}
 	if err := s.bindWorkflowNativePreparation(ctx, *run, &input, provider); err != nil {
 		return input, lane, err
 	}
 
-	if err := s.checkWorkflowPreparationGit(ctx, IntegrationCandidate{Input: input, Lane: lane}); err != nil {
+	if err := s.checkWorkflowPreparationGit(ctx, workflowstate.IntegrationCandidate{Input: input, Lane: lane}); err != nil {
 		return input, lane, err
 	}
 
@@ -216,10 +216,10 @@ func (s *Store) prepareWorkflowIntegrationGit(ctx context.Context, run *workflow
 	return input, lane, nil
 }
 
-func (s *Store) beginWorkflowPreparationClaim(run *workflowInvocationFile, observation workflowSliceObservation, source ReviewInput, claim *Claim) (Lane, error) {
+func (s *Store) beginWorkflowPreparationClaim(run *workflowInvocationFile, observation workflowSliceObservation, source workflowstate.ReviewInput, claim *Claim) (workflowstate.Lane, error) {
 	record := observation.tasks[len(observation.tasks)-1]
 	if !workflowTaskClaimable(record.Task) {
-		return Lane{}, ErrWorkflowOwned
+		return workflowstate.Lane{}, ErrWorkflowOwned
 	}
 
 	lane, err := s.beginWorkflowPreparation(run, source)
@@ -241,14 +241,14 @@ func (s *Store) beginWorkflowPreparationClaim(run *workflowInvocationFile, obser
 	return lane, s.commitWorkflowClaim(*run, record)
 }
 
-func (s *Store) beginWorkflowPreparation(run *workflowInvocationFile, source ReviewInput) (Lane, error) {
+func (s *Store) beginWorkflowPreparation(run *workflowInvocationFile, source workflowstate.ReviewInput) (workflowstate.Lane, error) {
 	if run.PreparationCount >= workflowstate.PageLimit {
-		return Lane{}, fmt.Errorf("workflow preparation history budget exhausted")
+		return workflowstate.Lane{}, fmt.Errorf("workflow preparation history budget exhausted")
 	}
 
 	hash, err := workflowReviewInputHash(source)
 	if err != nil {
-		return Lane{}, err
+		return workflowstate.Lane{}, err
 	}
 
 	run.PreparationCount++
@@ -260,12 +260,12 @@ func (s *Store) beginWorkflowPreparation(run *workflowInvocationFile, source Rev
 	}
 
 	id := contenthash.Sum([]byte(fmt.Sprintf("%s:%d", run.ID, run.PreparationCount)))[:24]
-	lane := Lane{Unit: source.Unit, Branch: "refs/heads/chr/workflow/integration-" + id, Worktree: filepath.Join(s.layout.WorktreeRoot(), "integration-"+id), BaseCommit: source.TargetCommit, HeadCommit: source.TargetCommit}
+	lane := workflowstate.Lane{Unit: source.Unit, Branch: "refs/heads/chr/workflow/integration-" + id, Worktree: filepath.Join(s.layout.WorktreeRoot(), "integration-"+id), BaseCommit: source.TargetCommit, HeadCommit: source.TargetCommit}
 
 	return lane, nil
 }
 
-func (s *Store) workflowPreparationQuery(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, source ReviewInput, lane Lane) (PreparationQuery, error) {
+func (s *Store) workflowPreparationQuery(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, source workflowstate.ReviewInput, lane workflowstate.Lane) (PreparationQuery, error) {
 	candidate, err := s.readWorkflowSliceCandidate(ctx, run, observation)
 	if err != nil {
 		return PreparationQuery{}, err

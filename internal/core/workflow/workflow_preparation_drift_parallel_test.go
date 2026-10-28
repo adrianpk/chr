@@ -3,6 +3,7 @@ package workflow
 import (
 	"testing"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -42,7 +43,7 @@ func TestNativeParallelDrift(t *testing.T) {
 	nativeDriftRetained(t, second, before, fresh)
 }
 
-func nativeDriftParallelReview(t *testing.T, store *Store, id string, provider nativeDriftProviderFixture, fresh IntegrationCandidate) {
+func nativeDriftParallelReview(t *testing.T, store *Store, id string, provider nativeDriftProviderFixture, fresh workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	if _, err := store.CheckWorkflowPublicationGuard(t.Context(), id, provider); err == nil {
@@ -58,7 +59,7 @@ func nativeDriftParallelReview(t *testing.T, store *Store, id string, provider n
 	}
 }
 
-func nativeDriftParallelLane(t *testing.T, lane workflowParallelPublicationLane) (nativePreparationFixture, IntegrationCandidate) {
+func nativeDriftParallelLane(t *testing.T, lane workflowParallelPublicationLane) (nativePreparationFixture, workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	f := lane.fixture

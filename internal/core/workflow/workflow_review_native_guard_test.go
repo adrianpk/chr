@@ -14,31 +14,31 @@ import (
 func TestNativeReviewInputs(t *testing.T) {
 	cases := []struct {
 		name   string
-		change func(*testing.T, nativePreparationFixture, IntegrationCandidate)
+		change func(*testing.T, nativePreparationFixture, workflowstate.IntegrationCandidate)
 	}{
-		{"target", func(_ *testing.T, f nativePreparationFixture, _ IntegrationCandidate) {
+		{"target", func(_ *testing.T, f nativePreparationFixture, _ workflowstate.IntegrationCandidate) {
 			f.provider.pr.BaseCommit = contenthash.Sum([]byte("moved"))[:40]
 			f.provider.target = f.provider.pr.BaseCommit
 		}},
-		{"source", func(_ *testing.T, f nativePreparationFixture, _ IntegrationCandidate) {
+		{"source", func(_ *testing.T, f nativePreparationFixture, _ workflowstate.IntegrationCandidate) {
 			f.provider.pr.HeadCommit = contenthash.Sum([]byte("moved"))[:40]
 		}},
-		{"profile", func(t *testing.T, f nativePreparationFixture, _ IntegrationCandidate) {
+		{"profile", func(t *testing.T, f nativePreparationFixture, _ workflowstate.IntegrationCandidate) {
 			writeWorkflowTestConfigValue(t, f.f.store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationDisabled)
 		}},
-		{"method", func(t *testing.T, f nativePreparationFixture, _ IntegrationCandidate) {
+		{"method", func(t *testing.T, f nativePreparationFixture, _ workflowstate.IntegrationCandidate) {
 			writeWorkflowTestConfigValue(t, f.f.store.layout.ProjectDir(), "work", "merge_strategy", "squash")
 		}},
-		{"contract", func(t *testing.T, f nativePreparationFixture, c IntegrationCandidate) {
+		{"contract", func(t *testing.T, f nativePreparationFixture, c workflowstate.IntegrationCandidate) {
 			workflowReviewWrite(t, filepath.Join(f.f.store.layout.Root(), c.Input.Source.Slice.ContractRef), []byte("{}"))
 		}},
-		{"history", func(t *testing.T, f nativePreparationFixture, c IntegrationCandidate) {
+		{"history", func(t *testing.T, f nativePreparationFixture, c workflowstate.IntegrationCandidate) {
 			workflowReviewWrite(t, filepath.Join(f.f.store.layout.Root(), c.Native.HistoryManifestRef.Path), []byte("{}"))
 		}},
-		{"result", func(t *testing.T, _ nativePreparationFixture, c IntegrationCandidate) {
+		{"result", func(t *testing.T, _ nativePreparationFixture, c workflowstate.IntegrationCandidate) {
 			workflowIntegrationCommit(t, c.Lane.Worktree, "result.txt", "Changed candidate")
 		}},
-		{"generation", func(t *testing.T, f nativePreparationFixture, _ IntegrationCandidate) {
+		{"generation", func(t *testing.T, f nativePreparationFixture, _ workflowstate.IntegrationCandidate) {
 			entry := nativeReviewEntry(t, f.f.store, f.f.run.ID)
 			for _, state := range []string{"queued", "preparing", "validating", "reviewing"} {
 				entry = nativeRoleTransition(t, f.f.store, entry, state)
@@ -86,7 +86,7 @@ func TestNativeReviewPolicyIO(t *testing.T) {
 			f, _ := nativeReviewFixture(t, workflowstate.ReviewTrustedAutoMerge)
 			store, id := f.f.store, f.f.run.ID
 			before := workflowTestRead(t, store, id)
-			provider := &nativeReviewProviderFixture{f.provider, func(_ *NativeCapability) {
+			provider := &nativeReviewProviderFixture{f.provider, func(_ *workflowstate.NativeCapability) {
 				if change == "profile" {
 					writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationDisabled)
 				} else {

@@ -9,63 +9,31 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// IntegrationQuery binds host Git verification to canonical provider facts.
-type IntegrationQuery struct {
-	Repository      string `json:"repository"`
-	TargetBranch    string `json:"target_branch"`
-	Method          string `json:"method"`
-	SourceCommit    string `json:"source_commit"`
-	SourceTree      string `json:"source_tree"`
-	OriginCommit    string `json:"origin_commit"`
-	ResultCommit    string `json:"result_commit"`
-	SourceDirectory string `json:"-"`
-}
-
-// IntegrationCommit retains ordered source/result tree and parent proof.
-type IntegrationCommit struct {
-	Source string `json:"source"`
-	Commit string `json:"commit"`
-	Tree   string `json:"tree"`
-	Parent string `json:"parent"`
-}
-
-// IntegrationProof contains host observations of an actual remote target.
-type IntegrationProof struct {
-	IntegrationQuery
-	BaseCommit     string                 `json:"base_commit"`
-	PreparedTree   string                 `json:"prepared_tree"`
-	VerifiedTree   string                 `json:"verified_tree"`
-	ObservedTarget string                 `json:"observed_target"`
-	History        []IntegrationCommit    `json:"history"`
-	HistoryHash    string                 `json:"history_hash"`
-	Provenance     *IntegrationProvenance `json:"provenance,omitempty"`
-}
-
 // IntegrationGit is a trusted host IO port, never a worker evidence port.
 // It fetches the named canonical target and verifies method-specific Git proof.
 type IntegrationGit interface {
-	VerifyWorkflowIntegration(context.Context, IntegrationQuery) (IntegrationProof, error)
+	VerifyWorkflowIntegration(context.Context, workflowstate.IntegrationQuery) (workflowstate.IntegrationProof, error)
 }
 
 // PreparedIntegrationGit re-proves a retained history version from the
 // actual canonical target, including declared fixes and attribution metadata.
 type PreparedIntegrationGit interface {
-	VerifyPreparedWorkflowIntegration(context.Context, IntegrationQuery, IntegrationProof) (IntegrationProof, error)
+	VerifyPreparedWorkflowIntegration(context.Context, workflowstate.IntegrationQuery, workflowstate.IntegrationProof) (workflowstate.IntegrationProof, error)
 }
 
 // SliceDeliveryProof retains verified external delivery before finalization.
 type SliceDeliveryProof struct {
-	Schema           string                     `json:"schema"`
-	InvocationID     string                     `json:"invocation_id"`
-	Unit             workflowstate.Ref          `json:"unit"`
-	CandidateID      string                     `json:"candidate_id"`
-	CandidateRef     string                     `json:"candidate_ref"`
-	CandidateHash    string                     `json:"candidate_hash"`
-	SubmissionID     string                     `json:"submission_id"`
-	PullRequest      PullRequestSnapshot        `json:"pull_request"`
-	Git              IntegrationProof           `json:"git"`
-	ConfirmedAt      time.Time                  `json:"confirmed_at"`
-	NativeReceiptRef *workflowstate.EvidenceRef `json:"native_receipt_ref,omitempty"`
+	Schema           string                            `json:"schema"`
+	InvocationID     string                            `json:"invocation_id"`
+	Unit             workflowstate.Ref                 `json:"unit"`
+	CandidateID      string                            `json:"candidate_id"`
+	CandidateRef     string                            `json:"candidate_ref"`
+	CandidateHash    string                            `json:"candidate_hash"`
+	SubmissionID     string                            `json:"submission_id"`
+	PullRequest      workflowstate.PullRequestSnapshot `json:"pull_request"`
+	Git              workflowstate.IntegrationProof    `json:"git"`
+	ConfirmedAt      time.Time                         `json:"confirmed_at"`
+	NativeReceiptRef *workflowstate.EvidenceRef        `json:"native_receipt_ref,omitempty"`
 }
 
 // VerifyWorkflowSliceIntegration observes external integration without publishing
@@ -166,17 +134,17 @@ func (s *Store) workflowDeliveryCandidate(ctx context.Context, run workflowInvoc
 	return observation, candidate, err
 }
 
-func workflowIntegrationQuery(run workflowInvocationFile, candidate SliceCandidate, pr PullRequestSnapshot, method string) IntegrationQuery {
-	return IntegrationQuery{Repository: run.PullRequest.Request.Repository, TargetBranch: run.PullRequest.Request.BaseBranch, Method: method, SourceCommit: candidate.Result.Commit, SourceTree: candidate.Result.Tree, OriginCommit: candidate.Target.Commit, ResultCommit: pr.ResultCommit, SourceDirectory: candidate.Lane.Worktree}
+func workflowIntegrationQuery(run workflowInvocationFile, candidate SliceCandidate, pr workflowstate.PullRequestSnapshot, method string) workflowstate.IntegrationQuery {
+	return workflowstate.IntegrationQuery{Repository: run.PullRequest.Request.Repository, TargetBranch: run.PullRequest.Request.BaseBranch, Method: method, SourceCommit: candidate.Result.Commit, SourceTree: candidate.Result.Tree, OriginCommit: candidate.Target.Commit, ResultCommit: pr.ResultCommit, SourceDirectory: candidate.Lane.Worktree}
 }
 
-func (s *Store) observeWorkflowDeliveryPR(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, provider PullRequestProvider) (PullRequestSnapshot, error) {
+func (s *Store) observeWorkflowDeliveryPR(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, provider PullRequestProvider) (workflowstate.PullRequestSnapshot, error) {
 	pr, err := provider.ReadWorkflowPullRequest(ctx, run.PullRequest.URL)
 	if err != nil {
 		return pr, err
 	}
 
-	if err := s.acceptWorkflowPullRequest(ctx, run, observation, []PullRequestSnapshot{pr}); err != nil {
+	if err := s.acceptWorkflowPullRequest(ctx, run, observation, []workflowstate.PullRequestSnapshot{pr}); err != nil {
 		return pr, err
 	}
 

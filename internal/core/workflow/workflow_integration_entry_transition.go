@@ -139,7 +139,7 @@ func (s *Store) checkWorkflowIntegrationCandidate(entry IntegrationEntry) error 
 		return nil
 	}
 
-	var candidate IntegrationCandidate
+	var candidate workflowstate.IntegrationCandidate
 	if err := s.readWorkflowNativeEvidence(entry.InvocationID, *entry.CandidateRef, &candidate); err != nil {
 		return err
 	}
@@ -195,7 +195,7 @@ func (s *Store) checkWorkflowIntegrationPublication(ctx context.Context, run wor
 	return s.checkWorkflowIntegrationFinalization(ctx, run, old, next, latest)
 }
 
-func guardWorkflowIntegrationSubmissionPhase(entry IntegrationEntry, submission Submission) error {
+func guardWorkflowIntegrationSubmissionPhase(entry IntegrationEntry, submission workflowstate.Submission) error {
 	if submission.State == "awaiting_observation" && !slices.Contains([]string{"publishing", "observing", "blocked"}, entry.State) {
 		return ErrWorkflowObservationRequired
 	}
@@ -219,7 +219,7 @@ func checkWorkflowIntegrationSubmissionBinding(run workflowInvocationFile, entry
 	return nil
 }
 
-func (s *Store) checkWorkflowIntegrationFinalization(ctx context.Context, run workflowInvocationFile, old, next IntegrationEntry, submission Submission) error {
+func (s *Store) checkWorkflowIntegrationFinalization(ctx context.Context, run workflowInvocationFile, old, next IntegrationEntry, submission workflowstate.Submission) error {
 	if workflowIntegrationNeedsRequeueProof(next, submission) {
 		if submission.State != "unpublished" {
 			return ErrWorkflowObservationRequired
@@ -266,7 +266,7 @@ func (s *Store) checkWorkflowIntegrationReceiptImages(ctx context.Context, run w
 	return nil
 }
 
-func workflowIntegrationReceiptBindingMatches(run workflowInvocationFile, entry IntegrationEntry, submission Submission) bool {
+func workflowIntegrationReceiptBindingMatches(run workflowInvocationFile, entry IntegrationEntry, submission workflowstate.Submission) bool {
 	return submission.State == "confirmed" && entry.ReceiptRef != nil && entry.ReceiptRef.Path == run.DeliveryRef && entry.ReceiptRef.Hash == run.DeliveryHash
 }
 
@@ -349,7 +349,7 @@ func retainWorkflowIntegrationStop(entry *IntegrationEntry, run workflowInvocati
 	}
 }
 
-func workflowIntegrationCandidateExcluded(entry IntegrationEntry, submission Submission) bool {
+func workflowIntegrationCandidateExcluded(entry IntegrationEntry, submission workflowstate.Submission) bool {
 	if submission.Native == nil || submission.State == "unpublished" {
 		return false
 	}
@@ -361,7 +361,7 @@ func workflowIntegrationReceiptOwnerMatches(receipt *Receipt, run workflowInvoca
 	return receipt.Native != nil && receipt.Native.EntryID == entry.ID && receipt.Native.InvocationID == run.ID
 }
 
-func workflowIntegrationNeedsRequeueProof(entry IntegrationEntry, submission Submission) bool {
+func workflowIntegrationNeedsRequeueProof(entry IntegrationEntry, submission workflowstate.Submission) bool {
 	return entry.State == "queued" && submission.Native != nil
 }
 

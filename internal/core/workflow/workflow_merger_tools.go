@@ -14,24 +14,24 @@ import (
 // Broker messages are the entire model tool surface. Only scoped file operations
 // are granted; a model cannot supply shell commands or launch validation code.
 type workflowMergerToolRequest struct {
-	Operation string          `json:"operation"`
-	Path      string          `json:"path,omitempty"`
-	Content   string          `json:"content,omitempty"`
-	Check     *int            `json:"check,omitempty"`
-	Result    json.RawMessage `json:"result,omitempty"`
-	Usage     *MergerUsage    `json:"usage,omitempty"`
+	Operation string                     `json:"operation"`
+	Path      string                     `json:"path,omitempty"`
+	Content   string                     `json:"content,omitempty"`
+	Check     *int                       `json:"check,omitempty"`
+	Result    json.RawMessage            `json:"result,omitempty"`
+	Usage     *workflowstate.MergerUsage `json:"usage,omitempty"`
 }
 
 type workflowMergerToolResponse struct {
-	Content string         `json:"content,omitempty"`
-	Check   *CommandResult `json:"check,omitempty"`
-	Error   string         `json:"error,omitempty"`
+	Content string                       `json:"content,omitempty"`
+	Check   *workflowstate.CommandResult `json:"check,omitempty"`
+	Error   string                       `json:"error,omitempty"`
 }
 
 type workflowMergerTools struct {
-	input  MergerInput
+	input  workflowstate.MergerInput
 	root   *os.Root
-	checks []CommandResult
+	checks []workflowstate.CommandResult
 	guard  func(context.Context) error
 }
 

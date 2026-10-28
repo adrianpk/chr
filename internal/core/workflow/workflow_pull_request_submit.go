@@ -8,19 +8,19 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) ensureWorkflowPullRequest(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, provider PullRequestProvider) (PullRequestSnapshot, error) {
+func (s *Store) ensureWorkflowPullRequest(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, provider PullRequestProvider) (workflowstate.PullRequestSnapshot, error) {
 	if run.PullRequest.URL != "" {
 		pr, err := provider.ReadWorkflowPullRequest(ctx, run.PullRequest.URL)
 		if err != nil {
 			return pr, err
 		}
 
-		return pr, s.acceptWorkflowPullRequest(ctx, run, observation, []PullRequestSnapshot{pr})
+		return pr, s.acceptWorkflowPullRequest(ctx, run, observation, []workflowstate.PullRequestSnapshot{pr})
 	}
 
 	found, err := provider.FindWorkflowPullRequests(ctx, run.PullRequest.Request.PullRequestQuery)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	if len(found) > 0 {
@@ -30,43 +30,43 @@ func (s *Store) ensureWorkflowPullRequest(ctx context.Context, run *workflowInvo
 	}
 
 	if run.PullRequest.State != "prepared" {
-		return PullRequestSnapshot{}, s.awaitWorkflowPullRequest(run, nil)
+		return workflowstate.PullRequestSnapshot{}, s.awaitWorkflowPullRequest(run, nil)
 	}
 
 	return s.createWorkflowPullRequest(ctx, run, observation, provider)
 }
 
-func (s *Store) createWorkflowPullRequest(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, provider PullRequestProvider) (PullRequestSnapshot, error) {
+func (s *Store) createWorkflowPullRequest(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, provider PullRequestProvider) (workflowstate.PullRequestSnapshot, error) {
 	binding := run.PullRequest
 
 	commit, err := provider.ReadWorkflowBranch(ctx, binding.Request.Repository, binding.Request.HeadBranch)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	if commit != binding.SourceCommit {
-		return PullRequestSnapshot{}, fmt.Errorf("%w: canonical source branch differs from validated candidate", workflowstate.ErrConflict)
+		return workflowstate.PullRequestSnapshot{}, fmt.Errorf("%w: canonical source branch differs from validated candidate", workflowstate.ErrConflict)
 	}
 
 	if _, err := s.readWorkflowSliceCandidate(ctx, *run, observation); err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	binding.State, binding.Reason = "creating", ""
 
 	if err := s.commitWorkflowState(run); err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	pr, err := provider.CreateWorkflowPullRequest(ctx, binding.Request)
 	if err != nil {
-		return pr, errors.Join(err, s.awaitWorkflowPullRequest(run, []PullRequestSnapshot{pr}))
+		return pr, errors.Join(err, s.awaitWorkflowPullRequest(run, []workflowstate.PullRequestSnapshot{pr}))
 	}
 
-	return pr, s.acceptWorkflowPullRequest(ctx, run, observation, []PullRequestSnapshot{pr})
+	return pr, s.acceptWorkflowPullRequest(ctx, run, observation, []workflowstate.PullRequestSnapshot{pr})
 }
 
-func (s *Store) awaitWorkflowPullRequest(run *workflowInvocationFile, snapshots []PullRequestSnapshot) error {
+func (s *Store) awaitWorkflowPullRequest(run *workflowInvocationFile, snapshots []workflowstate.PullRequestSnapshot) error {
 	run.PullRequest.State, run.PullRequest.Reason = "awaiting_observation", "creation_outcome_unknown"
 	run.Status, run.Outcome = "waiting_integration", "pr_awaiting_observation"
 
@@ -82,7 +82,7 @@ func (s *Store) awaitWorkflowPullRequest(run *workflowInvocationFile, snapshots 
 	return ErrWorkflowAwaitingObservation
 }
 
-func (s *Store) acceptWorkflowPullRequest(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, snapshots []PullRequestSnapshot) error {
+func (s *Store) acceptWorkflowPullRequest(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, snapshots []workflowstate.PullRequestSnapshot) error {
 	reason := workflowPullRequestMismatch(*run.PullRequest, snapshots)
 	if reason != "" {
 		return s.blockWorkflowPullRequest(run, snapshots, reason)
@@ -116,7 +116,7 @@ func (s *Store) acceptWorkflowPullRequest(ctx context.Context, run *workflowInvo
 	return s.commitWorkflowPullRequestFiles(run, files, change)
 }
 
-func (s *Store) blockWorkflowPullRequest(run *workflowInvocationFile, snapshots []PullRequestSnapshot, reason string) error {
+func (s *Store) blockWorkflowPullRequest(run *workflowInvocationFile, snapshots []workflowstate.PullRequestSnapshot, reason string) error {
 	run.PullRequest.State, run.PullRequest.Reason = "blocked", reason
 	run.Status, run.Outcome = "blocked", reason
 	run.Blocker = &Blocker{Dependency: run.PullRequest.Unit, Reason: reason, NextActionOwner: "workflow_operator"}
@@ -133,7 +133,7 @@ func (s *Store) blockWorkflowPullRequest(run *workflowInvocationFile, snapshots 
 	return fmt.Errorf("%w: %s requires explicit reconciliation", workflowstate.ErrConflict, reason)
 }
 
-func workflowPullRequestMismatch(binding PullRequestBinding, snapshots []PullRequestSnapshot) string {
+func workflowPullRequestMismatch(binding PullRequestBinding, snapshots []workflowstate.PullRequestSnapshot) string {
 	if len(snapshots) != 1 {
 		return "canonical_pr_ambiguous"
 	}
@@ -158,7 +158,7 @@ func workflowPullRequestMismatch(binding PullRequestBinding, snapshots []PullReq
 	return ""
 }
 
-func workflowPullRequestIdentityMatches(binding PullRequestBinding, pr PullRequestSnapshot) bool {
+func workflowPullRequestIdentityMatches(binding PullRequestBinding, pr workflowstate.PullRequestSnapshot) bool {
 	if pr.Repository != binding.Request.Repository || pr.HeadRepository != pr.Repository || pr.HeadBranch != binding.Request.HeadBranch || pr.BaseBranch != binding.Request.BaseBranch || pr.HeadCommit != binding.SourceCommit || !workflowCommitID(pr.BaseCommit) {
 		return false
 	}

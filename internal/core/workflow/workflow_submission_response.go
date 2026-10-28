@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, id, submissionID string, response SubmissionResponse, submitErr error) (submission Submission, err error) {
+func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, id, submissionID string, response workflowstate.SubmissionResponse, submitErr error) (submission workflowstate.Submission, err error) {
 	err = s.withLock(ctx, func() error {
 		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
@@ -40,7 +40,7 @@ func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, id, submis
 	return submission, err
 }
 
-func workflowSubmissionResponseState(response SubmissionResponse, err error) string {
+func workflowSubmissionResponseState(response workflowstate.SubmissionResponse, err error) string {
 	if err != nil {
 		return "error_unknown"
 	}
@@ -52,7 +52,7 @@ func workflowSubmissionResponseState(response SubmissionResponse, err error) str
 	return "unaccepted"
 }
 
-func (s *Store) finishWorkflowSubmissionObservation(ctx context.Context, id string, observed Submission) (submission Submission, err error) {
+func (s *Store) finishWorkflowSubmissionObservation(ctx context.Context, id string, observed workflowstate.Submission) (submission workflowstate.Submission, err error) {
 	err = s.withLock(ctx, func() error {
 		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {

@@ -12,7 +12,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) finishWorkflowTask(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result *TaskResult, interrupted bool) error {
+func (s *Store) finishWorkflowTask(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result *workflowstate.TaskResult, interrupted bool) error {
 	return s.withLock(ctx, func() error {
 		run, record, err := s.checkWorkflowCredential(ctx, claim, false)
 		if err != nil {
@@ -54,7 +54,7 @@ func (s *Store) finishWorkflowTask(ctx context.Context, claim *Claim, prepared w
 	})
 }
 
-func (s *Store) checkWorkflowTaskCandidate(ctx context.Context, run *workflowInvocationFile, prepared workflowPreparedTask, result *TaskResult) error {
+func (s *Store) checkWorkflowTaskCandidate(ctx context.Context, run *workflowInvocationFile, prepared workflowPreparedTask, result *workflowstate.TaskResult) error {
 	commit, tree, err := s.workflowLaneCandidate(ctx, prepared.input.Lane)
 	if result.Successful && (err != nil || commit != result.Commit || tree != result.Tree) {
 		return fmt.Errorf("%w: validated candidate changed before journaling", workflowstate.ErrConflict)
@@ -75,7 +75,7 @@ func (s *Store) checkWorkflowTaskCandidate(ctx context.Context, run *workflowInv
 	return ctx.Err()
 }
 
-func applyWorkflowTaskResult(run *workflowInvocationFile, record *Record, result TaskResult, ref string) {
+func applyWorkflowTaskResult(run *workflowInvocationFile, record *Record, result workflowstate.TaskResult, ref string) {
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	attempt.ResultRef, attempt.FinishedAt = ref, time.Now().UTC()
 	record.Task.AttemptID = ""
@@ -101,7 +101,7 @@ func workflowExecutionStopped(run workflowInvocationFile, interrupted bool) bool
 	return run.StopIntent != "" || interrupted || !time.Now().Before(run.Attempts[len(run.Attempts)-1].LeaseUntil)
 }
 
-func (s *Store) finishStoppedWorkflowTask(run workflowInvocationFile, record Record, claim *Claim, result *TaskResult) error {
+func (s *Store) finishStoppedWorkflowTask(run workflowInvocationFile, record Record, claim *Claim, result *workflowstate.TaskResult) error {
 	result.Successful, result.Outcome = false, "interrupted"
 	if run.StopIntent != "" {
 		result.Outcome = workflowstate.StopStatus(run.StopIntent)

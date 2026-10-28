@@ -14,7 +14,7 @@ type nativeDriftProviderFixture struct {
 	remote string
 }
 
-func (p nativeDriftProviderFixture) ReadWorkflowPullRequest(ctx context.Context, url string) (PullRequestSnapshot, error) {
+func (p nativeDriftProviderFixture) ReadWorkflowPullRequest(ctx context.Context, url string) (workflowstate.PullRequestSnapshot, error) {
 	pr, err := p.nativePreparationProviderFixture.ReadWorkflowPullRequest(ctx, url)
 	if err != nil {
 		return pr, err

@@ -107,7 +107,7 @@ func TestNativeQueueJournal(t *testing.T) {
 	nativeQueueRetainedSubmission(t, f, first)
 }
 
-func nativeQueueRetainedSubmission(t *testing.T, f nativeSubmissionFixture, first Submission) {
+func nativeQueueRetainedSubmission(t *testing.T, f nativeSubmissionFixture, first workflowstate.Submission) {
 	t.Helper()
 
 	before := nativeQueueImages(t, f.store.layout.Root())
@@ -154,7 +154,7 @@ func nativeQueueRemoveBudget(t *testing.T, store *Store, id string) workflowInvo
 	return run
 }
 
-func nativeQueueInterruptedIntent(t *testing.T, f nativeSubmissionFixture, first Submission) {
+func nativeQueueInterruptedIntent(t *testing.T, f nativeSubmissionFixture, first workflowstate.Submission) {
 	t.Helper()
 
 	barriers, err := f.store.QueryWorkflowPublicationBarriers(t.Context(), "")

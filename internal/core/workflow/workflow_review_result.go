@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) finishWorkflowReview(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, decision ReviewDecision, executionErr error, interrupted bool) (result ReviewBinding, err error) {
+func (s *Store) finishWorkflowReview(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, decision workflowstate.ReviewDecision, executionErr error, interrupted bool) (result workflowstate.ReviewBinding, err error) {
 	err = s.withLock(ctx, func() error {
 		run, record, readErr := s.checkWorkflowCredential(ctx, claim, false)
 		if readErr != nil {
@@ -26,7 +26,7 @@ func (s *Store) finishWorkflowReview(ctx context.Context, claim *Claim, prepared
 		}
 
 		if workflowExecutionStopped(run, interrupted) {
-			readErr = owner.finishStoppedWorkflowTask(run, record, claim, &TaskResult{})
+			readErr = owner.finishStoppedWorkflowTask(run, record, claim, &workflowstate.TaskResult{})
 
 			return errors.Join(executionErr, ErrWorkflowStop, readErr)
 		}
@@ -39,9 +39,9 @@ func (s *Store) finishWorkflowReview(ctx context.Context, claim *Claim, prepared
 	return result, err
 }
 
-func (s *Store) acceptWorkflowReview(ctx context.Context, claim *Claim, run workflowInvocationFile, record Record, provider PullRequestProvider, decision ReviewDecision, executionErr error) (ReviewBinding, error) {
+func (s *Store) acceptWorkflowReview(ctx context.Context, claim *Claim, run workflowInvocationFile, record Record, provider PullRequestProvider, decision workflowstate.ReviewDecision, executionErr error) (workflowstate.ReviewBinding, error) {
 	if err := workflowAttemptQuiescent(run.Attempts[len(run.Attempts)-1]); err != nil {
-		return ReviewBinding{}, err
+		return workflowstate.ReviewBinding{}, err
 	}
 
 	observation, input, err := s.workflowReviewInputs(ctx, run, provider)
@@ -50,7 +50,7 @@ func (s *Store) acceptWorkflowReview(ctx context.Context, claim *Claim, run work
 	}
 
 	if failure := errors.Join(executionErr, err); failure != nil {
-		return ReviewBinding{}, s.checkpointFailedWorkflowReview(claim, run, record, failure)
+		return workflowstate.ReviewBinding{}, s.checkpointFailedWorkflowReview(claim, run, record, failure)
 	}
 
 	state := workflowReviewDecisionState(decision.Result.Decision)
@@ -58,13 +58,13 @@ func (s *Store) acceptWorkflowReview(ctx context.Context, claim *Claim, run work
 	attempt.Outcome, attempt.FinishedAt = "reviewed", time.Now().UTC()
 
 	if err := s.persistWorkflowReviewDecision(&run, observation, decision, state); err != nil {
-		return ReviewBinding{}, err
+		return workflowstate.ReviewBinding{}, err
 	}
 
 	return *run.Review, claim.releaseReservation()
 }
 
-func checkWorkflowReviewInputHash(input ReviewInput, expected string) error {
+func checkWorkflowReviewInputHash(input workflowstate.ReviewInput, expected string) error {
 	hash, err := workflowReviewInputHash(input)
 	if err != nil || hash != expected {
 		return fmt.Errorf("%w: review inputs changed during execution", workflowstate.ErrConflict)

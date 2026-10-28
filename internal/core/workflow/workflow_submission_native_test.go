@@ -13,7 +13,7 @@ import (
 type nativeSubmissionFixture struct {
 	store     *Store
 	entry     IntegrationEntry
-	candidate IntegrationCandidate
+	candidate workflowstate.IntegrationCandidate
 	provider  *nativePreparationProviderFixture
 }
 
@@ -42,7 +42,7 @@ func newNativeSubmissionFixture(t *testing.T) nativeSubmissionFixture {
 	return nativeSubmissionFixture{store, entry, candidate, fixture.provider}
 }
 
-func beginNativeSubmission(t *testing.T, f nativeSubmissionFixture) Submission {
+func beginNativeSubmission(t *testing.T, f nativeSubmissionFixture) workflowstate.Submission {
 	t.Helper()
 
 	submission, dispatch, err := f.store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider)
@@ -53,7 +53,7 @@ func beginNativeSubmission(t *testing.T, f nativeSubmissionFixture) Submission {
 	return submission
 }
 
-func nativeSubmissionUpdate(t *testing.T, f nativeSubmissionFixture, submission Submission) NativeSubmissionUpdate {
+func nativeSubmissionUpdate(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission) NativeSubmissionUpdate {
 	t.Helper()
 
 	run, err := f.store.readWorkflowInvocation(f.entry.InvocationID)

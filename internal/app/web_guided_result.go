@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -58,7 +58,7 @@ func guidedWebResult(view *webui.GuidedUseCaseView, observed GuidedUseCaseInspec
 	view.Result = projected
 }
 
-func guidedWebValidation(label, outcome, reference, waiver string, commands []workflowcore.CommandResult) webui.GuidedUseCaseValidation {
+func guidedWebValidation(label, outcome, reference, waiver string, commands []workflowstate.CommandResult) webui.GuidedUseCaseValidation {
 	result := webui.GuidedUseCaseValidation{Label: label, Outcome: outcome, Reference: reference, Waiver: waiver}
 	for _, command := range commands {
 		result.Commands = append(result.Commands, webui.GuidedUseCaseValidationCommand{Command: strings.Join(command.Command, " "), ExitCode: command.ExitCode})

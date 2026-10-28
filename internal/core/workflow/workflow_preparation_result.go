@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) commitWorkflowPreparationInput(ctx context.Context, run *workflowInvocationFile, record Record, observation workflowSliceObservation, input PreparationInput, lane Lane) (workflowPreparedTask, error) {
+func (s *Store) commitWorkflowPreparationInput(ctx context.Context, run *workflowInvocationFile, record Record, observation workflowSliceObservation, input workflowstate.PreparationInput, lane workflowstate.Lane) (workflowPreparedTask, error) {
 	run.Attempts[len(run.Attempts)-1].ContractHash = workflowUnitContractHash(observation)
 
 	taskInput, err := s.workflowSliceInput(ctx, *run, record, observation)
@@ -37,7 +37,7 @@ func (s *Store) commitWorkflowPreparationInput(ctx context.Context, run *workflo
 	return prepared, s.commitWorkflowPullRequestFiles(run, files, file)
 }
 
-func checkWorkflowPreparedProof(query PreparationQuery, proof IntegrationProof) error {
+func checkWorkflowPreparedProof(query PreparationQuery, proof workflowstate.IntegrationProof) error {
 	expected := query.IntegrationQuery
 
 	expected.ResultCommit, expected.SourceDirectory = proof.ResultCommit, ""
@@ -52,7 +52,7 @@ func checkWorkflowPreparedProof(query PreparationQuery, proof IntegrationProof) 
 	return validateWorkflowIntegrationProof(expected, proof)
 }
 
-func (s *Store) checkWorkflowPreparationSource(ctx context.Context, run workflowInvocationFile, input PreparationInput, provider PublicationGuardProvider) error {
+func (s *Store) checkWorkflowPreparationSource(ctx context.Context, run workflowInvocationFile, input workflowstate.PreparationInput, provider PublicationGuardProvider) error {
 	_, source, err := s.workflowReviewSourceInputs(ctx, run, provider)
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func (s *Store) checkWorkflowPreparationSource(ctx context.Context, run workflow
 	return nil
 }
 
-func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, claim *Claim, prepared workflowPreparedTask, candidate *IntegrationCandidate, provider PublicationGuardProvider, validationErr error, interrupted bool) error {
+func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, claim *Claim, prepared workflowPreparedTask, candidate *workflowstate.IntegrationCandidate, provider PublicationGuardProvider, validationErr error, interrupted bool) error {
 	return s.withLock(ctx, func() error {
 		run, record, err := s.checkWorkflowCredential(ctx, claim, false)
 		if err != nil {
@@ -118,7 +118,7 @@ func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, claim *
 	})
 }
 
-func (s *Store) checkpointWorkflowPreparationFailure(ctx context.Context, run workflowInvocationFile, record Record, claim *Claim, candidate IntegrationCandidate, prepared workflowPreparedTask, provider PublicationGuardProvider, validationErr, failure error) error {
+func (s *Store) checkpointWorkflowPreparationFailure(ctx context.Context, run workflowInvocationFile, record Record, claim *Claim, candidate workflowstate.IntegrationCandidate, prepared workflowPreparedTask, provider PublicationGuardProvider, validationErr, failure error) error {
 	// Only an observed command failure on the still-current clean result can
 	// request semantic repair. Stops, mutation and stale fences remain failures.
 	actionable := candidate.Input.Native != nil && workflowCandidateGateFailed(candidate.Validation) && s.checkWorkflowCandidateFailureCurrent(ctx, run, candidate, provider) == nil
@@ -133,7 +133,7 @@ func (s *Store) checkpointWorkflowPreparationFailure(ctx context.Context, run wo
 	return errors.Join(failure, repairErr, claim.releaseReservation())
 }
 
-func (s *Store) retainWorkflowPreparationFailureRepair(ctx context.Context, run workflowInvocationFile, candidate IntegrationCandidate, provider PublicationGuardProvider, actionable, targetMoved bool) error {
+func (s *Store) retainWorkflowPreparationFailureRepair(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, provider PublicationGuardProvider, actionable, targetMoved bool) error {
 	if targetMoved {
 		return s.retainWorkflowNativeTargetDrift(run.ID)
 	}
@@ -154,11 +154,11 @@ func (s *Store) retainWorkflowPreparationFailureRepair(ctx context.Context, run 
 	return s.checkWorkflowNativeSourceRevision(ctx, &current, provider)
 }
 
-func (s *Store) checkWorkflowCandidateFailureCurrent(ctx context.Context, run workflowInvocationFile, candidate IntegrationCandidate, provider PublicationGuardProvider) error {
+func (s *Store) checkWorkflowCandidateFailureCurrent(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, provider PublicationGuardProvider) error {
 	return errors.Join(s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, candidate), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
 }
 
-func workflowCandidateGateFailed(result TaskResult) bool {
+func workflowCandidateGateFailed(result workflowstate.TaskResult) bool {
 	for _, command := range result.Validation {
 		if command.ExitCode != 0 && !command.Truncated {
 			return true
@@ -168,7 +168,7 @@ func workflowCandidateGateFailed(result TaskResult) bool {
 	return false
 }
 
-func (s *Store) checkWorkflowPreparationCompletion(ctx context.Context, run workflowInvocationFile, prepared workflowPreparedTask, candidate *IntegrationCandidate, provider PublicationGuardProvider, validationErr error) error {
+func (s *Store) checkWorkflowPreparationCompletion(ctx context.Context, run workflowInvocationFile, prepared workflowPreparedTask, candidate *workflowstate.IntegrationCandidate, provider PublicationGuardProvider, validationErr error) error {
 	failure := errors.Join(validationErr, s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, *candidate), validateWorkflowPreparationGate(prepared.input, candidate.Validation), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
 	if failure != nil {
 		return failure

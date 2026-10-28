@@ -89,7 +89,7 @@ func (s *Store) Create(ctx context.Context, title string, record Record) (create
 }
 
 func (s *Store) preflightCreation(ctx context.Context, r Record) error {
-	r.Identity = Identity{ID: "new-workflow-artifact", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
+	r.Identity = workflowstate.Identity{ID: "new-workflow-artifact", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
 	if err := r.Validate(); err != nil {
 		return err
 	}

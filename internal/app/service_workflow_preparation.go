@@ -5,18 +5,19 @@ import (
 	"fmt"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PrepareWorkflowSliceIntegration runs the shared guarded combined-result gate.
-func (s service) PrepareWorkflowSliceIntegration(ctx context.Context, id string) (workflowcore.IntegrationCandidate, error) {
+func (s service) PrepareWorkflowSliceIntegration(ctx context.Context, id string) (workflowstate.IntegrationCandidate, error) {
 	store, provider, err := s.workflowPreparationDependencies(id)
 	if err != nil {
-		return workflowcore.IntegrationCandidate{}, err
+		return workflowstate.IntegrationCandidate{}, err
 	}
 
 	run, err := store.ReadWorkflow(ctx, id)
 	if err != nil {
-		return workflowcore.IntegrationCandidate{}, err
+		return workflowstate.IntegrationCandidate{}, err
 	}
 
 	git := s.workflowPreparationGit
@@ -28,10 +29,10 @@ func (s service) PrepareWorkflowSliceIntegration(ctx context.Context, id string)
 }
 
 // CheckWorkflowPublicationGuard returns exact current authority for submission.
-func (s service) CheckWorkflowPublicationGuard(ctx context.Context, id string) (workflowcore.PublicationGuard, error) {
+func (s service) CheckWorkflowPublicationGuard(ctx context.Context, id string) (workflowstate.PublicationGuard, error) {
 	store, provider, err := s.workflowPreparationDependencies(id)
 	if err != nil {
-		return workflowcore.PublicationGuard{}, err
+		return workflowstate.PublicationGuard{}, err
 	}
 
 	return store.CheckWorkflowPublicationGuard(ctx, id, provider)

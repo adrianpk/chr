@@ -40,8 +40,8 @@ func newWorkflowGitFixture(t *testing.T, method string) workflowGitFixture {
 	workflowIntegrationCommand(t, root, "init", "--bare", "--quiet", remote)
 	workflowIntegrationCommand(t, actor, "push", remote, source+":refs/heads/chr/workflow/fixture", base+":refs/heads/dev")
 
-	query := IntegrationQuery{Repository: "https://forge.example.invalid/team/project", TargetBranch: "dev", Method: method, SourceCommit: source, SourceTree: workflowIntegrationCommand(t, actor, "rev-parse", source+"^{tree}"), OriginCommit: origin, ResultCommit: result}
-	proof := IntegrationProof{IntegrationQuery: query, BaseCommit: base, ObservedTarget: base}
+	query := workflowstate.IntegrationQuery{Repository: "https://forge.example.invalid/team/project", TargetBranch: "dev", Method: method, SourceCommit: source, SourceTree: workflowIntegrationCommand(t, actor, "rev-parse", source+"^{tree}"), OriginCommit: origin, ResultCommit: result}
+	proof := workflowstate.IntegrationProof{IntegrationQuery: query, BaseCommit: base, ObservedTarget: base}
 
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: actor}}
 	if err := reader.verifyMethod(t.Context(), &proof); err != nil {

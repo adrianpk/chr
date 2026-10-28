@@ -9,18 +9,18 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func observeWorkflowPublicationCapability(ctx context.Context, provider PublicationGuardProvider, source ReviewInput) (PublicationCapability, error) {
+func observeWorkflowPublicationCapability(ctx context.Context, provider PublicationGuardProvider, source workflowstate.ReviewInput) (workflowstate.PublicationCapability, error) {
 	if provider == nil {
-		return PublicationCapability{}, ErrWorkflowAtomicGuard
+		return workflowstate.PublicationCapability{}, ErrWorkflowAtomicGuard
 	}
 
 	head, err := provider.ReadWorkflowBranch(ctx, source.PullRequest.Repository, source.PullRequest.HeadBranch)
 	if err != nil {
-		return PublicationCapability{}, err
+		return workflowstate.PublicationCapability{}, err
 	}
 
 	if head != source.PullRequest.HeadCommit {
-		return PublicationCapability{}, workflowstate.ErrConflict
+		return workflowstate.PublicationCapability{}, workflowstate.ErrConflict
 	}
 
 	capability, err := provider.WorkflowIntegrationCapability(ctx, source.PullRequest, source.Policy.Method)
@@ -31,7 +31,7 @@ func observeWorkflowPublicationCapability(ctx context.Context, provider Publicat
 	return capability, validateWorkflowPublicationCapability(source, capability)
 }
 
-func validateWorkflowPublicationCapability(source ReviewInput, capability PublicationCapability) error {
+func validateWorkflowPublicationCapability(source workflowstate.ReviewInput, capability workflowstate.PublicationCapability) error {
 	if capability.Repository != source.PullRequest.Repository || capability.PullRequestURL != source.PullRequest.URL || capability.Method != source.Policy.Method || capability.Mechanism == "" || len(capability.Mechanism) > 128 || len(capability.Revision) != 64 {
 		return workflowstate.ErrConflict
 	}
@@ -43,7 +43,7 @@ func validateWorkflowPublicationCapability(source ReviewInput, capability Public
 	return validateWorkflowSignatureCapability(capability)
 }
 
-func validateWorkflowSignatureCapability(capability PublicationCapability) error {
+func validateWorkflowSignatureCapability(capability workflowstate.PublicationCapability) error {
 	if capability.RequiredSignatures != (capability.SigningProfile != "") || (capability.RequiredSignatures && !validWorkflowNativeFingerprint(capability.SigningProfile)) {
 		return ErrWorkflowAtomicGuard
 	}
@@ -51,45 +51,45 @@ func validateWorkflowSignatureCapability(capability PublicationCapability) error
 	return nil
 }
 
-func (s *Store) checkWorkflowPublicationGuard(ctx context.Context, run workflowInvocationFile, provider PublicationGuardProvider) (PublicationGuard, error) {
+func (s *Store) checkWorkflowPublicationGuard(ctx context.Context, run workflowInvocationFile, provider PublicationGuardProvider) (workflowstate.PublicationGuard, error) {
 	if run.Preparation == nil {
-		return PublicationGuard{}, fmt.Errorf("publication requires prepared combined-result validation")
+		return workflowstate.PublicationGuard{}, fmt.Errorf("publication requires prepared combined-result validation")
 	}
 
 	review, err := s.checkWorkflowReviewGrant(ctx, run, provider)
 	if err != nil {
-		return PublicationGuard{}, err
+		return workflowstate.PublicationGuard{}, err
 	}
 
 	source := workflowPreparationSource(review)
 
 	candidate, err := s.currentWorkflowPreparation(ctx, run, source)
 	if err != nil {
-		return PublicationGuard{}, err
+		return workflowstate.PublicationGuard{}, err
 	}
 
 	capability, err := observeWorkflowPreparedCapability(ctx, provider, candidate.Input)
 	if err != nil {
-		return PublicationGuard{}, err
+		return workflowstate.PublicationGuard{}, err
 	}
 
 	if capability != candidate.Input.Capability || review.PreparationRef != run.Preparation.ResultRef || review.PreparationHash != run.Preparation.ResultHash {
-		return PublicationGuard{}, workflowstate.ErrConflict
+		return workflowstate.PublicationGuard{}, workflowstate.ErrConflict
 	}
 
-	return PublicationGuard{PullRequest: review.PullRequest, Capability: capability, Git: candidate.Input.Git, PreparationRef: run.Preparation.ResultRef, PreparationHash: run.Preparation.ResultHash, ReviewHash: run.Review.InputHash, Policy: review.Policy}, nil
+	return workflowstate.PublicationGuard{PullRequest: review.PullRequest, Capability: capability, Git: candidate.Input.Git, PreparationRef: run.Preparation.ResultRef, PreparationHash: run.Preparation.ResultHash, ReviewHash: run.Review.InputHash, Policy: review.Policy}, nil
 }
 
-func workflowPreparationSource(input ReviewInput) ReviewInput {
+func workflowPreparationSource(input workflowstate.ReviewInput) workflowstate.ReviewInput {
 	input.PreparationRef, input.PreparationHash, input.PreparedGit = "", "", nil
 	input.Native = nil
 
 	return input
 }
 
-func (s *Store) currentWorkflowPreparation(ctx context.Context, run workflowInvocationFile, source ReviewInput) (IntegrationCandidate, error) {
+func (s *Store) currentWorkflowPreparation(ctx context.Context, run workflowInvocationFile, source workflowstate.ReviewInput) (workflowstate.IntegrationCandidate, error) {
 	if run.Preparation == nil || run.Preparation.State != "validated" {
-		return IntegrationCandidate{}, fmt.Errorf("combined-result validation is absent or stale")
+		return workflowstate.IntegrationCandidate{}, fmt.Errorf("combined-result validation is absent or stale")
 	}
 
 	candidate, err := s.readWorkflowPreparation(run)
@@ -109,7 +109,7 @@ func (s *Store) currentWorkflowPreparation(ctx context.Context, run workflowInvo
 	return candidate, nil
 }
 
-func (s *Store) checkWorkflowPreparationGit(ctx context.Context, candidate IntegrationCandidate) error {
+func (s *Store) checkWorkflowPreparationGit(ctx context.Context, candidate workflowstate.IntegrationCandidate) error {
 	commit, tree, err := s.workflowLaneCandidate(ctx, candidate.Lane)
 
 	proof := candidate.Input.Git
@@ -129,7 +129,7 @@ func (s *Store) checkWorkflowPreparationGit(ctx context.Context, candidate Integ
 
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: candidate.Lane.Worktree}}
 
-	observed := IntegrationProof{IntegrationQuery: proof.IntegrationQuery, ObservedTarget: proof.ObservedTarget, Provenance: proof.Provenance}
+	observed := workflowstate.IntegrationProof{IntegrationQuery: proof.IntegrationQuery, ObservedTarget: proof.ObservedTarget, Provenance: proof.Provenance}
 	if err := reader.verifyMethod(ctx, &observed); err != nil {
 		return err
 	}

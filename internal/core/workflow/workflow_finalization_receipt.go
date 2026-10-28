@@ -44,7 +44,7 @@ func workflowSliceReceipt(run workflowInvocationFile, proof SliceDeliveryProof, 
 		facts.ValidationRefs = append(facts.ValidationRefs, task.EvidenceRef)
 	}
 
-	identity := Identity{ID: workflowSliceReceiptID(run), ProjectID: run.ProjectID, Namespace: run.Namespace, Revision: 1, CreatedAt: proof.ConfirmedAt, UpdatedAt: proof.ConfirmedAt}
+	identity := workflowstate.Identity{ID: workflowSliceReceiptID(run), ProjectID: run.ProjectID, Namespace: run.Namespace, Revision: 1, CreatedAt: proof.ConfirmedAt, UpdatedAt: proof.ConfirmedAt}
 	record := Record{Identity: identity, Kind: "receipt", Path: workflowSliceReceiptPath(run), Receipt: facts}
 
 	return record, record.Validate()
@@ -121,7 +121,7 @@ func workflowNativeReceiptMatchesProof(record Record, proof SliceDeliveryProof) 
 	return receipt.ConfirmedAt.Equal(proof.ConfirmedAt) && workflowReceiptGitMatches(*receipt, proof.Git) && receipt.PullRequest == proof.PullRequest.URL
 }
 
-func workflowReceiptGitMatches(receipt Receipt, git IntegrationProof) bool {
+func workflowReceiptGitMatches(receipt Receipt, git workflowstate.IntegrationProof) bool {
 	if receipt.Repository != git.Repository || receipt.Method != git.Method || receipt.SourceCommit != git.SourceCommit || receipt.BaseCommit != git.BaseCommit {
 		return false
 	}

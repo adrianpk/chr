@@ -31,7 +31,7 @@ func (p *workflowParallelPublicationProvider) observationPath() string {
 	return filepath.Join(p.remote, "pr-"+contenthash.Sum([]byte(p.pr.URL))+".json")
 }
 
-func (p *workflowParallelPublicationProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (PullRequestSnapshot, error) {
+func (p *workflowParallelPublicationProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (workflowstate.PullRequestSnapshot, error) {
 	pr := p.pr
 	if url != pr.URL {
 		return pr, workflowstate.ErrConflict
@@ -51,7 +51,7 @@ func (p *workflowParallelPublicationProvider) ReadWorkflowPullRequest(ctx contex
 	return pr, err
 }
 
-func (p *workflowParallelPublicationProvider) SubmitWorkflowIntegration(ctx context.Context, submission Submission) (SubmissionResponse, error) {
+func (p *workflowParallelPublicationProvider) SubmitWorkflowIntegration(ctx context.Context, submission workflowstate.Submission) (workflowstate.SubmissionResponse, error) {
 	response, err := p.workflowSubmissionProviderFixture.SubmitWorkflowIntegration(ctx, submission)
 	if !response.Accepted {
 		return response, err
@@ -142,12 +142,12 @@ func workflowParallelPublicationTargetSource(t *testing.T, store *Store, record 
 	workflowTicketReviewConfig(t, store, "rebase", workflowstate.ReviewTrustedAutoMerge)
 	workflowIntegrationCommand(t, store.layout.ProjectDir(), "push", remote, candidate.Result.Commit+":"+candidate.Lane.Branch)
 
-	pr := PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/" + strconv.Itoa(number), Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: target, HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}
+	pr := workflowstate.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/" + strconv.Itoa(number), Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: target, HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}
 
 	return workflowParallelPublicationPrepare(t, store, record, run.ID, remote, pr)
 }
 
-func workflowParallelPublicationPrepare(t *testing.T, store *Store, record Record, id, remote string, pr PullRequestSnapshot) workflowParallelPublicationLane {
+func workflowParallelPublicationPrepare(t *testing.T, store *Store, record Record, id, remote string, pr workflowstate.PullRequestSnapshot) workflowParallelPublicationLane {
 	t.Helper()
 
 	provider := workflowParallelPublicationProviderFor(pr, remote)
@@ -171,7 +171,7 @@ func workflowParallelPublicationPrepare(t *testing.T, store *Store, record Recor
 	return workflowParallelPublicationLane{fixture, provider}
 }
 
-func workflowParallelPublicationProviderFor(pr PullRequestSnapshot, remote string) *workflowParallelPublicationProvider {
+func workflowParallelPublicationProviderFor(pr workflowstate.PullRequestSnapshot, remote string) *workflowParallelPublicationProvider {
 	preparation := &workflowPreparationProviderFixture{workflowReviewProviderFixture: &workflowReviewProviderFixture{workflowPRProviderFixture: &workflowPRProviderFixture{pr: pr}, target: pr.BaseCommit}, guarded: true, revision: "guard-v1"}
 
 	return &workflowParallelPublicationProvider{&workflowSubmissionProviderFixture{workflowPreparationProviderFixture: preparation, remote: remote, sealed: map[string]bool{}}}

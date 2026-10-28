@@ -11,15 +11,15 @@ import (
 // MergerAcceptance records host observations, never a validation or
 // review grant. Accepted checkpoints still require the complete candidate gate.
 type MergerAcceptance struct {
-	SchemaVersion int                       `json:"schema_version"`
-	AttemptID     string                    `json:"attempt_id"`
-	InputHash     string                    `json:"input_hash"`
-	CheckpointRef workflowstate.EvidenceRef `json:"checkpoint_ref"`
-	Outcome       string                    `json:"outcome"`
-	CheckedAt     time.Time                 `json:"checked_at"`
-	Repair        *IntegrationTreeRepair    `json:"repair,omitempty"`
-	Next          *MergerRepairState        `json:"next,omitempty"`
-	Failure       string                    `json:"failure,omitempty"`
+	SchemaVersion int                                  `json:"schema_version"`
+	AttemptID     string                               `json:"attempt_id"`
+	InputHash     string                               `json:"input_hash"`
+	CheckpointRef workflowstate.EvidenceRef            `json:"checkpoint_ref"`
+	Outcome       string                               `json:"outcome"`
+	CheckedAt     time.Time                            `json:"checked_at"`
+	Repair        *workflowstate.IntegrationTreeRepair `json:"repair,omitempty"`
+	Next          *MergerRepairState                   `json:"next,omitempty"`
+	Failure       string                               `json:"failure,omitempty"`
 }
 
 // ExecuteWorkflowMergerRepair runs a certified driver at a frozen checkpoint,
@@ -81,7 +81,7 @@ func (s *Store) acceptWorkflowMerger(ctx context.Context, claim *Claim, prepared
 	return s.commitWorkflowMergerRepair(ctx, claim, prepared, provider, git, state, repair, acceptance)
 }
 
-func (s *Store) commitWorkflowMergerRepair(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, git MergerRepairGit, state MergerRepairState, repair IntegrationTreeRepair, acceptance *MergerAcceptance) error {
+func (s *Store) commitWorkflowMergerRepair(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, git MergerRepairGit, state MergerRepairState, repair workflowstate.IntegrationTreeRepair, acceptance *MergerAcceptance) error {
 	if err := importWorkflowMergerRepairTrees(ctx, git, state, prepared.input.Lane.Worktree, repair); err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (s *Store) guardWorkflowMergerAcceptance(ctx context.Context, claim *Claim,
 	return claim.store.CheckWorkflowMergerEvidence(ctx, *prepared.input.Merger, time.Now().UTC())
 }
 
-func (s *Store) checkWorkflowMergerRepairRequest(ctx context.Context, input MergerInput, git MergerRepairGit) error {
+func (s *Store) checkWorkflowMergerRepairRequest(ctx context.Context, input workflowstate.MergerInput, git MergerRepairGit) error {
 	return s.withLock(ctx, func() error {
 		_, owner, err := s.locateWorkflowInvocation(ctx, input.InvocationID)
 		if err != nil {

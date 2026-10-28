@@ -12,27 +12,27 @@ import (
 // UnitDelivery retains a delivered unit before its active bindings move.
 // EvidenceRef binds the exact frontier, target and receipt to an immutable image.
 type UnitDelivery struct {
-	Schema            string                      `json:"schema"`
-	InvocationID      string                      `json:"invocation_id"`
-	Unit              workflowstate.Ref           `json:"unit"`
-	SetID             string                      `json:"set_id,omitempty"`
-	Cursor            int                         `json:"cursor"`
-	Target            workflowstate.PreviewTarget `json:"target"`
-	NextTarget        workflowstate.PreviewTarget `json:"next_target"`
-	Lane              Lane                        `json:"lane"`
-	CandidateRef      string                      `json:"candidate_ref"`
-	CandidateHash     string                      `json:"candidate_hash"`
-	PullRequest       *PullRequestBinding         `json:"pull_request_binding"`
-	DeliveryProofRef  string                      `json:"delivery_proof_ref"`
-	DeliveryProofHash string                      `json:"delivery_proof_hash"`
-	DeliveryRef       string                      `json:"delivery_ref"`
-	DeliveryHash      string                      `json:"delivery_hash"`
-	Preparation       *PreparationBinding         `json:"preparation_binding,omitempty"`
-	Review            *ReviewBinding              `json:"review_binding,omitempty"`
-	Submission        *SubmissionBinding          `json:"submission_binding,omitempty"`
-	Proof             IntegrationProof            `json:"proof"`
-	EvidenceRef       string                      `json:"evidence_ref,omitempty"`
-	EvidenceHash      string                      `json:"evidence_hash,omitempty"`
+	Schema            string                         `json:"schema"`
+	InvocationID      string                         `json:"invocation_id"`
+	Unit              workflowstate.Ref              `json:"unit"`
+	SetID             string                         `json:"set_id,omitempty"`
+	Cursor            int                            `json:"cursor"`
+	Target            workflowstate.PreviewTarget    `json:"target"`
+	NextTarget        workflowstate.PreviewTarget    `json:"next_target"`
+	Lane              workflowstate.Lane             `json:"lane"`
+	CandidateRef      string                         `json:"candidate_ref"`
+	CandidateHash     string                         `json:"candidate_hash"`
+	PullRequest       *PullRequestBinding            `json:"pull_request_binding"`
+	DeliveryProofRef  string                         `json:"delivery_proof_ref"`
+	DeliveryProofHash string                         `json:"delivery_proof_hash"`
+	DeliveryRef       string                         `json:"delivery_ref"`
+	DeliveryHash      string                         `json:"delivery_hash"`
+	Preparation       *PreparationBinding            `json:"preparation_binding,omitempty"`
+	Review            *workflowstate.ReviewBinding   `json:"review_binding,omitempty"`
+	Submission        *SubmissionBinding             `json:"submission_binding,omitempty"`
+	Proof             workflowstate.IntegrationProof `json:"proof"`
+	EvidenceRef       string                         `json:"evidence_ref,omitempty"`
+	EvidenceHash      string                         `json:"evidence_hash,omitempty"`
 }
 
 // FrontierPorts supplies trusted canonical observation and target hydration.

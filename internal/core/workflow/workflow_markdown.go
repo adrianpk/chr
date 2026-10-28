@@ -211,5 +211,5 @@ func (s *Store) prepareAdoption(relative string, task Task, observedHash string)
 		return Record{}, err
 	}
 
-	return Record{Identity: Identity{ID: key, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: instant, UpdatedAt: time.Now().UTC()}, Kind: "ticket", Path: relative, Body: body, Task: &task, Metadata: map[string]json.RawMessage{"frontmatter": json.RawMessage(strconv.Quote(front))}, SourceHash: observedHash}, nil
+	return Record{Identity: workflowstate.Identity{ID: key, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: instant, UpdatedAt: time.Now().UTC()}, Kind: "ticket", Path: relative, Body: body, Task: &task, Metadata: map[string]json.RawMessage{"frontmatter": json.RawMessage(strconv.Quote(front))}, SourceHash: observedHash}, nil
 }

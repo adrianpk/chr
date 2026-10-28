@@ -112,14 +112,14 @@ func workflowClosingNativeJournalMatches(journal workflowSubmissionJournal, run 
 	return actual == expected && journal.Unit == receipt.Receipt.Unit
 }
 
-func (s *Store) observeWorkflowClosingNativeSlice(ctx context.Context, input ClosingInput, receipt Record, ports FrontierPorts) (IntegrationProof, error) {
+func (s *Store) observeWorkflowClosingNativeSlice(ctx context.Context, input workflowstate.ClosingInput, receipt Record, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
 	observation, err := s.observeWorkflowNativeReceipt(ctx, receipt, ports.Provider, ports.Observer)
 	if err != nil {
-		return IntegrationProof{}, err
+		return workflowstate.IntegrationProof{}, err
 	}
 
 	if observation.State != "merged" || observation.Git == nil {
-		return IntegrationProof{}, ErrWorkflowObservationRequired
+		return workflowstate.IntegrationProof{}, ErrWorkflowObservationRequired
 	}
 
 	proof := *observation.Git
@@ -130,7 +130,7 @@ func (s *Store) observeWorkflowClosingNativeSlice(ctx context.Context, input Clo
 	return proof, nil
 }
 
-func (s *Store) checkWorkflowClosingNativeCanonical(ctx context.Context, input ClosingInput, ports FrontierPorts) error {
+func (s *Store) checkWorkflowClosingNativeCanonical(ctx context.Context, input workflowstate.ClosingInput, ports FrontierPorts) error {
 	for _, slice := range input.Slices {
 		receipt, err := s.readRecord(slice.Receipt.Ref)
 		if err != nil {
@@ -164,7 +164,7 @@ func workflowClosingNativeEvidence(receipt Record, proof SliceDeliveryProof) []s
 		refs = append(refs, native.GitApplicationRef.Path)
 	}
 
-	for _, ref := range append(native.evidenceRefs(), native.ObservationRefs...) {
+	for _, ref := range append(native.EvidenceRefs(), native.ObservationRefs...) {
 		refs = append(refs, ref.Path)
 	}
 

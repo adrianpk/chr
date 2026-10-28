@@ -4,11 +4,13 @@ import (
 	"os"
 	"os/exec"
 	"sync"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowCommandGuard struct {
 	sync.Mutex
-	identity *ProcessIdentity
+	identity *workflowstate.ProcessIdentity
 }
 
 func (guard *workflowCommandGuard) remember(pid int) error {

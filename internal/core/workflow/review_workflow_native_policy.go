@@ -3,6 +3,8 @@ package workflow
 import (
 	"encoding/json"
 	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowNativeRepositoryPolicy struct {
@@ -24,7 +26,7 @@ type workflowNativeBranchPolicy struct {
 
 type workflowNativePolicyObservation struct {
 	data        []byte
-	unsupported []NativeUnsupported
+	unsupported []workflowstate.NativeUnsupported
 	contract    string
 }
 
@@ -65,14 +67,14 @@ func workflowNativeRemotePolicy(responses []json.RawMessage, method, contract st
 		}
 
 		if len(rules) != 0 {
-			reasons = append(reasons, NativeUnsupported{"native_rules_required", "Certify equivalence for the current enforced rules without disabling them."})
+			reasons = append(reasons, workflowstate.NativeUnsupported{Condition: "native_rules_required", Decision: "Certify equivalence for the current enforced rules without disabling them."})
 		}
 	}
 
 	return workflowNativePolicyObservation{data: projection, unsupported: reasons, contract: contract}, nil
 }
 
-func workflowNativeProtectionReasons(repository workflowNativeRepositoryPolicy, target, source workflowNativeBranchPolicy, method, contract string) []NativeUnsupported {
+func workflowNativeProtectionReasons(repository workflowNativeRepositoryPolicy, target, source workflowNativeBranchPolicy, method, contract string) []workflowstate.NativeUnsupported {
 	allowed := workflowNativeMethodAllowed(repository, method, contract)
 	checks := []struct {
 		valid     bool
@@ -84,11 +86,11 @@ func workflowNativeProtectionReasons(repository workflowNativeRepositoryPolicy, 
 		{target.Protected != nil && !*target.Protected && source.Protected != nil && !*source.Protected, "native_protections_required", "Certify an equivalent enforced policy; retain all existing protections."},
 	}
 
-	var reasons []NativeUnsupported
+	var reasons []workflowstate.NativeUnsupported
 
 	for _, check := range checks {
 		if !check.valid {
-			reasons = append(reasons, NativeUnsupported{check.condition, check.decision})
+			reasons = append(reasons, workflowstate.NativeUnsupported{Condition: check.condition, Decision: check.decision})
 		}
 	}
 

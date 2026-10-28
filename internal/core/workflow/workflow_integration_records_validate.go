@@ -162,7 +162,7 @@ func (s *Store) checkWorkflowIntegrationJournals(ctx context.Context, snapshot w
 	return checkWorkflowIntegrationProjections(snapshot)
 }
 
-func (s *Store) checkWorkflowIntegrationJournalOwner(ctx context.Context, snapshot workflowIntegrationSnapshot, journal workflowSubmissionJournal, submission Submission) error {
+func (s *Store) checkWorkflowIntegrationJournalOwner(ctx context.Context, snapshot workflowIntegrationSnapshot, journal workflowSubmissionJournal, submission workflowstate.Submission) error {
 	index := slices.IndexFunc(snapshot.Runs, func(r workflowInvocationFile) bool {
 		return r.ID == journal.InvocationID && r.Namespace == journal.Namespace && r.OwnerRoot == journal.OwnerRoot
 	})
@@ -185,7 +185,7 @@ func (s *Store) checkWorkflowIntegrationJournalOwner(ctx context.Context, snapsh
 	return owner.checkWorkflowNativeSubmissionEvidence(ctx, submission)
 }
 
-func workflowIntegrationJournalMatches(view IntegrationView, submission Submission) bool {
+func workflowIntegrationJournalMatches(view IntegrationView, submission workflowstate.Submission) bool {
 	native, entry := submission.Native, view.Entry
 	if native.Unit != entry.Unit || native.SourceRepository != entry.Repository || native.TargetRef != entry.TargetRef || native.ClaimGeneration > entry.ClaimGeneration {
 		return false

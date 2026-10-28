@@ -84,11 +84,11 @@ func workflowTaskBoundary(run *workflowInvocationFile, record Record) bool {
 	return false
 }
 
-func (s *Store) checkWorkflowReusableTask(ctx context.Context, run workflowInvocationFile, record Record, lane Lane) error {
+func (s *Store) checkWorkflowReusableTask(ctx context.Context, run workflowInvocationFile, record Record, lane workflowstate.Lane) error {
 	return s.checkWorkflowReusableTaskPrepared(ctx, run, record, lane, (*Store).recoverTransition)
 }
 
-func (s *Store) checkWorkflowReusableTaskPrepared(ctx context.Context, run workflowInvocationFile, record Record, lane Lane, prepare func(*Store) error) error {
+func (s *Store) checkWorkflowReusableTaskPrepared(ctx context.Context, run workflowInvocationFile, record Record, lane workflowstate.Lane, prepare func(*Store) error) error {
 	if _, err := s.observeWorkflowLane(ctx, lane); err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func (s *Store) workflowRetainedResultMatches(ctx context.Context, run workflowI
 		return false
 	}
 
-	var result TaskResult
+	var result workflowstate.TaskResult
 	if err := json.Unmarshal(data, &result); err != nil {
 		return false
 	}

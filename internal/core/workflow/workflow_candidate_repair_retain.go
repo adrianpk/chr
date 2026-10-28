@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) retainWorkflowCandidateRepair(ctx context.Context, run *workflowInvocationFile, candidate IntegrationCandidate, reason string, refs []workflowstate.EvidenceRef) error {
+func (s *Store) retainWorkflowCandidateRepair(ctx context.Context, run *workflowInvocationFile, candidate workflowstate.IntegrationCandidate, reason string, refs []workflowstate.EvidenceRef) error {
 	if run.Integration == nil || candidate.Input.Native == nil || len(refs) == 0 {
 		return workflowstate.ErrConflict
 	}
@@ -50,7 +50,7 @@ func (s *Store) retainWorkflowCandidateRepair(ctx context.Context, run *workflow
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
+	updateWorkflowIntegrationBinding(run, workflowstate.IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
 
 	return s.commitWorkflowPullRequestFiles(run, []workflowstate.FileChange{queue}, file)
 }
@@ -67,7 +67,7 @@ func (s *Store) checkWorkflowCandidateRepairTransition(ctx context.Context, run 
 	return s.guardWorkflowPreparationTransition(ctx, run, request)
 }
 
-func (s *Store) retainWorkflowFailedCandidate(ctx context.Context, run workflowInvocationFile, candidate IntegrationCandidate) error {
+func (s *Store) retainWorkflowFailedCandidate(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate) error {
 	current, err := s.readWorkflowInvocation(run.ID)
 	if err != nil {
 		return err
@@ -79,6 +79,6 @@ func (s *Store) retainWorkflowFailedCandidate(ctx context.Context, run workflowI
 	return s.retainWorkflowCandidateRepair(ctx, &current, candidate, "combined_gate_regression", []workflowstate.EvidenceRef{ref})
 }
 
-func workflowCandidateRepairOwnerMatches(run workflowInvocationFile, entry IntegrationEntry, candidate IntegrationCandidate) bool {
+func workflowCandidateRepairOwnerMatches(run workflowInvocationFile, entry IntegrationEntry, candidate workflowstate.IntegrationCandidate) bool {
 	return entry.ClaimGeneration == candidate.Input.Native.ClaimGeneration && entry.StopIntent == "" && run.StopIntent == ""
 }

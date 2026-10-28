@@ -124,7 +124,7 @@ func TestNativeBudgetLegacy(t *testing.T) {
 	nativeBudgetLegacyUncertainty(t, f, provider, entry, submission, path, before)
 }
 
-func nativeBudgetLegacyUncertainty(t *testing.T, f workflowPreparationFixture, provider *workflowSubmissionProviderFixture, entry IntegrationEntry, submission Submission, path string, before []byte) {
+func nativeBudgetLegacyUncertainty(t *testing.T, f workflowPreparationFixture, provider *workflowSubmissionProviderFixture, entry IntegrationEntry, submission workflowstate.Submission, path string, before []byte) {
 	t.Helper()
 
 	if again, dispatch, err := f.store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, entry.InvocationID), provider); !errors.Is(err, ErrWorkflowObservationRequired) || dispatch || again.ID != submission.ID {

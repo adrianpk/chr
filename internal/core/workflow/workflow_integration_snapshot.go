@@ -162,7 +162,7 @@ func checkWorkflowIntegrationDirectoryFiles(run workflowInvocationFile, files []
 			continue
 		}
 
-		known := slices.ContainsFunc(run.IntegrationEntries, func(b IntegrationBinding) bool { return b.EntryID == file.Name() })
+		known := slices.ContainsFunc(run.IntegrationEntries, func(b workflowstate.IntegrationBinding) bool { return b.EntryID == file.Name() })
 		if !known || !file.IsDir() || file.Type()&os.ModeSymlink != 0 {
 			return workflowIntegrationConflict("unbound integration image requires explicit guarded migration")
 		}

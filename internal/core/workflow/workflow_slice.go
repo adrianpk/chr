@@ -11,37 +11,17 @@ import (
 
 const workflowSliceValidationPurpose = "slice_validation"
 
-// SliceTaskProof binds ordered membership to host-accepted task evidence.
-type SliceTaskProof struct {
-	Key          string `json:"ticket_key"`
-	ContractHash string `json:"contract_hash"`
-	EvidenceRef  string `json:"evidence_ref"`
-	EvidenceHash string `json:"evidence_hash"`
-	InputRef     string `json:"input_ref"`
-	InputHash    string `json:"input_hash"`
-}
-
-// SliceInput binds an integration contract and its task proofs.
-// Independent ticket inputs omit set and aggregate-contract references.
-type SliceInput struct {
-	Unit         workflowstate.Ref `json:"unit"`
-	SetID        string            `json:"set_id,omitempty"`
-	ContractRef  string            `json:"contract_ref,omitempty"`
-	ContractHash string            `json:"contract_hash"`
-	Tasks        []SliceTaskProof  `json:"tasks"`
-}
-
 // SliceCandidate retains immutable host evidence for a slice or an
 // independent ticket; the ticket field preserves its actual integration unit.
 type SliceCandidate struct {
 	Schema       string                      `json:"schema"`
 	ID           string                      `json:"id"`
 	InvocationID string                      `json:"invocation_id"`
-	Slice        SliceInput                  `json:"slice,omitzero"`
-	Ticket       *SliceInput                 `json:"ticket,omitempty"`
+	Slice        workflowstate.SliceInput    `json:"slice,omitzero"`
+	Ticket       *workflowstate.SliceInput   `json:"ticket,omitempty"`
 	Target       workflowstate.PreviewTarget `json:"target"`
-	Lane         Lane                        `json:"lane"`
-	Result       TaskResult                  `json:"result"`
+	Lane         workflowstate.Lane          `json:"lane"`
+	Result       workflowstate.TaskResult    `json:"result"`
 }
 
 // ExecuteWorkflowSlice runs remaining tasks on the retained lane and validates

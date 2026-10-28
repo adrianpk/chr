@@ -40,7 +40,7 @@ func workflowSelectionCommit(t *testing.T, store *Store) (string, string) {
 	return workflowSelectionGit(t, store, "rev-parse", "HEAD"), workflowSelectionGit(t, store, "rev-parse", "HEAD^{tree}")
 }
 
-func writeSelectionProof(t *testing.T, store *Store, record Record, proof TaskValidation) Record {
+func writeSelectionProof(t *testing.T, store *Store, record Record, proof workflowstate.TaskValidation) Record {
 	t.Helper()
 
 	relative := "run/fixture/evidence/" + record.Task.Key + ".json"
@@ -75,7 +75,7 @@ func TestWorkflowSelectionPrerequisites(t *testing.T) {
 
 	commit, tree := workflowSelectionCommit(t, store)
 	branch := workflowSelectionGit(t, store, "symbolic-ref", "HEAD")
-	proof := TaskValidation{Schema: "chr-task-validation/v1", Key: result.Tasks[0].Task.Key, ContractHash: result.Tasks[0].Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
+	proof := workflowstate.TaskValidation{Schema: "chr-task-validation/v1", Key: result.Tasks[0].Task.Key, ContractHash: result.Tasks[0].Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
 	writeSelectionProof(t, store, result.Tasks[0], proof)
 
 	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: result.Tasks[1].Task.Key}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
@@ -132,7 +132,7 @@ func TestWorkflowSelectionInvalidDependencies(t *testing.T) {
 func selectionReceipt(t *testing.T, store *Store, unit workflowstate.Ref, commit, tree string) Record {
 	t.Helper()
 
-	identity := Identity{ID: "receipt-1", ProjectID: store.projectID, Namespace: store.layout.Namespace(), Revision: 1, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
+	identity := workflowstate.Identity{ID: "receipt-1", ProjectID: store.projectID, Namespace: store.layout.Namespace(), Revision: 1, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
 	record := Record{Identity: identity, Kind: "receipt", Path: "run/fixture/evidence/receipt.json", Receipt: &Receipt{Schema: WorkflowSchema, Unit: unit, CandidateID: "candidate", SubmissionID: "submission", Provider: "forgejo", Repository: "https://forge.example/test/repo", PullRequest: "https://forge.example/test/repo/pulls/1", Method: "rebase", SourceCommit: commit, BaseCommit: commit, PreparedTree: tree, HistoryProof: "host-verification", ResultCommit: commit, VerifiedTree: tree, ObservedTarget: commit, VerificationRef: "host-proof", ValidationRefs: []string{"host-validation"}, ConfirmedAt: time.Now().UTC()}}
 
 	receipt, err := store.CreateReceipt(t.Context(), record)
@@ -186,20 +186,20 @@ func TestWorkflowSelectionTargetProof(t *testing.T) {
 func TestWorkflowSelectionBadProof(t *testing.T) {
 	cases := []struct {
 		name   string
-		mutate func(*TaskValidation)
+		mutate func(*workflowstate.TaskValidation)
 	}{
-		{"failed", func(p *TaskValidation) { p.Successful = false }},
-		{"contract", func(p *TaskValidation) { p.ContractHash = "changed" }},
-		{"ticket", func(p *TaskValidation) { p.Key = "foreign" }},
-		{"tree", func(p *TaskValidation) { p.Tree = strings.Repeat("a", 40) }},
-		{"branch", func(p *TaskValidation) { p.Branch = "refs/heads/foreign" }},
+		{"failed", func(p *workflowstate.TaskValidation) { p.Successful = false }},
+		{"contract", func(p *workflowstate.TaskValidation) { p.ContractHash = "changed" }},
+		{"ticket", func(p *workflowstate.TaskValidation) { p.Key = "foreign" }},
+		{"tree", func(p *workflowstate.TaskValidation) { p.Tree = strings.Repeat("a", 40) }},
+		{"branch", func(p *workflowstate.TaskValidation) { p.Branch = "refs/heads/foreign" }},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			store, result := workflowSelectionFixture(t)
 			commit, tree := workflowSelectionCommit(t, store)
 			branch := workflowSelectionGit(t, store, "symbolic-ref", "HEAD")
-			proof := TaskValidation{Schema: "chr-task-validation/v1", Key: result.Tasks[0].Task.Key, ContractHash: result.Tasks[0].Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
+			proof := workflowstate.TaskValidation{Schema: "chr-task-validation/v1", Key: result.Tasks[0].Task.Key, ContractHash: result.Tasks[0].Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
 			tc.mutate(&proof)
 			writeSelectionProof(t, store, result.Tasks[0], proof)
 
@@ -218,7 +218,7 @@ func TestWorkflowSelectionEvidencePages(t *testing.T) {
 	store, result := workflowSelectionFixture(t)
 	commit, tree := workflowSelectionCommit(t, store)
 	branch := workflowSelectionGit(t, store, "symbolic-ref", "HEAD")
-	proof := TaskValidation{Schema: "chr-task-validation/v1", Key: result.Tasks[0].Task.Key, ContractHash: result.Tasks[0].Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
+	proof := workflowstate.TaskValidation{Schema: "chr-task-validation/v1", Key: result.Tasks[0].Task.Key, ContractHash: result.Tasks[0].Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
 	task := writeSelectionProof(t, store, result.Tasks[0], proof)
 	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
 
@@ -250,7 +250,7 @@ func TestWorkflowSelectionEarlierTasks(t *testing.T) {
 	commit, tree := workflowSelectionCommit(t, store)
 	branch := workflowSelectionGit(t, store, "symbolic-ref", "HEAD")
 	task := result.Tasks[1]
-	proof := TaskValidation{Schema: "chr-task-validation/v1", Key: task.Task.Key, ContractHash: task.Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
+	proof := workflowstate.TaskValidation{Schema: "chr-task-validation/v1", Key: task.Task.Key, ContractHash: task.Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
 	writeSelectionProof(t, store, task, proof)
 
 	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: result.Tasks[2].Task.Key}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}

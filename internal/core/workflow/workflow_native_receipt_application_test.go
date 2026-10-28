@@ -56,7 +56,7 @@ func TestNativeReceiptApplication(t *testing.T) {
 	checkNativeReceiptDelivery(t, f, submission, receipt, err)
 }
 
-func nativeReceiptRecord(t *testing.T, f nativeSubmissionFixture, submission Submission) Record {
+func nativeReceiptRecord(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission) Record {
 	t.Helper()
 
 	run, err := f.store.readWorkflowInvocation(submission.InvocationID)
@@ -75,7 +75,7 @@ func nativeReceiptRecord(t *testing.T, f nativeSubmissionFixture, submission Sub
 	return record
 }
 
-func nativeReceiptAlteredApplication(t *testing.T, store *Store, submission Submission, ref workflowstate.EvidenceRef, change func(*NativeGitObservation)) workflowstate.EvidenceRef {
+func nativeReceiptAlteredApplication(t *testing.T, store *Store, submission workflowstate.Submission, ref workflowstate.EvidenceRef, change func(*NativeGitObservation)) workflowstate.EvidenceRef {
 	t.Helper()
 
 	var observation NativeGitObservation

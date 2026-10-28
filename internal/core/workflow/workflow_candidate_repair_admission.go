@@ -26,7 +26,7 @@ func validateWorkflowCandidateRepairBinding(run workflowInvocationFile) error {
 	return nil
 }
 
-func (s *Store) checkWorkflowCandidateRepairAdmission(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, input MergerInput, provider PullRequestProvider) error {
+func (s *Store) checkWorkflowCandidateRepairAdmission(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, input workflowstate.MergerInput, provider PullRequestProvider) error {
 	b := run.CandidateRepair
 	if b == nil {
 		return nil
@@ -59,7 +59,7 @@ func (s *Store) checkWorkflowCandidateRepairAdmission(ctx context.Context, run w
 	return s.checkWorkflowCandidateFailureSource(ctx, run, repair.Candidate, guard)
 }
 
-func (s *Store) checkWorkflowCandidateFailureSource(ctx context.Context, run workflowInvocationFile, candidate IntegrationCandidate, provider PublicationGuardProvider) error {
+func (s *Store) checkWorkflowCandidateFailureSource(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, provider PublicationGuardProvider) error {
 	_, source, err := s.workflowReviewSourceInputs(ctx, run, provider)
 	if err != nil || checkWorkflowReviewInputHash(source, run.Preparation.SourceHash) != nil {
 		return errorsOrConflict(err)
@@ -78,6 +78,6 @@ func (s *Store) checkWorkflowCandidateFailureSource(ctx context.Context, run wor
 	return s.checkWorkflowPreparationGit(ctx, candidate)
 }
 
-func workflowCandidateRepairFenceMatches(b CandidateRepairBinding, run workflowInvocationFile, entry IntegrationEntry, input MergerInput) bool {
+func workflowCandidateRepairFenceMatches(b CandidateRepairBinding, run workflowInvocationFile, entry IntegrationEntry, input workflowstate.MergerInput) bool {
 	return b.EntryID == entry.ID && b.ClaimGeneration == entry.ClaimGeneration && b.CandidateHash == workflowMergerCandidateHash(run, entry) && input.RepairCheckpointRef != nil
 }

@@ -141,7 +141,7 @@ type nativeLivePolicyReader struct {
 	publication GitPublication
 }
 
-func (reader nativeLivePolicyReader) ReadWorkflowNativePolicy(ctx context.Context, pr PullRequestSnapshot, method string) (NativePolicy, error) {
+func (reader nativeLivePolicyReader) ReadWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (NativePolicy, error) {
 	if err := ctx.Err(); err != nil {
 		return NativePolicy{}, err
 	}

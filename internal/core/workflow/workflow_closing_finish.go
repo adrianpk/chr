@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) finishWorkflowClosing(ctx context.Context, claim *workflowClosingClaim, receipt ClosingReceipt, failure error, ports FrontierPorts) (SetClosureResult, error) {
+func (s *Store) finishWorkflowClosing(ctx context.Context, claim *workflowClosingClaim, receipt workflowstate.ClosingReceipt, failure error, ports FrontierPorts) (SetClosureResult, error) {
 	if err := s.checkWorkflowClosingCredential(claim); err != nil {
 		return SetClosureResult{}, errors.Join(failure, err)
 	}

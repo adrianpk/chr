@@ -8,7 +8,7 @@ import (
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-func validateWorkflowNativeSubmission(submission Submission, schema string) error {
+func validateWorkflowNativeSubmission(submission workflowstate.Submission, schema string) error {
 	native := submission.Native
 	if native == nil {
 		return validateWorkflowLegacySubmissionSchema(submission, schema)
@@ -33,11 +33,11 @@ func validateWorkflowNativeSubmission(submission Submission, schema string) erro
 	return validateWorkflowNativeApplication(submission)
 }
 
-func validWorkflowNativeSubmissionHistory(native NativeSubmission) bool {
+func validWorkflowNativeSubmissionHistory(native workflowstate.NativeSubmission) bool {
 	return len(native.ObservationRefs) <= workflowstate.PageLimit && len(native.GitObservationRefs) <= workflowstate.PageLimit && len(native.TransportResponseHistory) <= workflowstate.PageLimit
 }
 
-func validateWorkflowLegacySubmissionSchema(submission Submission, schema string) error {
+func validateWorkflowLegacySubmissionSchema(submission workflowstate.Submission, schema string) error {
 	if schema == "chr-integration-journal/v2" && submission.State != "unpublished" {
 		return workflowstate.ErrConflict
 	}
@@ -45,13 +45,13 @@ func validateWorkflowLegacySubmissionSchema(submission Submission, schema string
 	return nil
 }
 
-func validWorkflowNativeSubmissionOwner(submission Submission) bool {
+func validWorkflowNativeSubmissionOwner(submission workflowstate.Submission) bool {
 	native := submission.Native
 
 	return native.InvocationID == submission.InvocationID && native.Unit == submission.Unit && native.ClaimGeneration > 0 && native.Mechanism == workspaceconfig.WorkflowPublicationGitAtomicDualRef && validWorkflowNativeFingerprint(native.CandidateHash) && workflowNativeRecordGitMatches(native.NativeRecordBinding, submission.Guard.Git) && native.CanonicalPR == submission.Guard.PullRequest.URL && native.CapabilityHash == submission.Guard.Capability.Revision
 }
 
-func validateWorkflowNativeSubmissionRefs(native NativeSubmission) error {
+func validateWorkflowNativeSubmissionRefs(native workflowstate.NativeSubmission) error {
 	refs := append([]workflowstate.EvidenceRef{native.CandidateRef, native.ReviewGrantRef, native.FastForwardProofRef}, native.ObservationRefs...)
 
 	refs = append(refs, native.TransportResponseHistory...)
@@ -72,7 +72,7 @@ func validateWorkflowNativeSubmissionRefs(native NativeSubmission) error {
 	return nil
 }
 
-func validateWorkflowNativeApplication(submission Submission) error {
+func validateWorkflowNativeApplication(submission workflowstate.Submission) error {
 	native := submission.Native
 	if !validWorkflowNativeDispatch(*native) {
 		return workflowstate.ErrConflict
@@ -96,7 +96,7 @@ func validateWorkflowNativeApplication(submission Submission) error {
 	return nil
 }
 
-func validWorkflowNativeDispatch(native NativeSubmission) bool {
+func validWorkflowNativeDispatch(native workflowstate.NativeSubmission) bool {
 	if native.DispatchState == "not_started" {
 		return native.DispatchIdentity == nil && native.ApplicationState == "not_started"
 	}
@@ -104,13 +104,13 @@ func validWorkflowNativeDispatch(native NativeSubmission) bool {
 	return slices.Contains([]string{"dispatching", "quiescent"}, native.DispatchState) && native.DispatchIdentity != nil && validWorkflowProcessIdentity(*native.DispatchIdentity)
 }
 
-func validWorkflowNativeUnpublished(submission Submission) bool {
+func validWorkflowNativeUnpublished(submission workflowstate.Submission) bool {
 	native := submission.Native
 
 	return slices.Contains([]string{"unpublished", "awaiting_observation"}, submission.State) && native.DispatchState == "quiescent" && native.NonApplicationRef != nil && native.ReceiptRef == nil
 }
 
-func validateWorkflowNativeApplied(submission Submission) error {
+func validateWorkflowNativeApplied(submission workflowstate.Submission) error {
 	native := submission.Native
 	if native.TransportResponseRef == nil || native.CommandManifestRef == nil || native.AdvertisementRef == nil || native.NonApplicationRef != nil || submission.State == "unpublished" {
 		return workflowstate.ErrConflict
@@ -123,7 +123,7 @@ func validateWorkflowNativeApplied(submission Submission) error {
 	return nil
 }
 
-func guardWorkflowNativeSubmissionUpdate(old, next NativeSubmission) error {
+func guardWorkflowNativeSubmissionUpdate(old, next workflowstate.NativeSubmission) error {
 	if !sameWorkflowNativeSubmissionIntent(old, next) || !workflowNativeDispatchProgresses(old, next) || !workflowNativeApplicationProgresses(old, next) {
 		return workflowstate.ErrConflict
 	}
@@ -143,7 +143,7 @@ func guardWorkflowNativeSubmissionUpdate(old, next NativeSubmission) error {
 	return guardWorkflowNativeRetainedRefs(old, next)
 }
 
-func workflowNativeDispatchProgresses(old, next NativeSubmission) bool {
+func workflowNativeDispatchProgresses(old, next workflowstate.NativeSubmission) bool {
 	if old.DispatchIdentity != nil && !reflect.DeepEqual(old.DispatchIdentity, next.DispatchIdentity) {
 		return false
 	}
@@ -151,7 +151,7 @@ func workflowNativeDispatchProgresses(old, next NativeSubmission) bool {
 	return old.DispatchState != "quiescent" || next.DispatchState == "quiescent"
 }
 
-func workflowNativeApplicationProgresses(old, next NativeSubmission) bool {
+func workflowNativeApplicationProgresses(old, next workflowstate.NativeSubmission) bool {
 	switch old.ApplicationState {
 	case "git_applied", "not_applied":
 		return next.ApplicationState == old.ApplicationState
@@ -162,7 +162,7 @@ func workflowNativeApplicationProgresses(old, next NativeSubmission) bool {
 	}
 }
 
-func guardWorkflowNativeRetainedRefs(old, next NativeSubmission) error {
+func guardWorkflowNativeRetainedRefs(old, next workflowstate.NativeSubmission) error {
 	for _, pair := range [][2]*workflowstate.EvidenceRef{{old.AdvertisementRef, next.AdvertisementRef}, {old.CommandManifestRef, next.CommandManifestRef}, {old.ReceiptRef, next.ReceiptRef}, {old.NonApplicationRef, next.NonApplicationRef}, {old.DispatchCompletionRef, next.DispatchCompletionRef}} {
 		if pair[0] != nil && !reflect.DeepEqual(pair[0], pair[1]) {
 			return workflowstate.ErrConflict
@@ -172,14 +172,14 @@ func guardWorkflowNativeRetainedRefs(old, next NativeSubmission) error {
 	return nil
 }
 
-func sameWorkflowNativeSubmissionIntent(old, next NativeSubmission) bool {
+func sameWorkflowNativeSubmissionIntent(old, next workflowstate.NativeSubmission) bool {
 	clearWorkflowNativeSubmissionProgress(&old)
 	clearWorkflowNativeSubmissionProgress(&next)
 
 	return workflowNativeJSONEqual(old, next)
 }
 
-func clearWorkflowNativeSubmissionProgress(native *NativeSubmission) {
+func clearWorkflowNativeSubmissionProgress(native *workflowstate.NativeSubmission) {
 	native.DispatchState, native.ApplicationState = "", ""
 	native.DispatchIdentity = nil
 	native.DispatchCompletionRef = nil
@@ -190,7 +190,7 @@ func clearWorkflowNativeSubmissionProgress(native *NativeSubmission) {
 	native.ReceiptRef, native.NonApplicationRef = nil, nil
 }
 
-func guardWorkflowNativeResponseHistory(old, next NativeSubmission) error {
+func guardWorkflowNativeResponseHistory(old, next workflowstate.NativeSubmission) error {
 	if len(next.TransportResponseHistory) < len(old.TransportResponseHistory) || !slices.Equal(old.TransportResponseHistory, next.TransportResponseHistory[:len(old.TransportResponseHistory)]) {
 		return workflowstate.ErrConflict
 	}

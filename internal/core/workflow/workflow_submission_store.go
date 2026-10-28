@@ -19,14 +19,14 @@ import (
 const workflowPublicationDirectory = "chr-workflow-publications"
 
 type workflowSubmissionJournal struct {
-	Schema       string            `json:"schema"`
-	Key          string            `json:"key"`
-	OwnerRoot    string            `json:"owner_root"`
-	Namespace    string            `json:"namespace"`
-	InvocationID string            `json:"invocation_id"`
-	Unit         workflowstate.Ref `json:"unit"`
-	TargetKey    string            `json:"target_key"`
-	Attempts     []Submission      `json:"attempts"`
+	Schema       string                     `json:"schema"`
+	Key          string                     `json:"key"`
+	OwnerRoot    string                     `json:"owner_root"`
+	Namespace    string                     `json:"namespace"`
+	InvocationID string                     `json:"invocation_id"`
+	Unit         workflowstate.Ref          `json:"unit"`
+	TargetKey    string                     `json:"target_key"`
+	Attempts     []workflowstate.Submission `json:"attempts"`
 	sourceHash   string
 }
 
@@ -34,7 +34,7 @@ func workflowSubmissionJournalKey(run workflowInvocationFile) string {
 	return contenthash.Sum([]byte(run.OwnerRoot + "\n" + run.Namespace + "\n" + run.ID + "\n" + run.Lane.Unit.Kind + "\n" + run.Lane.Unit.ID))
 }
 
-func workflowSubmissionTargetKey(pr PullRequestSnapshot) (string, error) {
+func workflowSubmissionTargetKey(pr workflowstate.PullRequestSnapshot) (string, error) {
 	repository, err := workflowCanonicalRepository(pr.Repository)
 	if err != nil || !validWorkflowPRBranch(pr.BaseBranch) {
 		return "", workflowstate.ErrConflict

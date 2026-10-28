@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func checkWorkflowMergerRemote(ctx context.Context, provider PullRequestProvider, input MergerInput) error {
+func checkWorkflowMergerRemote(ctx context.Context, provider PullRequestProvider, input workflowstate.MergerInput) error {
 	if provider == nil {
 		return workflowstate.ErrConflict
 	}

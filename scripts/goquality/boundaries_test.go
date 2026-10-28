@@ -11,7 +11,7 @@ type leafDependencyCase struct {
 }
 
 func leafDependencyCases() []leafDependencyCase {
-	return append(append(append(ticketProjectionDependencyCases(), configurationDependencyCases()...), workflowDependencyCases()...), append([]leafDependencyCase{
+	return append(append(append(ticketProjectionDependencyCases(), configurationDependencyCases()...), append(workflowDependencyCases(), workflowStageDependencyCases()...)...), append([]leafDependencyCase{
 		{"authoring bounded journals", "internal/core/authoring/owner.go", "package authoring\nimport _ \"" + coreImportPath + "ops/file\"\n", false},
 		{"authoring native coordinator", "internal/core/authoring/guided_preparation.go", "package authoring\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"file authoring cycle", "internal/core/ops/file/io.go", "package file\nimport _ \"" + coreImportPath + "authoring\"\n", true},
@@ -140,4 +140,26 @@ func workflowDependencyCases() []leafDependencyCase {
 		{"workflow descendant root cycle", "internal/core/workflow/durable/store.go", "package durable\nimport _ \"forge.adrianpk.com/chr/internal/core\"\n", true},
 		{"state coordinator configuration", "internal/core/workflow/state/value.go", "package state\nimport _ \"forge.adrianpk.com/chr/internal/core/workspace/config\"\n", true},
 	}
+}
+
+func workflowStageDependencyCases() []leafDependencyCase {
+	var cases []leafDependencyCase
+
+	for _, stage := range []string{"integrate", "merge", "forge", "review", "closeout"} {
+		path := "internal/core/workflow/" + stage + "/port.go"
+		for _, dependency := range []struct {
+			name, owner string
+			blocked     bool
+		}{
+			{"shared values", "workflow/state", false},
+			{"coordinator", "workflow", true},
+			{"filesystem mutation", "ops/file", true},
+			{"configuration authority", "workspace/config", true},
+		} {
+			source := "package " + stage + "\nimport _ \"" + coreImportPath + dependency.owner + "\"\n"
+			cases = append(cases, leafDependencyCase{stage + " " + dependency.name, path, source, dependency.blocked})
+		}
+	}
+
+	return cases
 }

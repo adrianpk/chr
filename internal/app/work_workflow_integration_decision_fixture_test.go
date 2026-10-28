@@ -82,12 +82,12 @@ func retainServiceIntegrationDecision(t *testing.T, operations service, entry wo
 	}
 }
 
-func serviceIntegrationDecisionInput(t *testing.T, operations service, run workflowcore.Invocation, entry workflowcore.IntegrationEntry) workflowcore.MergerInput {
+func serviceIntegrationDecisionInput(t *testing.T, operations service, run workflowcore.Invocation, entry workflowcore.IntegrationEntry) workflowstate.MergerInput {
 	t.Helper()
 
 	now := time.Now().UTC()
 	gate := serviceIntegrationDecisionGate(t, operations, entry.Unit.ID)
-	input := workflowcore.MergerInput{MergerIdentity: workflowcore.MergerIdentity{ProtocolVersion: 1, ID: "surface-decision", InvocationID: run.ID, EntryID: entry.ID, Unit: entry.Unit, CandidateRevision: entry.StateRevision, CandidateHash: run.CandidateHash, ClaimGeneration: entry.ClaimGeneration, ScopeHash: entry.FrozenScopeHash, Reason: "actionable_review_finding"}, MergerGit: workflowcore.MergerGit{Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef, Source: run.Lane.HeadCommit, Base: run.PullRequest.TargetCommit, Method: "rebase"}, MergerScope: workflowcore.MergerScope{AllowedPaths: []string{"result.txt"}, ProtectedPaths: []string{"Makefile"}}, MergerValidation: workflowcore.MergerValidation{ValidationCommands: gate.Commands}, MergerLimits: workflowcore.MergerLimits{CapacityReservationID: "pending-capacity", BudgetReservationID: "surface-decision", RemainingAttempts: 3, WorkerTimeoutSeconds: run.Policy.WorkerTimeoutSeconds, AdmittedAt: now, Deadline: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second)}}
+	input := workflowstate.MergerInput{MergerIdentity: workflowstate.MergerIdentity{ProtocolVersion: 1, ID: "surface-decision", InvocationID: run.ID, EntryID: entry.ID, Unit: entry.Unit, CandidateRevision: entry.StateRevision, CandidateHash: run.CandidateHash, ClaimGeneration: entry.ClaimGeneration, ScopeHash: entry.FrozenScopeHash, Reason: "actionable_review_finding"}, MergerGit: workflowstate.MergerGit{Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef, Source: run.Lane.HeadCommit, Base: run.PullRequest.TargetCommit, Method: "rebase"}, MergerScope: workflowstate.MergerScope{AllowedPaths: []string{"result.txt"}, ProtectedPaths: []string{"Makefile"}}, MergerValidation: workflowstate.MergerValidation{ValidationCommands: gate.Commands}, MergerLimits: workflowstate.MergerLimits{CapacityReservationID: "pending-capacity", BudgetReservationID: "surface-decision", RemainingAttempts: 3, WorkerTimeoutSeconds: run.Policy.WorkerTimeoutSeconds, AdmittedAt: now, Deadline: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second)}}
 	input.OwnedWorkspaceID = fmt.Sprintf("%x", sha256.Sum256([]byte(run.ID+"\x00"+entry.ID+"\x00"+input.ID)))
 	commits := strings.Fields(serviceWorkflowDependencyGit(t, run.Lane.Worktree, "rev-list", "--reverse", run.Lane.BaseCommit+".."+run.Lane.HeadCommit))
 	input.SourceManifestRef = serviceIntegrationDecisionEvidence(t, operations, run.ID, "source", workflowcore.NativeSourceManifest{Schema: "chr-native-source/v1", Repository: entry.Repository, SourceRef: input.SourceRef, OriginalSource: input.Source, Commits: commits})
@@ -96,7 +96,7 @@ func serviceIntegrationDecisionInput(t *testing.T, operations service, run workf
 	target := serviceIntegrationDecisionEvidence(t, operations, run.ID, "target-intent", map[string]string{"intent": "Preserve the target validation requirements"})
 	finding := serviceIntegrationDecisionEvidence(t, operations, run.ID, "finding", workflowstate.ReviewFinding{Category: workflowstate.AgenticReviewFindingCorrectness, Title: "Reconcile declared requirements", Detail: "The source and target intent require an explicit compatible interpretation"})
 	input.IntentRefs, input.TargetChangeRefs, input.FindingRefs = []workflowstate.EvidenceRef{source}, []workflowstate.EvidenceRef{target}, []workflowstate.EvidenceRef{finding}
-	input.Requirements = []workflowcore.MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source, ConflictsWith: []string{"target-validation"}}, {ID: "target-validation", Origin: "target", Evidence: target}}
+	input.Requirements = []workflowstate.MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source, ConflictsWith: []string{"target-validation"}}, {ID: "target-validation", Origin: "target", Evidence: target}}
 
 	sealed, err := workflowcore.SealWorkflowMergerInput(input, now)
 	if err != nil {

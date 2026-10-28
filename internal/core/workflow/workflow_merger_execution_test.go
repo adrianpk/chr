@@ -23,7 +23,7 @@ func nativeMergerExecution(t *testing.T, id string) (workflowPreparationFixture,
 	entry = nativeRoleTransition(t, f.store, entry, "merging")
 	run := workflowTestRead(t, f.store, f.run.ID)
 	now := time.Now().UTC()
-	input := MergerInput{MergerIdentity: MergerIdentity{ProtocolVersion: 1, ID: id, InvocationID: run.ID, EntryID: entry.ID, Unit: entry.Unit, CandidateRevision: entry.StateRevision, CandidateHash: run.CandidateHash, ClaimGeneration: entry.ClaimGeneration, ScopeHash: entry.FrozenScopeHash, Reason: "preparation_conflict"}, MergerGit: MergerGit{Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef, Source: run.Lane.HeadCommit, Base: f.base, Method: "merge"}, MergerScope: MergerScope{AllowedPaths: []string{"result.txt"}, ProtectedPaths: []string{"Makefile"}}, MergerValidation: MergerValidation{ValidationCommands: workflowPreparationGate("test -f result.txt").Commands}, MergerLimits: MergerLimits{CapacityReservationID: "pending-capacity", BudgetReservationID: id, RemainingAttempts: 3, WorkerTimeoutSeconds: run.Policy.WorkerTimeoutSeconds, AdmittedAt: now, Deadline: now.Add(15 * time.Second)}}
+	input := workflowstate.MergerInput{MergerIdentity: workflowstate.MergerIdentity{ProtocolVersion: 1, ID: id, InvocationID: run.ID, EntryID: entry.ID, Unit: entry.Unit, CandidateRevision: entry.StateRevision, CandidateHash: run.CandidateHash, ClaimGeneration: entry.ClaimGeneration, ScopeHash: entry.FrozenScopeHash, Reason: "preparation_conflict"}, MergerGit: workflowstate.MergerGit{Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef, Source: run.Lane.HeadCommit, Base: f.base, Method: "merge"}, MergerScope: workflowstate.MergerScope{AllowedPaths: []string{"result.txt"}, ProtectedPaths: []string{"Makefile"}}, MergerValidation: workflowstate.MergerValidation{ValidationCommands: workflowPreparationGate("test -f result.txt").Commands}, MergerLimits: workflowstate.MergerLimits{CapacityReservationID: "pending-capacity", BudgetReservationID: id, RemainingAttempts: 3, WorkerTimeoutSeconds: run.Policy.WorkerTimeoutSeconds, AdmittedAt: now, Deadline: now.Add(15 * time.Second)}}
 	input.OwnedWorkspaceID = workflowMergerWorkspaceID(input)
 	manifest := NativeSourceManifest{Schema: "chr-native-source/v1", Repository: input.Repository, SourceRef: input.SourceRef, OriginalSource: input.Source, Commits: strings.Fields(workflowIntegrationCommand(t, f.run.Lane.Worktree, "rev-list", "--reverse", f.run.Lane.BaseCommit+".."+input.Source))}
 	input.SourceManifestRef = retainNativeRecordEvidence(t, f.store, run.ID, "execution-source", manifest)
@@ -31,8 +31,8 @@ func nativeMergerExecution(t *testing.T, id string) (workflowPreparationFixture,
 	source := retainNativeRecordEvidence(t, f.store, run.ID, "execution-intent", map[string]string{"intent": "Preserve source behavior"})
 	target := retainNativeRecordEvidence(t, f.store, run.ID, "execution-target", map[string]string{"intent": "Preserve target validation"})
 	input.IntentRefs, input.TargetChangeRefs = []workflowstate.EvidenceRef{source}, []workflowstate.EvidenceRef{target}
-	input.Requirements = []MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
-	input.Conflicts = []MergerConflict{{ID: "conflict-1", Path: "result.txt", Kind: "text", Evidence: diagnostic, RequirementIDs: []string{"source-api", "target-validation"}}}
+	input.Requirements = []workflowstate.MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
+	input.Conflicts = []workflowstate.MergerConflict{{ID: "conflict-1", Path: "result.txt", Kind: "text", Evidence: diagnostic, RequirementIDs: []string{"source-api", "target-validation"}}}
 
 	input, err := SealWorkflowMergerInput(input, now)
 	if err != nil {
@@ -319,15 +319,15 @@ func nativeMergerConflictFixture(t *testing.T) (workflowPreparationFixture, work
 	return f, ref
 }
 
-func nativeMergerChildMeter(input MergerInput) *MergerUsage {
+func nativeMergerChildMeter(input workflowstate.MergerInput) *workflowstate.MergerUsage {
 	if input.ID != "merger-metered" {
 		return nil
 	}
 
-	return &MergerUsage{Input: 20, Output: 10, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}
+	return &workflowstate.MergerUsage{Input: 20, Output: 10, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}
 }
 
-func nativeMergerChildEdit(encoder *json.Encoder, decoder *json.Decoder, input MergerInput) {
+func nativeMergerChildEdit(encoder *json.Encoder, decoder *json.Decoder, input workflowstate.MergerInput) {
 	path, content := "result.txt", "Preserved source and target behavior\n"
 	if strings.HasPrefix(input.ID, "merger-regenerate") {
 		path, content = "manual.txt", "Retain the approved source input\n"
@@ -338,13 +338,13 @@ func nativeMergerChildEdit(encoder *json.Encoder, decoder *json.Decoder, input M
 	}
 }
 
-func nativeMergerChildProposal(input MergerInput) MergerResult {
+func nativeMergerChildProposal(input workflowstate.MergerInput) workflowstate.MergerResult {
 	proposal := nativeMergerResolved(input)
 
 	proposal.ChangedPaths, proposal.ResolutionNotes = nil, nil
 	for _, conflict := range input.Conflicts {
 		proposal.ChangedPaths = append(proposal.ChangedPaths, conflict.Path)
-		proposal.ResolutionNotes = append(proposal.ResolutionNotes, MergerResolution{ConflictID: conflict.ID, Path: conflict.Path, Rationale: "Preserve independent source and target requirements through the declared repair.", RequirementIDs: conflict.RequirementIDs, RegenerationCommand: conflict.RegenerationCommand})
+		proposal.ResolutionNotes = append(proposal.ResolutionNotes, workflowstate.MergerResolution{ConflictID: conflict.ID, Path: conflict.Path, Rationale: "Preserve independent source and target requirements through the declared repair.", RequirementIDs: conflict.RequirementIDs, RegenerationCommand: conflict.RegenerationCommand})
 	}
 
 	if strings.HasPrefix(input.ID, "merger-regenerate") {
@@ -354,13 +354,13 @@ func nativeMergerChildProposal(input MergerInput) MergerResult {
 	return proposal
 }
 
-func nativeMergerChildDecision(encoder *json.Encoder, decoder *json.Decoder, input MergerInput) bool {
+func nativeMergerChildDecision(encoder *json.Encoder, decoder *json.Decoder, input workflowstate.MergerInput) bool {
 	if input.ID != "merger-decision" {
 		return false
 	}
 
-	question := MergerDecision{ID: "interpretation", Issue: "Select the compatible interpretation of both requirements", RequirementIDs: []string{"source-api", "target-validation"}, Options: []string{"Preserve the declared behavior", "Defer the repair"}, Authority: "maintainer"}
-	proposal := MergerResult{ProtocolVersion: 1, InputHash: input.InputHash, Outcome: "needs_decision", DecisionRequests: []MergerDecision{question}}
+	question := workflowstate.MergerDecision{ID: "interpretation", Issue: "Select the compatible interpretation of both requirements", RequirementIDs: []string{"source-api", "target-validation"}, Options: []string{"Preserve the declared behavior", "Defer the repair"}, Authority: "maintainer"}
+	proposal := workflowstate.MergerResult{ProtocolVersion: 1, InputHash: input.InputHash, Outcome: "needs_decision", DecisionRequests: []workflowstate.MergerDecision{question}}
 
 	data, err := json.Marshal(proposal)
 	if err != nil {

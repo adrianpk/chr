@@ -21,8 +21,8 @@ type NativeSourceManifest struct {
 // NativeHistoryManifest versions the existing host method/history proof.
 // Later provenance refinements append evidence rather than rewriting v1 records.
 type NativeHistoryManifest struct {
-	Schema string           `json:"schema"`
-	Git    IntegrationProof `json:"git"`
+	Schema string                         `json:"schema"`
+	Git    workflowstate.IntegrationProof `json:"git"`
 }
 
 func (s *Store) readWorkflowNativeEvidence(id string, ref workflowstate.EvidenceRef, value any) error {
@@ -38,7 +38,7 @@ func (s *Store) readWorkflowNativeEvidence(id string, ref workflowstate.Evidence
 	return json.Unmarshal(data, value)
 }
 
-func (s *Store) checkWorkflowNativeCandidate(candidate IntegrationCandidate) error {
+func (s *Store) checkWorkflowNativeCandidate(candidate workflowstate.IntegrationCandidate) error {
 	if err := validateWorkflowCandidateSchema(candidate); err != nil || candidate.Native == nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (s *Store) checkWorkflowNativeCandidate(candidate IntegrationCandidate) err
 		return err
 	}
 
-	var input PreparationInput
+	var input workflowstate.PreparationInput
 	if err := s.readWorkflowNativeEvidence(b.InvocationID, b.PreparationRef, &input); err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (s *Store) checkWorkflowNativeCandidate(candidate IntegrationCandidate) err
 		return workflowstate.ErrConflict
 	}
 
-	var capability NativeCapability
+	var capability workflowstate.NativeCapability
 	if err := s.readWorkflowNativeEvidence(b.InvocationID, b.CapabilityRef, &capability); err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (s *Store) checkWorkflowNativeCandidate(candidate IntegrationCandidate) err
 	return s.checkWorkflowNativeCandidateHistory(candidate, b)
 }
 
-func (s *Store) checkWorkflowNativeCandidateHistory(candidate IntegrationCandidate, b NativeRecordBinding) error {
+func (s *Store) checkWorkflowNativeCandidateHistory(candidate workflowstate.IntegrationCandidate, b workflowstate.NativeRecordBinding) error {
 	var history NativeHistoryManifest
 	if err := s.readWorkflowNativeEvidence(b.InvocationID, b.HistoryManifestRef, &history); err != nil {
 		return err
@@ -82,12 +82,12 @@ func (s *Store) checkWorkflowNativeCandidateHistory(candidate IntegrationCandida
 	return nil
 }
 
-func (s *Store) checkWorkflowNativeRecordEvidence(b NativeRecordBinding) error {
+func (s *Store) checkWorkflowNativeRecordEvidence(b workflowstate.NativeRecordBinding) error {
 	if err := validateWorkflowNativeRecordBinding(b); err != nil {
 		return err
 	}
 
-	for _, ref := range b.evidenceRefs() {
+	for _, ref := range b.EvidenceRefs() {
 		if _, err := s.readWorkflowReviewImage(ref.Path, ref.Hash); err != nil {
 			return err
 		}
@@ -113,7 +113,7 @@ func (s *Store) checkWorkflowNativeRecordEvidence(b NativeRecordBinding) error {
 	return s.checkWorkflowNativeCapabilityEvidence(b)
 }
 
-func (s *Store) checkWorkflowNativeSourceManifest(b NativeRecordBinding, git IntegrationProof) error {
+func (s *Store) checkWorkflowNativeSourceManifest(b workflowstate.NativeRecordBinding, git workflowstate.IntegrationProof) error {
 	var source NativeSourceManifest
 	if err := s.readWorkflowNativeEvidence(b.InvocationID, b.SourceManifestRef, &source); err != nil {
 		return err
@@ -130,8 +130,8 @@ func (s *Store) checkWorkflowNativeSourceManifest(b NativeRecordBinding, git Int
 	return validateWorkflowNativeSourceCommits(b, source.Commits, git)
 }
 
-func (s *Store) checkWorkflowNativeCapabilityEvidence(b NativeRecordBinding) error {
-	var capability NativeCapability
+func (s *Store) checkWorkflowNativeCapabilityEvidence(b workflowstate.NativeRecordBinding) error {
+	var capability workflowstate.NativeCapability
 	if err := s.readWorkflowNativeEvidence(b.InvocationID, b.CapabilityRef, &capability); err != nil {
 		return err
 	}
@@ -154,9 +154,9 @@ func (s *Store) checkWorkflowNativeCapabilityEvidence(b NativeRecordBinding) err
 	return s.checkWorkflowNativeValidationEvidence(b)
 }
 
-func (s *Store) checkWorkflowNativeValidationEvidence(b NativeRecordBinding) error {
+func (s *Store) checkWorkflowNativeValidationEvidence(b workflowstate.NativeRecordBinding) error {
 	for _, ref := range b.ValidationRefs {
-		var result TaskResult
+		var result workflowstate.TaskResult
 		if err := s.readWorkflowNativeEvidence(b.InvocationID, ref, &result); err != nil {
 			return err
 		}
@@ -173,7 +173,7 @@ func (s *Store) checkWorkflowNativeValidationEvidence(b NativeRecordBinding) err
 	return nil
 }
 
-func (s *Store) checkWorkflowNativeValidationInput(b NativeRecordBinding, result TaskResult) error {
+func (s *Store) checkWorkflowNativeValidationInput(b workflowstate.NativeRecordBinding, result workflowstate.TaskResult) error {
 	var input TaskInput
 	if err := s.readWorkflowNativeEvidence(b.InvocationID, workflowstate.EvidenceRef{Path: result.InputRef, Hash: result.InputHash}, &input); err != nil {
 		return err
@@ -183,7 +183,7 @@ func (s *Store) checkWorkflowNativeValidationInput(b NativeRecordBinding, result
 		return workflowstate.ErrConflict
 	}
 
-	var preparation PreparationInput
+	var preparation workflowstate.PreparationInput
 	if err := s.readWorkflowNativeEvidence(b.InvocationID, b.PreparationRef, &preparation); err != nil {
 		return err
 	}
@@ -206,7 +206,7 @@ func (s *Store) checkWorkflowNativeReceipt(record Record) error {
 		return workflowstate.ErrConflict
 	}
 
-	var candidate IntegrationCandidate
+	var candidate workflowstate.IntegrationCandidate
 	if err := s.readWorkflowNativeEvidence(native.InvocationID, native.CandidateRef, &candidate); err != nil {
 		return err
 	}
@@ -258,7 +258,7 @@ func (s *Store) checkWorkflowNativeReceiptObservations(receipt Receipt) error {
 	return nil
 }
 
-func workflowNativeReceiptCandidateMatches(receipt Receipt, candidate IntegrationCandidate) bool {
+func workflowNativeReceiptCandidateMatches(receipt Receipt, candidate workflowstate.IntegrationCandidate) bool {
 	if candidate.Native == nil || receipt.CandidateID != candidate.Input.Source.CandidateID {
 		return false
 	}
@@ -267,7 +267,7 @@ func workflowNativeReceiptCandidateMatches(receipt Receipt, candidate Integratio
 }
 
 func (s *Store) checkWorkflowNativeTransactionRevision(native NativeReceipt, transaction GitPublicationResult) error {
-	var capability NativeCapability
+	var capability workflowstate.NativeCapability
 	if err := s.readWorkflowNativeEvidence(native.InvocationID, native.CapabilityRef, &capability); err != nil {
 		return err
 	}
@@ -316,14 +316,14 @@ func workflowNativeJSONEqual(a, b any) bool {
 	return firstErr == nil && secondErr == nil && contenthash.Sum(first) == contenthash.Sum(second)
 }
 
-func validWorkflowNativeSourceHeader(b NativeRecordBinding, source NativeSourceManifest) bool {
+func validWorkflowNativeSourceHeader(b workflowstate.NativeRecordBinding, source NativeSourceManifest) bool {
 	expected := [4]string{"chr-native-source/v1", b.SourceRepository, b.SourceRef, b.OriginalSource}
 	actual := [4]string{source.Schema, source.Repository, source.SourceRef, source.OriginalSource}
 
 	return expected == actual && len(source.Commits) > 0 && len(source.Commits) <= workflowstate.RecordLimit
 }
 
-func validWorkflowNativeCapabilityRecord(capability NativeCapability) bool {
+func validWorkflowNativeCapabilityRecord(capability workflowstate.NativeCapability) bool {
 	for _, fingerprint := range []string{capability.ServerCapabilityFingerprint, capability.CredentialIdentityFingerprint} {
 		if !validWorkflowNativeFingerprint(fingerprint) {
 			return false
@@ -333,7 +333,7 @@ func validWorkflowNativeCapabilityRecord(capability NativeCapability) bool {
 	return len(capability.OwnershipRevision) > 0 && len(capability.OwnershipRevision) <= 256 && !strings.ContainsAny(capability.OwnershipRevision, "\x00\r\n") && slices.Contains([]string{"forgejo_same_pr_git_auto_merge/v1", "github_same_pr_git_merge/v1", workflowNativeSourceResultContract}, capability.ObservationContract)
 }
 
-func validateWorkflowNativeSourceCommits(b NativeRecordBinding, commits []string, git IntegrationProof) error {
+func validateWorkflowNativeSourceCommits(b workflowstate.NativeRecordBinding, commits []string, git workflowstate.IntegrationProof) error {
 	seen := map[string]bool{}
 	for _, commit := range commits {
 		if !workflowCommitID(commit) || len(commit) != len(b.OriginalSource) || seen[commit] {
@@ -346,7 +346,7 @@ func validateWorkflowNativeSourceCommits(b NativeRecordBinding, commits []string
 	return validateWorkflowNativeSourceMapping(b, commits, git)
 }
 
-func validateWorkflowNativeSourceMapping(b NativeRecordBinding, commits []string, git IntegrationProof) error {
+func validateWorkflowNativeSourceMapping(b workflowstate.NativeRecordBinding, commits []string, git workflowstate.IntegrationProof) error {
 	if git.Provenance != nil {
 		originals := make([]string, 0, len(git.Provenance.Source))
 		for _, entry := range git.Provenance.Source {

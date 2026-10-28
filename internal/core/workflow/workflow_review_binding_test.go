@@ -60,22 +60,22 @@ func TestWorkflowReviewDecisionChecks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	valid := ReviewDecision{BindingHash: file.Review.InputHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Required evidence inspected."}}
+	valid := workflowstate.ReviewDecision{BindingHash: file.Review.InputHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Required evidence inspected."}}
 
 	for _, test := range []struct {
 		name   string
-		change func(*ReviewDecision)
+		change func(*workflowstate.ReviewDecision)
 	}{
-		{"another input", func(d *ReviewDecision) { d.BindingHash = "another" }},
-		{"pass findings", func(d *ReviewDecision) {
+		{"another input", func(d *workflowstate.ReviewDecision) { d.BindingHash = "another" }},
+		{"pass findings", func(d *workflowstate.ReviewDecision) {
 			d.Result.BlockingFindings = []workflowstate.ReviewFinding{{Category: "correctness", Title: "Broken", Detail: "Wrong result."}}
 		}},
-		{"cosmetic", func(d *ReviewDecision) {
+		{"cosmetic", func(d *workflowstate.ReviewDecision) {
 			d.Result.Decision = workflowstate.IntegrationReviewDecisionNeedsChanges
 			d.RepairTaskKey = input.Slice.Tasks[0].Key
 			d.Result.BlockingFindings = []workflowstate.ReviewFinding{{Category: "cosmetic", Title: "Style", Detail: "Optional formatting."}}
 		}},
-		{"unknown task", func(d *ReviewDecision) {
+		{"unknown task", func(d *workflowstate.ReviewDecision) {
 			d.Result.Decision = workflowstate.IntegrationReviewDecisionNeedsChanges
 			d.RepairTaskKey = "another task"
 			d.Result.BlockingFindings = []workflowstate.ReviewFinding{{Category: "correctness", Title: "Broken", Detail: "Wrong result."}}

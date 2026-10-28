@@ -2,6 +2,8 @@ package workflow
 
 import (
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowAssuranceLost loses every guarded publication response in a
@@ -70,7 +72,7 @@ func workflowAssuranceLostResponse(t *testing.T, store *Store, progress Continua
 	return 1
 }
 
-func checkWorkflowAssuranceLostProof(t *testing.T, store *Store, submission Submission) {
+func checkWorkflowAssuranceLostProof(t *testing.T, store *Store, submission workflowstate.Submission) {
 	t.Helper()
 
 	var response GitPublicationResult

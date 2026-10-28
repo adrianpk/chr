@@ -70,7 +70,7 @@ func checkWorkflowManualPending(t *testing.T, store *Store, id string) {
 	}
 }
 
-func checkWorkflowManualReplay(t *testing.T, store *Store, claim *Claim, candidate ManualCandidate, result TaskResult) {
+func checkWorkflowManualReplay(t *testing.T, store *Store, claim *Claim, candidate ManualCandidate, result workflowstate.TaskResult) {
 	t.Helper()
 
 	replay, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate)

@@ -78,7 +78,7 @@ func (reader workflowIntegrationReader) mergerDiffPaths(ctx context.Context, bef
 	return workflowMergerChangedPaths(data)
 }
 
-func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Context, input MergerInput, proposal MergerResult, before, after string, exact bool) error {
+func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Context, input workflowstate.MergerInput, proposal workflowstate.MergerResult, before, after string, exact bool) error {
 	paths, err := reader.mergerDiffPaths(ctx, before, after)
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Con
 	return reader.checkMergerChangedKinds(ctx, input, paths, before, after)
 }
 
-func (reader workflowIntegrationReader) checkMergerChangedKinds(ctx context.Context, input MergerInput, paths []string, objects ...string) error {
+func (reader workflowIntegrationReader) checkMergerChangedKinds(ctx context.Context, input workflowstate.MergerInput, paths []string, objects ...string) error {
 	for _, path := range paths {
 		for _, object := range objects {
 			kind, err := reader.mergerFileKind(ctx, object, path)
@@ -108,7 +108,7 @@ func (reader workflowIntegrationReader) checkMergerChangedKinds(ctx context.Cont
 				return err
 			}
 
-			declared := slices.ContainsFunc(input.Conflicts, func(c MergerConflict) bool {
+			declared := slices.ContainsFunc(input.Conflicts, func(c workflowstate.MergerConflict) bool {
 				return c.Path == path && c.Kind == kind && workflowMergerProcedureRequired(c)
 			})
 			if kind != "text" && !declared {
@@ -124,7 +124,7 @@ func (reader workflowIntegrationReader) mergerPathObject(ctx context.Context, tr
 	return reader.RawOutput(ctx, "ls-tree", "-z", "--full-tree", tree, "--", path)
 }
 
-func (reader workflowIntegrationReader) checkMergerSideSelection(ctx context.Context, state MergerRepairState, input MergerInput, tree string) error {
+func (reader workflowIntegrationReader) checkMergerSideSelection(ctx context.Context, state MergerRepairState, input workflowstate.MergerInput, tree string) error {
 	for _, conflict := range input.Conflicts {
 		if workflowMergerProcedureRequired(conflict) {
 			continue

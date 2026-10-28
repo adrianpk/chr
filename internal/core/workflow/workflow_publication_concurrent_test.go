@@ -14,7 +14,7 @@ import (
 func TestWorkflowPublicationLateResponse(t *testing.T) {
 	f, p := newWorkflowSubmissionFixture(t, "rebase")
 	started, release := make(chan struct{}), make(chan struct{})
-	p.before = func(_ context.Context, _ Submission) { close(started); <-release }
+	p.before = func(_ context.Context, _ workflowstate.Submission) { close(started); <-release }
 	finished := make(chan error, 1)
 
 	go func() {

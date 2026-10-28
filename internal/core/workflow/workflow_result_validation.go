@@ -14,7 +14,7 @@ import (
 type ResultValidation struct {
 	Ticket, Title, Outcome string
 	Reference              workflowstate.EvidenceRef
-	Commands               []CommandResult
+	Commands               []workflowstate.CommandResult
 	Waiver                 string
 }
 
@@ -66,7 +66,7 @@ func (s *Store) workflowResultValidation(attempt Attempt) (ResultValidation, int
 		return ResultValidation{}, 0, errorsOrConflict(err)
 	}
 
-	var evidence TaskResult
+	var evidence workflowstate.TaskResult
 	if err := json.Unmarshal(data, &evidence); err != nil {
 		return ResultValidation{}, 0, err
 	}
@@ -87,7 +87,7 @@ func (s *Store) workflowResultValidation(attempt Attempt) (ResultValidation, int
 	return ResultValidation{Ticket: attempt.TaskKey, Title: input.Contract.Title, Outcome: evidence.Outcome, Reference: workflowstate.EvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}, Commands: evidence.Validation, Waiver: evidence.WaiverReason}, len(data) + size, nil
 }
 
-func workflowResultMatchesAttempt(evidence TaskResult, attempt Attempt) bool {
+func workflowResultMatchesAttempt(evidence workflowstate.TaskResult, attempt Attempt) bool {
 	return evidence.AttemptID == attempt.ID && evidence.Generation == attempt.Generation && evidence.InputRef == attempt.InputRef && evidence.InputHash == attempt.InputHash
 }
 

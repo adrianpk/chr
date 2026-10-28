@@ -9,22 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// IntegrationProvenance supplements the original history proof without
-// rewriting historical receipts. Source includes every original reachable commit.
-type IntegrationProvenance struct {
-	Schema            string                   `json:"schema"`
-	ObjectFormat      string                   `json:"object_format"`
-	AttributionPolicy string                   `json:"attribution_policy"`
-	CombinedDiffHash  string                   `json:"combined_diff_hash"`
-	Source            []IntegrationAttribution `json:"source"`
-	Prepared          []IntegrationAttribution `json:"prepared"`
-	Replays           []IntegrationReplay      `json:"replays,omitempty"`
-	IntegrationFixes  []IntegrationFix         `json:"integration_fixes,omitempty"`
-	Repairs           []IntegrationTreeRepair  `json:"repairs,omitempty"`
-	Preparation       *IntegrationPreparation  `json:"preparation,omitempty"`
-}
-
-func (reader workflowIntegrationReader) combinedProvenance(ctx context.Context, proof IntegrationProof) (*IntegrationProvenance, error) {
+func (reader workflowIntegrationReader) combinedProvenance(ctx context.Context, proof workflowstate.IntegrationProof) (*workflowstate.IntegrationProvenance, error) {
 	source, err := reader.sourceAttributions(ctx, proof)
 	if err != nil {
 		return nil, err
@@ -45,7 +30,7 @@ func (reader workflowIntegrationReader) combinedProvenance(ctx context.Context, 
 		return nil, err
 	}
 
-	p := &IntegrationProvenance{Schema: "chr-integration-provenance/v1", ObjectFormat: format, AttributionPolicy: "host_author_with_original_source_manifest", CombinedDiffHash: contenthash.Sum([]byte(diff)), Source: source, Prepared: []IntegrationAttribution{prepared}}
+	p := &workflowstate.IntegrationProvenance{Schema: "chr-integration-provenance/v1", ObjectFormat: format, AttributionPolicy: "host_author_with_original_source_manifest", CombinedDiffHash: contenthash.Sum([]byte(diff)), Source: source, Prepared: []workflowstate.IntegrationAttribution{prepared}}
 	if proof.Provenance != nil {
 		p.Repairs = slices.Clone(proof.Provenance.Repairs)
 	}
@@ -53,7 +38,7 @@ func (reader workflowIntegrationReader) combinedProvenance(ctx context.Context, 
 	return p, nil
 }
 
-func (reader workflowIntegrationReader) verifyCombinedProvenance(ctx context.Context, proof *IntegrationProof) error {
+func (reader workflowIntegrationReader) verifyCombinedProvenance(ctx context.Context, proof *workflowstate.IntegrationProof) error {
 	if proof.Provenance == nil {
 		return nil
 	}
@@ -70,7 +55,7 @@ func (reader workflowIntegrationReader) verifyCombinedProvenance(ctx context.Con
 	return nil
 }
 
-func validateWorkflowIntegrationProvenance(proof IntegrationProof) error {
+func validateWorkflowIntegrationProvenance(proof workflowstate.IntegrationProof) error {
 	p := proof.Provenance
 	if p == nil {
 		return nil
@@ -104,7 +89,7 @@ func validateWorkflowIntegrationProvenance(proof IntegrationProof) error {
 	return nil
 }
 
-func validWorkflowProvenanceHeader(proof IntegrationProof, p IntegrationProvenance) bool {
+func validWorkflowProvenanceHeader(proof workflowstate.IntegrationProof, p workflowstate.IntegrationProvenance) bool {
 	if !validWorkflowProvenanceEnvelope(proof, p) || !validWorkflowProvenanceCount(p) {
 		return false
 	}
@@ -116,7 +101,7 @@ func validWorkflowProvenanceHeader(proof IntegrationProof, p IntegrationProvenan
 	return p.AttributionPolicy == "host_author_with_original_source_manifest" && len(p.Prepared) == 1 && len(p.Replays) == 0 && len(p.IntegrationFixes) == 0
 }
 
-func validWorkflowProvenanceEnvelope(proof IntegrationProof, p IntegrationProvenance) bool {
+func validWorkflowProvenanceEnvelope(proof workflowstate.IntegrationProof, p workflowstate.IntegrationProvenance) bool {
 	expectedFormat := "sha1"
 	if len(proof.ResultCommit) == 64 {
 		expectedFormat = "sha256"
@@ -125,11 +110,11 @@ func validWorkflowProvenanceEnvelope(proof IntegrationProof, p IntegrationProven
 	return p.Schema == "chr-integration-provenance/v1" && validWorkflowNativeFingerprint(p.CombinedDiffHash) && p.ObjectFormat == expectedFormat
 }
 
-func validWorkflowProvenanceCount(p IntegrationProvenance) bool {
+func validWorkflowProvenanceCount(p workflowstate.IntegrationProvenance) bool {
 	return len(p.Source) > 0 && len(p.Source) <= workflowstate.RecordLimit && len(p.Prepared) > 0 && len(p.Prepared) <= workflowstate.RecordLimit
 }
 
-func validWorkflowAttributedSources(proof IntegrationProof, sources []IntegrationAttribution) bool {
+func validWorkflowAttributedSources(proof workflowstate.IntegrationProof, sources []workflowstate.IntegrationAttribution) bool {
 	seen := map[string]bool{}
 	for _, entry := range sources {
 		if !validWorkflowIntegrationAttribution(entry) || len(entry.Commit) != len(proof.SourceCommit) || seen[entry.Commit] {
@@ -142,7 +127,7 @@ func validWorkflowAttributedSources(proof IntegrationProof, sources []Integratio
 	return sources[len(sources)-1].Commit == proof.SourceCommit
 }
 
-func validateWorkflowProvenanceCommits(proof IntegrationProof, p IntegrationProvenance) error {
+func validateWorkflowProvenanceCommits(proof workflowstate.IntegrationProof, p workflowstate.IntegrationProvenance) error {
 	if !validWorkflowAttributedSources(proof, p.Source) {
 		return workflowstate.ErrConflict
 	}

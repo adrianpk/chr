@@ -21,7 +21,7 @@ type RoleReservation struct {
 	AttemptID    string
 	Role         string
 	LeaseUntil   time.Time
-	Owner        ProcessIdentity
+	Owner        workflowstate.ProcessIdentity
 }
 
 // IntegrationCapacity is an observation, not permission to launch work.

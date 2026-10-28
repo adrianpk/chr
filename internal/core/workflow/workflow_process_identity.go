@@ -11,25 +11,18 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ProcessIdentity binds a PID to one Linux boot and process birth.
-type ProcessIdentity struct {
-	PID        int    `json:"pid"`
-	BootID     string `json:"boot_id"`
-	StartTicks string `json:"start_ticks"`
-}
-
 // Process retains each supervised worker or validation command.
 type Process struct {
-	CapacitySlot int             `json:"capacity_slot,omitempty"`
-	Identity     ProcessIdentity `json:"identity"`
-	GroupID      int             `json:"group_id"`
-	Command      []string        `json:"command"`
-	State        string          `json:"state"`
-	StdoutRef    string          `json:"stdout_ref"`
-	StderrRef    string          `json:"stderr_ref"`
-	StdoutHash   string          `json:"stdout_hash"`
-	StderrHash   string          `json:"stderr_hash"`
-	Result       *CommandResult  `json:"result"`
+	CapacitySlot int                           `json:"capacity_slot,omitempty"`
+	Identity     workflowstate.ProcessIdentity `json:"identity"`
+	GroupID      int                           `json:"group_id"`
+	Command      []string                      `json:"command"`
+	State        string                        `json:"state"`
+	StdoutRef    string                        `json:"stdout_ref"`
+	StderrRef    string                        `json:"stderr_ref"`
+	StdoutHash   string                        `json:"stdout_hash"`
+	StderrHash   string                        `json:"stderr_hash"`
+	Result       *workflowstate.CommandResult  `json:"result"`
 }
 
 type workflowProcStat struct {
@@ -37,18 +30,18 @@ type workflowProcStat struct {
 	group        int
 }
 
-func workflowProcessIdentity(pid int) (ProcessIdentity, error) {
+func workflowProcessIdentity(pid int) (workflowstate.ProcessIdentity, error) {
 	boot, err := os.ReadFile("/proc/sys/kernel/random/boot_id")
 	if err != nil {
-		return ProcessIdentity{}, err
+		return workflowstate.ProcessIdentity{}, err
 	}
 
 	stat, err := workflowReadProcStat(pid)
 	if err != nil {
-		return ProcessIdentity{}, err
+		return workflowstate.ProcessIdentity{}, err
 	}
 
-	return ProcessIdentity{PID: pid, BootID: strings.TrimSpace(string(boot)), StartTicks: stat.birth}, nil
+	return workflowstate.ProcessIdentity{PID: pid, BootID: strings.TrimSpace(string(boot)), StartTicks: stat.birth}, nil
 }
 
 func workflowReadProcStat(pid int) (workflowProcStat, error) {
@@ -72,7 +65,7 @@ func workflowReadProcStat(pid int) (workflowProcStat, error) {
 	return workflowProcStat{state: fields[0], birth: fields[19], group: group}, err
 }
 
-func workflowProcessAlive(identity ProcessIdentity) (bool, error) {
+func workflowProcessAlive(identity workflowstate.ProcessIdentity) (bool, error) {
 	observed, err := workflowProcessIdentity(identity.PID)
 	if workflowProcessMissing(err) {
 		return false, nil

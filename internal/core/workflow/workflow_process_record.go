@@ -54,7 +54,7 @@ func (s *Store) registerWorkflowProcess(ctx context.Context, claim *Claim, prepa
 	return registered, index, err
 }
 
-func (s *Store) finishWorkflowProcess(ctx context.Context, claim *Claim, index int, expected Process, result CommandResult) error {
+func (s *Store) finishWorkflowProcess(ctx context.Context, claim *Claim, index int, expected Process, result workflowstate.CommandResult) error {
 	return s.withLock(ctx, func() error {
 		run, _, err := s.checkWorkflowCredential(ctx, claim, false)
 		if err != nil {

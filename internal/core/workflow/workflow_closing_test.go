@@ -13,13 +13,13 @@ import (
 
 type workflowClosingProvider struct {
 	workflowFrontierProvider
-	prs map[string]PullRequestSnapshot
+	prs map[string]workflowstate.PullRequestSnapshot
 }
 
-func (p workflowClosingProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (PullRequestSnapshot, error) {
+func (p workflowClosingProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (workflowstate.PullRequestSnapshot, error) {
 	pr, found := p.prs[url]
 	if !found {
-		return PullRequestSnapshot{}, workflowstate.ErrConflict
+		return workflowstate.PullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 
 	target, err := p.ReadWorkflowBranch(ctx, pr.Repository, pr.BaseBranch)
@@ -38,7 +38,7 @@ func workflowClosingExtentFixture(t *testing.T, extent string, policy workflowst
 	t.Helper()
 
 	fixture := workflowDeliveryPolicyFixture(t, "rebase", extent, policy)
-	prs := map[string]PullRequestSnapshot{fixture.provider.pr.URL: fixture.provider.pr}
+	prs := map[string]workflowstate.PullRequestSnapshot{fixture.provider.pr.URL: fixture.provider.pr}
 	workflowFinalizeFrontier(t, fixture)
 	workflowAdvanceFrontier(t, fixture)
 	workflowDeliverNextFrontier(t, &fixture)

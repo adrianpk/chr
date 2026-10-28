@@ -13,16 +13,16 @@ import (
 )
 
 type workflowMergerCall struct {
-	Protocol string            `json:"protocol"`
-	Input    MergerInput       `json:"input"`
-	Evidence map[string]string `json:"evidence"`
+	Protocol string                    `json:"protocol"`
+	Input    workflowstate.MergerInput `json:"input"`
+	Evidence map[string]string         `json:"evidence"`
 }
 
-func (s *Store) workflowMergerCall(input MergerInput) (workflowMergerCall, error) {
+func (s *Store) workflowMergerCall(input workflowstate.MergerInput) (workflowMergerCall, error) {
 	call := workflowMergerCall{Protocol: workflowMergerBrokerProtocol, Input: input, Evidence: map[string]string{}}
 	total := 0
 
-	for _, ref := range input.evidenceRefs() {
+	for _, ref := range input.EvidenceRefs() {
 		if _, present := call.Evidence[ref.Path]; present {
 			continue
 		}
@@ -43,7 +43,7 @@ func (s *Store) workflowMergerCall(input MergerInput) (workflowMergerCall, error
 	return call, nil
 }
 
-func serveWorkflowMergerBroker(ctx context.Context, tools *workflowMergerTools, reader io.Reader, writer io.Writer) (proposal json.RawMessage, usage *MergerUsage, err error) {
+func serveWorkflowMergerBroker(ctx context.Context, tools *workflowMergerTools, reader io.Reader, writer io.Writer) (proposal json.RawMessage, usage *workflowstate.MergerUsage, err error) {
 	scanner := bufio.NewScanner(reader)
 	scanner.Buffer(make([]byte, 4096), workflowstate.FileLimit+1)
 
@@ -99,7 +99,7 @@ func decodeWorkflowMergerTool(data []byte) (workflowMergerToolRequest, error) {
 	return request, err
 }
 
-func workflowMergerTerminal(request workflowMergerToolRequest) (json.RawMessage, *MergerUsage, error) {
+func workflowMergerTerminal(request workflowMergerToolRequest) (json.RawMessage, *workflowstate.MergerUsage, error) {
 	if request.Path != "" || request.Content != "" || request.Check != nil || len(request.Result) == 0 {
 		return nil, nil, workflowstate.ErrConflict
 	}
@@ -124,7 +124,7 @@ func writeWorkflowMergerToolResponse(ctx context.Context, tools *workflowMergerT
 	return encoder.Encode(response)
 }
 
-func writeWorkflowMergerTerminal(encoder *json.Encoder, request workflowMergerToolRequest) (json.RawMessage, *MergerUsage, error) {
+func writeWorkflowMergerTerminal(encoder *json.Encoder, request workflowMergerToolRequest) (json.RawMessage, *workflowstate.MergerUsage, error) {
 	proposal, usage, err := workflowMergerTerminal(request)
 	if err != nil {
 		return nil, nil, err

@@ -35,7 +35,7 @@ func nativeClosingPublicationPeer(t *testing.T, f nativeClosingFixture) nativeSu
 	}
 
 	repo := f.receipt.Receipt.Repository
-	pr := PullRequestSnapshot{URL: repo + "/pulls/8", Repository: repo, HeadRepository: repo, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}
+	pr := workflowstate.PullRequestSnapshot{URL: repo + "/pulls/8", Repository: repo, HeadRepository: repo, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}
 	provider := &nativePreparationProviderFixture{workflowPreparationProviderFixture: &workflowPreparationProviderFixture{workflowReviewProviderFixture: &workflowReviewProviderFixture{workflowPRProviderFixture: &workflowPRProviderFixture{pr: pr}, target: target}, guarded: true, revision: "guard-v1"}, policyRevision: "policy-v1"}
 	workflowPREnsure(t, peer, entry.InvocationID, provider)
 

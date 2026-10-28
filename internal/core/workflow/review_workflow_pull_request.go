@@ -50,7 +50,7 @@ func (adapter RemoteReviewAdapter) CheckWorkflowRepositoryProvider(ctx context.C
 }
 
 // FindWorkflowPullRequests observes all states and rejects incomplete pagination.
-func (adapter RemoteReviewAdapter) FindWorkflowPullRequests(ctx context.Context, query PullRequestQuery) ([]PullRequestSnapshot, error) {
+func (adapter RemoteReviewAdapter) FindWorkflowPullRequests(ctx context.Context, query PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error) {
 	resolvedReview, err := adapter.resolveWorkflowRepository(query.Repository)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (adapter RemoteReviewAdapter) FindWorkflowPullRequests(ctx context.Context,
 		return nil, workflowstate.ErrConflict
 	}
 
-	found := []PullRequestSnapshot{}
+	found := []workflowstate.PullRequestSnapshot{}
 	count := 0
 
 	for page := 1; page <= workflowstate.PageLimit; page++ {
@@ -121,7 +121,7 @@ func decodeWorkflowPRList(data []byte) ([]workflowRemotePRJSON, error) {
 	return items, nil
 }
 
-func appendWorkflowPRMatches(found []PullRequestSnapshot, items []workflowRemotePRJSON, branch string) ([]PullRequestSnapshot, error) {
+func appendWorkflowPRMatches(found []workflowstate.PullRequestSnapshot, items []workflowRemotePRJSON, branch string) ([]workflowstate.PullRequestSnapshot, error) {
 	for _, item := range items {
 		if item.Head.Ref != branch {
 			continue
@@ -139,15 +139,15 @@ func appendWorkflowPRMatches(found []PullRequestSnapshot, items []workflowRemote
 }
 
 // ReadWorkflowPullRequest retrieves provider metadata without review side effects.
-func (adapter RemoteReviewAdapter) ReadWorkflowPullRequest(ctx context.Context, rawURL string) (PullRequestSnapshot, error) {
+func (adapter RemoteReviewAdapter) ReadWorkflowPullRequest(ctx context.Context, rawURL string) (workflowstate.PullRequestSnapshot, error) {
 	repository, err := workflowPullRequestRepository(rawURL)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	resolvedReview, err := adapter.resolve(rawURL)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	reference, config := resolvedReview.reference, resolvedReview.config
@@ -156,33 +156,33 @@ func (adapter RemoteReviewAdapter) ReadWorkflowPullRequest(ctx context.Context, 
 
 	data, err := adapter.workflowProviderRunner().Output(ctx, config.CLI, workflowRemoteAPIArgs(repository, reference, "GET", endpoint, false)...)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	return decodeWorkflowRemotePR(data)
 }
 
 // CreateWorkflowPullRequest creates a PR only; it never reviews or merges it.
-func (adapter RemoteReviewAdapter) CreateWorkflowPullRequest(ctx context.Context, request PullRequestRequest) (PullRequestSnapshot, error) {
+func (adapter RemoteReviewAdapter) CreateWorkflowPullRequest(ctx context.Context, request PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
 	resolvedReview, err := adapter.resolveWorkflowRepository(request.Repository)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	reference, config := resolvedReview.reference, resolvedReview.config
 
 	if !validWorkflowPRBranch(request.HeadBranch) || !validWorkflowPullRequestContent(SlicePullRequestRequest{BaseBranch: request.BaseBranch, Title: request.Title, Body: request.Body}) {
-		return PullRequestSnapshot{}, workflowstate.ErrConflict
+		return workflowstate.PullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 
 	payload, err := json.Marshal(map[string]string{"head": request.HeadBranch, "base": request.BaseBranch, "title": request.Title, "body": request.Body})
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	data, err := adapter.workflowProviderRunner().Input(ctx, config.CLI, payload, workflowRemoteAPIArgs(request.Repository, reference, "POST", workflowRemotePRListPath(reference), true)...)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	return decodeWorkflowRemotePR(data)
@@ -241,31 +241,31 @@ func decodeWorkflowRemoteBranch(data []byte) (string, error) {
 	return branch.Commit.SHA, nil
 }
 
-func decodeWorkflowRemotePR(data []byte) (PullRequestSnapshot, error) {
+func decodeWorkflowRemotePR(data []byte) (workflowstate.PullRequestSnapshot, error) {
 	if len(data) > workflowstate.FileLimit {
-		return PullRequestSnapshot{}, workflowstate.ErrConflict
+		return workflowstate.PullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 
 	var pr workflowRemotePRJSON
 	if err := json.Unmarshal(data, &pr); err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	return workflowRemotePRSnapshot(pr)
 }
 
-func workflowRemotePRSnapshot(pr workflowRemotePRJSON) (PullRequestSnapshot, error) {
+func workflowRemotePRSnapshot(pr workflowRemotePRJSON) (workflowstate.PullRequestSnapshot, error) {
 	repository, err := workflowCanonicalRepository(pr.Base.Repo.URL)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
 	headRepository, err := workflowCanonicalRepository(pr.Head.Repo.URL)
 	if err != nil {
-		return PullRequestSnapshot{}, err
+		return workflowstate.PullRequestSnapshot{}, err
 	}
 
-	return PullRequestSnapshot{URL: pr.URL, Repository: repository, HeadRepository: headRepository, HeadBranch: pr.Head.Ref, BaseBranch: pr.Base.Ref, HeadCommit: pr.Head.SHA, BaseCommit: pr.Base.SHA, State: pr.State, Merged: pr.Merged, ResultCommit: pr.ResultCommit}, nil
+	return workflowstate.PullRequestSnapshot{URL: pr.URL, Repository: repository, HeadRepository: headRepository, HeadBranch: pr.Head.Ref, BaseBranch: pr.Base.Ref, HeadCommit: pr.Head.SHA, BaseCommit: pr.Base.SHA, State: pr.State, Merged: pr.Merged, ResultCommit: pr.ResultCommit}, nil
 }
 
 func (adapter RemoteReviewAdapter) resolveWorkflowRepository(repository string) (reviewProviderEndpoint, error) {

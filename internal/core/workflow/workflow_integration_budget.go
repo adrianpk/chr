@@ -43,35 +43,24 @@ type IntegrationUsage struct {
 	ClosingAttempts  []string             `json:"closing_attempts"`
 }
 
-// TokenAllowance describes whole-call accounting, including input.
-// Reported output already includes reasoning; cached input remains input.
-type TokenAllowance struct {
-	Maximum            int64     `json:"maximum"`
-	Input              int64     `json:"input"`
-	Output             int64     `json:"output"`
-	CapabilityRevision string    `json:"capability_revision"`
-	WholeCall          bool      `json:"whole_call"`
-	Deadline           time.Time `json:"deadline"`
-}
-
 // IntegrationReservation is retained before any possible dispatch.
 // Unknown usage keeps Maximum charged; absence of a response is no refund.
 type IntegrationReservation struct {
-	AttemptInput    *workflowstate.EvidenceRef `json:"attempt_input,omitempty"`
-	ID              string                     `json:"id"`
-	Kind            string                     `json:"kind"`
-	Role            string                     `json:"role"`
-	EntryID         string                     `json:"entry_id"`
-	Unit            workflowstate.Ref          `json:"unit"`
-	ClaimGeneration uint64                     `json:"claim_generation"`
-	AttemptID       string                     `json:"attempt_id"`
-	BaseCommit      string                     `json:"base_commit,omitempty"`
-	Allowance       TokenAllowance             `json:"allowance"`
-	RuntimeDeadline time.Time                  `json:"runtime_deadline,omitempty"`
-	State           string                     `json:"state"`
-	ReportedInput   int64                      `json:"reported_input"`
-	ReportedOutput  int64                      `json:"reported_output"`
-	SettlementProof *workflowstate.EvidenceRef `json:"settlement_proof"`
+	AttemptInput    *workflowstate.EvidenceRef   `json:"attempt_input,omitempty"`
+	ID              string                       `json:"id"`
+	Kind            string                       `json:"kind"`
+	Role            string                       `json:"role"`
+	EntryID         string                       `json:"entry_id"`
+	Unit            workflowstate.Ref            `json:"unit"`
+	ClaimGeneration uint64                       `json:"claim_generation"`
+	AttemptID       string                       `json:"attempt_id"`
+	BaseCommit      string                       `json:"base_commit,omitempty"`
+	Allowance       workflowstate.TokenAllowance `json:"allowance"`
+	RuntimeDeadline time.Time                    `json:"runtime_deadline,omitempty"`
+	State           string                       `json:"state"`
+	ReportedInput   int64                        `json:"reported_input"`
+	ReportedOutput  int64                        `json:"reported_output"`
+	SettlementProof *workflowstate.EvidenceRef   `json:"settlement_proof"`
 }
 
 // IntegrationBudget is owned by the invocation, never by a queue index.

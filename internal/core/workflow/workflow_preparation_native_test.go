@@ -20,24 +20,24 @@ type nativePreparationProviderFixture struct {
 	policyRevision string
 }
 
-func (p *nativePreparationProviderFixture) WorkflowIntegrationCapability(ctx context.Context, pr PullRequestSnapshot, method string) (PublicationCapability, error) {
+func (p *nativePreparationProviderFixture) WorkflowIntegrationCapability(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowstate.PublicationCapability, error) {
 	capability, err := p.workflowPreparationProviderFixture.WorkflowIntegrationCapability(ctx, pr, method)
 	capability.Mechanism = workspaceconfig.WorkflowPublicationGitAtomicDualRef
 
 	return capability, err
 }
 
-func (p *nativePreparationProviderFixture) WorkflowPreparedNativeCapability(_ context.Context, pr PullRequestSnapshot, proof IntegrationProof) (NativeCapability, error) {
+func (p *nativePreparationProviderFixture) WorkflowPreparedNativeCapability(_ context.Context, pr workflowstate.PullRequestSnapshot, proof workflowstate.IntegrationProof) (workflowstate.NativeCapability, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
 	fingerprint, err := workflowGitCapabilityFingerprint(map[string]bool{"atomic": true, "report-status": true})
 	if err != nil {
-		return NativeCapability{}, err
+		return workflowstate.NativeCapability{}, err
 	}
 
-	capability := NativeCapability{
-		PublicationCapability: PublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
+	capability := workflowstate.NativeCapability{
+		PublicationCapability: workflowstate.PublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
 		SourceRef:             "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-preparation/v1",
 		PolicyFingerprint: contenthash.Sum([]byte(p.policyRevision)), ServerCapabilityFingerprint: fingerprint, CredentialIdentityFingerprint: contenthash.Sum([]byte("publisher")),
 		ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowNativeAdapterVersion,
@@ -99,7 +99,7 @@ func nativePreparationMethod(t *testing.T, method string) {
 	}
 }
 
-func checkNativePreparationEvidence(t *testing.T, fixture nativePreparationFixture, candidate IntegrationCandidate) {
+func checkNativePreparationEvidence(t *testing.T, fixture nativePreparationFixture, candidate workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	f := fixture.f
@@ -114,7 +114,7 @@ func checkNativePreparationEvidence(t *testing.T, fixture nativePreparationFixtu
 	checkNativePreparationRetained(t, fixture, candidate)
 }
 
-func checkNativePreparationRetained(t *testing.T, fixture nativePreparationFixture, candidate IntegrationCandidate) {
+func checkNativePreparationRetained(t *testing.T, fixture nativePreparationFixture, candidate workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	f := fixture.f

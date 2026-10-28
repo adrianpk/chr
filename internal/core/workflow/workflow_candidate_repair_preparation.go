@@ -11,7 +11,7 @@ import (
 // fresh isolated gate checkout. It cannot replace the result or method.
 type RepairedPreparationGit interface {
 	PreparationGit
-	PrepareWorkflowRepairedIntegration(context.Context, PreparationQuery, MergerRepairState) (IntegrationProof, error)
+	PrepareWorkflowRepairedIntegration(context.Context, PreparationQuery, MergerRepairState) (workflowstate.IntegrationProof, error)
 }
 
 func (s *Store) acceptedWorkflowCandidateRepair(run workflowInvocationFile) (*MergerRepairState, []workflowstate.EvidenceRef, error) {
@@ -63,7 +63,7 @@ func (s *Store) readWorkflowAcceptedRepair(run workflowInvocationFile, entry Int
 	return a.Next, refs, err
 }
 
-func (s *Store) workflowCandidateRepairAttemptRefs(run workflowInvocationFile, proof IntegrationProof) ([]workflowstate.EvidenceRef, error) {
+func (s *Store) workflowCandidateRepairAttemptRefs(run workflowInvocationFile, proof workflowstate.IntegrationProof) ([]workflowstate.EvidenceRef, error) {
 	refs := []workflowstate.EvidenceRef{}
 
 	if proof.Provenance == nil {

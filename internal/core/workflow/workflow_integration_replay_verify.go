@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowIntegrationHistoryTipMatches(proof IntegrationProof, last IntegrationCommit) bool {
+func workflowIntegrationHistoryTipMatches(proof workflowstate.IntegrationProof, last workflowstate.IntegrationCommit) bool {
 	if proof.Method == "rebase" && proof.Provenance != nil {
 		p := proof.Provenance
 		if !validWorkflowProvenanceHeader(proof, *p) || len(p.Source) != len(proof.History) {
@@ -22,7 +22,7 @@ func workflowIntegrationHistoryTipMatches(proof IntegrationProof, last Integrati
 	return last.Commit == proof.ResultCommit && last.Tree == proof.PreparedTree
 }
 
-func (reader workflowIntegrationReader) rebaseResults(ctx context.Context, proof IntegrationProof, count int) ([]string, string, error) {
+func (reader workflowIntegrationReader) rebaseResults(ctx context.Context, proof workflowstate.IntegrationProof, count int) ([]string, string, error) {
 	base := proof.ResultCommit
 	if p := proof.Provenance; p != nil {
 		if !validWorkflowProvenanceHeader(proof, *p) || len(p.Source) != count {
@@ -47,7 +47,7 @@ func (reader workflowIntegrationReader) rebaseResults(ctx context.Context, proof
 	return results, base, nil
 }
 
-func (reader workflowIntegrationReader) verifyRebaseProvenance(ctx context.Context, proof *IntegrationProof) error {
+func (reader workflowIntegrationReader) verifyRebaseProvenance(ctx context.Context, proof *workflowstate.IntegrationProof) error {
 	if proof.Provenance == nil {
 		return nil
 	}

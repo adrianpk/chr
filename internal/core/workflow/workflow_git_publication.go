@@ -24,7 +24,7 @@ type GitPublication struct {
 	SourceRewriteAuthorized bool
 	OwnershipRevision       string
 	CandidateRevision       string
-	Git                     IntegrationProof
+	Git                     workflowstate.IntegrationProof
 	// BeforeSend retains the actual advertisement and exact command intent.
 	// A failed callback aborts before any update command is sent.
 	BeforeSend func(context.Context, GitPublicationAdvertisement) error `json:"-"`

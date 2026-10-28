@@ -211,14 +211,14 @@ func (s *Store) reconcileWorkflowUnmergedSubmission(ctx context.Context, run *wo
 	return nil
 }
 
-func (s *Store) readWorkflowPublicationCheckpoint(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowSubmissionJournal, PullRequestSnapshot, error) {
+func (s *Store) readWorkflowPublicationCheckpoint(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowSubmissionJournal, workflowstate.PullRequestSnapshot, error) {
 	if run.PullRequest == nil || run.PullRequest.State != "bound" || run.PullRequest.URL == "" {
-		return workflowSubmissionJournal{}, PullRequestSnapshot{}, fmt.Errorf("publication requires a bound canonical integration-unit PR")
+		return workflowSubmissionJournal{}, workflowstate.PullRequestSnapshot{}, fmt.Errorf("publication requires a bound canonical integration-unit PR")
 	}
 
 	journal, err := s.loadWorkflowSubmissionJournal(ctx, run)
 	if err != nil {
-		return journal, PullRequestSnapshot{}, err
+		return journal, workflowstate.PullRequestSnapshot{}, err
 	}
 
 	pr, err := provider.ReadWorkflowPullRequest(ctx, run.PullRequest.URL)
@@ -226,7 +226,7 @@ func (s *Store) readWorkflowPublicationCheckpoint(ctx context.Context, run workf
 		return journal, pr, err
 	}
 
-	if reason := workflowPullRequestMismatch(*run.PullRequest, []PullRequestSnapshot{pr}); reason != "" {
+	if reason := workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}); reason != "" {
 		return journal, pr, fmt.Errorf("%w: %s", workflowstate.ErrConflict, reason)
 	}
 

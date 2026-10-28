@@ -10,8 +10,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) regenerateWorkflowMerger(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, reader workflowIntegrationReader, state MergerRepairState, repair IntegrationTreeRepair) ([]MergerRegenerationEvidence, error) {
-	evidence := []MergerRegenerationEvidence{}
+func (s *Store) regenerateWorkflowMerger(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, reader workflowIntegrationReader, state MergerRepairState, repair workflowstate.IntegrationTreeRepair) ([]workflowstate.MergerRegenerationEvidence, error) {
+	evidence := []workflowstate.MergerRegenerationEvidence{}
 
 	tree := repair.ProposalTree
 	for _, conflict := range repair.Input.Conflicts {
@@ -40,8 +40,8 @@ func (s *Store) regenerateWorkflowMerger(ctx context.Context, claim *Claim, prep
 	return evidence, nil
 }
 
-func (s *Store) runWorkflowMergerRegeneration(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, reader workflowIntegrationReader, state MergerRepairState, conflict MergerConflict, tree string) (MergerRegenerationEvidence, error) {
-	evidence := MergerRegenerationEvidence{ConflictID: conflict.ID, InputTree: tree}
+func (s *Store) runWorkflowMergerRegeneration(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, reader workflowIntegrationReader, state MergerRepairState, conflict workflowstate.MergerConflict, tree string) (workflowstate.MergerRegenerationEvidence, error) {
+	evidence := workflowstate.MergerRegenerationEvidence{ConflictID: conflict.ID, InputTree: tree}
 
 	config, err := os.ReadFile(filepath.Join(reader.Directory, ".git", "config"))
 	if err != nil {
@@ -83,13 +83,13 @@ func (s *Store) runWorkflowMergerRegeneration(ctx context.Context, claim *Claim,
 	return evidence, nil
 }
 
-func (s *Store) runWorkflowMergerProcedure(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, command []string) (CommandResult, error) {
+func (s *Store) runWorkflowMergerProcedure(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, command []string) (workflowstate.CommandResult, error) {
 	if err := s.guardWorkflowMergerAcceptance(ctx, claim, prepared, provider); err != nil {
-		return CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 
 	if !validWorkflowMergerCommand(command) || time.Now().After(prepared.leaseUntil) {
-		return CommandResult{}, workflowstate.ErrConflict
+		return workflowstate.CommandResult{}, workflowstate.ErrConflict
 	}
 
 	result, err := workflowRunCommand(ctx, claim, prepared, command)

@@ -8,13 +8,14 @@ import (
 	"os"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowMergerDriverResult struct {
-	command CommandResult
+	command workflowstate.CommandResult
 	data    json.RawMessage
-	usage   *MergerUsage
-	checks  []CommandResult
+	usage   *workflowstate.MergerUsage
+	checks  []workflowstate.CommandResult
 	err     error
 }
 
@@ -89,7 +90,7 @@ func executeWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared wor
 	return result
 }
 
-func exchangeWorkflowMerger(ctx context.Context, tools *workflowMergerTools, call workflowMergerCall, reader io.Reader, writer io.Writer) (json.RawMessage, *MergerUsage, error) {
+func exchangeWorkflowMerger(ctx context.Context, tools *workflowMergerTools, call workflowMergerCall, reader io.Reader, writer io.Writer) (json.RawMessage, *workflowstate.MergerUsage, error) {
 	if err := json.NewEncoder(writer).Encode(call); err != nil {
 		return nil, nil, err
 	}

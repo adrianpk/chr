@@ -7,13 +7,13 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) checkWorkflowNativeSubmissionEvidence(ctx context.Context, submission Submission) error {
+func (s *Store) checkWorkflowNativeSubmissionEvidence(ctx context.Context, submission workflowstate.Submission) error {
 	native := submission.Native
 	if native == nil {
 		return workflowstate.ErrConflict
 	}
 
-	var candidate IntegrationCandidate
+	var candidate workflowstate.IntegrationCandidate
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, native.CandidateRef, &candidate); err != nil {
 		return err
 	}
@@ -33,13 +33,13 @@ func (s *Store) checkWorkflowNativeSubmissionEvidence(ctx context.Context, submi
 	return s.checkWorkflowNativeTransportEvidence(ctx, submission)
 }
 
-func workflowNativeSubmissionCandidateMatches(submission Submission, candidate IntegrationCandidate) bool {
+func workflowNativeSubmissionCandidateMatches(submission workflowstate.Submission, candidate workflowstate.IntegrationCandidate) bool {
 	native := submission.Native
 
 	return candidate.Native != nil && candidate.Native.CandidateHash == native.CandidateHash && workflowNativeJSONEqual(candidate.Native.NativeRecordBinding, native.NativeRecordBinding) && workflowNativeJSONEqual(candidate.Input.Git, submission.Guard.Git) && native.FastForwardProofRef == candidate.Native.HistoryManifestRef
 }
 
-func (s *Store) checkWorkflowNativeSubmissionReview(submission Submission) error {
+func (s *Store) checkWorkflowNativeSubmissionReview(submission workflowstate.Submission) error {
 	var review workflowReviewEvidence
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, submission.Native.ReviewGrantRef, &review); err != nil {
 		return err
@@ -52,7 +52,7 @@ func (s *Store) checkWorkflowNativeSubmissionReview(submission Submission) error
 	return nil
 }
 
-func (s *Store) checkWorkflowNativeTransportEvidence(ctx context.Context, submission Submission) error {
+func (s *Store) checkWorkflowNativeTransportEvidence(ctx context.Context, submission workflowstate.Submission) error {
 	if err := s.checkWorkflowNativeAdvertisement(submission); err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (s *Store) checkWorkflowNativeTransportEvidence(ctx context.Context, submis
 	}
 }
 
-func (s *Store) checkWorkflowNativeAdvertisement(submission Submission) error {
+func (s *Store) checkWorkflowNativeAdvertisement(submission workflowstate.Submission) error {
 	native := submission.Native
 	if native.AdvertisementRef == nil {
 		return nil
@@ -98,7 +98,7 @@ func (s *Store) checkWorkflowNativeAdvertisement(submission Submission) error {
 		return err
 	}
 
-	var capability NativeCapability
+	var capability workflowstate.NativeCapability
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, native.CapabilityRef, &capability); err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (s *Store) checkWorkflowNativeAdvertisement(submission Submission) error {
 	return nil
 }
 
-func (s *Store) checkWorkflowNativeCommands(submission Submission) error {
+func (s *Store) checkWorkflowNativeCommands(submission workflowstate.Submission) error {
 	native := submission.Native
 	if native.CommandManifestRef == nil {
 		return nil
@@ -129,7 +129,7 @@ func (s *Store) checkWorkflowNativeCommands(submission Submission) error {
 	return nil
 }
 
-func (s *Store) checkWorkflowNativeResponse(submission Submission) error {
+func (s *Store) checkWorkflowNativeResponse(submission workflowstate.Submission) error {
 	native := submission.Native
 
 	refs := slices.Clone(native.TransportResponseHistory)
@@ -155,7 +155,7 @@ func (s *Store) checkWorkflowNativeResponse(submission Submission) error {
 	return nil
 }
 
-func validWorkflowNativeResponse(native NativeSubmission, response GitPublicationResult) bool {
+func validWorkflowNativeResponse(native workflowstate.NativeSubmission, response GitPublicationResult) bool {
 	if [3]string{response.Schema, response.OriginalSourceCommit, response.ResultCommit} != [3]string{"chr-git-publication-result/v1", native.OriginalSource, native.PreparedResult} {
 		return false
 	}
@@ -175,7 +175,7 @@ func validWorkflowNativeResponse(native NativeSubmission, response GitPublicatio
 	return slices.Contains([]string{"unknown", "rejected"}, response.State) && response.PublishedSourceCommit == ""
 }
 
-func (s *Store) checkWorkflowNativeJournalObservations(submission Submission) error {
+func (s *Store) checkWorkflowNativeJournalObservations(submission workflowstate.Submission) error {
 	native := submission.Native
 	for _, ref := range native.ObservationRefs {
 		var observation NativePublicationObservation
@@ -203,7 +203,7 @@ func (s *Store) checkWorkflowNativeJournalObservations(submission Submission) er
 	return nil
 }
 
-func workflowNativeJournalObservationMatches(native NativeSubmission, observation NativePublicationObservation) bool {
+func workflowNativeJournalObservationMatches(native workflowstate.NativeSubmission, observation NativePublicationObservation) bool {
 	if [2]string{native.OriginalSource, native.PublishedSource} != [2]string{observation.OriginalSourceCommit, observation.PublishedSourceCommit} {
 		return false
 	}
@@ -216,7 +216,7 @@ func workflowNativeJournalObservationMatches(native NativeSubmission, observatio
 	return bound && slices.Contains([]string{"observing", "merged", "reconciliation_required"}, observation.State)
 }
 
-func (s *Store) checkWorkflowNativeAppliedEvidence(submission Submission) error {
+func (s *Store) checkWorkflowNativeAppliedEvidence(submission workflowstate.Submission) error {
 	native := submission.Native
 	if native.TransportResponseRef == nil {
 		return workflowstate.ErrConflict
@@ -237,7 +237,7 @@ func (s *Store) checkWorkflowNativeAppliedEvidence(submission Submission) error 
 	return s.checkWorkflowNativeTransactionRevision(receipt, result)
 }
 
-func (s *Store) checkWorkflowNativeNonApplication(_ context.Context, submission Submission) error {
+func (s *Store) checkWorkflowNativeNonApplication(_ context.Context, submission workflowstate.Submission) error {
 	native := submission.Native
 	if native.NonApplicationRef == nil || native.DispatchState != "quiescent" || native.DispatchIdentity == nil {
 		return workflowstate.ErrConflict
@@ -268,13 +268,13 @@ func (s *Store) checkWorkflowNativeNonApplication(_ context.Context, submission 
 	return nil
 }
 
-func validWorkflowNativeNonApplication(submission Submission, proof NativeNonApplicationProof) bool {
+func validWorkflowNativeNonApplication(submission workflowstate.Submission, proof NativeNonApplicationProof) bool {
 	native := submission.Native
 
 	return proof.SchemaVersion == 1 && proof.SubmissionID == submission.ID && proof.CannotApply && proof.InputChanged && workflowCommitID(proof.ObservedSource) && workflowCommitID(proof.ObservedTarget) && (proof.ObservedSource != native.OriginalSource || proof.ObservedTarget != native.ValidatedBase)
 }
 
-func (s *Store) applyWorkflowNativeSubmissionEvidence(ctx context.Context, submission *Submission) error {
+func (s *Store) applyWorkflowNativeSubmissionEvidence(ctx context.Context, submission *workflowstate.Submission) error {
 	if err := s.checkWorkflowNativeSubmissionEvidence(ctx, *submission); err != nil {
 		return err
 	}
@@ -288,7 +288,7 @@ func (s *Store) applyWorkflowNativeSubmissionEvidence(ctx context.Context, submi
 
 		if proof.InputChanged {
 			submission.State = "unpublished"
-			submission.Unpublished = &SubmissionObservation{SubmissionID: submission.ID, Unpublished: true}
+			submission.Unpublished = &workflowstate.SubmissionObservation{SubmissionID: submission.ID, Unpublished: true}
 		}
 	}
 
@@ -303,7 +303,7 @@ func (s *Store) applyWorkflowNativeSubmissionEvidence(ctx context.Context, submi
 	return validateWorkflowNativeSubmission(*submission, "chr-integration-journal/v2")
 }
 
-func (s *Store) confirmWorkflowNativeSubmission(_ context.Context, submission *Submission) error {
+func (s *Store) confirmWorkflowNativeSubmission(_ context.Context, submission *workflowstate.Submission) error {
 	native := submission.Native
 
 	record, err := s.readRecord(native.ReceiptRef.Path)
@@ -339,7 +339,7 @@ func (s *Store) confirmWorkflowNativeSubmission(_ context.Context, submission *S
 	return validateWorkflowSubmissionProof(*submission)
 }
 
-func workflowNativeSubmissionReceiptMatches(submission Submission, record Record) bool {
+func workflowNativeSubmissionReceiptMatches(submission workflowstate.Submission, record Record) bool {
 	receipt, native := record.Receipt, submission.Native
 
 	return receipt != nil && receipt.Native != nil && receipt.SubmissionID == submission.ID && receipt.Native.CandidateRef == native.CandidateRef && receipt.Native.TransactionProofRef == *native.TransportResponseRef && receipt.Native.CandidateHash == native.CandidateHash

@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -65,7 +66,7 @@ func nativeLiveRebase(t *testing.T, state string, profile nativeLiveProfile) {
 	}
 }
 
-func createNativeLivePR(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, request GitPublication) PullRequestSnapshot {
+func createNativeLivePR(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, request GitPublication) workflowstate.PullRequestSnapshot {
 	t.Helper()
 
 	pr, err := adapter.CreateWorkflowPullRequest(t.Context(), PullRequestRequest{
@@ -82,7 +83,7 @@ func createNativeLivePR(t *testing.T, adapter RemoteReviewAdapter, profile nativ
 	return pr
 }
 
-func admitNativeLiveProfile(t *testing.T, state string, adapter RemoteReviewAdapter, profile nativeLiveProfile, request GitPublication, pr PullRequestSnapshot, publisher OSWorkflowGitPublisher) NativeCapability {
+func admitNativeLiveProfile(t *testing.T, state string, adapter RemoteReviewAdapter, profile nativeLiveProfile, request GitPublication, pr workflowstate.PullRequestSnapshot, publisher OSWorkflowGitPublisher) workflowstate.NativeCapability {
 	t.Helper()
 
 	policy := nativeLivePolicyReader{state: state, profile: profile, publication: request}
@@ -198,13 +199,13 @@ func writeNativeLiveEvidence(t *testing.T, state, key string, evidence *nativeLi
 	}
 }
 
-func nativeLiveActivity(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, pr PullRequestSnapshot, action string) {
+func nativeLiveActivity(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, pr workflowstate.PullRequestSnapshot, action string) {
 	t.Helper()
 
 	nativeLiveActivityContext(t, t.Context(), adapter, profile, pr, action)
 }
 
-func nativeLiveActivityContext(t *testing.T, ctx context.Context, adapter RemoteReviewAdapter, profile nativeLiveProfile, pr PullRequestSnapshot, action string) {
+func nativeLiveActivityContext(t *testing.T, ctx context.Context, adapter RemoteReviewAdapter, profile nativeLiveProfile, pr workflowstate.PullRequestSnapshot, action string) {
 	t.Helper()
 
 	resolvedReview, err := adapter.resolve(pr.URL)

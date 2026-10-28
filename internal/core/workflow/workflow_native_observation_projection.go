@@ -1,8 +1,12 @@
 package workflow
 
-import "strings"
+import (
+	"strings"
 
-func (s *Store) projectWorkflowNativeCanonicalObservation(entry *IntegrationEntry, submission Submission) error {
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
+
+func (s *Store) projectWorkflowNativeCanonicalObservation(entry *IntegrationEntry, submission workflowstate.Submission) error {
 	if entry.State == "blocked" && !workflowNativeCanonicalBlocker(entry.Blocker) {
 		return nil
 	}

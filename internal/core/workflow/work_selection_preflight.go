@@ -14,6 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const (
@@ -46,12 +47,12 @@ type AgentOperationLock struct {
 }
 
 type agentOperationLockRecord struct {
-	Operation string           `json:"operation"`
-	Owner     string           `json:"owner"`
-	PID       int              `json:"pid"`
-	CreatedAt string           `json:"created_at"`
-	AttemptID string           `json:"attempt_id,omitempty"`
-	Process   *ProcessIdentity `json:"process,omitempty"`
+	Operation string                         `json:"operation"`
+	Owner     string                         `json:"owner"`
+	PID       int                            `json:"pid"`
+	CreatedAt string                         `json:"created_at"`
+	AttemptID string                         `json:"attempt_id,omitempty"`
+	Process   *workflowstate.ProcessIdentity `json:"process,omitempty"`
 }
 
 // AcquireAgentOperationLock executes the corresponding package operation.

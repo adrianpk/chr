@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -102,7 +103,7 @@ func nativeReviewDenial(t *testing.T, state string, profile nativeLiveProfile) {
 	}
 }
 
-func nativeProtectionDenied(capability NativeCapability) bool {
+func nativeProtectionDenied(capability workflowstate.NativeCapability) bool {
 	for _, reason := range capability.Unsupported {
 		if reason.Condition == "native_protections_required" || reason.Condition == "native_rules_required" {
 			return true

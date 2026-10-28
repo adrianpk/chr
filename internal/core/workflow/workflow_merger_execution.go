@@ -7,6 +7,8 @@ import (
 	"os"
 	"slices"
 	"time"
+
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 )
 
 // ExecuteWorkflowMerger runs one certified broker driver in a private owned
@@ -76,7 +78,8 @@ func (s *Store) runWorkflowMerger(ctx context.Context, claim *Claim, prepared wo
 		return workflowMergerDriverResult{err: err}
 	}
 
-	if err := claim.store.CheckWorkflowMergerEvidence(ctx, *prepared.input.Merger, time.Now().UTC()); err != nil {
+	var evidence workflowmerge.Evidence = claim.store
+	if err := evidence.CheckWorkflowMergerEvidence(ctx, *prepared.input.Merger, time.Now().UTC()); err != nil {
 		return workflowMergerDriverResult{err: err}
 	}
 

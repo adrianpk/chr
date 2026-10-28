@@ -23,21 +23,8 @@ type SSHCommitSigning struct {
 	Principal string
 }
 
-// CommitSigningProfile identifies the certified SSH signer policy.
-type CommitSigningProfile struct {
-	Hash      string `json:"hash"`
-	PublicKey string `json:"public_key"`
-	Principal string `json:"principal"`
-}
-
-// IntegrationSignature binds cryptographic verification to one object.
-type IntegrationSignature struct {
-	Commit        string `json:"commit"`
-	SignatureHash string `json:"signature_hash"`
-}
-
 // Profile returns the nonsecret identity bound by publication capability.
-func (signing SSHCommitSigning) Profile() (CommitSigningProfile, error) {
+func (signing SSHCommitSigning) Profile() (workflowstate.CommitSigningProfile, error) {
 	return workflowSSHSigningProfile(&signing)
 }
 
@@ -48,12 +35,12 @@ func (git OSWorkflowPreparationGit) WithSSHCommitSigning(signing SSHCommitSignin
 	return git
 }
 
-func workflowSSHSigningProfile(signing *SSHCommitSigning) (CommitSigningProfile, error) {
+func workflowSSHSigningProfile(signing *SSHCommitSigning) (workflowstate.CommitSigningProfile, error) {
 	if signing == nil || !filepath.IsAbs(signing.KeyFile) {
-		return CommitSigningProfile{}, workflowstate.ErrConflict
+		return workflowstate.CommitSigningProfile{}, workflowstate.ErrConflict
 	}
 
-	p := CommitSigningProfile{PublicKey: strings.TrimSpace(signing.PublicKey), Principal: signing.Principal}
+	p := workflowstate.CommitSigningProfile{PublicKey: strings.TrimSpace(signing.PublicKey), Principal: signing.Principal}
 
 	p.Hash = contenthash.Sum([]byte("chr-ssh-commit-signing/v1:" + p.Principal + ":" + p.PublicKey))
 	if !validWorkflowSigningProfile(p) {
@@ -63,7 +50,7 @@ func workflowSSHSigningProfile(signing *SSHCommitSigning) (CommitSigningProfile,
 	return p, nil
 }
 
-func validWorkflowSigningProfile(p CommitSigningProfile) bool {
+func validWorkflowSigningProfile(p workflowstate.CommitSigningProfile) bool {
 	if !validWorkflowSigningPrincipal(p.Principal) || !validWorkflowSigningPublicKey(p.PublicKey) {
 		return false
 	}
@@ -103,7 +90,7 @@ func validWorkflowSigningPublicKey(publicKey string) bool {
 	return publicKey == strings.Join(fields, " ")
 }
 
-func validWorkflowPreparationSignatures(proof IntegrationProof, p IntegrationPreparation) bool {
+func validWorkflowPreparationSignatures(proof workflowstate.IntegrationProof, p workflowstate.IntegrationPreparation) bool {
 	if !p.RequiredSignatures {
 		return p.Signing == nil && len(p.Signatures) == 0
 	}
@@ -150,26 +137,26 @@ func (reader workflowIntegrationReader) signPreparationObject(ctx context.Contex
 	return header + "\ngpgsig " + strings.ReplaceAll(signature, "\n", "\n ") + "\n\n" + message, nil
 }
 
-func (reader workflowIntegrationReader) verifyPreparationSignature(ctx context.Context, commit string, profile *CommitSigningProfile) (IntegrationSignature, error) {
+func (reader workflowIntegrationReader) verifyPreparationSignature(ctx context.Context, commit string, profile *workflowstate.CommitSigningProfile) (workflowstate.IntegrationSignature, error) {
 	if profile == nil || !validWorkflowSigningProfile(*profile) {
-		return IntegrationSignature{}, workflowstate.ErrConflict
+		return workflowstate.IntegrationSignature{}, workflowstate.ErrConflict
 	}
 
 	data, err := reader.RawOutput(ctx, "cat-file", "commit", commit)
 	if err != nil {
-		return IntegrationSignature{}, err
+		return workflowstate.IntegrationSignature{}, err
 	}
 
 	payload, signature, err := workflowPreparationSignaturePayload(data)
 	if err != nil {
-		return IntegrationSignature{}, err
+		return workflowstate.IntegrationSignature{}, err
 	}
 
 	if err := verifyWorkflowSSHSignature(ctx, payload, signature, *profile); err != nil {
-		return IntegrationSignature{}, err
+		return workflowstate.IntegrationSignature{}, err
 	}
 
-	return IntegrationSignature{Commit: commit, SignatureHash: contenthash.Sum([]byte(signature))}, nil
+	return workflowstate.IntegrationSignature{Commit: commit, SignatureHash: contenthash.Sum([]byte(signature))}, nil
 }
 
 func workflowPreparationSignaturePayload(data string) (string, string, error) {
@@ -206,7 +193,7 @@ func workflowPreparationSignaturePayload(data string) (string, string, error) {
 	return strings.Join(unsigned, "\n") + "\n\n" + message, strings.Join(signature, "\n") + "\n", nil
 }
 
-func verifyWorkflowSSHSignature(ctx context.Context, payload, signature string, profile CommitSigningProfile) (err error) {
+func verifyWorkflowSSHSignature(ctx context.Context, payload, signature string, profile workflowstate.CommitSigningProfile) (err error) {
 	dir, err := os.MkdirTemp("", "chr-commit-signature-")
 	if err != nil {
 		return err

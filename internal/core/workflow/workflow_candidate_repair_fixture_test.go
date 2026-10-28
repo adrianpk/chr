@@ -42,7 +42,7 @@ func nativeCandidateRepairFixture(t *testing.T, method, reason string) (nativePr
 	return f, request, nativeMergerTestHarness(t, f.f.store, run.ID)
 }
 
-func nativeCandidateRepairInput(t *testing.T, f nativePreparationFixture, run Invocation, candidate IntegrationCandidate, gate workflowstate.Validation) MergerInput {
+func nativeCandidateRepairInput(t *testing.T, f nativePreparationFixture, run Invocation, candidate workflowstate.IntegrationCandidate, gate workflowstate.Validation) workflowstate.MergerInput {
 	t.Helper()
 
 	repair, err := f.f.store.ReadWorkflowCandidateRepair(t.Context(), run.ID)
@@ -54,7 +54,7 @@ func nativeCandidateRepairInput(t *testing.T, f nativePreparationFixture, run In
 	now := time.Now().UTC()
 	// Real Git and durable fixture IO need CI allowance; expiry has separate coverage.
 	deadline := now.Add(min(2*time.Minute, time.Duration(run.Policy.WorkerTimeoutSeconds)*time.Second))
-	input := MergerInput{MergerIdentity: MergerIdentity{ProtocolVersion: 1, ID: "candidate-repair", InvocationID: run.ID, EntryID: entry.ID, Unit: entry.Unit, CandidateRevision: entry.StateRevision, CandidateHash: run.CandidateRepair.CandidateHash, ClaimGeneration: entry.ClaimGeneration, ScopeHash: entry.FrozenScopeHash, Reason: repair.Reason}, MergerGit: MergerGit{Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef, Source: run.Lane.HeadCommit, Base: f.f.base, Method: candidate.Input.Git.Method}, MergerContext: MergerContext{FindingRefs: repair.FindingRefs}, MergerScope: MergerScope{AllowedPaths: []string{"result.txt"}, ProtectedPaths: []string{"Makefile"}}, MergerValidation: MergerValidation{ValidationCommands: gate.Commands}, MergerLimits: MergerLimits{CapacityReservationID: "pending-capacity", BudgetReservationID: "candidate-repair", RemainingAttempts: 3, WorkerTimeoutSeconds: run.Policy.WorkerTimeoutSeconds, AdmittedAt: now, Deadline: deadline}}
+	input := workflowstate.MergerInput{MergerIdentity: workflowstate.MergerIdentity{ProtocolVersion: 1, ID: "candidate-repair", InvocationID: run.ID, EntryID: entry.ID, Unit: entry.Unit, CandidateRevision: entry.StateRevision, CandidateHash: run.CandidateRepair.CandidateHash, ClaimGeneration: entry.ClaimGeneration, ScopeHash: entry.FrozenScopeHash, Reason: repair.Reason}, MergerGit: workflowstate.MergerGit{Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef, Source: run.Lane.HeadCommit, Base: f.f.base, Method: candidate.Input.Git.Method}, MergerContext: workflowstate.MergerContext{FindingRefs: repair.FindingRefs}, MergerScope: workflowstate.MergerScope{AllowedPaths: []string{"result.txt"}, ProtectedPaths: []string{"Makefile"}}, MergerValidation: workflowstate.MergerValidation{ValidationCommands: gate.Commands}, MergerLimits: workflowstate.MergerLimits{CapacityReservationID: "pending-capacity", BudgetReservationID: "candidate-repair", RemainingAttempts: 3, WorkerTimeoutSeconds: run.Policy.WorkerTimeoutSeconds, AdmittedAt: now, Deadline: deadline}}
 	input.OwnedWorkspaceID = workflowMergerWorkspaceID(input)
 	manifest := NativeSourceManifest{Schema: "chr-native-source/v1", Repository: input.Repository, SourceRef: input.SourceRef, OriginalSource: input.Source, Commits: strings.Fields(workflowIntegrationCommand(t, f.f.run.Lane.Worktree, "rev-list", "--reverse", f.f.run.Lane.BaseCommit+".."+input.Source))}
 	input.SourceManifestRef = retainNativeRecordEvidence(t, f.f.store, run.ID, "candidate-source", manifest)
@@ -62,19 +62,19 @@ func nativeCandidateRepairInput(t *testing.T, f nativePreparationFixture, run In
 	source := retainNativeRecordEvidence(t, f.f.store, run.ID, "candidate-intent", candidate.Input.Source)
 	target := retainNativeRecordEvidence(t, f.f.store, run.ID, "candidate-target", candidate.Input.Git)
 	input.IntentRefs, input.TargetChangeRefs = []workflowstate.EvidenceRef{source}, []workflowstate.EvidenceRef{target}
-	input.Requirements = []MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
-	input.Conflicts = []MergerConflict{{ID: "semantic-result", Path: "result.txt", Kind: "semantic", Evidence: repair.FindingRefs[0], RequirementIDs: []string{"source-api", "target-validation"}}}
+	input.Requirements = []workflowstate.MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
+	input.Conflicts = []workflowstate.MergerConflict{{ID: "semantic-result", Path: "result.txt", Kind: "semantic", Evidence: repair.FindingRefs[0], RequirementIDs: []string{"source-api", "target-validation"}}}
 
 	return input
 }
 
-func nativeCandidateRepairCheckpoint(t *testing.T, f nativePreparationFixture, candidate IntegrationCandidate) MergerRepairState {
+func nativeCandidateRepairCheckpoint(t *testing.T, f nativePreparationFixture, candidate workflowstate.IntegrationCandidate) MergerRepairState {
 	t.Helper()
 
 	proof := candidate.Input.Git
 	query := PreparationQuery{IntegrationQuery: proof.IntegrationQuery, BaseCommit: proof.BaseCommit}
 	query.SourceDirectory, query.ResultCommit = candidate.Lane.Worktree, ""
-	query.Lane = Lane{Unit: f.entry.Unit, Branch: "refs/heads/chr/workflow/semantic", Worktree: filepath.Join(t.TempDir(), "semantic"), BaseCommit: f.f.base, HeadCommit: f.f.base}
+	query.Lane = workflowstate.Lane{Unit: f.entry.Unit, Branch: "refs/heads/chr/workflow/semantic", Worktree: filepath.Join(t.TempDir(), "semantic"), BaseCommit: f.f.base, HeadCommit: f.f.base}
 
 	var (
 		state MergerRepairState
@@ -94,7 +94,7 @@ func nativeCandidateRepairCheckpoint(t *testing.T, f nativePreparationFixture, c
 	return state
 }
 
-func nativeCandidateRepairStart(t *testing.T, method, reason string) (nativePreparationFixture, IntegrationCandidate, workflowstate.Validation) {
+func nativeCandidateRepairStart(t *testing.T, method, reason string) (nativePreparationFixture, workflowstate.IntegrationCandidate, workflowstate.Validation) {
 	t.Helper()
 
 	gate := workflowPreparationGate("test ! -f target.txt || grep -q 'source and target' result.txt")

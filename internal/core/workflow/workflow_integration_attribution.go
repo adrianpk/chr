@@ -11,41 +11,22 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// IntegrationIdentity preserves an object's identity and Git date.
-type IntegrationIdentity struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Date  string `json:"date"`
-}
-
-// IntegrationAttribution binds metadata to the complete commit object.
-// MessageHash covers the original bytes, including trailing newlines.
-type IntegrationAttribution struct {
-	Commit      string              `json:"commit"`
-	Tree        string              `json:"tree"`
-	Parents     []string            `json:"parents"`
-	Author      IntegrationIdentity `json:"author"`
-	Committer   IntegrationIdentity `json:"committer"`
-	MessageHash string              `json:"message_hash"`
-	Encoding    string              `json:"encoding,omitempty"`
-}
-
-func (reader workflowIntegrationReader) commitAttribution(ctx context.Context, commit string) (IntegrationAttribution, error) {
+func (reader workflowIntegrationReader) commitAttribution(ctx context.Context, commit string) (workflowstate.IntegrationAttribution, error) {
 	data, err := reader.RawOutput(ctx, "cat-file", "commit", commit)
 	if err != nil {
-		return IntegrationAttribution{}, err
+		return workflowstate.IntegrationAttribution{}, err
 	}
 
 	return workflowCommitAttribution(commit, data)
 }
 
-func workflowCommitAttribution(commit, data string) (IntegrationAttribution, error) {
+func workflowCommitAttribution(commit, data string) (workflowstate.IntegrationAttribution, error) {
 	header, message, ok := strings.Cut(data, "\n\n")
 	if !ok {
-		return IntegrationAttribution{}, workflowstate.ErrConflict
+		return workflowstate.IntegrationAttribution{}, workflowstate.ErrConflict
 	}
 
-	result := IntegrationAttribution{Commit: commit, Parents: []string{}, MessageHash: contenthash.Sum([]byte(message))}
+	result := workflowstate.IntegrationAttribution{Commit: commit, Parents: []string{}, MessageHash: contenthash.Sum([]byte(message))}
 
 	for _, line := range strings.Split(header, "\n") {
 		key, value, _ := strings.Cut(line, " ")
@@ -77,15 +58,15 @@ func workflowCommitAttribution(commit, data string) (IntegrationAttribution, err
 	return result, nil
 }
 
-func workflowIntegrationIdentity(value string) (IntegrationIdentity, error) {
+func workflowIntegrationIdentity(value string) (workflowstate.IntegrationIdentity, error) {
 	nameEnd := strings.LastIndex(value, " <")
 	if nameEnd < 1 {
-		return IntegrationIdentity{}, workflowstate.ErrConflict
+		return workflowstate.IntegrationIdentity{}, workflowstate.ErrConflict
 	}
 
 	email, date, ok := strings.Cut(value[nameEnd+2:], "> ")
 
-	identity := IntegrationIdentity{Name: value[:nameEnd], Email: email, Date: date}
+	identity := workflowstate.IntegrationIdentity{Name: value[:nameEnd], Email: email, Date: date}
 	if !ok || !validWorkflowCommitIdentity(identity) {
 		return identity, workflowstate.ErrConflict
 	}
@@ -93,7 +74,7 @@ func workflowIntegrationIdentity(value string) (IntegrationIdentity, error) {
 	return identity, nil
 }
 
-func validWorkflowCommitIdentity(identity IntegrationIdentity) bool {
+func validWorkflowCommitIdentity(identity workflowstate.IntegrationIdentity) bool {
 	if identity.Name == "" || identity.Email == "" || strings.ContainsAny(identity.Name+identity.Email, "\x00\r\n<>") {
 		return false
 	}
@@ -123,11 +104,11 @@ func validWorkflowCommitTimezone(zone string) bool {
 	return hoursErr == nil && minutesErr == nil && hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60
 }
 
-func validWorkflowIntegrationAttribution(entry IntegrationAttribution) bool {
+func validWorkflowIntegrationAttribution(entry workflowstate.IntegrationAttribution) bool {
 	return !strings.ContainsAny(entry.Encoding, "\x00\r\n") && validWorkflowCommitIdentity(entry.Author) && validWorkflowCommitIdentity(entry.Committer) && validWorkflowAttributionObjects(entry)
 }
 
-func validWorkflowAttributionObjects(entry IntegrationAttribution) bool {
+func validWorkflowAttributionObjects(entry workflowstate.IntegrationAttribution) bool {
 	if !workflowCommitID(entry.Commit) || !workflowCommitID(entry.Tree) || len(entry.Commit) != len(entry.Tree) || len(entry.Parents) > workflowstate.RecordLimit || !validWorkflowNativeFingerprint(entry.MessageHash) {
 		return false
 	}
@@ -141,7 +122,7 @@ func validWorkflowAttributionObjects(entry IntegrationAttribution) bool {
 	return true
 }
 
-func (reader workflowIntegrationReader) sourceAttributions(ctx context.Context, proof IntegrationProof) ([]IntegrationAttribution, error) {
+func (reader workflowIntegrationReader) sourceAttributions(ctx context.Context, proof workflowstate.IntegrationProof) ([]workflowstate.IntegrationAttribution, error) {
 	line, err := reader.Output(ctx, "rev-list", "--reverse", "--topo-order", "--max-count="+strconv.Itoa(workflowstate.RecordLimit+1), proof.OriginCommit+".."+proof.SourceCommit)
 
 	commits := strings.Fields(line)
@@ -149,7 +130,7 @@ func (reader workflowIntegrationReader) sourceAttributions(ctx context.Context, 
 		return nil, fmt.Errorf("integration source manifest is empty or exceeds commit bounds")
 	}
 
-	entries := make([]IntegrationAttribution, 0, len(commits))
+	entries := make([]workflowstate.IntegrationAttribution, 0, len(commits))
 	size := 0
 
 	for _, commit := range commits {

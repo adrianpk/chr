@@ -48,7 +48,7 @@ func TestNativeAgentReview(t *testing.T) {
 func nativeAgentReviewProvider(t *testing.T, store *Store, request StartRequest, id string, candidate SliceCandidate) *workflowReviewProviderFixture {
 	t.Helper()
 
-	pr := PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}
+	pr := workflowstate.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}
 
 	provider := &workflowReviewProviderFixture{workflowPRProviderFixture: &workflowPRProviderFixture{pr: pr}, target: pr.BaseCommit}
 	if _, err := store.EnsureWorkflowSlicePullRequest(t.Context(), id, workflowPRContent(), provider); err != nil {

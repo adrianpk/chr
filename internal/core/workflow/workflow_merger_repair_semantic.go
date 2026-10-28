@@ -11,7 +11,7 @@ import (
 
 // BeginWorkflowMergerSemanticRepair rewinds an existing verified rebase to the
 // owning original step. The unchanged prefix stays exact and the suffix replays.
-func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx context.Context, query PreparationQuery, proof IntegrationProof, original string) (MergerRepairState, error) {
+func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx context.Context, query PreparationQuery, proof workflowstate.IntegrationProof, original string) (MergerRepairState, error) {
 	if git.validateQuery(query) != nil || !validWorkflowMergerSemanticProof(query, proof) {
 		return MergerRepairState{}, workflowstate.ErrConflict
 	}
@@ -47,12 +47,12 @@ func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx contex
 	return reader.semanticMergerCheckpoint(ctx, query, proof, original)
 }
 
-func validWorkflowMergerSemanticProof(query PreparationQuery, proof IntegrationProof) bool {
+func validWorkflowMergerSemanticProof(query PreparationQuery, proof workflowstate.IntegrationProof) bool {
 	return query.Method == "rebase" && proof.Provenance != nil && proof.Provenance.Preparation != nil && len(proof.Provenance.IntegrationFixes) == 0
 }
 
-func (reader workflowIntegrationReader) semanticMergerCheckpoint(ctx context.Context, query PreparationQuery, proof IntegrationProof, original string) (MergerRepairState, error) {
-	index := slices.IndexFunc(proof.History, func(entry IntegrationCommit) bool { return entry.Source == original })
+func (reader workflowIntegrationReader) semanticMergerCheckpoint(ctx context.Context, query PreparationQuery, proof workflowstate.IntegrationProof, original string) (MergerRepairState, error) {
+	index := slices.IndexFunc(proof.History, func(entry workflowstate.IntegrationCommit) bool { return entry.Source == original })
 	if index < 0 {
 		return MergerRepairState{}, workflowstate.ErrConflict
 	}
@@ -64,7 +64,7 @@ func (reader workflowIntegrationReader) semanticMergerCheckpoint(ctx context.Con
 
 	state := MergerRepairState{SchemaVersion: 1, Query: query, Preparation: *reader.preparation, ReplayIndex: index, OriginalParent: parent, PreparedParent: proof.History[index].Parent, CurrentSource: original, History: slices.Clone(proof.History[:index])}
 	for _, repair := range proof.Provenance.Repairs {
-		if slices.ContainsFunc(state.History, func(entry IntegrationCommit) bool { return entry.Source == repair.Source }) {
+		if slices.ContainsFunc(state.History, func(entry workflowstate.IntegrationCommit) bool { return entry.Source == repair.Source }) {
 			state.Repairs = append(state.Repairs, repair)
 		}
 	}

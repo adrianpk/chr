@@ -13,19 +13,19 @@ import (
 )
 
 type workflowReviewEvidence struct {
-	Schema       string         `json:"schema"`
-	Origin       string         `json:"origin"`
-	Decision     ReviewDecision `json:"decision"`
-	PreviousRef  string         `json:"previous_ref"`
-	PreviousHash string         `json:"previous_hash"`
-	RecordedAt   time.Time      `json:"recorded_at"`
+	Schema       string                       `json:"schema"`
+	Origin       string                       `json:"origin"`
+	Decision     workflowstate.ReviewDecision `json:"decision"`
+	PreviousRef  string                       `json:"previous_ref"`
+	PreviousHash string                       `json:"previous_hash"`
+	RecordedAt   time.Time                    `json:"recorded_at"`
 }
 
 func workflowReviewPath(id string, round int, name string) string {
 	return filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "review", fmt.Sprintf("%03d", round), name))
 }
 
-func (s *Store) persistWorkflowReviewInput(run *workflowInvocationFile, observation workflowSliceObservation, input ReviewInput) error {
+func (s *Store) persistWorkflowReviewInput(run *workflowInvocationFile, observation workflowSliceObservation, input workflowstate.ReviewInput) error {
 	if run.ReviewCount >= workflowstate.PageLimit {
 		return fmt.Errorf("workflow review history budget exhausted")
 	}
@@ -37,7 +37,7 @@ func (s *Store) persistWorkflowReviewInput(run *workflowInvocationFile, observat
 
 	run.ReviewCount++
 	ref := workflowReviewPath(run.ID, run.ReviewCount, "input.json")
-	run.Review = &ReviewBinding{Round: run.ReviewCount, Unit: input.Unit, State: "pending", InputRef: ref, InputHash: contenthash.Sum(data)}
+	run.Review = &workflowstate.ReviewBinding{Round: run.ReviewCount, Unit: input.Unit, State: "pending", InputRef: ref, InputHash: contenthash.Sum(data)}
 	run.Status, run.Outcome, run.Blocker = "waiting_review", "slice_review_pending", nil
 
 	files, err := s.workflowReviewDomainChanges(run, observation, false)
@@ -48,7 +48,7 @@ func (s *Store) persistWorkflowReviewInput(run *workflowInvocationFile, observat
 	return s.commitWorkflowPullRequestFiles(run, files, workflowstate.FileChange{Path: ref, After: data})
 }
 
-func (s *Store) persistWorkflowReviewDecision(run *workflowInvocationFile, observation workflowSliceObservation, decision ReviewDecision, state string, extra ...workflowstate.FileChange) error {
+func (s *Store) persistWorkflowReviewDecision(run *workflowInvocationFile, observation workflowSliceObservation, decision workflowstate.ReviewDecision, state string, extra ...workflowstate.FileChange) error {
 	if run.Review.DecisionCount >= 2 {
 		return fmt.Errorf("workflow review decision history budget exhausted")
 	}
@@ -149,31 +149,31 @@ func (s *Store) workflowReviewDomainChanges(run *workflowInvocationFile, observa
 	return files, nil
 }
 
-func (s *Store) readWorkflowReview(run workflowInvocationFile) (ReviewInput, ReviewDecision, error) {
-	var input ReviewInput
+func (s *Store) readWorkflowReview(run workflowInvocationFile) (workflowstate.ReviewInput, workflowstate.ReviewDecision, error) {
+	var input workflowstate.ReviewInput
 	if run.Review == nil {
-		return input, ReviewDecision{}, workflowstate.ErrConflict
+		return input, workflowstate.ReviewDecision{}, workflowstate.ErrConflict
 	}
 
 	data, err := s.readWorkflowReviewImage(run.Review.InputRef, run.Review.InputHash)
 	if err != nil {
-		return input, ReviewDecision{}, err
+		return input, workflowstate.ReviewDecision{}, err
 	}
 
 	if err := json.Unmarshal(data, &input); err != nil {
-		return input, ReviewDecision{}, err
+		return input, workflowstate.ReviewDecision{}, err
 	}
 
 	if input.Schema != "chr-workflow-review-input/v1" || input.InvocationID != run.ID || input.Unit != run.Review.Unit || !workflowCommitID(input.TargetCommit) {
-		return input, ReviewDecision{}, workflowstate.ErrConflict
+		return input, workflowstate.ReviewDecision{}, workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowReviewPolicy(input.Policy); err != nil {
-		return input, ReviewDecision{}, err
+		return input, workflowstate.ReviewDecision{}, err
 	}
 
 	if err := validateWorkflowNativeReviewInput(input); err != nil {
-		return input, ReviewDecision{}, err
+		return input, workflowstate.ReviewDecision{}, err
 	}
 
 	decision, err := s.readWorkflowReviewDecisions(run, input)

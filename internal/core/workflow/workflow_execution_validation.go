@@ -8,7 +8,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) validateWorkflowTask(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result *TaskResult) error {
+func (s *Store) validateWorkflowTask(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result *workflowstate.TaskResult) error {
 	commit, tree, err := claim.store.workflowLaneCandidate(ctx, prepared.input.Lane)
 	if err != nil {
 		return err
@@ -44,7 +44,7 @@ func (s *Store) validateWorkflowTask(ctx context.Context, claim *Claim, prepared
 	return s.checkWorkflowValidationImage(validationContext, claim, prepared, *result)
 }
 
-func (s *Store) checkWorkflowValidationImage(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result TaskResult) error {
+func (s *Store) checkWorkflowValidationImage(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result workflowstate.TaskResult) error {
 	if err := s.checkWorkflowPreparedClaim(ctx, claim, prepared); err != nil {
 		return err
 	}

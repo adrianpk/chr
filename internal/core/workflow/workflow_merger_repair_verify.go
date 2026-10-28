@@ -8,7 +8,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Context, proof IntegrationProof, original, parent, source string) (string, error) {
+func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Context, proof workflowstate.IntegrationProof, original, parent, source string) (string, error) {
 	if proof.Provenance == nil || len(proof.Provenance.Repairs) == 0 {
 		return reader.preparedTree(ctx, original, parent, source)
 	}
@@ -43,7 +43,7 @@ func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Cont
 	return tree, nil
 }
 
-func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Context, repair IntegrationTreeRepair, original, parent, source, tree string, conflicts []string) error {
+func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Context, repair workflowstate.IntegrationTreeRepair, original, parent, source, tree string, conflicts []string) error {
 	if err := validateWorkflowRepairPosition(repair, original, parent, source, tree); err != nil {
 		return err
 	}
@@ -74,9 +74,9 @@ func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Conte
 	return reader.verifyMergerConflictKinds(ctx, repair, conflicts)
 }
 
-func (reader workflowIntegrationReader) verifyMergerConflictKinds(ctx context.Context, repair IntegrationTreeRepair, paths []string) error {
+func (reader workflowIntegrationReader) verifyMergerConflictKinds(ctx context.Context, repair workflowstate.IntegrationTreeRepair, paths []string) error {
 	for _, path := range paths {
-		index := slices.IndexFunc(repair.Input.Conflicts, func(c MergerConflict) bool { return c.Path == path })
+		index := slices.IndexFunc(repair.Input.Conflicts, func(c workflowstate.MergerConflict) bool { return c.Path == path })
 		if index < 0 {
 			return workflowstate.ErrConflict
 		}

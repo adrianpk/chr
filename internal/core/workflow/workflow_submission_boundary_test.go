@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowSubmissionAtomicGuard changes a canonical source or target after
@@ -26,7 +27,7 @@ func testWorkflowSubmissionAtomicGuard(t *testing.T, changed string) {
 	t.Helper()
 
 	f, provider := newWorkflowSubmissionFixture(t, "rebase")
-	provider.before = func(ctx context.Context, s Submission) {
+	provider.before = func(ctx context.Context, s workflowstate.Submission) {
 		moveWorkflowSubmissionRef(t, ctx, f.remote, changed, s)
 	}
 
@@ -45,7 +46,7 @@ func testWorkflowSubmissionAtomicGuard(t *testing.T, changed string) {
 	}
 }
 
-func moveWorkflowSubmissionRef(t *testing.T, ctx context.Context, remote, changed string, s Submission) {
+func moveWorkflowSubmissionRef(t *testing.T, ctx context.Context, remote, changed string, s workflowstate.Submission) {
 	t.Helper()
 
 	branch, commit := s.Guard.Git.TargetBranch, s.Guard.Git.OriginCommit
@@ -123,7 +124,7 @@ func workflowSubmissionAlias(t *testing.T, f workflowPreparationFixture) *Store 
 	return NewWorkflowStore(layout, "project-alias")
 }
 
-func assertWorkflowSubmissionExcluded(t *testing.T, alias *Store, submission Submission) {
+func assertWorkflowSubmissionExcluded(t *testing.T, alias *Store, submission workflowstate.Submission) {
 	t.Helper()
 
 	err := alias.withLock(t.Context(), func() error {
@@ -163,7 +164,7 @@ func TestWorkflowSubmissionProjectionLoss(t *testing.T) {
 func TestWorkflowSubmissionStop(t *testing.T) {
 	f, provider := newWorkflowSubmissionFixture(t, "rebase")
 	entered := make(chan struct{})
-	provider.before = func(ctx context.Context, _ Submission) {
+	provider.before = func(ctx context.Context, _ workflowstate.Submission) {
 		close(entered)
 		<-ctx.Done()
 	}

@@ -11,12 +11,13 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowParallelPublisherSpec struct {
 	ProjectDir, Namespace, InvocationID, Remote string
 	Mode, Entered, Release, Result              string
-	PullRequest                                 PullRequestSnapshot
+	PullRequest                                 workflowstate.PullRequestSnapshot
 }
 
 type workflowParallelPublisherResult struct {
@@ -45,7 +46,7 @@ func TestWorkflowParallelPublisher(t *testing.T) {
 	store := NewWorkflowStore(layout, "publication-alias")
 	provider := workflowParallelPublicationProviderFor(spec.PullRequest, spec.Remote)
 	provider.unknown, provider.lost = spec.Mode == "unknown", spec.Mode == "lost"
-	provider.before = func(ctx context.Context, submission Submission) {
+	provider.before = func(ctx context.Context, submission workflowstate.Submission) {
 		workflowParallelPublisherBarrier(t, ctx, store, spec, submission)
 	}
 
@@ -60,7 +61,7 @@ func TestWorkflowParallelPublisher(t *testing.T) {
 	writeWorkflowParallelPublisherResult(t, spec.Result, result)
 }
 
-func workflowParallelPublisherBarrier(t *testing.T, ctx context.Context, store *Store, spec workflowParallelPublisherSpec, submission Submission) {
+func workflowParallelPublisherBarrier(t *testing.T, ctx context.Context, store *Store, spec workflowParallelPublisherSpec, submission workflowstate.Submission) {
 	t.Helper()
 
 	retained, err := store.ReadWorkflowSubmission(ctx, spec.InvocationID)

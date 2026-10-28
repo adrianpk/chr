@@ -59,7 +59,7 @@ func (s *Store) materializationEnvelope(kind, title string, number int, now time
 		return Record{}, err
 	}
 
-	return Record{Identity: Identity{ID: id, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: now, UpdatedAt: now}, Kind: kind, Path: kind + "/" + id + "/metadata.json", Metadata: metadata}, nil
+	return Record{Identity: workflowstate.Identity{ID: id, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: now, UpdatedAt: now}, Kind: kind, Path: kind + "/" + id + "/metadata.json", Metadata: metadata}, nil
 }
 
 func (s *Store) buildMaterializationTasks(ctx context.Context, opts MaterializationOptions, set Record, plan generationcore.GeneratedWorkflowPlan, number int, now time.Time) ([]Record, map[string]string, error) {

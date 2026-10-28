@@ -13,9 +13,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowRunAgentCommand(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string) (CommandResult, error) {
+func workflowRunAgentCommand(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string) (workflowstate.CommandResult, error) {
 	if err := harnesshost.CheckExecutable(prepared.input.HarnessBinding, command); err != nil {
-		return CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 
 	if prepared.input.AgentCall == nil {
@@ -23,7 +23,7 @@ func workflowRunAgentCommand(ctx context.Context, claim *Claim, prepared workflo
 	}
 
 	if err := claim.store.checkWorkflowAgentInput(ctx, prepared.input); err != nil {
-		return CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 
 	result, executionErr := workflowRunCommand(ctx, claim, prepared, command)
@@ -55,7 +55,7 @@ func (s *Store) checkWorkflowAgentInput(ctx context.Context, input TaskInput) er
 	return err
 }
 
-func parseWorkflowAgentResponse(result CommandResult, input TaskInput) (AgentResponse, error) {
+func parseWorkflowAgentResponse(result workflowstate.CommandResult, input TaskInput) (AgentResponse, error) {
 	var response AgentResponse
 	if result.ExitCode != 0 || result.Truncated {
 		return response, ErrWorkflowIntegrationBudget
@@ -81,7 +81,7 @@ func checkWorkflowAgentResponse(response AgentResponse, input TaskInput) error {
 		return ErrWorkflowIntegrationBudget
 	}
 
-	usage := MergerUsage{CapabilityRevision: response.CapabilityRevision, WholeCall: response.WholeCall, Input: *response.Input, Output: *response.Output}
+	usage := workflowstate.MergerUsage{CapabilityRevision: response.CapabilityRevision, WholeCall: response.WholeCall, Input: *response.Input, Output: *response.Output}
 	if err := validateWorkflowMergerReportedUsage(&usage, &call.Allowance); err != nil {
 		return errors.Join(ErrWorkflowIntegrationBudget, err)
 	}

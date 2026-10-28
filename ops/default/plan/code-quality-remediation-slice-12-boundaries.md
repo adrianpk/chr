@@ -88,6 +88,31 @@ and splitWorkflowMarkdown already has its direct shared RequireMarkdown owner
 from Slice 9. The original baseline identities remain frozen; final dispositions
 will record actual changes, retained contracts and implementation evidence.
 
+## Consumer-owned stage operations
+
+The [port map](code-quality-remediation-slice-12-ports.csv) records five contracts
+and their actual production bindings. integrate.Validation validates and accepts
+one claimed candidate; merge.Evidence verifies retained input; review.Decisions
+accepts one bound review role; forge.Responses retains the untrusted response for
+one journaled submission; closeout.Gate executes one bound closing gate. Private
+workflow implementations retain claim/prepared/provider or closing/journal
+identities. The store implements merger evidence checking directly.
+
+The operation calls retain their original arguments, guards, critical sections,
+cleanup and error joins. No store object, opaque handle or raw journal commit
+crosses a stage contract. Each stage imports only workflow/state; 20 positive and
+negative AST cases enforce that boundary. Policy extraction remains with the
+approved T13-T15 tasks, while all 908 Store methods remain at the mutation owner.
+
+Sixty shared protocol types and both evidence-enumeration methods move to state
+with exact tokens after qualification and the EvidenceRefs name. Their existing
+public type/embedded-field names, JSON order/tags, enum strings and nil/empty
+representations remain intact. Six cross-package NativeUnsupported literals now
+name the original Condition/Decision fields in the same order with unchanged
+expressions. Native policy, authority validation, IO and recovery stay outside
+this data owner. Both actual record/role wire fixtures and guarded stage workflows
+pass at the new boundary.
+
 ## Receipt duplication D08
 
 The original D08 spans are `readWorkflowControlReceipt` and
@@ -104,6 +129,5 @@ The compiler-resolved source graph and exact CSV coverage/hash checks passed.
 The frozen entry map is separate from runtime acceptance. The move ledger
 records prerequisites and the compiling family relocation with exact declaration
 preimages and current resolutions. Focused wire/storage, native Git/filesystem,
-guarded legacy operations, application and dependency checks pass. Stage ports,
-assigned signature remediation and final candidate validation remain active
+guarded legacy operations, application and dependency checks pass. Assigned signature remediation and final candidate validation remain active
 Slice 12 work.

@@ -110,22 +110,22 @@ func (s *Store) checkWorkflowManualCandidate(ctx context.Context, claim *Claim, 
 		return fmt.Errorf("%w: reported manual candidate differs from actual Git image", workflowstate.ErrConflict)
 	}
 
-	return s.checkWorkflowValidationImage(ctx, claim, prepared, TaskResult{TaskValidation: TaskValidation{Commit: commit, Tree: tree}})
+	return s.checkWorkflowValidationImage(ctx, claim, prepared, workflowstate.TaskResult{TaskValidation: workflowstate.TaskValidation{Commit: commit, Tree: tree}})
 }
 
-func (s *Store) workflowManualWorkerResult(ctx context.Context, claim *Claim) (CommandResult, error) {
+func (s *Store) workflowManualWorkerResult(ctx context.Context, claim *Claim) (workflowstate.CommandResult, error) {
 	run, err := s.ReadWorkflow(ctx, claim.InvocationID)
 	if err != nil {
-		return CommandResult{}, err
+		return workflowstate.CommandResult{}, err
 	}
 
 	processes := run.Attempts[len(run.Attempts)-1].Processes
 	if len(processes) == 0 {
-		return CommandResult{}, nil
+		return workflowstate.CommandResult{}, nil
 	}
 
 	if len(processes) != 1 || processes[0].Result == nil || processes[0].Result.ExitCode != 0 {
-		return CommandResult{}, ErrWorkflowOwned
+		return workflowstate.CommandResult{}, ErrWorkflowOwned
 	}
 
 	return *processes[0].Result, nil

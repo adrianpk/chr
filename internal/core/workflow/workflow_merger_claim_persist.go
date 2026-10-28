@@ -5,13 +5,15 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowWorkerSlotLabel(file *os.File) string {
 	return strconv.Itoa(workflowWorkerSlotNumber(file.Name()))
 }
 
-func (s *Store) persistWorkflowMergerClaim(ctx context.Context, run workflowInvocationFile, record Record, claim *Claim, budget IntegrationBudget, input MergerInput, harness MergerHarness, lane Lane, root string) (*Claim, workflowPreparedTask, error) {
+func (s *Store) persistWorkflowMergerClaim(ctx context.Context, run workflowInvocationFile, record Record, claim *Claim, budget IntegrationBudget, input workflowstate.MergerInput, harness MergerHarness, lane workflowstate.Lane, root string) (*Claim, workflowPreparedTask, error) {
 	reservation, err := workflowMergerReservation(&run, budget, &input, claim)
 	if err != nil {
 		return nil, workflowPreparedTask{}, err

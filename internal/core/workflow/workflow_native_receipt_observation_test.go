@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeReceiptDescendant observes actual target advancement after native
@@ -224,7 +225,7 @@ func nativeReceiptFrontierPorts(t *testing.T, fixture nativeCanonicalFixture, ta
 	return FrontierPorts{Provider: fixture.forge.adapter, Observer: fixture.git, Target: fixture.git}
 }
 
-func nativeCanonicalMergedPR(fixture nativeCanonicalFixture, target string) PullRequestSnapshot {
+func nativeCanonicalMergedPR(fixture nativeCanonicalFixture, target string) workflowstate.PullRequestSnapshot {
 	pr := fixture.forge.request.PullRequest
 	pr.State, pr.Merged, pr.ResultCommit, pr.HeadCommit, pr.BaseCommit = "closed", true, fixture.f.candidate.Native.PreparedResult, fixture.f.candidate.Native.PublishedSource, target
 

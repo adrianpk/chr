@@ -14,18 +14,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// TaskValidation binds host validation to a cumulative lane commit.
-// Evidence files are immutable inputs; status text alone is never proof.
-type TaskValidation struct {
-	Schema       string `json:"schema"`
-	Key          string `json:"ticket_key"`
-	ContractHash string `json:"execution_contract_hash"`
-	Branch       string `json:"branch"`
-	Commit       string `json:"commit"`
-	Tree         string `json:"tree"`
-	Successful   bool   `json:"successful"`
-}
-
 type workflowProofReader struct {
 	store        *Store
 	selection    workflowSelection
@@ -78,7 +66,7 @@ func (reader *workflowProofReader) taskProofReason(ctx context.Context, record R
 			continue
 		}
 
-		var proof TaskValidation
+		var proof workflowstate.TaskValidation
 		if err := json.Unmarshal(data, &proof); err != nil {
 			continue
 		}
@@ -91,7 +79,7 @@ func (reader *workflowProofReader) taskProofReason(ctx context.Context, record R
 	return "task_evidence_invalid"
 }
 
-func (reader *workflowProofReader) validTaskProof(ctx context.Context, record Record, proof TaskValidation) bool {
+func (reader *workflowProofReader) validTaskProof(ctx context.Context, record Record, proof workflowstate.TaskValidation) bool {
 	matches := proof.Schema == "chr-task-validation/v1" && proof.Successful && proof.Key == record.Task.Key && proof.ContractHash == record.Task.ContractHash && proof.Branch == reader.request.CumulativeBranch
 
 	return matches && reader.commitHasTree(ctx, proof.Commit, proof.Tree) && reader.isAncestor(ctx, proof.Commit, reader.request.CumulativeCommit) && reader.branchAtCommit(ctx)

@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeDriftGateProvider struct {
@@ -16,7 +18,7 @@ type nativeDriftGateProvider struct {
 	move   func()
 }
 
-func (p *nativeDriftGateProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (PullRequestSnapshot, error) {
+func (p *nativeDriftGateProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (workflowstate.PullRequestSnapshot, error) {
 	if _, err := os.Stat(p.marker); err == nil {
 		p.once.Do(p.move)
 	}

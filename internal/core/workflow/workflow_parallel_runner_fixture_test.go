@@ -12,6 +12,7 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowParallelRunnerSpec struct {
@@ -58,7 +59,7 @@ func TestWorkflowParallelRunner(t *testing.T) {
 	store := NewWorkflowStore(layout, "project-1")
 	claim, err := workflowParallelRunnerClaim(t, store, spec)
 
-	result := TaskResult{}
+	result := workflowstate.TaskResult{}
 	if err == nil {
 		result, err = claim.store.ExecuteWorkflowTask(t.Context(), claim, workflowParallelWorker(spec))
 	}

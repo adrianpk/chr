@@ -50,7 +50,7 @@ func nativeMergerDeniedTools(t *testing.T, tools *workflowMergerTools) {
 	}
 }
 
-func nativeMergerToolFiles(t *testing.T, input MergerInput) (*workflowMergerTools, string, string) {
+func nativeMergerToolFiles(t *testing.T, input workflowstate.MergerInput) (*workflowMergerTools, string, string) {
 	t.Helper()
 
 	dir := t.TempDir()

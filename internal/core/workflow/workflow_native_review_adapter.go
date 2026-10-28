@@ -26,61 +26,61 @@ func NewWorkflowNativeReviewAdapter(remote RemoteReviewAdapter, store *Store, id
 
 // WorkflowIntegrationCapability is a preliminary mechanism check. Publication
 // additionally requires the prepared result's current transport capability.
-func (adapter *NativeReviewAdapter) WorkflowIntegrationCapability(ctx context.Context, pr PullRequestSnapshot, method string) (PublicationCapability, error) {
+func (adapter *NativeReviewAdapter) WorkflowIntegrationCapability(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowstate.PublicationCapability, error) {
 	policy, err := adapter.ReadWorkflowNativePolicy(ctx, pr, method)
 	if err != nil {
-		return PublicationCapability{}, err
+		return workflowstate.PublicationCapability{}, err
 	}
 
 	observation, err := adapter.readWorkflowNativePolicy(ctx, pr, method)
 	if err != nil {
-		return PublicationCapability{}, err
+		return workflowstate.PublicationCapability{}, err
 	}
 
 	if len(observation.unsupported) != 0 || !workflowNativeObservationContractMatches(observation.contract, policy.ObservationContract) {
-		return PublicationCapability{}, fmt.Errorf("%w: current repository policy does not support the publisher profile", ErrWorkflowAtomicGuard)
+		return workflowstate.PublicationCapability{}, fmt.Errorf("%w: current repository policy does not support the publisher profile", ErrWorkflowAtomicGuard)
 	}
 
 	identity, err := adapter.readWorkflowNativeIdentity(ctx, pr)
 	if err != nil || identity != policy.APIIdentityFingerprint {
-		return PublicationCapability{}, fmt.Errorf("%w: publisher identity changed", workflowstate.ErrConflict)
+		return workflowstate.PublicationCapability{}, fmt.Errorf("%w: publisher identity changed", workflowstate.ErrConflict)
 	}
 
 	host, err := json.Marshal(policy)
 	if err != nil {
-		return PublicationCapability{}, err
+		return workflowstate.PublicationCapability{}, err
 	}
 
-	return PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, Revision: contenthash.Sum(append(host, observation.data...)), AtomicSourceBase: true, ExactResult: true}, nil
+	return workflowstate.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, Revision: contenthash.Sum(append(host, observation.data...)), AtomicSourceBase: true, ExactResult: true}, nil
 }
 
 // WorkflowPreparedNativeCapability observes the actual receive-pack server for
 // the host's exact S/B/P proof, using the same configured publisher as dispatch.
-func (adapter *NativeReviewAdapter) WorkflowPreparedNativeCapability(ctx context.Context, pr PullRequestSnapshot, proof IntegrationProof) (NativeCapability, error) {
+func (adapter *NativeReviewAdapter) WorkflowPreparedNativeCapability(ctx context.Context, pr workflowstate.PullRequestSnapshot, proof workflowstate.IntegrationProof) (workflowstate.NativeCapability, error) {
 	policy, err := adapter.ReadWorkflowNativePolicy(ctx, pr, proof.Method)
 	if err != nil {
-		return NativeCapability{}, err
+		return workflowstate.NativeCapability{}, err
 	}
 
 	run, owner, profile, err := adapter.nativePublisher(ctx)
 	if err != nil {
-		return NativeCapability{}, err
+		return workflowstate.NativeCapability{}, err
 	}
 
 	request := GitPublication{Repository: pr.Repository, SourceRepository: pr.HeadRepository, Directory: owner.layout.ProjectDir(), SourceRef: policy.SourceRef, TargetRef: policy.TargetRef, SourceRewriteAuthorized: true, OwnershipRevision: policy.OwnershipRevision, Git: proof}
 
 	request.CandidateRevision, err = GitPublicationRevision(request)
 	if err != nil {
-		return NativeCapability{}, err
+		return workflowstate.NativeCapability{}, err
 	}
 
 	config, err := workspaceconfig.Load(owner.layout.ProjectDir())
 	if err != nil {
-		return NativeCapability{}, err
+		return workflowstate.NativeCapability{}, err
 	}
 
 	if proof.SourceCommit != run.PullRequest.SourceCommit {
-		return NativeCapability{}, workflowstate.ErrConflict
+		return workflowstate.NativeCapability{}, workflowstate.ErrConflict
 	}
 
 	query := NativeCapabilityRequest{Config: config.Work.Integration, PullRequest: pr, Publication: request}

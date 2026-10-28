@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (adapter RemoteReviewAdapter) readWorkflowNativeIdentity(ctx context.Context, pr PullRequestSnapshot) (string, error) {
+func (adapter RemoteReviewAdapter) readWorkflowNativeIdentity(ctx context.Context, pr workflowstate.PullRequestSnapshot) (string, error) {
 	resolvedReview, err := adapter.resolve(pr.URL)
 	if err != nil {
 		return "", err

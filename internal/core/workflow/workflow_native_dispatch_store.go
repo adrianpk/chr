@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) retainWorkflowNativeDispatch(ctx context.Context, run workflowInvocationFile, submission Submission) (Submission, error) {
+func (s *Store) retainWorkflowNativeDispatch(ctx context.Context, run workflowInvocationFile, submission workflowstate.Submission) (workflowstate.Submission, error) {
 	entry, err := s.workflowNativeDispatchEntry(run, submission)
 	if err != nil {
 		return submission, err
@@ -36,7 +36,7 @@ func (s *Store) retainWorkflowNativeDispatch(ctx context.Context, run workflowIn
 	return s.retainWorkflowNativeSubmission(ctx, run, request)
 }
 
-func (s *Store) workflowNativeDispatchEntry(run workflowInvocationFile, submission Submission) (IntegrationEntry, error) {
+func (s *Store) workflowNativeDispatchEntry(run workflowInvocationFile, submission workflowstate.Submission) (IntegrationEntry, error) {
 	if run.Integration == nil || run.IntegrationBudget == nil {
 		return IntegrationEntry{}, workflowstate.ErrConflict
 	}

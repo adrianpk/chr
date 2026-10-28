@@ -62,3 +62,13 @@ from ReviewMode. The result keeps its original field order, JSON tags and
 nil/empty slices. Pure value validation preserves category/text/decision checks
 and error messages. Native callers still own approval, source/revision guards,
 cosmetic blocking policy, transport, configuration, persistence and mutations.
+
+Shared integration proof/candidate, review input/decision, merger protocol,
+submission and closing input/result values now serve both durable records and
+consumer-owned stage ports. All original public type and embedded-field names,
+JSON keys/tags/order, enum strings and nil/empty representations remain intact.
+ProcessIdentity is retained process identity data, not a process handle or
+execution capability. EvidenceRefs enumerates the original ordered references
+on merger input and native record-binding values; native owners still validate
+containment, hashes, authorization and actual evidence. This data owner gains no
+store, configuration, transport, claim resource, journal or recovery authority.

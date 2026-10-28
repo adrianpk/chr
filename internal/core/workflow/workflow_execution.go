@@ -4,28 +4,30 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ExecuteWorkflowTask runs one owned task, then applies host validation evidence.
 // Workers receive frozen JSON on stdin and an isolated cwd; they do not own status.
-func (s *Store) ExecuteWorkflowTask(ctx context.Context, claim *Claim, worker []string) (TaskResult, error) {
+func (s *Store) ExecuteWorkflowTask(ctx context.Context, claim *Claim, worker []string) (workflowstate.TaskResult, error) {
 	return s.executeWorkflowTask(ctx, claim, worker, nil)
 }
 
 // ExecuteWorkflowTaskWithHarness enforces and settles a certified whole-call grant.
-func (s *Store) ExecuteWorkflowTaskWithHarness(ctx context.Context, claim *Claim, harness AgentHarness) (TaskResult, error) {
+func (s *Store) ExecuteWorkflowTaskWithHarness(ctx context.Context, claim *Claim, harness AgentHarness) (workflowstate.TaskResult, error) {
 	return s.executeWorkflowTask(ctx, claim, harness.Command, &harness)
 }
 
-func (s *Store) executeWorkflowTask(ctx context.Context, claim *Claim, worker []string, harness *AgentHarness) (TaskResult, error) {
+func (s *Store) executeWorkflowTask(ctx context.Context, claim *Claim, worker []string, harness *AgentHarness) (workflowstate.TaskResult, error) {
 	if err := beginWorkflowClaimExecution(claim); err != nil {
-		return TaskResult{}, err
+		return workflowstate.TaskResult{}, err
 	}
 	defer endWorkflowClaimExecution(claim)
 
 	prepared, err := s.prepareWorkflowTaskHarness(ctx, claim, worker, workflowPreparationAutomatic, harness)
 	if err != nil {
-		return TaskResult{}, err
+		return workflowstate.TaskResult{}, err
 	}
 
 	watched, stop := s.watchWorkflowStop(ctx, claim)
@@ -48,7 +50,7 @@ func workflowClaimQuiescent(claim *Claim) bool {
 	return !claim.execution.running && (claim.execution.groupPID == 0 || workflowCommandGroupStopped(claim.execution.groupPID))
 }
 
-func (s *Store) runWorkflowTask(ctx context.Context, claim *Claim, prepared workflowPreparedTask) (TaskResult, error) {
+func (s *Store) runWorkflowTask(ctx context.Context, claim *Claim, prepared workflowPreparedTask) (workflowstate.TaskResult, error) {
 	workerContext, cancel := context.WithDeadline(ctx, prepared.leaseUntil)
 	defer cancel()
 
@@ -106,8 +108,8 @@ func endWorkflowClaimExecution(claim *Claim) {
 	claim.execution.Unlock()
 }
 
-func newWorkflowTaskResult(prepared workflowPreparedTask) TaskResult {
+func newWorkflowTaskResult(prepared workflowPreparedTask) workflowstate.TaskResult {
 	input := prepared.input
 
-	return TaskResult{TaskValidation: TaskValidation{Schema: "chr-task-validation/v1", Key: input.TaskKey, ContractHash: input.ContractHash, Branch: input.Lane.Branch}, ExecutionMode: input.ExecutionMode, AttemptID: input.AttemptID, Generation: input.Generation, InputRef: prepared.inputRef, InputHash: prepared.inputHash}
+	return workflowstate.TaskResult{TaskValidation: workflowstate.TaskValidation{Schema: "chr-task-validation/v1", Key: input.TaskKey, ContractHash: input.ContractHash, Branch: input.Lane.Branch}, ExecutionMode: input.ExecutionMode, AttemptID: input.AttemptID, Generation: input.Generation, InputRef: prepared.inputRef, InputHash: prepared.inputHash}
 }

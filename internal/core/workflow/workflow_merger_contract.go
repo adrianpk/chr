@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) checkWorkflowMergerCommands(ctx context.Context, run workflowInvocationFile, input MergerInput) error {
+func (s *Store) checkWorkflowMergerCommands(ctx context.Context, run workflowInvocationFile, input workflowstate.MergerInput) error {
 	observation, err := s.observeWorkflowSlice(ctx, run)
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func (s *Store) checkWorkflowMergerCommands(ctx context.Context, run workflowInv
 	return nil
 }
 
-func checkWorkflowMergerBudget(budget IntegrationBudget, input MergerInput) error {
+func checkWorkflowMergerBudget(budget IntegrationBudget, input workflowstate.MergerInput) error {
 	if err := checkWorkflowIntegrationCounterCharge(budget, IntegrationReservation{Unit: input.Unit, Kind: "agent_call", Role: "merger"}, "merger"); err != nil {
 		return err
 	}

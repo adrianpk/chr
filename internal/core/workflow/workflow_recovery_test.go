@@ -96,9 +96,9 @@ func TestWorkflowProcessBirth(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, change := range []func(*ProcessIdentity){
-		func(i *ProcessIdentity) { i.StartTicks += "0" },
-		func(i *ProcessIdentity) { i.BootID = "00000000-0000-0000-0000-000000000000" },
+	for _, change := range []func(*workflowstate.ProcessIdentity){
+		func(i *workflowstate.ProcessIdentity) { i.StartTicks += "0" },
+		func(i *workflowstate.ProcessIdentity) { i.BootID = "00000000-0000-0000-0000-000000000000" },
 	} {
 		stale := identity
 		change(&stale)

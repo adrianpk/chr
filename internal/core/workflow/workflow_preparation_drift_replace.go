@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) replaceWorkflowNativePreparation(ctx context.Context, run *workflowInvocationFile, entry IntegrationEntry, previous PreparationInput, source ReviewInput) error {
+func (s *Store) replaceWorkflowNativePreparation(ctx context.Context, run *workflowInvocationFile, entry IntegrationEntry, previous workflowstate.PreparationInput, source workflowstate.ReviewInput) error {
 	next, err := s.workflowNativeReplacementEntry(ctx, *run, entry)
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (s *Store) replaceWorkflowNativePreparation(ctx context.Context, run *workf
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, IntegrationBinding{EntryID: next.ID, Unit: next.Unit, Revision: next.Revision, EntryRef: workflowstate.EvidenceRef{Path: queueFile.Path, Hash: contenthash.Sum(queueFile.After)}})
+	updateWorkflowIntegrationBinding(run, workflowstate.IntegrationBinding{EntryID: next.ID, Unit: next.Unit, Revision: next.Revision, EntryRef: workflowstate.EvidenceRef{Path: queueFile.Path, Hash: contenthash.Sum(queueFile.After)}})
 	staleWorkflowNativePreparation(run)
 	projectWorkflowIntegrationPhase(run, next)
 
