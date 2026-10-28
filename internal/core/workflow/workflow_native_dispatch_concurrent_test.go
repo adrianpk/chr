@@ -40,7 +40,7 @@ func TestNativeDispatchConcurrent(t *testing.T) {
 	finished := make(chan error, 1)
 
 	go func() {
-		_, _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, waiting)
+		_, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, waiting)
 		finished <- err
 	}()
 
@@ -55,7 +55,9 @@ func TestNativeDispatchConcurrent(t *testing.T) {
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 	current := nativeBudgetGuard(t, restarted, f.entry.InvocationID)
 
-	submission, _, err := restarted.PublishWorkflowNativeSubmission(t.Context(), current, f.provider, publisher)
+	nativePublication, err := restarted.PublishWorkflowNativeSubmission(t.Context(), current, f.provider, publisher)
+
+	submission := nativePublication.Submission
 	if !errors.Is(err, ErrWorkflowObservationRequired) || submission.Native.DispatchIdentity == nil || publisher.calls.Load() != 0 {
 		t.Fatal("replacement bypassed a live prior dispatch", err)
 	}

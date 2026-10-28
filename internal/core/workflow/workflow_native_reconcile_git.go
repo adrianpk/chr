@@ -18,7 +18,9 @@ func (s *Store) ReconcileWorkflowNativeGitSubmission(ctx context.Context, guard 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
-	submission, request, update, err := s.workflowNativeReconciliationInput(ctx, guard)
+	nativeReconciliation, err := s.workflowNativeReconciliationInput(ctx, guard)
+
+	submission, request, update := nativeReconciliation.Submission, nativeReconciliation.Request, nativeReconciliation.Update
 	if err != nil || submission.Native.ApplicationState == "not_applied" {
 		return submission, err
 	}
@@ -31,7 +33,13 @@ func (s *Store) ReconcileWorkflowNativeGitSubmission(ctx context.Context, guard 
 	return s.retainWorkflowNativeGitObservation(ctx, update, submission, observation)
 }
 
-func (s *Store) workflowNativeReconciliationInput(ctx context.Context, guard IntegrationBudgetGuard) (submission workflowstate.Submission, request GitPublication, update NativeSubmissionUpdate, err error) {
+func (s *Store) workflowNativeReconciliationInput(ctx context.Context, guard IntegrationBudgetGuard) (result workflowNativeReconciliation, err error) {
+	var (
+		submission workflowstate.Submission
+		request    GitPublication
+		update     NativeSubmissionUpdate
+	)
+
 	err = s.withLock(ctx, func() error {
 		invocationLocation, err := s.locateWorkflowInvocation(ctx, guard.InvocationID)
 		if err != nil {
@@ -75,7 +83,7 @@ func (s *Store) workflowNativeReconciliationInput(ctx context.Context, guard Int
 		return err
 	})
 
-	return submission, request, update, err
+	return workflowNativeReconciliation{Submission: submission, Request: request, Update: update}, err
 }
 
 func observeWorkflowNativeGit(ctx context.Context, submission workflowstate.Submission, request GitPublication, inspector GitPublicationInspector, git PreparedIntegrationGit) (NativeGitObservation, error) {

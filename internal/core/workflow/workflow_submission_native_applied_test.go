@@ -127,7 +127,9 @@ func nativeSubmissionPendingExcluded(t *testing.T, f nativeSubmissionFixture, su
 
 	guard := nativeBudgetGuard(t, f.store, f.entry.InvocationID)
 
-	again, dispatch, err := f.store.BeginWorkflowNativeSubmission(t.Context(), guard, f.provider)
+	submissionIntent, err := f.store.BeginWorkflowNativeSubmission(t.Context(), guard, f.provider)
+
+	again, dispatch := submissionIntent.Submission, submissionIntent.Dispatch
 	if err != nil || dispatch || again.ID != submission.ID {
 		t.Fatal("forge lag permitted another publication", err)
 	}

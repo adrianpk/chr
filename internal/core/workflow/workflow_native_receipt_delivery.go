@@ -75,7 +75,9 @@ func (s *Store) confirmWorkflowNativeReceipt(ctx context.Context, run workflowIn
 }
 
 func (s *Store) retainWorkflowNativeReceipt(ctx context.Context, run workflowInvocationFile, submission workflowstate.Submission) (Record, error) {
-	observation, ref, err := s.workflowNativeReceiptObservation(submission)
+	receiptEvidence, err := s.workflowNativeReceiptObservation(submission)
+	observation, ref := receiptEvidence.Observation, receiptEvidence.Ref
+
 	if err != nil {
 		return Record{}, err
 	}
@@ -97,24 +99,24 @@ func (s *Store) retainWorkflowNativeReceipt(ctx context.Context, run workflowInv
 	return s.writeRecord(ctx, record, 0)
 }
 
-func (s *Store) workflowNativeReceiptObservation(submission workflowstate.Submission) (NativePublicationObservation, workflowstate.EvidenceRef, error) {
+func (s *Store) workflowNativeReceiptObservation(submission workflowstate.Submission) (workflowNativeReceiptEvidence, error) {
 	var observation NativePublicationObservation
 
 	native := submission.Native
 	if native.ApplicationState != "git_applied" || native.TransportResponseRef == nil || len(native.ObservationRefs) == 0 {
-		return observation, workflowstate.EvidenceRef{}, ErrWorkflowObservationRequired
+		return workflowNativeReceiptEvidence{Observation: observation, Ref: workflowstate.EvidenceRef{}}, ErrWorkflowObservationRequired
 	}
 
 	ref := native.ObservationRefs[len(native.ObservationRefs)-1]
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, ref, &observation); err != nil {
-		return observation, ref, err
+		return workflowNativeReceiptEvidence{Observation: observation, Ref: ref}, err
 	}
 
 	if observation.State != "merged" || !s.workflowNativeCanonicalObservationValid(submission, observation) {
-		return observation, ref, ErrWorkflowObservationRequired
+		return workflowNativeReceiptEvidence{Observation: observation, Ref: ref}, ErrWorkflowObservationRequired
 	}
 
-	return observation, ref, nil
+	return workflowNativeReceiptEvidence{Observation: observation, Ref: ref}, nil
 }
 
 func workflowNativeReceiptID(run workflowInvocationFile, submission workflowstate.Submission) string {

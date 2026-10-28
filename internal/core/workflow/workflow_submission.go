@@ -44,7 +44,9 @@ func (s *Store) SubmitWorkflowSliceIntegration(ctx context.Context, id string, p
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
-	submission, submit, err := s.beginWorkflowSubmission(ctx, id, provider, git)
+	submissionIntent, err := s.beginWorkflowSubmission(ctx, id, provider, git)
+
+	submission, submit := submissionIntent.Submission, submissionIntent.Dispatch
 	if err != nil || !submit {
 		if err == nil && submission.State == "awaiting_observation" {
 			return s.ReconcileWorkflowSubmission(ctx, id, provider, git)

@@ -47,7 +47,9 @@ func (s *Store) AdvanceWorkflowSliceIntegration(ctx context.Context, id string, 
 }
 
 func (s *Store) advanceWorkflowLegacyIntegration(ctx context.Context, id string, ports PublicationPorts) (IntegrationProgress, error) {
-	receipt, delivered, err := s.observeWorkflowPublicationCheckpoint(ctx, id, ports)
+	publicationCheckpoint, err := s.observeWorkflowPublicationCheckpoint(ctx, id, ports)
+
+	receipt, delivered := publicationCheckpoint.Receipt, publicationCheckpoint.Observed
 	if err != nil || delivered {
 		return s.workflowIntegrationProgress(ctx, id, receipt, err)
 	}
@@ -96,7 +98,12 @@ func (s *Store) blockWorkflowMissingPublisher(ctx context.Context, id string) er
 	})
 }
 
-func (s *Store) observeWorkflowPublicationCheckpoint(ctx context.Context, id string, ports PublicationPorts) (receipt *Record, delivered bool, err error) {
+func (s *Store) observeWorkflowPublicationCheckpoint(ctx context.Context, id string, ports PublicationPorts) (result workflowPublicationCheckpoint, err error) {
+	var (
+		receipt   *Record
+		delivered bool
+	)
+
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
@@ -106,27 +113,30 @@ func (s *Store) observeWorkflowPublicationCheckpoint(ctx context.Context, id str
 			return readErr
 		}
 
-		receipt, delivered, readErr = invocationLocation2.Owner.reconcileWorkflowPublicationCheckpoint(ctx, invocationLocation2.Run, ports)
+		publicationCheckpoint2, readErr := invocationLocation2.Owner.reconcileWorkflowPublicationCheckpoint(ctx, invocationLocation2.Run, ports)
+		receipt, delivered = publicationCheckpoint2.Receipt, publicationCheckpoint2.Observed
 
 		return readErr
 	})
 
-	return receipt, delivered, err
+	return workflowPublicationCheckpoint{Receipt: receipt, Observed: delivered}, err
 }
 
-func (s *Store) reconcileWorkflowPublicationCheckpoint(ctx context.Context, run workflowInvocationFile, ports PublicationPorts) (*Record, bool, error) {
+func (s *Store) reconcileWorkflowPublicationCheckpoint(ctx context.Context, run workflowInvocationFile, ports PublicationPorts) (workflowPublicationCheckpoint, error) {
 	if run.DeliveryRef != "" {
 		receipt, err := s.readWorkflowSliceReceipt(ctx, run)
 		if err != nil {
-			return nil, true, err
+			return workflowPublicationCheckpoint{Receipt: nil, Observed: true}, err
 		}
 
-		return &receipt, true, nil
+		return workflowPublicationCheckpoint{Receipt: &receipt, Observed: true}, nil
 	}
 
-	journal, pr, err := s.readWorkflowPublicationCheckpoint(ctx, run, ports.Provider)
+	publicationObservation, err := s.readWorkflowPublicationCheckpoint(ctx, run, ports.Provider)
+	journal, pr := publicationObservation.Journal, publicationObservation.PullRequest
+
 	if err != nil {
-		return nil, false, err
+		return workflowPublicationCheckpoint{Receipt: nil, Observed: false}, err
 	}
 
 	if pr.Merged {
@@ -134,41 +144,41 @@ func (s *Store) reconcileWorkflowPublicationCheckpoint(ctx context.Context, run 
 	}
 
 	if err := s.reconcileWorkflowUnmergedSubmission(ctx, &run, journal, ports); err != nil {
-		return nil, false, err
+		return workflowPublicationCheckpoint{Receipt: nil, Observed: false}, err
 	}
 
 	if run.StopIntent != "" || workflowInvocationTerminal(run.Status) || run.Status == workflowstate.InvocationPaused {
-		return nil, false, ErrWorkflowStop
+		return workflowPublicationCheckpoint{Receipt: nil, Observed: false}, ErrWorkflowStop
 	}
 
-	return nil, false, nil
+	return workflowPublicationCheckpoint{Receipt: nil, Observed: false}, nil
 }
 
-func (s *Store) finalizeWorkflowObservedPublication(ctx context.Context, run workflowInvocationFile, journal workflowSubmissionJournal, ports PublicationPorts) (*Record, bool, error) {
+func (s *Store) finalizeWorkflowObservedPublication(ctx context.Context, run workflowInvocationFile, journal workflowSubmissionJournal, ports PublicationPorts) (workflowPublicationCheckpoint, error) {
 	policy, err := s.workflowReviewPolicy(run)
 	if len(journal.Attempts) > 0 && workflowSubmissionMatchesCandidate(run, journal.Attempts[len(journal.Attempts)-1]) {
 		policy, err = journal.Attempts[len(journal.Attempts)-1].Guard.Policy, nil
 	}
 
 	if err != nil {
-		return nil, true, err
+		return workflowPublicationCheckpoint{Receipt: nil, Observed: true}, err
 	}
 
 	if _, err := s.verifyWorkflowSliceIntegration(ctx, run, policy.Method, ports.Provider, ports.Observer); err != nil {
-		return nil, true, err
+		return workflowPublicationCheckpoint{Receipt: nil, Observed: true}, err
 	}
 
 	run, err = s.readWorkflowInvocation(run.ID)
 	if err != nil {
-		return nil, true, err
+		return workflowPublicationCheckpoint{Receipt: nil, Observed: true}, err
 	}
 
 	receipt, err := s.finalizeWorkflowSlice(ctx, run, ports.Provider, ports.Observer)
 	if err != nil {
-		return nil, true, err
+		return workflowPublicationCheckpoint{Receipt: nil, Observed: true}, err
 	}
 
-	return &receipt, true, nil
+	return workflowPublicationCheckpoint{Receipt: &receipt, Observed: true}, nil
 }
 
 func (s *Store) reconcileWorkflowUnmergedSubmission(ctx context.Context, run *workflowInvocationFile, journal workflowSubmissionJournal, ports PublicationPorts) error {
@@ -211,24 +221,24 @@ func (s *Store) reconcileWorkflowUnmergedSubmission(ctx context.Context, run *wo
 	return nil
 }
 
-func (s *Store) readWorkflowPublicationCheckpoint(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowSubmissionJournal, workflowstate.PullRequestSnapshot, error) {
+func (s *Store) readWorkflowPublicationCheckpoint(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowPublicationObservation, error) {
 	if run.PullRequest == nil || run.PullRequest.State != "bound" || run.PullRequest.URL == "" {
-		return workflowSubmissionJournal{}, workflowstate.PullRequestSnapshot{}, fmt.Errorf("publication requires a bound canonical integration-unit PR")
+		return workflowPublicationObservation{Journal: workflowSubmissionJournal{}, PullRequest: workflowstate.PullRequestSnapshot{}}, fmt.Errorf("publication requires a bound canonical integration-unit PR")
 	}
 
 	journal, err := s.loadWorkflowSubmissionJournal(ctx, run)
 	if err != nil {
-		return journal, workflowstate.PullRequestSnapshot{}, err
+		return workflowPublicationObservation{Journal: journal, PullRequest: workflowstate.PullRequestSnapshot{}}, err
 	}
 
 	pr, err := provider.ReadWorkflowPullRequest(ctx, run.PullRequest.URL)
 	if err != nil {
-		return journal, pr, err
+		return workflowPublicationObservation{Journal: journal, PullRequest: pr}, err
 	}
 
 	if reason := workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}); reason != "" {
-		return journal, pr, fmt.Errorf("%w: %s", workflowstate.ErrConflict, reason)
+		return workflowPublicationObservation{Journal: journal, PullRequest: pr}, fmt.Errorf("%w: %s", workflowstate.ErrConflict, reason)
 	}
 
-	return journal, pr, nil
+	return workflowPublicationObservation{Journal: journal, PullRequest: pr}, nil
 }

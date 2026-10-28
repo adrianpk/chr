@@ -102,7 +102,9 @@ func nativeHostPublication(t *testing.T, mode string) {
 
 	checkNativeHostRevocation(t, host)
 
-	entry, guard, err := f.store.workflowNativeContinuationOwner(t.Context(), f.run.ID)
+	nativeContinuation, err := f.store.workflowNativeContinuationOwner(t.Context(), f.run.ID)
+	entry, guard := nativeContinuation.Entry, nativeContinuation.Guard
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,12 +113,16 @@ func nativeHostPublication(t *testing.T, mode string) {
 		t.Fatal(err)
 	}
 
-	_, guard, err = f.store.workflowNativeContinuationOwner(t.Context(), f.run.ID)
+	nativeContinuation2, err := f.store.workflowNativeContinuationOwner(t.Context(), f.run.ID)
+	guard = nativeContinuation2.Guard
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, publication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, provider, provider)
+	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, provider, provider)
+
+	publication := nativePublication.Transport
 	if err != nil || publication.State != "applied" {
 		t.Fatal("real provider failed native publication", publication.State, err)
 	}

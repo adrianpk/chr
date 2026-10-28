@@ -7,14 +7,14 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) beginWorkflowNativeSubmission(ctx context.Context, run workflowInvocationFile, fence IntegrationBudgetGuard, provider PublicationGuardProvider) (workflowstate.Submission, bool, error) {
+func (s *Store) beginWorkflowNativeSubmission(ctx context.Context, run workflowInvocationFile, fence IntegrationBudgetGuard, provider PublicationGuardProvider) (SubmissionIntent, error) {
 	if err := s.checkWorkflowIntegrationRetainedRecords(ctx, run); err != nil {
-		return workflowstate.Submission{}, false, err
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 	}
 
 	journal, err := s.loadWorkflowSubmissionJournal(ctx, run)
 	if err != nil {
-		return workflowstate.Submission{}, false, err
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 	}
 
 	if len(journal.Attempts) > 0 && journal.Attempts[len(journal.Attempts)-1].State != "unpublished" {
@@ -26,74 +26,78 @@ func (s *Store) beginWorkflowNativeSubmission(ctx context.Context, run workflowI
 	entry, budget := budgetObservation.Entry, budgetObservation.Budget
 
 	if err != nil {
-		return workflowstate.Submission{}, false, err
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 	}
 
 	if err := guardWorkflowIntegrationBudget(run, entry, budget, fence); err != nil {
-		return workflowstate.Submission{}, false, err
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 	}
 
 	if !workflowNativeSubmissionReady(run, entry, journal) {
-		return workflowstate.Submission{}, false, workflowstate.ErrConflict
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowIntegrationAuthorization(run, entry); err != nil {
-		return workflowstate.Submission{}, false, err
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 	}
 
-	return s.authorizeWorkflowNativeIntent(ctx, run, entry, journal, fence, provider)
+	return s.authorizeWorkflowNativeIntent(ctx, run, workflowNativeIntentOwner{Entry: entry, Journal: journal, Fence: fence}, provider)
 }
 
-func (s *Store) retryWorkflowNativeSubmission(run *workflowInvocationFile, journal workflowSubmissionJournal) (workflowstate.Submission, bool, error) {
+func (s *Store) retryWorkflowNativeSubmission(run *workflowInvocationFile, journal workflowSubmissionJournal) (SubmissionIntent, error) {
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.Native == nil {
-		return last, false, ErrWorkflowObservationRequired
+		return SubmissionIntent{Submission: last, Dispatch: false}, ErrWorkflowObservationRequired
 	}
 
-	return last, false, s.projectWorkflowNativeSubmission(run, journal)
+	return SubmissionIntent{Submission: last, Dispatch: false}, s.projectWorkflowNativeSubmission(run, journal)
 }
 
 func workflowNativeSubmissionReady(run workflowInvocationFile, entry IntegrationEntry, journal workflowSubmissionJournal) bool {
 	return entry.State == "ready_to_publish" && entry.StopIntent == "" && run.StopIntent == "" && len(journal.Attempts) < 10
 }
 
-func (s *Store) authorizeWorkflowNativeIntent(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, journal workflowSubmissionJournal, fence IntegrationBudgetGuard, provider PublicationGuardProvider) (workflowstate.Submission, bool, error) {
+func (s *Store) authorizeWorkflowNativeIntent(ctx context.Context, run workflowInvocationFile, owner workflowNativeIntentOwner, provider PublicationGuardProvider) (SubmissionIntent, error) {
+	entry, journal, fence := owner.Entry, owner.Journal, owner.Fence
+
 	guard, err := s.checkWorkflowPublicationGuard(ctx, run, provider)
 	if err != nil {
-		return workflowstate.Submission{}, false, err
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 	}
 
 	candidate, err := s.readWorkflowPreparation(run)
 	if err != nil || candidate.Native == nil {
-		return workflowstate.Submission{}, false, errorsOrConflict(err)
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, errorsOrConflict(err)
 	}
 
 	if journal.Key == "" {
 		journal, err = newWorkflowSubmissionJournal(run, guard)
 		if err != nil {
-			return workflowstate.Submission{}, false, err
+			return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 		}
 	}
 
 	if err := s.guardWorkflowSubmissionTarget(ctx, journal.Key, journal.TargetKey); err != nil {
-		return workflowstate.Submission{}, false, err
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 	}
 
-	return s.persistWorkflowNativeIntent(ctx, run, entry, journal, guard, candidate, fence)
+	return s.persistWorkflowNativeIntent(ctx, run, workflowNativeIntentOwner{Entry: entry, Journal: journal, Fence: fence}, guard, candidate)
 }
 
-func (s *Store) persistWorkflowNativeIntent(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, journal workflowSubmissionJournal, guard workflowstate.PublicationGuard, candidate workflowstate.IntegrationCandidate, fence IntegrationBudgetGuard) (workflowstate.Submission, bool, error) {
+func (s *Store) persistWorkflowNativeIntent(ctx context.Context, run workflowInvocationFile, owner workflowNativeIntentOwner, guard workflowstate.PublicationGuard, candidate workflowstate.IntegrationCandidate) (SubmissionIntent, error) {
+	entry, journal, fence := owner.Entry, owner.Journal, owner.Fence
+
 	number := len(journal.Attempts) + 1
 	id := workflowSubmissionID(journal.Key, number, guard.PreparationHash)
 
 	reservation := IntegrationReservation{ID: id, Kind: "submission", EntryID: entry.ID, Unit: entry.Unit, ClaimGeneration: entry.ClaimGeneration, AttemptID: id, State: "reserved"}
 	if _, err := s.reserveWorkflowIntegration(ctx, run, IntegrationReserve{IntegrationBudgetGuard: fence, Reservation: reservation}); err != nil {
-		return workflowstate.Submission{}, false, err
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 	}
 
 	run, err := s.readWorkflowInvocation(run.ID)
 	if err != nil {
-		return workflowstate.Submission{}, false, err
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 	}
 
 	native := workflowNativeSubmissionIntent(candidate, run, entry)
@@ -102,14 +106,14 @@ func (s *Store) persistWorkflowNativeIntent(ctx context.Context, run workflowInv
 
 	journal.Attempts = append(journal.Attempts, submission)
 	if err := s.checkWorkflowNativeSubmissionEvidence(ctx, submission); err != nil {
-		return submission, false, err
+		return SubmissionIntent{Submission: submission, Dispatch: false}, err
 	}
 
 	if err := s.writeWorkflowSubmissionJournal(ctx, &journal); err != nil {
-		return submission, false, err
+		return SubmissionIntent{Submission: submission, Dispatch: false}, err
 	}
 
-	return submission, true, s.projectWorkflowNativeSubmission(&run, journal)
+	return SubmissionIntent{Submission: submission, Dispatch: true}, s.projectWorkflowNativeSubmission(&run, journal)
 }
 
 func (s *Store) projectWorkflowNativeSubmission(run *workflowInvocationFile, journal workflowSubmissionJournal) error {
@@ -240,7 +244,7 @@ func (s *Store) retainWorkflowNativeSubmission(ctx context.Context, run workflow
 		return last, s.projectWorkflowNativeSubmission(&run, journal)
 	}
 
-	if err := checkWorkflowNativeSubmissionCallback(run, entry, budget, last, journal.sourceHash, request); err != nil {
+	if err := checkWorkflowNativeSubmissionCallback(run, workflowNativeCallbackSnapshot{Entry: entry, Budget: budget, Submission: last, JournalHash: journal.sourceHash}, request); err != nil {
 		return last, err
 	}
 
@@ -267,7 +271,9 @@ func workflowNativeDispatchStopped(native workflowstate.NativeSubmission, run wo
 	return native.DispatchState == "not_started" && workflowIntegrationReservationStopped(run, entry)
 }
 
-func checkWorkflowNativeSubmissionCallback(run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, last workflowstate.Submission, hash string, request NativeSubmissionUpdate) error {
+func checkWorkflowNativeSubmissionCallback(run workflowInvocationFile, current workflowNativeCallbackSnapshot, request NativeSubmissionUpdate) error {
+	entry, budget, last, hash := current.Entry, current.Budget, current.Submission, current.JournalHash
+
 	if hash != request.JournalHash {
 		return workflowstate.ErrConflict
 	}

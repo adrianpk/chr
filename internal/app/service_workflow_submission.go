@@ -10,7 +10,9 @@ import (
 
 // SubmitWorkflowSliceIntegration invokes the shared durable publication protocol.
 func (s service) SubmitWorkflowSliceIntegration(ctx context.Context, id string) (workflowstate.Submission, error) {
-	store, provider, run, err := s.workflowSubmissionDependencies(ctx, id)
+	submissionDependencies, err := s.workflowSubmissionDependencies(ctx, id)
+	store, provider, run := submissionDependencies.Store, submissionDependencies.Provider, submissionDependencies.Invocation
+
 	if err != nil {
 		return workflowstate.Submission{}, err
 	}
@@ -20,7 +22,9 @@ func (s service) SubmitWorkflowSliceIntegration(ctx context.Context, id string) 
 
 // ReconcileWorkflowSubmission observes a retained submission without retrying it.
 func (s service) ReconcileWorkflowSubmission(ctx context.Context, id string) (workflowstate.Submission, error) {
-	store, provider, run, err := s.workflowSubmissionDependencies(ctx, id)
+	submissionDependencies2, err := s.workflowSubmissionDependencies(ctx, id)
+	store, provider, run := submissionDependencies2.Store, submissionDependencies2.Provider, submissionDependencies2.Invocation
+
 	if err != nil {
 		return workflowstate.Submission{}, err
 	}
@@ -47,21 +51,27 @@ func (s service) ReadWorkflowSubmission(ctx context.Context, id string) (workflo
 	return store.ReadWorkflowSubmission(ctx, id)
 }
 
-func (s service) workflowSubmissionDependencies(ctx context.Context, id string) (*workflowcore.Store, workflowcore.PublicationProvider, workflowcore.Invocation, error) {
+type workflowSubmissionDependencies struct {
+	Store      *workflowcore.Store
+	Provider   workflowcore.PublicationProvider
+	Invocation workflowcore.Invocation
+}
+
+func (s service) workflowSubmissionDependencies(ctx context.Context, id string) (workflowSubmissionDependencies, error) {
 	preparationDependencies, err := s.workflowPreparationDependencies(id)
 
 	store, guarded := preparationDependencies.Store, preparationDependencies.Provider
 
 	if err != nil {
-		return nil, nil, workflowcore.Invocation{}, err
+		return workflowSubmissionDependencies{Store: nil, Provider: nil, Invocation: workflowcore.Invocation{}}, err
 	}
 
 	provider, ok := guarded.(workflowcore.PublicationProvider)
 	if !ok {
-		return nil, nil, workflowcore.Invocation{}, fmt.Errorf("%w: configured provider has no durable publication contract", workflowstate.ErrAtomicGuard)
+		return workflowSubmissionDependencies{Store: nil, Provider: nil, Invocation: workflowcore.Invocation{}}, fmt.Errorf("%w: configured provider has no durable publication contract", workflowstate.ErrAtomicGuard)
 	}
 
 	run, err := store.ReadWorkflow(ctx, id)
 
-	return store, provider, run, err
+	return workflowSubmissionDependencies{Store: store, Provider: provider, Invocation: run}, err
 }

@@ -70,7 +70,9 @@ func (s *Store) workflowClosingDeliveryProof(ctx context.Context, receipt Record
 	}
 
 	if receipt.Receipt.Native != nil {
-		return s.workflowClosingNativeDeliveryProof(ctx, receipt)
+		closingProof, err := s.workflowClosingNativeDeliveryProof(ctx, receipt)
+
+		return closingProof.Proof, closingProof.VerificationHash, err
 	}
 
 	data, err := s.workflowClosingRead(receipt.Receipt.VerificationRef)

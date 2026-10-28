@@ -150,7 +150,7 @@ func nativeCoordinatorReplay(t *testing.T, registration string) {
 		t.Fatal("unregistered clone replayed a native transition", err)
 	}
 
-	if _, _, err := clone.BeginWorkflowNativeSubmission(t.Context(), IntegrationBudgetGuard{InvocationID: admission.InvocationID}, nil); !errors.Is(err, ErrWorkflowCoordinator) {
+	if _, err := clone.BeginWorkflowNativeSubmission(t.Context(), IntegrationBudgetGuard{InvocationID: admission.InvocationID}, nil); !errors.Is(err, ErrWorkflowCoordinator) {
 		t.Fatal("unregistered clone entered publication", err)
 	}
 

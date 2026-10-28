@@ -59,7 +59,12 @@ func (s *Store) readWorkflowNativeObservationBinding(submission workflowstate.Su
 	return validateWorkflowNativeBinding(*binding)
 }
 
-func (s *Store) retainWorkflowNativeCanonicalObservation(ctx context.Context, update NativeSubmissionUpdate, expected workflowstate.Submission, observation NativePublicationObservation) (submission workflowstate.Submission, next IntegrationBudgetGuard, err error) {
+func (s *Store) retainWorkflowNativeCanonicalObservation(ctx context.Context, update NativeSubmissionUpdate, expected workflowstate.Submission, observation NativePublicationObservation) (result workflowNativeRetention, err error) {
+	var (
+		submission workflowstate.Submission
+		next       IntegrationBudgetGuard
+	)
+
 	submission = expected
 	err = s.withLock(ctx, func() error {
 		invocationLocation2, err := s.locateWorkflowInvocation(ctx, update.InvocationID)
@@ -89,7 +94,7 @@ func (s *Store) retainWorkflowNativeCanonicalObservation(ctx context.Context, up
 		return err
 	})
 
-	return submission, next, err
+	return workflowNativeRetention{Submission: submission, Next: next}, err
 }
 
 func (s *Store) recordWorkflowNativeCanonicalObservation(ctx context.Context, run workflowInvocationFile, update NativeSubmissionUpdate, expected workflowstate.Submission, observation NativePublicationObservation) (workflowstate.Submission, error) {
@@ -139,5 +144,5 @@ func (s *Store) checkWorkflowNativeCanonicalCallback(ctx context.Context, run wo
 		return workflowstate.ErrConflict
 	}
 
-	return checkWorkflowNativeSubmissionCallback(run, entry, budget, last, journal.sourceHash, update)
+	return checkWorkflowNativeSubmissionCallback(run, workflowNativeCallbackSnapshot{Entry: entry, Budget: budget, Submission: last, JournalHash: journal.sourceHash}, update)
 }

@@ -33,7 +33,9 @@ func TestNativeStopBeforeSend(t *testing.T) {
 		return transport.PublishWorkflowGit(ctx, request)
 	}}
 
-	submission, result, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+
+	submission, result := nativePublication.Submission, nativePublication.Transport
 	if err == nil || result.CommandsSent || result.State != "not_sent" || submission.Native.DispatchState != "quiescent" {
 		t.Fatal("stopped host sent commands or lost completion", err)
 	}
@@ -57,7 +59,9 @@ func TestNativeStopRejected(t *testing.T) {
 	transport := NewWorkflowGitPublisher(b.SourceRepository, remote)
 	publisher.publisher = nativeOutcomePublisher(t, f, remote, transport, "source race")
 
-	submission, _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	nativePublication2, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	submission := nativePublication2.Submission
+
 	if err == nil {
 		t.Fatal("source race did not reject the transaction")
 	}

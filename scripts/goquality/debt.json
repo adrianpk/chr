@@ -7,11 +7,6 @@
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/service_workflow_submission.go::service.workflowSubmissionDependencies",
-      "signature": "func(ctx context.Context, id string) (*workflowcore.Store, workflowcore.PublicationProvider, workflowcore.Invocation, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/workflow/workflow_amendment_build.go::Store.buildWorkflowAmendment",
       "signature": "func(ctx context.Context, set Record, request SetAmendmentRequest, body []byte) (MaterializationResult, []workflowstate.FileChange, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 reassociates the unchanged retained image through workflow/state.FileChange."
@@ -50,11 +45,6 @@
       "id": "internal/core/workflow/workflow_closing_command.go::Store.waitWorkflowClosingCommand",
       "signature": "func(ctx context.Context, claim *workflowClosingClaim, command []string, process *exec.Cmd, permit *os.File, stdout, stderr *opsfile.CommandOutput, base string) (workflowstate.CommandResult, error)",
       "reason": "Existing above-six workflow debt; assigned to approved Slice 15. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_closing_native.go::Store.workflowClosingNativeDeliveryProof",
-      "signature": "func(ctx context.Context, receipt Record) (SliceDeliveryProof, string, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/workflow/workflow_closing_proof.go::Store.workflowClosingDeliveryProof",
@@ -115,136 +105,6 @@
       "id": "internal/core/workflow/workflow_frontier_validate.go::workflowRetainedRoleCounts",
       "signature": "func(run workflowInvocationFile) (preparation, review int)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_native_dispatch.go::Store.PublishWorkflowNativeSubmission",
-      "signature": "func(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider, publisher GitPublisher) (workflowstate.Submission, GitPublicationResult, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_native_dispatch.go::Store.prepareWorkflowNativeDispatch",
-      "signature": "func(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider) (submission workflowstate.Submission, request GitPublication, err error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_native_dispatch.go::Store.authorizeWorkflowNativeDispatch",
-      "signature": "func(ctx context.Context, submission workflowstate.Submission, provider PublicationGuardProvider) (workflowstate.Submission, GitPublication, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_native_dispatch_evidence.go::Store.readWorkflowOwnedDispatch",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, expected workflowstate.Submission) (workflowSubmissionJournal, IntegrationEntry, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_native_finalization.go::Store.finalizeWorkflowNativeUnit",
-      "signature": "func(ctx context.Context, run workflowInvocationFile) (bool, Record, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_native_host_policy.go::NativeReviewAdapter.nativePublisher",
-      "signature": "func(ctx context.Context) (workflowInvocationFile, *Store, NativePublisherProfile, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_native_observation.go::Store.observeWorkflowNativeSubmission",
-      "signature": "func(ctx context.Context, guard IntegrationBudgetGuard, observer NativePublicationObserver, git IntegrationGit, poll bool) (submission workflowstate.Submission, observation NativePublicationObservation, next IntegrationBudgetGuard, err error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_native_observation_store.go::Store.retainWorkflowNativeCanonicalObservation",
-      "signature": "func(ctx context.Context, update NativeSubmissionUpdate, expected workflowstate.Submission, observation NativePublicationObservation) (submission workflowstate.Submission, next IntegrationBudgetGuard, err error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_native_receipt_delivery.go::Store.workflowNativeReceiptObservation",
-      "signature": "func(submission workflowstate.Submission) (NativePublicationObservation, workflowstate.EvidenceRef, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_native_reconcile_git.go::Store.workflowNativeReconciliationInput",
-      "signature": "func(ctx context.Context, guard IntegrationBudgetGuard) (submission workflowstate.Submission, request GitPublication, update NativeSubmissionUpdate, err error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_publication.go::Store.observeWorkflowPublicationCheckpoint",
-      "signature": "func(ctx context.Context, id string, ports PublicationPorts) (receipt *Record, delivered bool, err error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_publication.go::Store.reconcileWorkflowPublicationCheckpoint",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, ports PublicationPorts) (*Record, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_publication.go::Store.finalizeWorkflowObservedPublication",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, journal workflowSubmissionJournal, ports PublicationPorts) (*Record, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_publication.go::Store.readWorkflowPublicationCheckpoint",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowSubmissionJournal, workflowstate.PullRequestSnapshot, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_publication_native.go::Store.workflowNativeContinuationOwner",
-      "signature": "func(ctx context.Context, id string) (entry IntegrationEntry, guard IntegrationBudgetGuard, err error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_native.go::Store.BeginWorkflowNativeSubmission",
-      "signature": "func(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider) (submission workflowstate.Submission, dispatch bool, err error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_native_store.go::Store.beginWorkflowNativeSubmission",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, fence IntegrationBudgetGuard, provider PublicationGuardProvider) (workflowstate.Submission, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_native_store.go::Store.retryWorkflowNativeSubmission",
-      "signature": "func(run *workflowInvocationFile, journal workflowSubmissionJournal) (workflowstate.Submission, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_native_store.go::Store.authorizeWorkflowNativeIntent",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, journal workflowSubmissionJournal, fence IntegrationBudgetGuard, provider PublicationGuardProvider) (workflowstate.Submission, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_native_store.go::Store.persistWorkflowNativeIntent",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, journal workflowSubmissionJournal, guard workflowstate.PublicationGuard, candidate workflowstate.IntegrationCandidate, fence IntegrationBudgetGuard) (workflowstate.Submission, bool, error)",
-      "reason": "Existing above-six workflow debt; assigned to approved Slice 14. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_native_store.go::checkWorkflowNativeSubmissionCallback",
-      "signature": "func(run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, last workflowstate.Submission, hash string, request NativeSubmissionUpdate) error",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_prepare.go::Store.beginWorkflowSubmission",
-      "signature": "func(ctx context.Context, id string, provider PublicationProvider, git IntegrationGit) (submission workflowstate.Submission, submit bool, err error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_prepare.go::Store.prepareWorkflowSubmission",
-      "signature": "func(ctx context.Context, run *workflowInvocationFile, provider PublicationProvider, git IntegrationGit) (workflowstate.Submission, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_prepare.go::Store.checkWorkflowSubmissionRetry",
-      "signature": "func(ctx context.Context, run *workflowInvocationFile, journal *workflowSubmissionJournal, provider PublicationProvider, git IntegrationGit) (workflowstate.Submission, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_prepare.go::Store.observeWorkflowSubmissionRetry",
-      "signature": "func(ctx context.Context, run *workflowInvocationFile, journal *workflowSubmissionJournal, provider PublicationProvider, git IntegrationGit) (workflowstate.Submission, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_submission_prepare.go::Store.persistWorkflowSubmissionIntent",
-      "signature": "func(ctx context.Context, run *workflowInvocationFile, journal workflowSubmissionJournal, guard workflowstate.PublicationGuard) (workflowstate.Submission, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/workflow/workflow_upgrade_journal.go::Store.prepareWorkflowUpgrade",

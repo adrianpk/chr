@@ -46,9 +46,11 @@ func (s *Store) advanceWorkflowNativeIntegration(ctx context.Context, id string,
 		return s.workflowIntegrationProgress(ctx, id, nil, s.admitWorkflowNativeContinuation(ctx, run))
 	}
 
-	entry, guard, err := s.workflowNativeContinuationOwner(ctx, id)
+	nativeContinuation, err := s.workflowNativeContinuationOwner(ctx, id)
+
+	entry, guard := nativeContinuation.Entry, nativeContinuation.Guard
 	if err == nil {
-		err = s.continueWorkflowNativePhase(ctx, entry, guard, provider, ports)
+		err = s.continueWorkflowNativePhase(ctx, workflowNativeContinuation{Entry: entry, Guard: guard}, provider, ports)
 	}
 
 	return s.workflowIntegrationProgress(ctx, id, nil, err)
@@ -64,7 +66,12 @@ func (s *Store) admitWorkflowNativeContinuation(ctx context.Context, run Invocat
 	return err
 }
 
-func (s *Store) workflowNativeContinuationOwner(ctx context.Context, id string) (entry IntegrationEntry, guard IntegrationBudgetGuard, err error) {
+func (s *Store) workflowNativeContinuationOwner(ctx context.Context, id string) (result workflowNativeContinuation, err error) {
+	var (
+		entry IntegrationEntry
+		guard IntegrationBudgetGuard
+	)
+
 	err = s.withLock(ctx, func() error {
 		invocationLocation2, err := s.locateWorkflowInvocation(ctx, id)
 		if err != nil {
@@ -81,10 +88,12 @@ func (s *Store) workflowNativeContinuationOwner(ctx context.Context, id string) 
 		return err
 	})
 
-	return entry, guard, err
+	return workflowNativeContinuation{Entry: entry, Guard: guard}, err
 }
 
-func (s *Store) continueWorkflowNativePhase(ctx context.Context, entry IntegrationEntry, guard IntegrationBudgetGuard, provider NativePreparationProvider, ports PublicationPorts) error {
+func (s *Store) continueWorkflowNativePhase(ctx context.Context, owner workflowNativeContinuation, provider NativePreparationProvider, ports PublicationPorts) error {
+	entry, guard := owner.Entry, owner.Guard
+
 	switch entry.State {
 	case "queued":
 		return s.transitionWorkflowNativeContinuation(ctx, entry, guard, "preparing")
@@ -97,7 +106,7 @@ func (s *Store) continueWorkflowNativePhase(ctx context.Context, entry Integrati
 	case "reviewing", "waiting_review":
 		return s.reviewWorkflowNativeContinuation(ctx, guard, provider, ports)
 	case "ready_to_publish":
-		_, _, err := s.PublishWorkflowNativeSubmission(ctx, guard, provider, ports.NativePublisher)
+		_, err := s.PublishWorkflowNativeSubmission(ctx, guard, provider, ports.NativePublisher)
 
 		return err
 	case "publishing", "observing":
@@ -117,7 +126,9 @@ func (s *Store) reviewWorkflowNativeContinuation(ctx context.Context, guard Inte
 		return err
 	}
 
-	entry, guard, err := s.workflowNativeContinuationOwner(ctx, guard.InvocationID)
+	nativeContinuation2, err := s.workflowNativeContinuationOwner(ctx, guard.InvocationID)
+	entry, guard := nativeContinuation2.Entry, nativeContinuation2.Guard
+
 	if err != nil {
 		return err
 	}
@@ -152,7 +163,9 @@ func (s *Store) observeWorkflowNativeIntegration(ctx context.Context, guard Inte
 		return err
 	}
 
-	_, guard, err := s.workflowNativeContinuationOwner(ctx, guard.InvocationID)
+	nativeContinuation3, err := s.workflowNativeContinuationOwner(ctx, guard.InvocationID)
+	guard = nativeContinuation3.Guard
+
 	if err != nil {
 		return err
 	}
@@ -167,7 +180,9 @@ func (s *Store) observeWorkflowNativeIntegration(ctx context.Context, guard Inte
 		return err
 	}
 
-	_, guard, err = s.workflowNativeContinuationOwner(ctx, guard.InvocationID)
+	nativeContinuation4, err := s.workflowNativeContinuationOwner(ctx, guard.InvocationID)
+	guard = nativeContinuation4.Guard
+
 	if err != nil {
 		return err
 	}

@@ -126,7 +126,9 @@ func (s *Store) updateWorkflowNativeDispatch(ctx context.Context, expected workf
 			return err
 		}
 
-		journal, entry, err := invocationLocation.Owner.readWorkflowOwnedDispatch(ctx, invocationLocation.Run, expected)
+		dispatchEvidence, err := invocationLocation.Owner.readWorkflowOwnedDispatch(ctx, invocationLocation.Run, expected)
+		journal, entry := dispatchEvidence.Journal, dispatchEvidence.Entry
+
 		if err != nil {
 			return err
 		}
@@ -151,28 +153,28 @@ func (s *Store) updateWorkflowNativeDispatch(ctx context.Context, expected workf
 	return submission, err
 }
 
-func (s *Store) readWorkflowOwnedDispatch(ctx context.Context, run workflowInvocationFile, expected workflowstate.Submission) (workflowSubmissionJournal, IntegrationEntry, error) {
+func (s *Store) readWorkflowOwnedDispatch(ctx context.Context, run workflowInvocationFile, expected workflowstate.Submission) (workflowNativeDispatchEvidence, error) {
 	journal, err := s.readWorkflowSubmissionJournal(ctx, run)
 	if err != nil {
-		return journal, IntegrationEntry{}, err
+		return workflowNativeDispatchEvidence{Journal: journal, Entry: IntegrationEntry{}}, err
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if !workflowNativeDispatchIntentMatches(last, expected) {
-		return journal, IntegrationEntry{}, fmt.Errorf("%w: dispatch intent changed", workflowstate.ErrConflict)
+		return workflowNativeDispatchEvidence{Journal: journal, Entry: IntegrationEntry{}}, fmt.Errorf("%w: dispatch intent changed", workflowstate.ErrConflict)
 	}
 
 	identity, err := workflowProcessIdentity(os.Getpid())
 	if err != nil || identity != *last.Native.DispatchIdentity || last.Native.DispatchState != "dispatching" {
-		return journal, IntegrationEntry{}, fmt.Errorf("%w: dispatch owner changed", workflowstate.ErrConflict)
+		return workflowNativeDispatchEvidence{Journal: journal, Entry: IntegrationEntry{}}, fmt.Errorf("%w: dispatch owner changed", workflowstate.ErrConflict)
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
 	if err == nil && !workflowNativeSubmissionEntryMatches(last, entry) {
-		return journal, entry, fmt.Errorf("%w: dispatch generation or candidate changed", workflowstate.ErrConflict)
+		return workflowNativeDispatchEvidence{Journal: journal, Entry: entry}, fmt.Errorf("%w: dispatch generation or candidate changed", workflowstate.ErrConflict)
 	}
 
-	return journal, entry, err
+	return workflowNativeDispatchEvidence{Journal: journal, Entry: entry}, err
 }
 
 func workflowNativeDispatchIntentMatches(last, expected workflowstate.Submission) bool {

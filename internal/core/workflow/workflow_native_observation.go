@@ -17,7 +17,8 @@ type NativePublicationObserver interface {
 // ObserveWorkflowNativeSubmission reconciles the retained intent once, including
 // an explicit observation after its polling deadline. It never issues receipts.
 func (s *Store) ObserveWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, observer NativePublicationObserver, git IntegrationGit) (workflowstate.Submission, error) {
-	submission, _, _, err := s.observeWorkflowNativeSubmission(ctx, guard, observer, git, false)
+	nativeObservation, err := s.observeWorkflowNativeSubmission(ctx, guard, workflowNativeObservers{Canonical: observer, Git: git}, false)
+	submission := nativeObservation.Submission
 
 	return submission, err
 }
@@ -28,7 +29,9 @@ func (s *Store) PollWorkflowNativeSubmission(ctx context.Context, guard Integrat
 	delay := 250 * time.Millisecond
 
 	for {
-		submission, observation, next, err := s.observeWorkflowNativeSubmission(ctx, guard, observer, git, true)
+		nativeObservation2, err := s.observeWorkflowNativeSubmission(ctx, guard, workflowNativeObservers{Canonical: observer, Git: git}, true)
+
+		submission, observation, next := nativeObservation2.Submission, nativeObservation2.Observation, nativeObservation2.Next
 		if err != nil || observation.State != "observing" {
 			return submission, err
 		}
@@ -53,19 +56,29 @@ func (s *Store) PollWorkflowNativeSubmission(ctx context.Context, guard Integrat
 	}
 }
 
-func (s *Store) observeWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, observer NativePublicationObserver, git IntegrationGit, poll bool) (submission workflowstate.Submission, observation NativePublicationObservation, next IntegrationBudgetGuard, err error) {
+func (s *Store) observeWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, observers workflowNativeObservers, poll bool) (result workflowNativeObservation, err error) {
+	observer, git := observers.Canonical, observers.Git
+
+	var (
+		submission  workflowstate.Submission
+		observation NativePublicationObservation
+		next        IntegrationBudgetGuard
+	)
+
 	if observer == nil || git == nil {
-		return submission, observation, next, workflowstate.ErrAtomicGuard
+		return workflowNativeObservation{Submission: submission, Observation: observation, Next: next}, workflowstate.ErrAtomicGuard
 	}
 
-	submission, request, update, err := s.workflowNativeReconciliationInput(ctx, guard)
+	nativeReconciliation, err := s.workflowNativeReconciliationInput(ctx, guard)
+
+	submission, request, update := nativeReconciliation.Submission, nativeReconciliation.Request, nativeReconciliation.Update
 	if err != nil {
-		return submission, observation, next, err
+		return workflowNativeObservation{Submission: submission, Observation: observation, Next: next}, err
 	}
 
 	binding, err := s.workflowNativeObservationBinding(ctx, submission, request)
 	if err != nil {
-		return submission, observation, next, err
+		return workflowNativeObservation{Submission: submission, Observation: observation, Next: next}, err
 	}
 
 	if poll && !binding.ReceiptConfirmed && !time.Now().Before(binding.ObservationDeadline) {
@@ -79,9 +92,10 @@ func (s *Store) observeWorkflowNativeSubmission(ctx context.Context, guard Integ
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
 
-	retained, next, retainErr := s.retainWorkflowNativeCanonicalObservation(cleanup, update, submission, observation)
+	nativeRetention, retainErr := s.retainWorkflowNativeCanonicalObservation(cleanup, update, submission, observation)
+	retained, next := nativeRetention.Submission, nativeRetention.Next
 
-	return retained, observation, next, errors.Join(err, retainErr)
+	return workflowNativeObservation{Submission: retained, Observation: observation, Next: next}, errors.Join(err, retainErr)
 }
 
 func observeWorkflowNativeBounded(ctx context.Context, observer NativePublicationObserver, binding NativePublicationBinding, git IntegrationGit) (NativePublicationObservation, error) {

@@ -48,7 +48,9 @@ func nativeGitOutcome(t *testing.T, name, application, state string) {
 	transport := NewWorkflowGitPublisher(f.candidate.Native.SourceRepository, remote)
 	publisher.publisher = nativeOutcomePublisher(t, f, remote, transport, name)
 
-	submission, result, publishErr := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	nativePublication, publishErr := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	submission, result := nativePublication.Submission, nativePublication.Transport
+
 	if (publishErr == nil) != (name == "applied") {
 		t.Fatal("unexpected dispatch outcome", publishErr)
 	}
@@ -178,7 +180,7 @@ func checkNativeGitOutcome(t *testing.T, f nativeSubmissionFixture, publisher *n
 
 	if retained.State == "unpublished" {
 		guard := nativeBudgetGuard(t, f.store, retained.InvocationID)
-		if _, _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher); !errors.Is(err, workflowstate.ErrConflict) || publisher.calls.Load() != 1 {
+		if _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher); !errors.Is(err, workflowstate.ErrConflict) || publisher.calls.Load() != 1 {
 			t.Fatal("sealed rejection reused stale authorization", err)
 		}
 	} else {

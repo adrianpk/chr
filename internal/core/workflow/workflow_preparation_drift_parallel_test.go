@@ -27,7 +27,7 @@ func TestNativeParallelDrift(t *testing.T) {
 	entry := nativeReviewEntry(t, store, id)
 	nativeRoleTransition(t, store, entry, "ready_to_publish")
 
-	if _, dispatch, err := store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, store, id), provider); err == nil || dispatch {
+	if submissionIntent, err := store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, store, id), provider); err == nil || submissionIntent.Dispatch {
 		t.Fatal("changed target reached native dispatch", err)
 	}
 

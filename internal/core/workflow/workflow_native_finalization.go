@@ -10,36 +10,36 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) finalizeWorkflowNativeUnit(ctx context.Context, run workflowInvocationFile) (bool, Record, error) {
+func (s *Store) finalizeWorkflowNativeUnit(ctx context.Context, run workflowInvocationFile) (workflowNativeFinalization, error) {
 	journal, err := s.readWorkflowSubmissionJournal(ctx, run)
 	if errors.Is(err, os.ErrNotExist) {
-		return false, Record{}, nil
+		return workflowNativeFinalization{Handled: false, Receipt: Record{}}, nil
 	}
 
 	if err != nil {
-		return true, Record{}, err
+		return workflowNativeFinalization{Handled: true, Receipt: Record{}}, err
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.Native == nil {
-		return false, Record{}, nil
+		return workflowNativeFinalization{Handled: false, Receipt: Record{}}, nil
 	}
 
 	if last.State != "confirmed" {
-		return true, Record{}, ErrWorkflowObservationRequired
+		return workflowNativeFinalization{Handled: true, Receipt: Record{}}, ErrWorkflowObservationRequired
 	}
 
 	if err := s.checkWorkflowNativeSubmissionEvidence(ctx, last); err != nil {
-		return true, Record{}, err
+		return workflowNativeFinalization{Handled: true, Receipt: Record{}}, err
 	}
 
 	if err := s.projectWorkflowNativeSubmission(&run, journal); err != nil {
-		return true, Record{}, err
+		return workflowNativeFinalization{Handled: true, Receipt: Record{}}, err
 	}
 
 	receipt, err := s.finalizeWorkflowNativeReceipt(ctx, &run)
 
-	return true, receipt, err
+	return workflowNativeFinalization{Handled: true, Receipt: receipt}, err
 }
 
 func (s *Store) finalizeWorkflowNativeReceipt(ctx context.Context, run *workflowInvocationFile) (Record, error) {

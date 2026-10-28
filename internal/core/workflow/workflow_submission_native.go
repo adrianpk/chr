@@ -66,19 +66,25 @@ type NativeSubmissionUpdate struct {
 
 // BeginWorkflowNativeSubmission retains intent before the native transport IO.
 // Retrying an unknown attempt only repairs its projection, never grants dispatch.
-func (s *Store) BeginWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider) (submission workflowstate.Submission, dispatch bool, err error) {
+func (s *Store) BeginWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider) (result SubmissionIntent, err error) {
+	var (
+		submission workflowstate.Submission
+		dispatch   bool
+	)
+
 	err = s.withLock(ctx, func() error {
 		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, guard.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		submission, dispatch, readErr = invocationLocation.Owner.beginWorkflowNativeSubmission(ctx, invocationLocation.Run, guard, provider)
+		submissionIntent, readErr := invocationLocation.Owner.beginWorkflowNativeSubmission(ctx, invocationLocation.Run, guard, provider)
+		submission, dispatch = submissionIntent.Submission, submissionIntent.Dispatch
 
 		return readErr
 	})
 
-	return submission, dispatch, err
+	return SubmissionIntent{Submission: submission, Dispatch: dispatch}, err
 }
 
 // RetainWorkflowNativeSubmission records sanitized transport/observation facts.

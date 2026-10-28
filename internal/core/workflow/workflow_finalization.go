@@ -29,7 +29,9 @@ func (s *Store) FinalizeWorkflowSlice(ctx context.Context, id string, provider P
 
 func (s *Store) finalizeWorkflowSlice(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider, git IntegrationGit) (Record, error) {
 	if run.Integration != nil {
-		handled, receipt, err := s.finalizeWorkflowNativeUnit(ctx, run)
+		nativeFinalization, err := s.finalizeWorkflowNativeUnit(ctx, run)
+
+		handled, receipt := nativeFinalization.Handled, nativeFinalization.Receipt
 		if handled {
 			return receipt, err
 		}

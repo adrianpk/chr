@@ -62,7 +62,9 @@ func (adapter *NativeReviewAdapter) WorkflowPreparedNativeCapability(ctx context
 		return workflowstate.NativeCapability{}, err
 	}
 
-	run, owner, profile, err := adapter.nativePublisher(ctx)
+	nativePublisher, err := adapter.nativePublisher(ctx)
+	run, owner, profile := nativePublisher.Run, nativePublisher.Owner, nativePublisher.Profile
+
 	if err != nil {
 		return workflowstate.NativeCapability{}, err
 	}
@@ -91,7 +93,9 @@ func (adapter *NativeReviewAdapter) WorkflowPreparedNativeCapability(ctx context
 // PublishWorkflowGit rechecks the exact local ownership/profile binding before
 // entering the existing atomic transport. It never calls a provider merge API.
 func (adapter *NativeReviewAdapter) PublishWorkflowGit(ctx context.Context, request GitPublication) (GitPublicationResult, error) {
-	run, owner, profile, err := adapter.nativePublisher(ctx)
+	nativePublisher2, err := adapter.nativePublisher(ctx)
+	run, owner, profile := nativePublisher2.Run, nativePublisher2.Owner, nativePublisher2.Profile
+
 	if err != nil {
 		return GitPublicationResult{}, err
 	}

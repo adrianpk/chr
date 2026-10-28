@@ -193,7 +193,9 @@ func TestNativeEntryUnknown(t *testing.T) {
 	request := IntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: run.Lane.Unit, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/" + run.PullRequest.Request.BaseBranch}
 	entry := nativeEntryAdmit(t, f.store, request)
 
-	_, dispatch, err := f.store.beginWorkflowSubmission(t.Context(), run.ID, provider, workflowSubmissionObserver(f))
+	submissionIntent, err := f.store.beginWorkflowSubmission(t.Context(), run.ID, provider, workflowSubmissionObserver(f))
+
+	dispatch := submissionIntent.Dispatch
 	if err != nil || !dispatch || provider.calls != 0 {
 		t.Fatal("fixture did not retain intent before external dispatch", err)
 	}

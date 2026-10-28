@@ -61,7 +61,9 @@ func TestNativeDispatch(t *testing.T) {
 	publisher, remote := nativeDispatchPublisher(t, f)
 	guard := nativeBudgetGuard(t, f.store, f.entry.InvocationID)
 
-	submission, result, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
+	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
+
+	submission, result := nativePublication.Submission, nativePublication.Transport
 	if err != nil || result.State != "applied" || publisher.calls.Load() != 1 {
 		t.Fatal("authorized atomic dispatch did not run once", err)
 	}
@@ -86,7 +88,9 @@ func nativeDispatchNoRepeat(t *testing.T, f nativeSubmissionFixture, publisher *
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 	guard := nativeBudgetGuard(t, restarted, f.entry.InvocationID)
 
-	again, _, err := restarted.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
+	nativePublication2, err := restarted.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
+
+	again := nativePublication2.Submission
 	if !errors.Is(err, ErrWorkflowObservationRequired) || again.ID != submission.ID || publisher.calls.Load() != 1 {
 		t.Fatal("restart repeated native dispatch", err)
 	}

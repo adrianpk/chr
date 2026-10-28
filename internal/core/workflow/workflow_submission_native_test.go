@@ -45,7 +45,9 @@ func newNativeSubmissionFixture(t *testing.T) nativeSubmissionFixture {
 func beginNativeSubmission(t *testing.T, f nativeSubmissionFixture) workflowstate.Submission {
 	t.Helper()
 
-	submission, dispatch, err := f.store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider)
+	submissionIntent, err := f.store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider)
+
+	submission, dispatch := submissionIntent.Submission, submissionIntent.Dispatch
 	if err != nil || !dispatch {
 		t.Fatal("native intent not retained", err)
 	}
@@ -96,7 +98,9 @@ func TestNativeSubmissionUnknown(t *testing.T) {
 
 	f.store = NewWorkflowStore(f.store.layout, f.store.projectID)
 
-	again, dispatch, err := f.store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider)
+	submissionIntent2, err := f.store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider)
+
+	again, dispatch := submissionIntent2.Submission, submissionIntent2.Dispatch
 	if err != nil || dispatch || !workflowNativeJSONEqual(again, submission) {
 		t.Fatal("restart re-dispatched uncertain Git", err)
 	}
@@ -122,14 +126,18 @@ func TestNativeSubmissionRecovery(t *testing.T) {
 		return nil
 	}
 
-	submission, dispatch, err := f.store.BeginWorkflowNativeSubmission(t.Context(), guard, f.provider)
+	submissionIntent3, err := f.store.BeginWorkflowNativeSubmission(t.Context(), guard, f.provider)
+
+	submission, dispatch := submissionIntent3.Submission, submissionIntent3.Dispatch
 	if !errors.Is(err, injected) || dispatch {
 		t.Fatal("common intent fault not reached", err)
 	}
 
 	f.store.afterReplace = nil
 
-	again, dispatch, err := f.store.BeginWorkflowNativeSubmission(t.Context(), guard, f.provider)
+	submissionIntent4, err := f.store.BeginWorkflowNativeSubmission(t.Context(), guard, f.provider)
+
+	again, dispatch := submissionIntent4.Submission, submissionIntent4.Dispatch
 	if err != nil || dispatch || again.ID != submission.ID {
 		t.Fatal("projection recovery allocated another intent", err)
 	}

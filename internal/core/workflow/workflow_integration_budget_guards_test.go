@@ -98,7 +98,9 @@ func TestNativeBudgetDrift(t *testing.T) {
 func TestNativeBudgetLegacy(t *testing.T) {
 	f, provider := newWorkflowSubmissionFixture(t, "merge")
 
-	submission, dispatch, err := f.store.beginWorkflowSubmission(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
+	submissionIntent, err := f.store.beginWorkflowSubmission(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
+
+	submission, dispatch := submissionIntent.Submission, submissionIntent.Dispatch
 	if err != nil || !dispatch {
 		t.Fatal(err)
 	}
@@ -127,7 +129,7 @@ func TestNativeBudgetLegacy(t *testing.T) {
 func nativeBudgetLegacyUncertainty(t *testing.T, f workflowPreparationFixture, provider *workflowSubmissionProviderFixture, entry IntegrationEntry, submission workflowstate.Submission, path string, before []byte) {
 	t.Helper()
 
-	if again, dispatch, err := f.store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, entry.InvocationID), provider); !errors.Is(err, ErrWorkflowObservationRequired) || dispatch || again.ID != submission.ID {
+	if submissionIntent2, err := f.store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, entry.InvocationID), provider); !errors.Is(err, ErrWorkflowObservationRequired) || submissionIntent2.Dispatch || submissionIntent2.Submission.ID != submission.ID {
 		t.Fatal("legacy uncertainty converted to empty native intent", err)
 	}
 

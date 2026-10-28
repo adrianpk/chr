@@ -42,7 +42,9 @@ func nativeCanonicalSubmissionFixture(t *testing.T, f nativeSubmissionFixture, l
 		publisher.publisher = nativeLostResponsePublisher(t, f.candidate.Native.SourceRepository, remote)
 	}
 
-	submission, _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	submission := nativePublication.Submission
+
 	if !lost && err != nil || lost && err == nil {
 		t.Fatal("native canonical fixture publication", err)
 	}

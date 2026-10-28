@@ -90,7 +90,9 @@ func TestNativeQueueJournal(t *testing.T) {
 	}
 	guard := nativeBudgetGuard(t, f.store, f.entry.InvocationID)
 
-	first, dispatch, err := f.store.BeginWorkflowNativeSubmission(t.Context(), guard, f.provider)
+	submissionIntent, err := f.store.BeginWorkflowNativeSubmission(t.Context(), guard, f.provider)
+
+	first, dispatch := submissionIntent.Submission, submissionIntent.Dispatch
 	if !errors.Is(err, crash) || dispatch {
 		t.Fatal("intent fault did not retain common barrier", err)
 	}
@@ -99,7 +101,9 @@ func TestNativeQueueJournal(t *testing.T) {
 
 	nativeQueueInterruptedIntent(t, f, first)
 
-	again, dispatch, err := f.store.BeginWorkflowNativeSubmission(t.Context(), guard, f.provider)
+	submissionIntent2, err := f.store.BeginWorkflowNativeSubmission(t.Context(), guard, f.provider)
+
+	again, dispatch := submissionIntent2.Submission, submissionIntent2.Dispatch
 	if err != nil || dispatch || again.ID != first.ID {
 		t.Fatal("retry invented another dispatch", err)
 	}

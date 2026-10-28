@@ -29,7 +29,7 @@ func TestNativeDispatchGuard(t *testing.T) {
 			guard := nativeBudgetGuard(t, f.store, f.entry.InvocationID)
 			test.change(t, f, &guard)
 
-			if _, _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher); err == nil || publisher.calls.Load() != 0 {
+			if _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher); err == nil || publisher.calls.Load() != 0 {
 				t.Fatal("stale or stopped owner reached dispatch", err)
 			}
 
@@ -65,7 +65,9 @@ func TestNativeDispatchPolicy(t *testing.T) {
 
 	guard := nativeBudgetGuard(t, f.store, f.entry.InvocationID)
 
-	submission, _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
+	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
+
+	submission := nativePublication.Submission
 	if !errors.Is(err, workflowstate.ErrConflict) || submission.ID == "" || publisher.calls.Load() != 0 {
 		t.Fatal("policy race reached publication", err)
 	}

@@ -10,7 +10,9 @@ import (
 // submission, including after its polling deadline. It cannot publish again or
 // change a consumed budget, and confirms only canonical Git and PR evidence.
 func (s *Store) ReconcileWorkflowNativeIntegration(ctx context.Context, id string, ports PublicationPorts) (workflowstate.Submission, error) {
-	_, guard, err := s.workflowNativeContinuationOwner(ctx, id)
+	nativeContinuation, err := s.workflowNativeContinuationOwner(ctx, id)
+	guard := nativeContinuation.Guard
+
 	if err != nil {
 		return workflowstate.Submission{}, err
 	}
