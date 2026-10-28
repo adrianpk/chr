@@ -78,3 +78,11 @@ evidence-reference and allowance checks are shared by native authority and stage
 consumers. They preserve the original values, error identities and overflow
 behavior. These checks perform no IO, admission, evidence reads or authorization;
 those decisions remain with the native owner.
+
+PreparationQuery and MergerRepairPlan are neutral data shared by native IO and
+stage policy. MergerOutcome and MergerRepairOutcome retain the existing proposal
+and plan strings; the native integration-entry and acceptance owners keep their
+own distinct phase types. ErrAtomicGuard is the same single sentinel used for
+insufficient atomic/source/base/result or signing guarantees. Existing fields,
+JSON order/tags, hashes and nil/empty representations remain unchanged. These
+values confer no execution, acceptance, receipt or publication authority.

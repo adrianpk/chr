@@ -24,7 +24,9 @@ The workflow owner retains root closure, process supervision, admission, claims,
 capacity/budget reservations, immutable evidence reads and guarded acceptance.
 `Evidence` verifies those retained inputs without exposing a mutable store. This
 package imports shared state and core/contenthash for the existing protocol
-checksums. It cannot import its coordinator or mutation and configuration
+checksums. Semantic repair selection and retained tree/regeneration, exact
+position and ordered predecessor/history checks also have this owner. The host
+observes Git and consumes these checks before guarded acceptance. It cannot import its coordinator or mutation and configuration
 authorities.
 
 ## Validation

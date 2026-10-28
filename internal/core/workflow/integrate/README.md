@@ -5,7 +5,8 @@
 This package owns candidate validation execution, exact gate evidence and the
 consumer contract for guarded acceptance. Pure Git attribution, replay
 correspondence, bounded identity-collision retries and preparation signing
-metadata rules live with that policy. Host callers still read/write Git objects
+metadata rules live with that policy. Complete history/provenance, prepared-result
+and observed atomic/signing capability checks use the same stage owner. Host callers still read/write Git objects
 and invoke the certified signer.
 
 ## Contract
@@ -19,6 +20,10 @@ Source observations omit prepared-only evidence.
 `Store.PrepareWorkflowSliceIntegration` retains claim admission, execution ownership,
 lease/stop contexts and capacity cleanup. The bound acceptance operation rechecks
 the claim, prepared input and current source before the existing atomic transition.
+
+`RepairProof` receives immutable integration proof data. A stateless native
+adapter composes merge tree/regeneration and replay-history checks in their
+original order; integrate imports no sibling stage.
 
 The contract imports shared `workflow/state` protocol values. The workflow owner
 implements it with the existing operations and retains claims, reservations,

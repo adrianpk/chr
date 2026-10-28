@@ -1,6 +1,6 @@
 # Slice 13: Candidate validation and merge stages
 
-Status: drafting
+Status: reviewing
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -9,115 +9,97 @@ PR: pending
 
 ## Purpose
 
-Give candidate preparation/validation and merge/repair policy their approved
-stage owners while preserving the store's guarded transactions and recovery.
+Give candidate validation and merge/repair policy independent owners while
+preserving guarded workflow persistence, evidence and recovery.
 
 ## Delivered Behavior
 
-The first candidate-stage extraction runs validation, builds the candidate and
-requests atomic acceptance through the existing bound port. Exact gate and source
-observation policy now have the integrate owner. Claim admission, stop/lease
-contexts, capacity release and the guarded transaction remain in workflow.Store.
-Nine preparation declarations now use named selection, claim, observation and
-Git results or bound completion inputs. Partial inputs on failure, cache presence,
-reservation release and the existing transaction order are preserved. A private
-failure mode replaces the actionable/target-moved pair with the same precedence.
-All 87 assigned signature rows are reconciled: 64 have implemented replacements
-and 23 retain specific cohesive five-parameter contracts. The exact repository
-debt manifest now has 62 entries, with no Slice 13 signature entry, at ceiling
-six and one external exception.
+`workflow/integrate` owns candidate validation execution, exact gate checks,
+source projection, Git attribution/replay/signing metadata, bounded preparation
+identity retries, complete retained proof and observed capability checks.
+`workflow/merge` owns the bounded broker, contained model tools, immutable
+input/result/scope/decision validation, semantic repair selection and retained
+tree/regeneration/position/replay-history checks. Actual native and application
+callers use the package-qualified APIs directly; no forwarding aliases remain.
 
-The first merge batch relocates 28 broker, JSON, path/scope and contained-tool
-declarations into workflow/merge. The mechanical commit preserves declaration
-tokens in 27 of 28 entries after owner naming; the response formatter inlines the same 4096-byte failure bound.
-The host still opens/closes the checkout and supervises the exact claimed driver.
-Existing tool escape/alias assertions move beside their owner; the child fixture
-retains independent original request/response fields.
+The validation port still binds the authenticated claim, prepared input and
+provider to Store-owned validation and atomic acceptance. A separate immutable
+repair-check port composes merge policy in its original order without sibling
+stage imports. The host retains Git/signing IO, certified process supervision,
+checkout lifetime, current source/target authority and every claim/reservation,
+lock, journal, atomic multi-record write and recovery operation. Contained model
+file operations keep the same opened checkout and claim guard.
 
-Stage APIs now use package-qualified names: integrate.ValidateCandidate,
-integrate.CheckGate, merge.ServeBroker, merge.Tools and the owned scope/JSON
-checks. BrokerResult retains the raw proposal and usage beside its error; driver
-inputs separate the bound claim/prepared call from owned pipe/output resources.
-The remaining candidate and merge extraction tasks are in progress.
+All 87 assigned signature rows are reconciled: 64 implemented replacements and
+23 precise cohesive five-parameter contracts. Named input/result values preserve
+partial values, absence, errors, ordering and cancellation. Typed committer,
+merge-tree and path modes replace internal control choices. Signature-required
+and membership booleans remain observed data; eight owned close suppressions
+have specific cleanup/error explanations.
 
-A subsequent mechanical batch moves 41 immutable input/result/intent/decision
-policy declarations into merge and 14 shared lexical validators into state. All
-55 normalized declaration token streams match the frozen source before and after
-stage naming. Production callers use merge.SealInput, merge.CheckInput,
-merge.ParseResult, merge.InputFence and merge.RequiredDecisions directly. There
-is no forwarding layer. The merge dependency bound now permits only shared
-state and contenthash for existing protocol checksums.
-
-Named admission, claimed preparation and workspace results preserve original
-partial values and errors. Private repair/regeneration inputs bind the same
-claim, prepared task and observations; contexts remain explicit. Typed
-exact/declared path checks replace internal boolean choices. All 20 newly
-implemented signature rows have at most five parameters and bounded results.
-Role reservation, lease/generation checks, immutable evidence reads, host Git
-continuation, journal writes and resource cleanup retain their existing owner
-and order.
-
-Named evidence, budget/grant, scheduler, delivery, signing and retry results
-preserve absent, present and failed outcomes, including partial values. The last
-six high-arity inputs now bind their actual snapshot, replay or commit data.
-
-The next mechanical extraction moves 30 attribution, provenance/replay,
-preparation identity/collision and signing declarations into integrate. All 30
-declaration token streams match after owner naming in the mechanical commit.
-Production callers now use integrate.ParseCommit, integrate.SignaturePayload,
-integrate.DistinctResult and the named provenance/signing checks directly. Git
-reads/writes, private signer access, source/target observation and guarded
-acceptance remain with their native host/Store owners. Typed committer and
-merge-tree modes preserve their original rules. Eight owned production close
-suppressions have precise explanations. The
-[boundary ledger](../../../plan/code-quality-remediation-slice-13-boundaries.csv)
-records these decisions and the stored-state work still pending.
+Integration entry/transition/blocker phases, merger proposal outcomes, repair
+plan outcomes and host acceptance outcomes now use distinct string-backed types.
+Their exact values, field order/tags, hashes, nil/empty representation, journal
+checks and rejection behavior remain intact. Twelve additional zero/empty/
+populated snapshots freeze the committed pre-change record shapes. Accepted
+repairs still require the complete exact candidate gate and confer no receipt
+or publication authority.
 
 ## Implementation Notes
 
-The predecessor PR #449 is verified merged into dev at
-`a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`. Its exact-head controller evidence
-is `EVFKMQZNCCYQDPLZLRXOYO2S7M`; all four recorded commands passed.
+Slice 12 PR #449 is verified integrated into dev at
+`a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e` with its exact-head controller evidence
+`EVFKMQZNCCYQDPLZLRXOYO2S7M`.
 
-Completed task commits:
+The [move ledger](../../../plan/code-quality-remediation-slice-13-moves.csv)
+resolves 146 current extraction images and preserves their source identities,
+raw hashes and introduction commits. Compiling mechanical moves precede API
+naming and explicit contract changes. Token comparisons match all 55 immutable
+protocol declarations, all 30 attribution/signing declarations, all 17 repair
+policy/record declarations and all 12 complete-proof/capability declarations.
+The initial broker move matches 27 of 28 declarations; its response formatter
+inlines the same original 4096-byte failure bound.
 
-- Candidate stage: `05a7a106029d64ee5aa1ba8b62703afc40437d72`.
-- Preparation contracts: `c7a15133e0a07f8eb3fec735e36c967730aff038`.
-- Mechanical merger broker: `962e03aef96bf7aefd2b075fe218041b9cd00dc6`.
-- Stage naming and broker/driver contracts: `8e3630b9b074ec7b15d7b0de252429c3844dd283`.
-- Mechanical immutable merger policy: `af02c72f04ec8fb1c8554f7fa777a2e18958dacc`.
-- Merger stage naming: `a4fa20fe7344c49dbc164e726dcac9883b574c32`.
-- Named merger claims and repair observations: `7f2d18b1a04821084af93f0c825d3f3376c791cf`.
-
-- Named evidence/budget/scheduling contracts: `d9bfaa918823edcdeb698e7fff13139663ce9d63`.
-- Mechanical integrate attribution/signing policy: `77b24972b7361457978889a8f7f69476fae8d860`.
-- Candidate API names, explicit modes and close explanations: `40ab73aaaed653ee7606801c09f9ad43b2e933c1`.
-
-All 908 Store methods retain one local receiver owner. Current method and move
-hashes follow these changes while their original source identities/hashes remain
-frozen. The current-file owner map records the actual stage files and private
-preparation resource bindings.
+The 908 Store methods retain one local receiver owner. Current hashes and
+signatures resolve alongside all 100 original authority boundaries and 79 frozen
+dependency references, including the intentional standard-library comparator.
+Each stage imports exactly two module owners: shared state and contenthash.
+Dependency checks reject coordinator, configuration and mutation-authority
+imports. The exact repository debt manifest remains at ceiling six with 62
+entries, one external exception and no assigned Slice 13 signature allowance.
 
 ## Contracts Added or Changed
 
-`ValidationInput` carries immutable candidate identity, preparation, lane and
-initial task result. The stage consumes `Validation`; it receives neither a
-mutable store nor claim/process resources. Execution and stop contexts remain
-explicit parameters. The integrate module dependency bound is shared state plus contenthash for
-existing retained checksums; coordinator, configuration and mutation authorities
-remain blocked. No alias
-or forwarding compatibility layer retains the moved names.
+`integrate.ValidationInput`, `Completion` and `Validation` bind exact candidate
+execution to guarded Store acceptance without exporting claim resources.
+`integrate.RepairProof` receives only immutable proof data; its stateless native
+adapter checks merge repairs then replay history. Execution and stop contexts
+remain explicit parameters.
 
-The [move ledger](../../../plan/code-quality-remediation-slice-13-moves.csv)
-retains the frozen source identities and hashes for the extracted policy.
+`merge.Call`, `BrokerResult`, `RepairPosition` and `RepairHistory` name the actual
+bounded execution, proposal/usage and observed proof values. Private admission,
+claim, workspace, repair, budget, scheduler and delivery values preserve the
+original partial/error results. Shared `PreparationQuery`, `MergerRepairPlan`
+and `ErrAtomicGuard` have direct native/stage consumers and preserve their
+original encoding or sentinel identity. The
+[boundary ledger](../../../plan/code-quality-remediation-slice-13-boundaries.csv)
+records every typed-state, mode, retained-data and suppression disposition.
 
 ## Files of Interest
 
-- `internal/core/workflow/integrate/`.
-- `internal/core/workflow/merge/`.
-- The existing workflow authority and method maps.
+- `internal/core/workflow/integrate/` and `internal/core/workflow/merge/`.
+- `internal/core/workflow/workflow_stage_ports.go` and the existing guarded Store operations.
+- `internal/core/workflow/state/` and `testdata/quality-records/`.
+- The signature, extraction, authority, Store method and stage-port ledgers linked by the tracker.
 
 ## Validation
+
+The controller records the final ordered checks against the exact clean pushed
+PR head after the PR-reference commit: `make verify`, focused real workflow
+checks, focused claim/process races and `git diff --check`. Their current outcome
+is retained with that head by the controller and the canonical PR. Task-level
+successful commands and evidence follow; they do not substitute for that final
+head-bound validation.
 
 - `go test ./internal/core/workflow ./scripts/goquality -run '^Test(WorkflowPreparation(Methods|GateFailure|Stop|Guard|Journal)|NativePreparation(Methods|Failure|Stop)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=12m -v`: pass; ten top-level checks, including real Git, stop, failure, journal/restart and frozen wire evidence. The existing runner owns and cleans its fixtures.
 
@@ -148,9 +130,13 @@ retains the frozen source identities and hashes for the extracted policy.
 - `make check-go-style`: pass; ceiling six, 62 exact debt entries, one external exception. All 87 assigned Slice 13 rows satisfy the final five-parameter/result policy.
 - `scripts/check-package-readmes.sh`: pass.
 
+- `go test ./internal/core/workflow ./internal/core/workflow/merge ./internal/app ./scripts/goquality -run '^Test(NativeMerger(Repair|RepairGuards|RepairProof|ReplaySteps|Semantic|Fix|HostRegeneration|HostRegenerationFailure|Acceptance|AcceptanceReject|AcceptanceStale|CheckpointGuards|CheckpointBinding|Descendants|Stop)|NativeDecision(Replay|IntegrationFix|Retry)|NativeReplay(Proof|Guard|Fix)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v`: pass; 23 top-level checks for semantic repair, regeneration, replay/decision, stale acceptance and supervised cleanup. The existing runner owns and cleans its fixtures.
+- `go test ./internal/core/workflow ./internal/core/workflow/integrate ./internal/core/workflow/merge ./internal/app ./scripts/goquality -run '^Test(NativeEntry(Transitions|Admission|Fences|Sequence|Blocker|Pause)|NativeSchedule(Waits|Order|Tasks|Prerequisite|NoReplay|Inputs)|NativeMerger(Protocol|Malformed|Results|Semantic|Fix|Acceptance|AcceptanceReject|AcceptanceStale|RepairProof|HostRegenerationFailure|Stop)|NativeDecision(Replay|IntegrationFix)|NativeReplay(Proof|Guard)|NativeSubmission(Recovery|LostAck)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v`: pass; 29 top-level checks for typed entry phases and merger outcomes through real admission, scheduling and repair. The existing runner owns and cleans its fixtures.
+- `go test ./internal/core/workflow ./internal/app ./scripts/goquality -run '^Test(NativeEntry(Candidate|Malformed|Unknown|Alias|Recovery|Retries)|NativeCanonicalLost|NativeReceipt(Lost|Recovery|Uncertainty)|NativeSubmissionRecovery|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v`: pass; 14 top-level checks for malformed records, unknown fields, recovery/lost acknowledgements and all 12 direct record snapshots. The existing runner owns and cleans its fixtures.
+- `go test ./internal/core/workflow ./internal/core/workflow/integrate ./internal/core/workflow/merge ./internal/app ./scripts/goquality -run '^Test(WorkflowPreparation(Methods|ProviderPaths|Guard|Unsupported)|NativeCombinedProof|NativeReplay(Proof|Guard|Fix)|NativeMerger(RepairProof|ReplaySteps|Semantic|Fix)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=12m -v`: pass; 15 top-level checks for consumer-owned repair proof composition and provider guards. The existing runner owns and cleans its fixtures.
+- `go test ./internal/core/workflow ./internal/core/workflow/integrate ./internal/core/workflow/merge ./internal/app ./scripts/goquality -run '^Test(WorkflowPreparation(Methods|ProviderPaths|Guard|Unsupported|GateFailure|Stop|Journal)|WorkflowIntegration(Methods|Reject|WrongMethod|ChangedInput|History|HostConfig|Cancelled)|NativeCombinedProof|NativePreparation(Signing|Methods)|NativeSigningBlocked|NativeReplay(Proof|Guard|Fix|Blocked)|NativeMerger(RepairProof|ReplaySteps|Semantic|Fix|AcceptanceStale|Stop)|NativeCanonicalLost|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v`: pass; 32 top-level checks for complete candidate/provenance/signing/capability policy, delivery rejection/cancellation and lost acknowledgement. The existing runner owns and cleans its fixtures.
+
 ## Risks and Follow-ups
 
-Remaining candidate proof/capability assembly and semantic/tree-repair policy
-still need their final stage boundaries. The boundary ledger retains three
-pending stored-state entries. The slice is active; final controller validation
-and the canonical PR are pending.
+None recorded. Integration into dev remains a controller-owned transition;
+the report and tracker close after the canonical merge is verified.
