@@ -27,6 +27,9 @@ type TicketBoardReadOptions struct {
 	Limit          int
 }
 
+// workflowTicketReader sequences bounded canonical/native ticket read views under the original caller-owned inspection lock.
+type workflowTicketReader struct{ store *Store }
+
 // ReadTicketBoard observes canonical documents and supported legacy tickets.
 // It never rebuilds SQL, adopts documents or recovers a workflow transition.
 func ReadTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (board ticketcore.Board, err error) {
@@ -46,7 +49,7 @@ func ReadTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (board ti
 	read := func() error {
 		var readErr error
 
-		board, readErr = store.readTicketBoard(ctx, opts)
+		board, readErr = (workflowTicketReader{store: store}).board(ctx, opts)
 
 		return readErr
 	}
@@ -59,8 +62,8 @@ func ReadTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (board ti
 	return board, err
 }
 
-func (s *Store) readTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (ticketcore.Board, error) {
-	tickets, err := s.readBoardTickets(ctx, opts.NativeWorkflow)
+func (host workflowTicketReader) board(ctx context.Context, opts TicketBoardReadOptions) (ticketcore.Board, error) {
+	tickets, err := (workflowTicketReader{store: host.store}).tickets(ctx, opts.NativeWorkflow)
 	if err != nil {
 		return ticketcore.Board{}, err
 	}
@@ -69,21 +72,21 @@ func (s *Store) readTicketBoard(ctx context.Context, opts TicketBoardReadOptions
 		tickets = slices.DeleteFunc(tickets, func(ticket ticketcore.Indexed) bool { return ticket.UseCase != opts.CaseSlug })
 	}
 
-	return ticketBoardPage(s.projectID, tickets, opts.Offset, opts.Limit), nil
+	return ticketBoardPage(host.store.projectID, tickets, opts.Offset, opts.Limit), nil
 }
 
-func (s *Store) readBoardTickets(ctx context.Context, native bool) ([]ticketcore.Indexed, error) {
+func (host workflowTicketReader) tickets(ctx context.Context, native bool) ([]ticketcore.Indexed, error) {
 	tickets := map[string]ticketcore.Indexed{}
 	paths := map[string]bool{}
 
 	if native {
-		if err := s.readNativeBoardTickets(ctx, tickets, paths); err != nil {
+		if err := (workflowTicketReader{store: host.store}).native(ctx, tickets, paths); err != nil {
 			return nil, err
 		}
 	}
 
-	for _, root := range []string{filepath.Join(s.layout.Root(), "ticket"), ticketcore.Directory(s.layout.ProjectDir())} {
-		if err := s.readLooseBoardTickets(ctx, root, tickets, paths); err != nil {
+	for _, root := range []string{filepath.Join(host.store.layout.Root(), "ticket"), ticketcore.Directory(host.store.layout.ProjectDir())} {
+		if err := (workflowTicketReader{store: host.store}).loose(ctx, root, tickets, paths); err != nil {
 			return nil, err
 		}
 	}
@@ -96,8 +99,8 @@ func (s *Store) readBoardTickets(ctx context.Context, native bool) ([]ticketcore
 	return ticketcore.SortedBoardTickets(all), nil
 }
 
-func (s *Store) readNativeBoardTickets(ctx context.Context, tickets map[string]ticketcore.Indexed, paths map[string]bool) error {
-	snapshot, err := s.readSnapshot(ctx)
+func (host workflowTicketReader) native(ctx context.Context, tickets map[string]ticketcore.Indexed, paths map[string]bool) error {
+	snapshot, err := host.store.readSnapshot(ctx)
 	if err != nil {
 		return err
 	}
@@ -107,7 +110,7 @@ func (s *Store) readNativeBoardTickets(ctx context.Context, tickets map[string]t
 			continue
 		}
 
-		ticket, err := workflowIndexedTicket(ctx, s, record)
+		ticket, err := workflowIndexedTicket(ctx, host.store, record)
 		if err != nil {
 			return err
 		}
@@ -132,8 +135,8 @@ func (s *Store) readNativeBoardTickets(ctx context.Context, tickets map[string]t
 	return nil
 }
 
-func (s *Store) readLooseBoardTickets(ctx context.Context, root string, tickets map[string]ticketcore.Indexed, paths map[string]bool) error {
-	files, err := boardMarkdownFiles(ctx, s.layout.ProjectDir(), root)
+func (host workflowTicketReader) loose(ctx context.Context, root string, tickets map[string]ticketcore.Indexed, paths map[string]bool) error {
+	files, err := boardMarkdownFiles(ctx, host.store.layout.ProjectDir(), root)
 	if err != nil {
 		return err
 	}
@@ -143,7 +146,7 @@ func (s *Store) readLooseBoardTickets(ctx context.Context, root string, tickets 
 			continue
 		}
 
-		if err := s.appendLooseBoardTicket(root, path, tickets); err != nil {
+		if err := (workflowTicketReader{store: host.store}).appendLoose(root, path, tickets); err != nil {
 			return err
 		}
 	}
@@ -222,14 +225,14 @@ func checkBoardRoot(projectDir, root string) error {
 	return nil
 }
 
-func (s *Store) appendLooseBoardTicket(root, path string, tickets map[string]ticketcore.Indexed) error {
-	ticket, err := ticketcore.ReadBoardDocument(s.layout.ProjectDir(), path)
+func (host workflowTicketReader) appendLoose(root, path string, tickets map[string]ticketcore.Indexed) error {
+	ticket, err := ticketcore.ReadBoardDocument(host.store.layout.ProjectDir(), path)
 	if err != nil {
 		return err
 	}
 
 	if old, exists := tickets[ticket.Key]; exists {
-		if old.NativeWorkflow || root == ticketcore.Directory(s.layout.ProjectDir()) && !strings.HasPrefix(old.Path, root+string(filepath.Separator)) {
+		if old.NativeWorkflow || root == ticketcore.Directory(host.store.layout.ProjectDir()) && !strings.HasPrefix(old.Path, root+string(filepath.Separator)) {
 			return nil
 		}
 
@@ -240,7 +243,7 @@ func (s *Store) appendLooseBoardTicket(root, path string, tickets map[string]tic
 		return fmt.Errorf("ticket Board observation bound exceeded")
 	}
 
-	ticket.ProjectID, ticket.Namespace = s.projectID, s.layout.Namespace()
+	ticket.ProjectID, ticket.Namespace = host.store.projectID, host.store.layout.Namespace()
 	tickets[ticket.Key] = ticket
 
 	return nil

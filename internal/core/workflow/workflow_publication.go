@@ -165,7 +165,7 @@ func (s *Store) finalizeWorkflowObservedPublication(ctx context.Context, run wor
 		return workflowPublicationCheckpoint{Receipt: nil, Observed: true}, err
 	}
 
-	if _, err := s.verifyWorkflowSliceIntegration(ctx, run, policy.Method, ports.Provider, ports.Observer); err != nil {
+	if _, err := (workflowPullRequestHost{store: s}).verifyDelivery(ctx, run, policy.Method, ports.Provider, ports.Observer); err != nil {
 		return workflowPublicationCheckpoint{Receipt: nil, Observed: true}, err
 	}
 

@@ -68,7 +68,7 @@ func (s *Store) StartWorkflowGuarded(ctx context.Context, request StartRequest, 
 
 			request.Policy = policy
 
-			request, resolveErr = s.resolveWorkflowHarnessRequest(ctx, request)
+			request, resolveErr = (workflowHarnessResolver{store: s}).resolve(ctx, request)
 			if resolveErr != nil {
 				return resolveErr
 			}

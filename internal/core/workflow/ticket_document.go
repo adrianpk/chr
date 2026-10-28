@@ -45,7 +45,7 @@ func ReadTicketDocument(ctx context.Context, opts TicketBoardReadOptions, key st
 	read := func() error {
 		var readErr error
 
-		document, readErr = store.readTicketDocument(ctx, opts.NativeWorkflow, key)
+		document, readErr = (workflowTicketReader{store: store}).document(ctx, opts.NativeWorkflow, key)
 
 		return readErr
 	}
@@ -58,8 +58,8 @@ func ReadTicketDocument(ctx context.Context, opts TicketBoardReadOptions, key st
 	return document, err
 }
 
-func (s *Store) readTicketDocument(ctx context.Context, native bool, key string) (TicketDocument, error) {
-	tickets, err := s.readBoardTickets(ctx, native)
+func (host workflowTicketReader) document(ctx context.Context, native bool, key string) (TicketDocument, error) {
+	tickets, err := (workflowTicketReader{store: host.store}).tickets(ctx, native)
 	if err != nil {
 		return TicketDocument{}, err
 	}
@@ -74,7 +74,7 @@ func (s *Store) readTicketDocument(ctx context.Context, native bool, key string)
 			return document, err
 		}
 
-		return s.nativeTicketDocument(ctx, document)
+		return (workflowTicketReader{store: host.store}).nativeDocument(ctx, document)
 	}
 
 	return TicketDocument{}, fmt.Errorf("ticket not found: %s", key)
@@ -163,8 +163,8 @@ func documentFields(document *TicketDocument, parsed ticketmetadata.Frontmatter)
 	}
 }
 
-func (s *Store) nativeTicketDocument(ctx context.Context, document TicketDocument) (TicketDocument, error) {
-	snapshot, err := s.readSnapshot(ctx)
+func (host workflowTicketReader) nativeDocument(ctx context.Context, document TicketDocument) (TicketDocument, error) {
+	snapshot, err := host.store.readSnapshot(ctx)
 	if err != nil {
 		return document, err
 	}

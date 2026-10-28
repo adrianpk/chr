@@ -39,7 +39,7 @@ func (s *Store) VerifyWorkflowSliceIntegration(ctx context.Context, id, method s
 			return readErr
 		}
 
-		proof, readErr = invocationLocation.Owner.verifyWorkflowSliceIntegration(ctx, invocationLocation.Run, method, provider, git)
+		proof, readErr = (workflowPullRequestHost{store: invocationLocation.Owner}).verifyDelivery(ctx, invocationLocation.Run, method, provider, git)
 
 		return readErr
 	})
@@ -47,8 +47,8 @@ func (s *Store) VerifyWorkflowSliceIntegration(ctx context.Context, id, method s
 	return proof, err
 }
 
-func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflowInvocationFile, method string, provider PullRequestProvider, git IntegrationGit) (workflowstate.SliceDeliveryProof, error) {
-	deliveryPreparation, err := s.workflowDeliveryCandidate(ctx, run)
+func (host workflowPullRequestHost) verifyDelivery(ctx context.Context, run workflowInvocationFile, method string, provider PullRequestProvider, git IntegrationGit) (workflowstate.SliceDeliveryProof, error) {
+	deliveryPreparation, err := host.store.workflowDeliveryCandidate(ctx, run)
 
 	observation, candidate := deliveryPreparation.Observation, deliveryPreparation.Candidate
 
@@ -56,17 +56,17 @@ func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflow
 		return workflowstate.SliceDeliveryProof{}, err
 	}
 
-	pr, err := s.observeWorkflowDeliveryPR(ctx, &run, observation, provider)
+	pr, err := (workflowPullRequestHost{store: host.store}).observeDelivery(ctx, &run, observation, provider)
 	if err != nil {
 		return workflowstate.SliceDeliveryProof{}, err
 	}
 
-	run, err = s.readWorkflowInvocation(run.ID)
+	run, err = host.store.readWorkflowInvocation(run.ID)
 	if err != nil {
 		return workflowstate.SliceDeliveryProof{}, err
 	}
 
-	if err := s.reconcileWorkflowPublishedSubmission(ctx, &run, pr, workflowDeliveryObservers{Provider: provider, Git: git}); err != nil {
+	if err := host.store.reconcileWorkflowPublishedSubmission(ctx, &run, pr, workflowDeliveryObservers{Provider: provider, Git: git}); err != nil {
 		return workflowstate.SliceDeliveryProof{}, err
 	}
 
@@ -85,13 +85,13 @@ func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflow
 		return workflowstate.SliceDeliveryProof{}, err
 	}
 
-	if _, err := s.workflowDeliveryCandidate(ctx, run); err != nil {
+	if _, err := host.store.workflowDeliveryCandidate(ctx, run); err != nil {
 		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	proof := workflowstate.SliceDeliveryProof{Schema: "chr-slice-delivery-proof/v1", InvocationID: run.ID, Unit: candidate.UnitInput().Unit, CandidateID: candidate.ID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, SubmissionID: workflowDeliverySubmissionID(run), PullRequest: pr, Git: gitProof, ConfirmedAt: time.Now().UTC()}
 
-	return s.persistWorkflowDeliveryProof(&run, proof)
+	return host.store.persistWorkflowDeliveryProof(&run, proof)
 }
 
 func (s *Store) workflowDeliveryCandidate(ctx context.Context, run workflowInvocationFile) (workflowDeliveryPreparation, error) {
@@ -127,13 +127,13 @@ func workflowIntegrationQuery(run workflowInvocationFile, candidate SliceCandida
 	return workflowstate.IntegrationQuery{Repository: run.PullRequest.Request.Repository, TargetBranch: run.PullRequest.Request.BaseBranch, Method: method, SourceCommit: candidate.Result.Commit, SourceTree: candidate.Result.Tree, OriginCommit: candidate.Target.Commit, ResultCommit: pr.ResultCommit, SourceDirectory: candidate.Lane.Worktree}
 }
 
-func (s *Store) observeWorkflowDeliveryPR(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, provider PullRequestProvider) (workflowstate.PullRequestSnapshot, error) {
+func (host workflowPullRequestHost) observeDelivery(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, provider PullRequestProvider) (workflowstate.PullRequestSnapshot, error) {
 	pr, err := provider.ReadWorkflowPullRequest(ctx, run.PullRequest.URL)
 	if err != nil {
 		return pr, err
 	}
 
-	if err := s.acceptWorkflowPullRequest(ctx, run, observation, []workflowstate.PullRequestSnapshot{pr}); err != nil {
+	if err := host.store.acceptWorkflowPullRequest(ctx, run, observation, []workflowstate.PullRequestSnapshot{pr}); err != nil {
 		return pr, err
 	}
 

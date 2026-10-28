@@ -16,7 +16,7 @@ func (s *Store) resumeWorkflowDependencyTarget(ctx context.Context, run *workflo
 		return nil, workflowstate.ErrObservationRequired
 	}
 
-	target, err := s.observeWorkflowDependencyTarget(ctx, *run, ports)
+	target, err := (workflowFrontierObserver{store: s}).dependencyTarget(ctx, *run, ports)
 	if err != nil {
 		return nil, err
 	}
@@ -69,8 +69,8 @@ func workflowDependencyBranchMatches(run workflowInvocationFile, branch string) 
 	return len(run.DependencyTargets) == 0 || run.DependencyTargets[0].Branch == branch
 }
 
-func (s *Store) observeWorkflowDependencyTarget(ctx context.Context, run workflowInvocationFile, ports ResumePorts) (workflowstate.PreviewTarget, error) {
-	query := TargetQuery{Repository: run.Selection.Target.Repository, Branch: ports.TargetBranch, Directory: s.layout.ProjectDir()}
+func (host workflowFrontierObserver) dependencyTarget(ctx context.Context, run workflowInvocationFile, ports ResumePorts) (workflowstate.PreviewTarget, error) {
+	query := TargetQuery{Repository: run.Selection.Target.Repository, Branch: ports.TargetBranch, Directory: host.store.layout.ProjectDir()}
 
 	target, err := ports.Target.ObserveWorkflowTarget(ctx, query)
 	if err != nil {
@@ -82,12 +82,12 @@ func (s *Store) observeWorkflowDependencyTarget(ctx context.Context, run workflo
 		return target, errorsOrConflict(err)
 	}
 
-	reader := workflowProofReader{store: s}
+	reader := workflowProofReader{store: host.store}
 	if !reader.isAncestor(ctx, run.ExecutionSelection().Target.Commit, target.Commit) {
 		return target, workflowstate.ErrConflict
 	}
 
-	return target, s.checkWorkflowTarget(ctx, target)
+	return target, host.store.checkWorkflowTarget(ctx, target)
 }
 
 func (s *Store) workflowDependencyTargetReceipts(ctx context.Context, run workflowInvocationFile) (map[string]string, error) {

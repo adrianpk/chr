@@ -56,7 +56,7 @@ func (s *Store) finalizeWorkflowLegacySlice(ctx context.Context, run workflowInv
 		return workflowstate.Record{}, fmt.Errorf("finalization requires canonical provider and Git observation")
 	}
 
-	if _, err := s.verifyWorkflowSliceIntegration(ctx, run, proof.Git.Method, provider, git); err != nil {
+	if _, err := (workflowPullRequestHost{store: s}).verifyDelivery(ctx, run, proof.Git.Method, provider, git); err != nil {
 		return workflowstate.Record{}, err
 	}
 

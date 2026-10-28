@@ -26,14 +26,17 @@ type HarnessResolution struct {
 // complete configuration image that owns admission. Retained requests skip it.
 type HarnessResolver func(context.Context, workspaceconfig.Config) (HarnessResolution, error)
 
-func (s *Store) resolveWorkflowHarnessRequest(ctx context.Context, request StartRequest) (StartRequest, error) {
-	harnessRequest, err := s.retainedWorkflowHarnessRequest(ctx, request)
+// workflowHarnessResolver resolves current host configuration and executable bindings under Store-owned admission exclusion.
+type workflowHarnessResolver struct{ store *Store }
+
+func (host workflowHarnessResolver) resolve(ctx context.Context, request StartRequest) (StartRequest, error) {
+	harnessRequest, err := host.store.retainedWorkflowHarnessRequest(ctx, request)
 
 	if err != nil || harnessRequest.Found {
 		return harnessRequest.Request, err
 	}
 
-	config, err := workspaceconfig.Load(s.layout.ProjectDir())
+	config, err := workspaceconfig.Load(host.store.layout.ProjectDir())
 	if err != nil {
 		return request, err
 	}

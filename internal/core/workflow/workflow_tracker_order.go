@@ -38,7 +38,7 @@ func workflowTrackerSchema(snapshot workflowstate.Snapshot, setID, requested, pr
 func (s *Store) versionedWorkflowTrackerImage(snapshot workflowstate.Snapshot, setID, schema string) (workflowTrackerImageResult, error) {
 	switch schema {
 	case "chr-tracker/v1":
-		return s.workflowTrackerImage(snapshot, setID)
+		return (workflowTrackerObserver{store: s}).image(snapshot, setID)
 	case "chr-tracker/v2":
 		return s.workflowOrderTrackerImage(snapshot, setID)
 	default:

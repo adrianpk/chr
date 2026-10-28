@@ -20,18 +20,21 @@ type workflowTrackerMembership struct {
 	Tasks []workflowstate.Record
 }
 
-func (s *Store) workflowTrackerImage(snapshot workflowstate.Snapshot, setID string) (workflowTrackerImageResult, error) {
+// workflowTrackerObserver assembles read-only tracker images from exact Store-owned snapshot and receipt evidence.
+type workflowTrackerObserver struct{ store *Store }
+
+func (host workflowTrackerObserver) image(snapshot workflowstate.Snapshot, setID string) (workflowTrackerImageResult, error) {
 	trackerMembers, err := workflowTrackerMembers(snapshot, setID)
 	if err != nil {
 		return workflowTrackerImageResult{Status: TrackerStatus{}, Output: nil}, err
 	}
 
-	result := TrackerStatus{Schema: "chr-tracker/v1", ProjectID: s.projectID, Namespace: s.layout.Namespace(), SetID: setID, Path: "tracker/" + setID + ".md"}
+	result := TrackerStatus{Schema: "chr-tracker/v1", ProjectID: host.store.projectID, Namespace: host.store.layout.Namespace(), SetID: setID, Path: "tracker/" + setID + ".md"}
 	for _, record := range append([]workflowstate.Record{trackerMembers.Set}, trackerMembers.Tasks...) {
 		result.Sources = append(result.Sources, TrackerSource{ID: record.ID, Path: record.Path, Revision: record.Revision, Hash: record.SourceHash})
 	}
 
-	if err := s.workflowTrackerReceiptSources(&result, trackerMembers.Set, trackerMembers.Tasks); err != nil {
+	if err := (workflowTrackerObserver{store: host.store}).receiptSources(&result, trackerMembers.Set, trackerMembers.Tasks); err != nil {
 		return workflowTrackerImageResult{Status: result, Output: nil}, err
 	}
 
@@ -88,7 +91,7 @@ func workflowTrackerMembers(snapshot workflowstate.Snapshot, setID string) (work
 	return workflowTrackerMembership{Set: set, Tasks: tasks}, nil
 }
 
-func (s *Store) workflowTrackerReceiptSources(result *TrackerStatus, set workflowstate.Record, tasks []workflowstate.Record) error {
+func (host workflowTrackerObserver) receiptSources(result *TrackerStatus, set workflowstate.Record, tasks []workflowstate.Record) error {
 	refs := map[string]bool{}
 	for _, task := range tasks {
 		refs[task.Task.DeliveryRef] = true
@@ -106,7 +109,7 @@ func (s *Store) workflowTrackerReceiptSources(result *TrackerStatus, set workflo
 	delete(refs, "")
 
 	for ref := range refs {
-		data, err := s.readWorkflowTrackerFile(ref)
+		data, err := host.store.readWorkflowTrackerFile(ref)
 		if err != nil {
 			return err
 		}

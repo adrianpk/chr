@@ -17,7 +17,7 @@ type LegacyWorkQueue struct {
 
 // ReadLegacyWorkQueue reads authoritative files without refreshing SQL.
 func ReadLegacyWorkQueue(ctx context.Context, layout opscore.Layout, projectID string) (result LegacyWorkQueue, err error) {
-	result.Tickets, err = NewWorkflowStore(layout, projectID).readBoardTickets(ctx, false)
+	result.Tickets, err = (workflowTicketReader{store: NewWorkflowStore(layout, projectID)}).tickets(ctx, false)
 	if err != nil {
 		return result, err
 	}

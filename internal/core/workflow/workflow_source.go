@@ -55,18 +55,7 @@ func (s *Store) PublishWorkflowSource(ctx context.Context, id string, publisher 
 			return err
 		}
 
-		query := SourceQuery{Repository: invocationLocation.Run.ExecutionSelection().Target.Repository, Directory: candidate.Lane.Worktree, Branch: candidate.Lane.Branch, Commit: candidate.Result.Commit, Tree: candidate.Result.Tree}
-		if invocationLocation.Run.PullRequest != nil {
-			query.PreviousCommit = invocationLocation.Run.PullRequest.SourceCommit
-		}
-
-		if err := publisher.PublishWorkflowSource(ctx, query); err != nil {
-			return err
-		}
-
-		_, err = invocationLocation.Owner.readWorkflowSliceCandidate(ctx, invocationLocation.Run, observation)
-
-		return err
+		return (workflowPullRequestHost{store: invocationLocation.Owner}).publishSource(ctx, invocationLocation.Run, observation, candidate, publisher)
 	})
 }
 
@@ -76,4 +65,19 @@ func workflowSourcePublishable(run workflowInvocationFile) bool {
 	}
 
 	return run.PullRequest == nil || run.PullRequest.State == "prepared" || run.PullRequest.State == "bound"
+}
+
+func (host workflowPullRequestHost) publishSource(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, candidate SliceCandidate, publisher SourceGit) error {
+	query := SourceQuery{Repository: run.ExecutionSelection().Target.Repository, Directory: candidate.Lane.Worktree, Branch: candidate.Lane.Branch, Commit: candidate.Result.Commit, Tree: candidate.Result.Tree}
+	if run.PullRequest != nil {
+		query.PreviousCommit = run.PullRequest.SourceCommit
+	}
+
+	if err := publisher.PublishWorkflowSource(ctx, query); err != nil {
+		return err
+	}
+
+	_, err := host.store.readWorkflowSliceCandidate(ctx, run, observation)
+
+	return err
 }

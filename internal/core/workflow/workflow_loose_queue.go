@@ -81,7 +81,7 @@ func (s *Store) reconcileWorkflowLooseQueue(ctx context.Context, run workflowInv
 		return run, err
 	}
 
-	next, err := s.selectWorkflowLooseQueue(ctx, run, selection)
+	next, err := (workflowWorkObserver{store: s}).selectLoose(ctx, run, selection)
 	if err != nil || reflect.DeepEqual(next.Invocation, run.Invocation) {
 		return run, err
 	}
@@ -93,7 +93,7 @@ func (s *Store) reconcileWorkflowLooseQueue(ctx context.Context, run workflowInv
 	return next, nil
 }
 
-func (s *Store) selectWorkflowLooseQueue(ctx context.Context, run workflowInvocationFile, selection workflowSelection) (workflowInvocationFile, error) {
+func (host workflowWorkObserver) selectLoose(ctx context.Context, run workflowInvocationFile, selection workflowSelection) (workflowInvocationFile, error) {
 	preview, err := selection.preview(run.ExecutionSelection())
 	if err != nil {
 		return run, err
@@ -108,7 +108,7 @@ func (s *Store) selectWorkflowLooseQueue(ctx context.Context, run workflowInvoca
 		next.LooseQueue.Admitted = slices.Clone(run.LooseQueue.Admitted)
 	}
 
-	if err := s.admitWorkflowLooseLater(ctx, &next, selection); err != nil {
+	if err := host.store.admitWorkflowLooseLater(ctx, &next, selection); err != nil {
 		return run, err
 	}
 
