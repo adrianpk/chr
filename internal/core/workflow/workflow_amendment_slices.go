@@ -39,14 +39,14 @@ func (s *Store) buildWorkflowAmendmentSlices(builder *workflowAmendmentBuild, pl
 	seen := 0
 
 	for _, input := range plan.Slices {
-		descriptor, retained, err := buildWorkflowAmendedSlice(builder, old, input)
+		built, err := buildWorkflowAmendedSlice(builder, old, input)
 		if err != nil {
 			return err
 		}
 
-		seen += retained
+		seen += built.Retained
 
-		builder.result.Set.Set.Slices = append(builder.result.Set.Set.Slices, descriptor)
+		builder.result.Set.Set.Slices = append(builder.result.Set.Set.Slices, built.Descriptor)
 	}
 
 	if seen != len(old) {
@@ -56,21 +56,26 @@ func (s *Store) buildWorkflowAmendmentSlices(builder *workflowAmendmentBuild, pl
 	return nil
 }
 
-func buildWorkflowAmendedSlice(builder *workflowAmendmentBuild, old map[string]workflowstate.WorkflowSlice, input generationcore.GeneratedWorkflowSlice) (workflowstate.WorkflowSlice, int, error) {
+type workflowAmendedSliceResult struct {
+	Descriptor workflowstate.WorkflowSlice
+	Retained   int
+}
+
+func buildWorkflowAmendedSlice(builder *workflowAmendmentBuild, old map[string]workflowstate.WorkflowSlice, input generationcore.GeneratedWorkflowSlice) (workflowAmendedSliceResult, error) {
 	descriptor, err := materializationSlice(input, builder.result.Set, builder.result.Tasks, builder.keys)
 	if err != nil {
-		return descriptor, 0, err
+		return workflowAmendedSliceResult{Descriptor: descriptor}, err
 	}
 
 	if previous, exists := old[input.ID]; exists {
 		descriptor, err = workflowAmendedSlice(previous, descriptor)
 
-		return descriptor, 1, err
+		return workflowAmendedSliceResult{Descriptor: descriptor, Retained: 1}, err
 	}
 
 	err = workflowNewAmendmentSlice(builder, input, &descriptor)
 
-	return descriptor, 0, err
+	return workflowAmendedSliceResult{Descriptor: descriptor}, err
 }
 
 func workflowAmendedSlice(previous, descriptor workflowstate.WorkflowSlice) (workflowstate.WorkflowSlice, error) {

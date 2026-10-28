@@ -8,39 +8,53 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) observeWorkflowFrontier(ctx context.Context, run workflowInvocationFile, receipt Record, candidate SliceCandidate, ports FrontierPorts) (workflowstate.PreviewTarget, workflowstate.IntegrationProof, error) {
+type workflowFrontierUnit struct {
+	Run       workflowInvocationFile
+	Receipt   Record
+	Candidate SliceCandidate
+}
+
+type workflowFrontierObservation struct {
+	Target workflowstate.PreviewTarget
+	Proof  workflowstate.IntegrationProof
+}
+
+func (s *Store) observeWorkflowFrontier(ctx context.Context, unit workflowFrontierUnit, ports FrontierPorts) (workflowFrontierObservation, error) {
 	if ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
-		return workflowstate.PreviewTarget{}, workflowstate.IntegrationProof{}, ErrWorkflowObservationRequired
+		return workflowFrontierObservation{}, ErrWorkflowObservationRequired
 	}
 
+	run := unit.Run
 	binding := run.PullRequest
 	query := TargetQuery{Repository: binding.Request.Repository, Branch: binding.Request.BaseBranch, Directory: s.layout.ProjectDir()}
 
 	target, err := ports.Target.ObserveWorkflowTarget(ctx, query)
 	if err != nil {
-		return target, workflowstate.IntegrationProof{}, err
+		return workflowFrontierObservation{Target: target}, err
 	}
 
 	if target.Repository != run.Selection.Target.Repository || !workflowstate.ValidCommitID(target.Commit) {
-		return target, workflowstate.IntegrationProof{}, workflowstate.ErrConflict
+		return workflowFrontierObservation{Target: target}, workflowstate.ErrConflict
 	}
 
-	proof, err := s.workflowFrontierReceiptProof(ctx, run, receipt, candidate, target, ports)
+	proof, err := s.workflowFrontierReceiptProof(ctx, unit, target, ports)
 	if err != nil {
-		return target, proof, err
+		return workflowFrontierObservation{Target: target, Proof: proof}, err
 	}
 
 	observed, err := ports.Provider.ReadWorkflowBranch(ctx, query.Repository, query.Branch)
 	if err != nil || observed != target.Commit {
-		return target, proof, errorsOrConflict(err)
+		return workflowFrontierObservation{Target: target, Proof: proof}, errorsOrConflict(err)
 	}
 
-	return target, proof, s.checkWorkflowTarget(ctx, target)
+	return workflowFrontierObservation{Target: target, Proof: proof}, s.checkWorkflowTarget(ctx, target)
 }
 
-func (s *Store) workflowFrontierReceiptProof(ctx context.Context, run workflowInvocationFile, receipt Record, candidate SliceCandidate, target workflowstate.PreviewTarget, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
+func (s *Store) workflowFrontierReceiptProof(ctx context.Context, unit workflowFrontierUnit, target workflowstate.PreviewTarget, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
+	run, receipt := unit.Run, unit.Receipt
+
 	if receipt.Receipt.Native == nil {
-		return observeWorkflowFrontierProof(ctx, run, receipt, candidate, target, ports)
+		return observeWorkflowFrontierProof(ctx, unit, target, ports)
 	}
 
 	observation, err := s.observeWorkflowNativeReceipt(ctx, receipt, ports.Provider, ports.Observer)
@@ -57,7 +71,9 @@ func (s *Store) workflowFrontierReceiptProof(ctx context.Context, run workflowIn
 	return *observation.Git, nil
 }
 
-func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFile, receipt Record, candidate SliceCandidate, target workflowstate.PreviewTarget, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
+func observeWorkflowFrontierProof(ctx context.Context, unit workflowFrontierUnit, target workflowstate.PreviewTarget, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
+	run, receipt, candidate := unit.Run, unit.Receipt, unit.Candidate
+
 	pr, err := ports.Provider.ReadWorkflowPullRequest(ctx, run.PullRequest.URL)
 	if err != nil {
 		return workflowstate.IntegrationProof{}, err

@@ -91,7 +91,7 @@ func (s *Store) advanceWorkflowFrontier(ctx context.Context, run *workflowInvoca
 		return fmt.Errorf("read retained frontier candidate: %w", err)
 	}
 
-	target, proof, err := s.observeWorkflowFrontier(ctx, *run, receipt, candidate, ports)
+	observed, err := s.observeWorkflowFrontier(ctx, workflowFrontierUnit{Run: *run, Receipt: receipt, Candidate: candidate}, ports)
 
 	err = errors.Join(err, s.refreshWorkflowNativeFrontier(run, receipt))
 	if err != nil {
@@ -102,7 +102,7 @@ func (s *Store) advanceWorkflowFrontier(ctx context.Context, run *workflowInvoca
 		return err
 	}
 
-	if err := s.commitWorkflowFrontier(run, target, proof); err != nil {
+	if err := s.commitWorkflowFrontier(run, observed.Target, observed.Proof); err != nil {
 		return fmt.Errorf("retain verified frontier: %w", err)
 	}
 

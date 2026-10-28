@@ -9,23 +9,28 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) observeWorkflowAmendment(ctx context.Context, request SetAmendmentRequest) (Record, []workflowInvocationFile, error) {
+type workflowAmendmentObservation struct {
+	Set         Record
+	Invocations []workflowInvocationFile
+}
+
+func (s *Store) observeWorkflowAmendment(ctx context.Context, request SetAmendmentRequest) (workflowAmendmentObservation, error) {
 	set, err := s.readRecord(request.SetPath)
 	if err != nil {
-		return set, nil, err
+		return workflowAmendmentObservation{Set: set}, err
 	}
 
 	if !s.workflowAmendmentImageMatches(set, request) {
-		return set, nil, workflowstate.ErrConflict
+		return workflowAmendmentObservation{Set: set}, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowAmendmentPlan(set, request); err != nil {
-		return set, nil, err
+		return workflowAmendmentObservation{Set: set}, err
 	}
 
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
-		return set, nil, err
+		return workflowAmendmentObservation{Set: set}, err
 	}
 
 	for _, run := range runs {
@@ -34,11 +39,11 @@ func (s *Store) observeWorkflowAmendment(ctx context.Context, request SetAmendme
 		}
 
 		if err := s.checkWorkflowAmendmentOwner(ctx, run); err != nil {
-			return set, nil, err
+			return workflowAmendmentObservation{Set: set}, err
 		}
 	}
 
-	return set, runs, nil
+	return workflowAmendmentObservation{Set: set, Invocations: runs}, nil
 }
 
 func (s *Store) workflowAmendmentImageMatches(set Record, request SetAmendmentRequest) bool {

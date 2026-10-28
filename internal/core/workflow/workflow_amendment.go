@@ -48,10 +48,12 @@ func (s *Store) AmendWorkflowSet(ctx context.Context, request SetAmendmentReques
 }
 
 func (s *Store) amendWorkflowSet(ctx context.Context, request SetAmendmentRequest) (result MaterializationResult, err error) {
-	set, runs, err := s.observeWorkflowAmendment(ctx, request)
+	observed, err := s.observeWorkflowAmendment(ctx, request)
 	if err != nil {
 		return MaterializationResult{}, err
 	}
+
+	set, runs := observed.Set, observed.Invocations
 
 	body, err := s.readApprovedPlan(request.Plan)
 	if err != nil {
@@ -72,12 +74,14 @@ func (s *Store) amendWorkflowSet(ctx context.Context, request SetAmendmentReques
 	}
 	defer func() { err = errors.Join(err, s.releaseWorkflowAllocation(guard)) }()
 
-	result, files, err := s.buildWorkflowAmendment(ctx, set, request, body)
+	prepared, err := s.buildWorkflowAmendment(ctx, set, request, body)
+	result = prepared.Result
+
 	if err != nil {
 		return result, err
 	}
 
-	files, err = s.workflowAmendmentInvocationFiles(ctx, runs, set, result.Set, files)
+	files, err := s.workflowAmendmentInvocationFiles(ctx, runs, set, result.Set, prepared.Files)
 	if err != nil {
 		return result, err
 	}

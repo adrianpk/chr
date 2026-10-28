@@ -22,26 +22,31 @@ type workflowAmendmentBuild struct {
 	root   string
 }
 
-func (s *Store) buildWorkflowAmendment(ctx context.Context, set Record, request SetAmendmentRequest, body []byte) (MaterializationResult, []workflowstate.FileChange, error) {
+type workflowAmendmentPreparation struct {
+	Result MaterializationResult
+	Files  []workflowstate.FileChange
+}
+
+func (s *Store) buildWorkflowAmendment(ctx context.Context, set Record, request SetAmendmentRequest, body []byte) (workflowAmendmentPreparation, error) {
 	builder, err := s.workflowAmendmentBuilder(ctx, set)
 	if err != nil {
-		return builder.result, nil, err
+		return workflowAmendmentPreparation{Result: builder.result}, err
 	}
 
 	plan := generationcore.OrderedWorkflowPlan(request.Plan)
 	if err := s.buildWorkflowAmendmentTasks(ctx, &builder, plan, request.ReserveTicketKey); err != nil {
-		return builder.result, nil, err
+		return workflowAmendmentPreparation{Result: builder.result}, err
 	}
 
 	if err := s.buildWorkflowAmendmentSlices(&builder, plan); err != nil {
-		return builder.result, nil, err
+		return workflowAmendmentPreparation{Result: builder.result}, err
 	}
 
 	if err := s.finishWorkflowAmendment(ctx, &builder, request, body); err != nil {
-		return builder.result, nil, err
+		return workflowAmendmentPreparation{Result: builder.result}, err
 	}
 
-	return builder.result, builder.files, nil
+	return workflowAmendmentPreparation{Result: builder.result, Files: builder.files}, nil
 }
 
 func (s *Store) workflowAmendmentBuilder(ctx context.Context, set Record) (workflowAmendmentBuild, error) {

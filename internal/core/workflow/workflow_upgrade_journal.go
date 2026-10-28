@@ -26,16 +26,28 @@ type workflowUpgradeJournal struct {
 	Checksum    string                                `json:"checksum"`
 }
 
+type workflowUpgradePreparation struct {
+	Journal workflowUpgradeJournal
+	Image   []byte
+}
+
+type workflowRetainedUpgrade struct {
+	Journal workflowUpgradeJournal
+	Found   bool
+}
+
 func (s *Store) upgradeWorkflowConfiguration(ctx context.Context, opts UpgradeOptions) (UpgradeResult, error) {
 	hash, err := workflowUpgradeRequestHash(opts)
 	if err != nil {
 		return UpgradeResult{}, err
 	}
 
-	journal, data, err := s.prepareWorkflowUpgrade(ctx, opts, hash)
+	prepared, err := s.prepareWorkflowUpgrade(ctx, opts, hash)
 	if err != nil {
 		return UpgradeResult{}, err
 	}
+
+	journal, data := prepared.Journal, prepared.Image
 
 	result := UpgradeResult{Snapshot: filepath.ToSlash(filepath.Join(".chr", "default", "workflow-upgrades", hash+".json")), Prior: journal.Prior, Current: journal.Current}
 
@@ -68,59 +80,59 @@ func workflowUpgradeRequestHash(opts UpgradeOptions) (string, error) {
 	return contenthash.Sum(data), err
 }
 
-func (s *Store) prepareWorkflowUpgrade(ctx context.Context, opts UpgradeOptions, hash string) (workflowUpgradeJournal, []byte, error) {
+func (s *Store) prepareWorkflowUpgrade(ctx context.Context, opts UpgradeOptions, hash string) (workflowUpgradePreparation, error) {
 	data, err := s.readWorkflowUpgradeFile("config.yml")
 	if errors.Is(err, os.ErrNotExist) {
 		data, err = nil, nil
 	}
 
 	if err != nil {
-		return workflowUpgradeJournal{}, nil, err
+		return workflowUpgradePreparation{}, err
 	}
 
-	if journal, found, err := s.retainedWorkflowUpgrade(hash); found || err != nil {
-		image, imageErr := workflowUpgradeJournalImage(journal, data, opts)
+	if retained, err := s.retainedWorkflowUpgrade(hash); retained.Found || err != nil {
+		image, imageErr := workflowUpgradeJournalImage(retained.Journal, data, opts)
 
-		return journal, image, errors.Join(err, imageErr)
+		return workflowUpgradePreparation{Journal: retained.Journal, Image: image}, errors.Join(err, imageErr)
 	}
 
 	config, err := workspaceconfig.Parse(data)
 	if err != nil {
-		return workflowUpgradeJournal{}, nil, err
+		return workflowUpgradePreparation{}, err
 	}
 
 	if config.Workflow.Version != 0 || contenthash.Sum(data) != opts.ExpectedRevision {
-		return workflowUpgradeJournal{}, nil, fmt.Errorf("workflow upgrade requires the unchanged legacy configuration")
+		return workflowUpgradePreparation{}, fmt.Errorf("workflow upgrade requires the unchanged legacy configuration")
 	}
 
 	if err := s.preflightWorkflowUpgradeAdoption(ctx, opts); err != nil {
-		return workflowUpgradeJournal{}, nil, err
+		return workflowUpgradePreparation{}, err
 	}
 
 	return s.newWorkflowUpgradeJournal(data, config, opts, hash)
 }
 
-func (s *Store) newWorkflowUpgradeJournal(data []byte, config workspaceconfig.Config, opts UpgradeOptions, hash string) (workflowUpgradeJournal, []byte, error) {
+func (s *Store) newWorkflowUpgradeJournal(data []byte, config workspaceconfig.Config, opts UpgradeOptions, hash string) (workflowUpgradePreparation, error) {
 	journal := workflowUpgradeJournal{Schema: 1, ProjectID: s.projectID, Namespace: s.layout.Namespace(), RequestHash: hash, Prior: workspaceconfig.EffectiveWorkflowConfiguration(config, "")}
 
 	image, err := workflowUpgradeConfig(data, journal.Prior, opts)
 	if err != nil {
-		return journal, nil, err
+		return workflowUpgradePreparation{Journal: journal}, err
 	}
 
 	current, err := workspaceconfig.Parse(image)
 	if err != nil {
-		return journal, nil, err
+		return workflowUpgradePreparation{Journal: journal}, err
 	}
 
 	journal.Current = workspaceconfig.EffectiveWorkflowConfiguration(current, "")
 
 	journal.Checksum, err = workflowUpgradeJournalHash(journal)
 	if err != nil {
-		return journal, nil, err
+		return workflowUpgradePreparation{Journal: journal}, err
 	}
 
-	return journal, image, s.writeWorkflowUpgradeFile(workspaceconfig.WorkflowUpgradePending, journal)
+	return workflowUpgradePreparation{Journal: journal, Image: image}, s.writeWorkflowUpgradeFile(workspaceconfig.WorkflowUpgradePending, journal)
 }
 
 func (s *Store) preflightWorkflowUpgradeAdoption(ctx context.Context, opts UpgradeOptions) error {
@@ -166,26 +178,26 @@ func workflowUpgradeJournalImage(journal workflowUpgradeJournal, data []byte, op
 	return image, err
 }
 
-func (s *Store) retainedWorkflowUpgrade(hash string) (workflowUpgradeJournal, bool, error) {
+func (s *Store) retainedWorkflowUpgrade(hash string) (workflowRetainedUpgrade, error) {
 	data, err := s.readWorkflowUpgradeFile(workspaceconfig.WorkflowUpgradePending)
 	if errors.Is(err, os.ErrNotExist) {
 		data, err = s.readWorkflowUpgradeFile("workflow-upgrades/" + hash + ".json")
 	}
 
 	if errors.Is(err, os.ErrNotExist) {
-		return workflowUpgradeJournal{}, false, nil
+		return workflowRetainedUpgrade{}, nil
 	}
 
 	journal := workflowUpgradeJournal{}
 	if err != nil {
-		return journal, false, err
+		return workflowRetainedUpgrade{Journal: journal}, err
 	}
 
 	if err := json.Unmarshal(data, &journal); err != nil {
-		return journal, true, err
+		return workflowRetainedUpgrade{Journal: journal, Found: true}, err
 	}
 
-	return journal, true, s.validateWorkflowUpgradeJournal(journal, hash)
+	return workflowRetainedUpgrade{Journal: journal, Found: true}, s.validateWorkflowUpgradeJournal(journal, hash)
 }
 
 func (s *Store) validateWorkflowUpgradeJournal(journal workflowUpgradeJournal, requestHash string) error {
