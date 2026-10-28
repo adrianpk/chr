@@ -7,7 +7,7 @@ Planning authorization: maintainer request, 2026-10-26.
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 12, Workflow state, store and coordinator package; activated after verified integration of PR #448.
+Active slice: Slice 13, Candidate validation and merge stages; activated after verified integration of PR #449.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b` on dev.
 
 Spec: [Remediation requirements](../spec/code-quality-remediation.md)
@@ -242,7 +242,7 @@ Focused selection: Existing indexed-ticket/readiness/doctor/worktree/evidence re
 Implementation map: [Store methods and authority boundaries](code-quality-remediation-slice-12-boundaries.md).
 
 Findings: R1, R2, R3, R5, R6, R10.
-Ticket: [TKT-20261026084832](../ticket/reviewing/20261026084832-quality-workflow.md).
+Ticket: [TKT-20261026084832](../ticket/solved/20261026084832-quality-workflow.md).
 
 1. **T12.1:** Freeze an explicit map of all current WorkflowStore methods: durable read/mutation/transaction, coordinator, integration, merge, forge/review or closeout. Retain one persistence/locking authority and identify every transaction and recovery boundary.
 2. **T12.2:** Move the workflow family and its actual callers to internal/core/workflow as a compiling mechanical relocation. Put shared workflow values under internal/core/workflow/state only where stages must share them without importing their coordinator. Never split methods of a nonlocal Go type across packages.
@@ -258,7 +258,7 @@ Focused selection: Existing WorkflowRoundTrip, mutation/receipt/idempotency/mate
 ### Slice 13: Candidate validation and merge stages
 
 Findings: R1, R2, R3, R10.
-Ticket: [TKT-20261026084833](../ticket/ready/20261026084833-quality-integration.md).
+Ticket: [TKT-20261026084833](../ticket/in_progress/20261026084833-quality-integration.md).
 
 1. **T13.1:** Extract candidate preparation/validation into internal/core/workflow/integrate through the ports established in Slice 12. Preserve exact source/target observation, guard checks, validation claims and atomic acceptance.
 2. **T13.2:** Extract merge and repair policy into internal/core/workflow/merge. Convert executeWorkflowMergerDriver, preparation claim/result tuples and repeated claim/prepared/tool/process inputs into cohesive execution values; contexts stay explicit.
@@ -417,8 +417,8 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | 9 | [TKT-20261026084829](../ticket/solved/20261026084829-quality-authoring.md) | Authoring, document generation and guided preparation | delivered; PR #446 |
 | 10 | [TKT-20261026084830](../ticket/solved/20261026084830-quality-harness.md) | Harness contracts and runtime lifecycle | delivered; PR #447 verified |
 | 11 | [TKT-20261026084831](../ticket/solved/20261026084831-quality-tickets.md) | Ticket, readiness and execution boundaries | delivered; PR #448 verified |
-| 12 | [TKT-20261026084832](../ticket/reviewing/20261026084832-quality-workflow.md) | Workflow state, store and coordinator package | reviewing; PR #449 |
-| 13 | [TKT-20261026084833](../ticket/ready/20261026084833-quality-integration.md) | Candidate validation and merge stages | ready; predecessor applies |
+| 12 | [TKT-20261026084832](../ticket/solved/20261026084832-quality-workflow.md) | Workflow state, store and coordinator package | delivered; PR #449 verified |
+| 13 | [TKT-20261026084833](../ticket/in_progress/20261026084833-quality-integration.md) | Candidate validation and merge stages | in_progress; PR #449 verified |
 | 14 | [TKT-20261026084834](../ticket/ready/20261026084834-quality-publication.md) | Forge publication and review stages | ready; predecessor applies |
 | 15 | [TKT-20261026084835](../ticket/ready/20261026084835-quality-closeout.md) | Workflow closeout and coordinator cleanup | ready; predecessor applies |
 | 16 | [TKT-20261026084836](../ticket/ready/20261026084836-quality-closure.md) | Final enforcement, documentation and integrated closure | ready; predecessor applies |

@@ -1,6 +1,6 @@
 # Slice 12: Workflow state, store and coordinator package
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -109,5 +109,8 @@ checks are recorded through the controller after the PR-reference commit.
 
 ## Risks and Follow-ups
 
-Stage policy extraction retains the approved owners in Slices 13–15. This report
-remains reviewing until the controller verifies integration into dev.
+Stage policy extraction retains the approved owners in Slices 13–15. Canonical
+PR #449 is verified merged into dev at `a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`.
+Controller validation `EVFKMQZNCCYQDPLZLRXOYO2S7M` passed the exact ordered
+`make verify`, focused workflow, cancellation/ownership race and diff checks on
+that clean head; its recorded finish is `2026-10-28T02:09:32.196676388Z`.

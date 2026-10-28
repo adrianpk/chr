@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084833
 title: "Quality slice 13: Candidate validation and merge stages"
-status: ready
+status: in_progress
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -10,6 +10,8 @@ tags: code-quality, remediation, slice-13
 source: review
 reported_at: 2026-10-26T08:48:33Z
 commits: []
+started_at: 2026-10-28T02:15:11Z
+branch: refactor/slice-13-quality-integration
 ready_at: 2026-10-26T08:57:09Z
 ---
 
@@ -56,3 +58,7 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 Existing preparation/admission/merger repair/cancellation and lost-ack fixtures with real Git and child processes; focused race for changed claim ownership; make verify.
 
 All commands above are planned. None ran as implementation validation during this planning task.
+
+Slice 12 PR #449 is verified integrated at
+`a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`. Candidate validation and merge
+extraction are active; no Slice 13 validation or PR has been completed.

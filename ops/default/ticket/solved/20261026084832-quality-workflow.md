@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084832
 title: "Quality slice 12: Workflow state, store and coordinator package"
-status: reviewing
+status: solved
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -15,6 +15,8 @@ branch: refactor/slice-12-quality-workflow
 ready_at: 2026-10-26T08:57:09Z
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/449
 reviewed_at: 2026-10-28T02:05:58Z
+closed_at: 2026-10-28T02:15:01Z
+resolution: fixed
 ---
 
 # Quality Slice 12: Workflow state, store and coordinator package
@@ -103,7 +105,6 @@ All 908 Store methods remain local; current hashes and frozen source identities,
 79 original dependencies and 100 authority/recovery entries are reconciled.
 
 The 75-check real IO/process/recovery/caller suite, strict lint, README checks and
-ceiling-six/115-debt policy pass. Canonical PR [#449](https://forge.adrianpk.com/adrianpk/chr/pulls/449) is open
-against dev. Controller validation records the exact clean PR head after its
-reference follow-up; integration remains with the controller. The ticket stays
-reviewing until that integration is verified.
+ceiling-six/115-debt policy pass. Canonical PR [#449](https://forge.adrianpk.com/adrianpk/chr/pulls/449) is verified
+merged into dev at `a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`. Controller validation
+`EVFKMQZNCCYQDPLZLRXOYO2S7M` passed all four ordered checks on that clean head.
