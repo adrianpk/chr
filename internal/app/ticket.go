@@ -4,11 +4,12 @@ import (
 	"github.com/urfave/cli/v3"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 )
 
 var (
 	reviewProviderDiagnosticRunner workflowcore.ReviewProviderDiagnosticRunner = workflowcore.OSReviewProviderDiagnosticRunner{}
-	reviewRemoteCommandRunner      workflowcore.ReviewRemoteCommandRunner      = workflowcore.OSReviewRemoteCommandRunner{}
+	reviewRemoteCommandRunner      workflowforge.Commands                      = workflowcore.OSReviewRemoteCommandRunner{}
 )
 
 func (factory commandFactory) ticketCommand() *cli.Command {

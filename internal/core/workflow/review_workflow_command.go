@@ -8,6 +8,7 @@ import (
 	"time"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 )
 
 type workflowProviderCommandRunner struct{}
@@ -36,7 +37,7 @@ func (workflowProviderCommandRunner) Input(ctx context.Context, command string, 
 	return stdout.Buffer.Bytes(), nil
 }
 
-func (adapter RemoteReviewAdapter) workflowProviderRunner() ReviewRemoteCommandRunner {
+func (adapter RemoteReviewAdapter) workflowProviderRunner() workflowforge.Commands {
 	switch adapter.runner.(type) {
 	case OSReviewRemoteCommandRunner, *OSReviewRemoteCommandRunner:
 		return workflowProviderCommandRunner{}

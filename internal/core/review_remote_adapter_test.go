@@ -74,7 +74,7 @@ func TestRemoteReviewAdapterWritesInlineComment(t *testing.T) {
 	runner := newFakeRemoteReviewRunner()
 	adapter := workflowcore.NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 
-	result, err := adapter.WriteComments(t.Context(), "https://github.com/example/repo/pull/34", []workflowcore.RemoteReviewComment{
+	result, err := adapter.WriteComments(t.Context(), "https://github.com/example/repo/pull/34", []workflowforge.ReviewComment{
 		{Body: "Handle nil input.", Path: "internal/example.go", Line: 42, Blocking: true},
 	})
 	if err != nil {
@@ -86,7 +86,7 @@ func TestRemoteReviewAdapterWritesInlineComment(t *testing.T) {
 	}
 
 	written := result.Comments[0]
-	if written.Placement != workflowcore.RemoteReviewCommentPlacementInline || written.Kind != workflowcore.RemoteReviewCommentKindBlocking {
+	if written.Placement != workflowforge.CommentPlacementInline || written.Kind != workflowforge.CommentKindBlocking {
 		t.Fatalf("written comment = %#v", written)
 	}
 
@@ -111,7 +111,7 @@ func TestRemoteReviewAdapterFallsBackToGeneralComment(t *testing.T) {
 
 	adapter := workflowcore.NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 
-	result, err := adapter.WriteComments(t.Context(), "https://codeberg.org/example/repo/pulls/12", []workflowcore.RemoteReviewComment{
+	result, err := adapter.WriteComments(t.Context(), "https://codeberg.org/example/repo/pulls/12", []workflowforge.ReviewComment{
 		{Body: "Handle nil input.", Path: "internal/example.go", Line: 42},
 	})
 	if err != nil {
@@ -119,7 +119,7 @@ func TestRemoteReviewAdapterFallsBackToGeneralComment(t *testing.T) {
 	}
 
 	written := result.Comments[0]
-	if written.Placement != workflowcore.RemoteReviewCommentPlacementGeneral || written.Reason != "inline_unavailable" {
+	if written.Placement != workflowforge.CommentPlacementGeneral || written.Reason != "inline_unavailable" {
 		t.Fatalf("written comment = %#v", written)
 	}
 

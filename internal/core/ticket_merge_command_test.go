@@ -45,7 +45,7 @@ func TestRunTicketMergeCommandAppliesSuccessfulMerge(t *testing.T) {
 	ticket, path := writeMergeCommandTicket(t)
 	remote := fakeTicketMergeCommandRemote{
 		snapshot: mergeCommandSnapshot(),
-		merge: workflowcore.MergeResult{
+		merge: workflowforge.MergeResult{
 			Reference: workflowforge.Reference{Provider: workflowforge.Forgejo},
 			Strategy:  workflowcore.TicketMergeStrategyRebase,
 			SHA:       "abc123",
@@ -92,7 +92,7 @@ func TestRunTicketMergeCommandCleansWorktreeAfterSuccessfulMerge(t *testing.T) {
 
 	remote := fakeTicketMergeCommandRemote{
 		snapshot: mergeCommandSnapshot(),
-		merge: workflowcore.MergeResult{
+		merge: workflowforge.MergeResult{
 			Reference: workflowforge.Reference{Provider: workflowforge.Forgejo},
 			Strategy:  workflowcore.TicketMergeStrategyRebase,
 			SHA:       "abc123",
@@ -189,18 +189,18 @@ func TestRunTicketMergeCommandRecordsBlockedPreflight(t *testing.T) {
 }
 
 type fakeTicketMergeCommandRemote struct {
-	snapshot workflowcore.RemoteReviewSnapshot
-	merge    workflowcore.MergeResult
+	snapshot workflowforge.ReviewSnapshot
+	merge    workflowforge.MergeResult
 	mergeErr error
 }
 
-func (remote fakeTicketMergeCommandRemote) Read(context.Context, string) (workflowcore.RemoteReviewSnapshot, error) {
+func (remote fakeTicketMergeCommandRemote) Read(context.Context, string) (workflowforge.ReviewSnapshot, error) {
 	return remote.snapshot, nil
 }
 
-func (remote fakeTicketMergeCommandRemote) Merge(context.Context, workflowcore.MergeRequest) (workflowcore.MergeResult, error) {
+func (remote fakeTicketMergeCommandRemote) Merge(context.Context, workflowforge.MergeRequest) (workflowforge.MergeResult, error) {
 	if remote.mergeErr != nil {
-		return workflowcore.MergeResult{}, remote.mergeErr
+		return workflowforge.MergeResult{}, remote.mergeErr
 	}
 
 	return remote.merge, nil
@@ -263,15 +263,15 @@ func readMergeCommandTicket(t *testing.T, path string) string {
 	return string(content)
 }
 
-func mergeCommandSnapshot() workflowcore.RemoteReviewSnapshot {
-	return workflowcore.RemoteReviewSnapshot{
+func mergeCommandSnapshot() workflowforge.ReviewSnapshot {
+	return workflowforge.ReviewSnapshot{
 		Reference:       workflowforge.Reference{Provider: workflowforge.Forgejo},
 		PullRequestJSON: `{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-3-merge-execution-command"},"mergeable":true}`,
 	}
 }
 
-func blockedMergeCommandSnapshot() workflowcore.RemoteReviewSnapshot {
-	return workflowcore.RemoteReviewSnapshot{
+func blockedMergeCommandSnapshot() workflowforge.ReviewSnapshot {
+	return workflowforge.ReviewSnapshot{
 		Reference:       workflowforge.Reference{Provider: workflowforge.Forgejo},
 		PullRequestJSON: `{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-3-merge-execution-command"},"mergeable":false}`,
 	}

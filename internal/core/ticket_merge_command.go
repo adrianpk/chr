@@ -11,13 +11,14 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TicketMergeCommandRemote defines a package boundary interface.
 type TicketMergeCommandRemote interface {
 	TicketMergePreflightRemoteReader
-	Merge(context.Context, workflowcore.MergeRequest) (workflowcore.MergeResult, error)
+	Merge(context.Context, workflowforge.MergeRequest) (workflowforge.MergeResult, error)
 }
 
 // TicketMergeCommandOptions describes a package boundary value.
@@ -39,7 +40,7 @@ type TicketMergeCommandOptions struct {
 type TicketMergeCommandResult struct {
 	TicketKey       string
 	Preflight       TicketMergePreflightResult
-	Merge           workflowcore.MergeResult
+	Merge           workflowforge.MergeResult
 	Status          ticketcore.Status
 	MergeState      ticketcore.MergeState
 	MergeResult     ticketcore.MergeResult
@@ -77,7 +78,7 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 		return result, applyTicketMergeCommandResult(ctx, opts.Ticket.Path, result, opts.MergedAt)
 	}
 
-	merge, err := opts.Remote.Merge(ctx, workflowcore.MergeRequest{URL: preflight.ReviewRef.URL, Strategy: preflight.MergeStrategy})
+	merge, err := opts.Remote.Merge(ctx, workflowforge.MergeRequest{URL: preflight.ReviewRef.URL, Strategy: preflight.MergeStrategy})
 	if err != nil {
 		result.Preflight.Allowed = false
 		result.Preflight.Blockers = append(result.Preflight.Blockers, TicketMergePreflightBlocker{

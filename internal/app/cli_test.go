@@ -36,6 +36,7 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -8813,7 +8814,7 @@ func (runner *fakeCLIReviewRemoteRunner) Input(
 	return []byte(`{}`), nil
 }
 
-func replaceReviewRemoteCommandRunner(runner workflowcore.ReviewRemoteCommandRunner) func() {
+func replaceReviewRemoteCommandRunner(runner workflowforge.Commands) func() {
 	previous := reviewRemoteCommandRunner
 	reviewRemoteCommandRunner = runner
 

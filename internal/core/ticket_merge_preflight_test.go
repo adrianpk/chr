@@ -16,7 +16,7 @@ import (
 func TestRunTicketMergePreflightAllowsReadyTicket(t *testing.T) {
 	ticket := testMergePreflightTicket()
 	remote := fakeTicketMergePreflightRemote{
-		snapshot: workflowcore.RemoteReviewSnapshot{
+		snapshot: workflowforge.ReviewSnapshot{
 			Reference:       workflowforge.Reference{Provider: workflowforge.Forgejo},
 			PullRequestJSON: `{"state":"open","base":{"ref":"develop"},"head":{"ref":"feat/slice-2-merger-preflight"},"mergeable":true}`,
 		},
@@ -73,7 +73,7 @@ func TestRunTicketMergePreflightBlocksWrongBase(t *testing.T) {
 	result, err := RunTicketMergePreflight(t.Context(), TicketMergePreflightOptions{
 		Ticket: testMergePreflightTicket(),
 		Remote: fakeTicketMergePreflightRemote{
-			snapshot: workflowcore.RemoteReviewSnapshot{
+			snapshot: workflowforge.ReviewSnapshot{
 				Reference:       workflowforge.Reference{Provider: workflowforge.Forgejo},
 				PullRequestJSON: `{"state":"open","base":{"ref":"main"},"head":{"ref":"feat/slice-2-merger-preflight"},"mergeable":true}`,
 			},
@@ -90,7 +90,7 @@ func TestRunTicketMergePreflightBlocksHeadMismatch(t *testing.T) {
 	result, err := RunTicketMergePreflight(t.Context(), TicketMergePreflightOptions{
 		Ticket: testMergePreflightTicket(),
 		Remote: fakeTicketMergePreflightRemote{
-			snapshot: workflowcore.RemoteReviewSnapshot{
+			snapshot: workflowforge.ReviewSnapshot{
 				Reference:       workflowforge.Reference{Provider: workflowforge.GitHub},
 				PullRequestJSON: `{"state":"OPEN","baseRefName":"dev","headRefName":"feat/other","mergeable":"MERGEABLE"}`,
 			},
@@ -107,7 +107,7 @@ func TestRunTicketMergePreflightBlocksNotMergeable(t *testing.T) {
 	result, err := RunTicketMergePreflight(t.Context(), TicketMergePreflightOptions{
 		Ticket: testMergePreflightTicket(),
 		Remote: fakeTicketMergePreflightRemote{
-			snapshot: workflowcore.RemoteReviewSnapshot{
+			snapshot: workflowforge.ReviewSnapshot{
 				Reference:       workflowforge.Reference{Provider: workflowforge.GitHub},
 				PullRequestJSON: `{"state":"OPEN","baseRefName":"dev","headRefName":"feat/slice-2-merger-preflight","mergeable":"CONFLICTING"}`,
 			},
@@ -194,17 +194,17 @@ func assertMergePreflightBlocker(t *testing.T, result TicketMergePreflightResult
 }
 
 type fakeTicketMergePreflightRemote struct {
-	snapshot workflowcore.RemoteReviewSnapshot
+	snapshot workflowforge.ReviewSnapshot
 	err      error
 }
 
-func (remote fakeTicketMergePreflightRemote) Read(context.Context, string) (workflowcore.RemoteReviewSnapshot, error) {
+func (remote fakeTicketMergePreflightRemote) Read(context.Context, string) (workflowforge.ReviewSnapshot, error) {
 	if remote.err != nil {
-		return workflowcore.RemoteReviewSnapshot{}, remote.err
+		return workflowforge.ReviewSnapshot{}, remote.err
 	}
 
 	if strings.TrimSpace(remote.snapshot.PullRequestJSON) == "" {
-		return workflowcore.RemoteReviewSnapshot{}, errors.New("unexpected remote read")
+		return workflowforge.ReviewSnapshot{}, errors.New("unexpected remote read")
 	}
 
 	return remote.snapshot, nil

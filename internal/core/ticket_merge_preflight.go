@@ -15,7 +15,7 @@ import (
 
 // TicketMergePreflightRemoteReader defines a package boundary interface.
 type TicketMergePreflightRemoteReader interface {
-	Read(ctx context.Context, rawURL string) (workflowcore.RemoteReviewSnapshot, error)
+	Read(ctx context.Context, rawURL string) (workflowforge.ReviewSnapshot, error)
 }
 
 // TicketMergePreflightOptions describes a package boundary value.
@@ -32,7 +32,7 @@ type TicketMergePreflightResult struct {
 	Allowed       bool
 	TicketKey     string
 	ReviewRef     ticketmetadata.ReviewRef
-	Remote        workflowcore.RemoteReviewSnapshot
+	Remote        workflowforge.ReviewSnapshot
 	ExpectedBase  string
 	MergeStrategy string
 	Blockers      []TicketMergePreflightBlocker
@@ -167,7 +167,7 @@ func ticketMergeSerialRepairBlocker(ticket ticketcore.Indexed, tickets []ticketc
 	return nil
 }
 
-func ticketMergeRemoteBlockers(handoff ticketcore.MergeHandoff, expectedBase string, snapshot workflowcore.RemoteReviewSnapshot) []TicketMergePreflightBlocker {
+func ticketMergeRemoteBlockers(handoff ticketcore.MergeHandoff, expectedBase string, snapshot workflowforge.ReviewSnapshot) []TicketMergePreflightBlocker {
 	metadata := parseTicketMergeRemoteMetadata(snapshot)
 	blockers := []TicketMergePreflightBlocker{}
 
@@ -206,7 +206,7 @@ func ticketMergeRemoteBlockers(handoff ticketcore.MergeHandoff, expectedBase str
 	return blockers
 }
 
-func parseTicketMergeRemoteMetadata(snapshot workflowcore.RemoteReviewSnapshot) ticketMergeRemoteMetadata {
+func parseTicketMergeRemoteMetadata(snapshot workflowforge.ReviewSnapshot) ticketMergeRemoteMetadata {
 	switch snapshot.Reference.Provider {
 	case workflowforge.GitHub:
 		return parseGitHubTicketMergeMetadata(snapshot.PullRequestJSON)

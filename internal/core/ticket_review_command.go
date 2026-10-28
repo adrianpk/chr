@@ -10,6 +10,7 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -37,13 +38,13 @@ type TicketReviewCommandOptions struct {
 type TicketReviewCommandResult struct {
 	TicketKey        string
 	ReviewRef        ticketmetadata.ReviewRef
-	RemoteSnapshot   workflowcore.RemoteReviewSnapshot
+	RemoteSnapshot   workflowforge.ReviewSnapshot
 	ReviewState      ticketcore.ReviewState
 	ReviewResult     ticketcore.ReviewResult
 	ReviewRound      int
 	Status           ticketcore.Status
 	BlockingFindings []string
-	RemoteComments   []workflowcore.RemoteReviewWrittenComment
+	RemoteComments   []workflowforge.WrittenComment
 	DryRun           bool
 }
 
@@ -138,7 +139,7 @@ func ticketReviewCommandPullRequestRef(ticket ticketcore.Indexed) (ticketmetadat
 	return ticketmetadata.ReviewRef{}, fmt.Errorf("ticket review requires a pull_request review ref")
 }
 
-func ticketReviewCommandPlan(opts TicketReviewCommandOptions, ref ticketmetadata.ReviewRef, snapshot workflowcore.RemoteReviewSnapshot, result ticketcore.ReviewResult) TicketReviewCommandResult {
+func ticketReviewCommandPlan(opts TicketReviewCommandOptions, ref ticketmetadata.ReviewRef, snapshot workflowforge.ReviewSnapshot, result ticketcore.ReviewResult) TicketReviewCommandResult {
 	transition := ticketReviewCommandStateAndStatus(result)
 
 	return TicketReviewCommandResult{
@@ -174,15 +175,15 @@ func ticketReviewCommandStateAndStatus(result ticketcore.ReviewResult) ticketRev
 	}
 }
 
-func writeTicketReviewCommandFindings(ctx context.Context, adapter workflowcore.RemoteReviewAdapter, url string, findings []string) ([]workflowcore.RemoteReviewWrittenComment, error) {
+func writeTicketReviewCommandFindings(ctx context.Context, adapter workflowcore.RemoteReviewAdapter, url string, findings []string) ([]workflowforge.WrittenComment, error) {
 	trimmed := trimmedTicketReviewFindings(findings)
 	if len(trimmed) == 0 {
 		return nil, nil
 	}
 
-	comments := make([]workflowcore.RemoteReviewComment, 0, len(trimmed))
+	comments := make([]workflowforge.ReviewComment, 0, len(trimmed))
 	for _, finding := range trimmed {
-		comments = append(comments, workflowcore.RemoteReviewComment{Body: finding, Blocking: true})
+		comments = append(comments, workflowforge.ReviewComment{Body: finding, Blocking: true})
 	}
 
 	result, err := adapter.WriteComments(ctx, url, comments)
