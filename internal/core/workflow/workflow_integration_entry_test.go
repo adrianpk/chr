@@ -41,7 +41,7 @@ func nativeEntryTransition(t *testing.T, store *Store, entry IntegrationEntry, n
 
 	run := workflowTestRead(t, store, entry.InvocationID)
 
-	request := IntegrationTransition{InvocationID: entry.InvocationID, EntryID: entry.ID, InvocationRevision: run.Revision, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: next}
+	request := IntegrationTransition{InvocationID: entry.InvocationID, EntryID: entry.ID, InvocationRevision: run.Revision, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: IntegrationState(next)}
 	if entry.CandidateRef != nil {
 		request.CandidateHash = entry.CandidateRef.Hash
 	}

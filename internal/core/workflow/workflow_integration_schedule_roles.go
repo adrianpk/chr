@@ -128,7 +128,7 @@ func workflowIntegrationRoleReady(run workflowInvocationFile, entry IntegrationE
 		return false
 	}
 
-	if !slices.Contains([]string{"queued", "preparing", "merging", "validating", "reviewing"}, entry.State) || !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationWaitingIntegration, workflowstate.InvocationWaitingReview}, run.Status) {
+	if !slices.Contains([]IntegrationState{"queued", "preparing", "merging", "validating", "reviewing"}, entry.State) || !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationWaitingIntegration, workflowstate.InvocationWaitingReview}, run.Status) {
 		return false
 	}
 

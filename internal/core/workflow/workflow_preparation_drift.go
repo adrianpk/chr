@@ -31,7 +31,7 @@ func (s *Store) guardWorkflowPreparationWork(ctx context.Context, run workflowIn
 		return nil
 	}
 
-	if !slices.Contains([]string{"queued", "preparing", "merging", "validating", "reviewing", "waiting_review", "ready_to_publish"}, entry.State) {
+	if !slices.Contains([]IntegrationState{"queued", "preparing", "merging", "validating", "reviewing", "waiting_review", "ready_to_publish"}, entry.State) {
 		return ErrWorkflowOwned
 	}
 

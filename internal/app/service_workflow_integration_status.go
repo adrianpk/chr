@@ -59,7 +59,7 @@ func workflowIntegrationStatus(observed *workflowcore.IntegrationInspection) *Wo
 
 	if entry := observed.Entry; entry != nil {
 		result.EntryID, result.EntryRevision, result.Unit = entry.ID, entry.Revision, entry.Unit
-		result.Repository, result.TargetRef, result.Phase = entry.Repository, entry.TargetRef, entry.State
+		result.Repository, result.TargetRef, result.Phase = entry.Repository, entry.TargetRef, string(entry.State)
 
 		result.QueuePosition, result.Blocker = observed.QueuePosition, entry.Blocker
 		if entry.CandidateRef != nil {

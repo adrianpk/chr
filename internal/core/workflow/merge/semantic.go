@@ -31,7 +31,7 @@ func PlanRepair(plan workflowstate.MergerRepairPlan, input workflowstate.MergerI
 	}
 
 	if len(owners) == 1 && owners[0] != "" {
-		plan.Outcome, plan.OriginalCommit = "replay_step", owners[0]
+		plan.Outcome, plan.OriginalCommit = workflowstate.MergerRepairReplayStep, owners[0]
 
 		return plan, nil
 	}
@@ -42,7 +42,7 @@ func PlanRepair(plan workflowstate.MergerRepairPlan, input workflowstate.MergerI
 		}
 
 		finding := *fix
-		plan.Outcome, plan.IntegrationFix = "integration_fix", &finding
+		plan.Outcome, plan.IntegrationFix = workflowstate.MergerRepairIntegrationFix, &finding
 
 		return plan, nil
 	}
@@ -52,7 +52,7 @@ func PlanRepair(plan workflowstate.MergerRepairPlan, input workflowstate.MergerI
 		requirements = append(requirements, requirement.ID)
 	}
 
-	plan.Outcome = "needs_decision"
+	plan.Outcome = workflowstate.MergerRepairNeedsDecision
 	plan.Decisions = []workflowstate.MergerDecision{{ID: "replay-owner", Issue: "The semantic repair has no unique original replay owner. Select the owning source step or declare an actionable integration fix.", RequirementIDs: requirements, Options: []string{"Identify the original source step", "Declare an integration fix with an actionable finding"}, Authority: "maintainer"}}
 
 	return plan, CheckDecisions(plan.Decisions, input)
@@ -78,7 +78,7 @@ func answeredPlan(plan workflowstate.MergerRepairPlan, input workflowstate.Merge
 				return answeredRepair{Plan: plan, Found: false}, workflowstate.ErrConflict
 			}
 
-			plan.Outcome, plan.OriginalCommit = "replay_step", answer.OriginalCommit
+			plan.Outcome, plan.OriginalCommit = workflowstate.MergerRepairReplayStep, answer.OriginalCommit
 
 			return answeredRepair{Plan: plan, Found: true}, nil
 		}
@@ -88,7 +88,7 @@ func answeredPlan(plan workflowstate.MergerRepairPlan, input workflowstate.Merge
 		}
 
 		finding := *answer.IntegrationFix
-		plan.Outcome, plan.IntegrationFix = "integration_fix", &finding
+		plan.Outcome, plan.IntegrationFix = workflowstate.MergerRepairIntegrationFix, &finding
 
 		return answeredRepair{Plan: plan, Found: true}, nil
 	}

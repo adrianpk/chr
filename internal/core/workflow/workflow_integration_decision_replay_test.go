@@ -22,7 +22,7 @@ func TestNativeDecisionReplay(t *testing.T) {
 	cases := []struct {
 		name    string
 		answer  workflowstate.IntegrationAnswer
-		outcome string
+		outcome workflowstate.MergerRepairOutcome
 		denied  bool
 	}{
 		{"owner", workflowstate.IntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.SourceCommit}, "replay_step", false},

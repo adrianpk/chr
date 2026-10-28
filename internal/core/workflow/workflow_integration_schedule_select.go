@@ -112,7 +112,7 @@ func workflowIntegrationScheduleRun(runs []workflowInvocationFile, entry Integra
 
 func workflowIntegrationScheduleExclusion(run workflowInvocationFile, entry IntegrationEntry) string {
 	if entry.State != "queued" {
-		return entry.State
+		return string(entry.State)
 	}
 
 	if entry.StopIntent != "" || run.StopIntent != "" {

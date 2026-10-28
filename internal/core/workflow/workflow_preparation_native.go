@@ -57,7 +57,7 @@ func workflowNativePreparationOwnerMatches(entry IntegrationEntry, source workfl
 
 func workflowNativePreparationEntryReady(run workflowInvocationFile, entry IntegrationEntry) error {
 	if run.Preparation != nil && run.Preparation.State == "validated" {
-		if !slices.Contains([]string{"reviewing", "waiting_review", "ready_to_publish"}, entry.State) || !workflowNativePreparedEntryMatches(run, entry) {
+		if !slices.Contains([]IntegrationState{"reviewing", "waiting_review", "ready_to_publish"}, entry.State) || !workflowNativePreparedEntryMatches(run, entry) {
 			return workflowstate.ErrConflict
 		}
 

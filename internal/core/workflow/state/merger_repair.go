@@ -32,9 +32,9 @@ type MergerRegenerationEvidence struct {
 // MergerRepairPlan selects an original replay owner or an explicit
 // integration fix. Ambiguity produces decisions, not implicit permission.
 type MergerRepairPlan struct {
-	InputHash      string           `json:"input_hash"`
-	Outcome        string           `json:"outcome"`
-	OriginalCommit string           `json:"original_commit,omitempty"`
-	IntegrationFix *ReviewFinding   `json:"integration_fix,omitempty"`
-	Decisions      []MergerDecision `json:"decisions,omitempty"`
+	InputHash      string              `json:"input_hash"`
+	Outcome        MergerRepairOutcome `json:"outcome"`
+	OriginalCommit string              `json:"original_commit,omitempty"`
+	IntegrationFix *ReviewFinding      `json:"integration_fix,omitempty"`
+	Decisions      []MergerDecision    `json:"decisions,omitempty"`
 }

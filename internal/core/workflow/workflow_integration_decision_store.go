@@ -229,7 +229,7 @@ func workflowDecisionContextEqual(original, next workflowstate.MergerInput) bool
 }
 
 func (s *Store) guardWorkflowDecisionTransition(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, request IntegrationTransition) error {
-	if entry.DecisionRef == nil || slices.Contains([]string{"blocked", "paused", "cancelled", "queued"}, request.State) {
+	if entry.DecisionRef == nil || slices.Contains([]IntegrationState{"blocked", "paused", "cancelled", "queued"}, request.State) {
 		return nil
 	}
 

@@ -57,7 +57,7 @@ func (s *Store) workflowNativeReplacementEntry(ctx context.Context, run workflow
 
 	updateWorkflowIntegrationEntry(&entry, request)
 
-	for _, state := range []string{"preparing", "validating"} {
+	for _, state := range []IntegrationState{IntegrationPreparing, IntegrationValidating} {
 		request = workflowNativeReplacementTransition(entry, state)
 		if err := guardWorkflowIntegrationTransition(entry, request); err != nil {
 			return entry, err
@@ -75,7 +75,7 @@ func (s *Store) workflowNativeReplacementEntry(ctx context.Context, run workflow
 	return entry, validateWorkflowIntegrationEntry(entry)
 }
 
-func workflowNativeReplacementTransition(entry IntegrationEntry, state string) IntegrationTransition {
+func workflowNativeReplacementTransition(entry IntegrationEntry, state IntegrationState) IntegrationTransition {
 	request := IntegrationTransition{EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: state}
 	if entry.CandidateRef != nil {
 		request.CandidateHash = entry.CandidateRef.Hash

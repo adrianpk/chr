@@ -115,7 +115,7 @@ func validateWorkflowIntegrationQueueQuery(q IntegrationQueueQuery) error {
 	}
 
 	for _, state := range q.States {
-		if !validWorkflowIntegrationState(state) {
+		if !validWorkflowIntegrationState(IntegrationState(state)) {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -243,7 +243,7 @@ func workflowIntegrationQueryTarget(entry IntegrationEntry, q IntegrationQueueQu
 }
 
 func workflowIntegrationQueryState(entry IntegrationEntry, q IntegrationQueueQuery) bool {
-	return len(q.States) == 0 || slices.Contains(q.States, entry.State)
+	return len(q.States) == 0 || slices.Contains(q.States, string(entry.State))
 }
 
 func workflowSubmissionQueryOwner(j workflowSubmissionJournal, q SubmissionQuery) bool {

@@ -75,8 +75,8 @@ func TestNativeMergerProtocol(t *testing.T) {
 	_, input, now := nativeMergerInput(t)
 	before := nativeMergerJSON(t, input)
 
-	for _, outcome := range []string{"resolved", "needs_decision", "failed"} {
-		t.Run(outcome, func(t *testing.T) {
+	for _, outcome := range []workflowstate.MergerOutcome{workflowstate.MergerResolved, workflowstate.MergerNeedsDecision, workflowstate.MergerFailed} {
+		t.Run(string(outcome), func(t *testing.T) {
 			result := nativeMergerResolved(input)
 
 			result.Outcome = outcome

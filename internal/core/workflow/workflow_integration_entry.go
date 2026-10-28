@@ -12,9 +12,9 @@ import (
 
 // IntegrationBlocker records the only permitted reconciliation resume.
 type IntegrationBlocker struct {
-	Reason         string `json:"reason"`
-	RequiredAction string `json:"required_action"`
-	ResumeState    string `json:"resume_state"`
+	Reason         string           `json:"reason"`
+	RequiredAction string           `json:"required_action"`
+	ResumeState    IntegrationState `json:"resume_state"`
 }
 
 // IntegrationEntry is owned by an invocation, never by a queue index.
@@ -30,7 +30,7 @@ type IntegrationEntry struct {
 	QueueSequence       uint64                     `json:"queue_sequence"`
 	AdmissionKey        string                     `json:"admission_key"`
 	FrozenScopeHash     string                     `json:"frozen_scope_hash"`
-	State               string                     `json:"state"`
+	State               IntegrationState           `json:"state"`
 	StateRevision       uint64                     `json:"state_revision"`
 	PreparationReserved bool                       `json:"preparation_reserved,omitempty"`
 	ClaimGeneration     uint64                     `json:"claim_generation"`
@@ -62,7 +62,7 @@ type IntegrationTransition struct {
 	EntryRevision      uint64
 	ClaimGeneration    uint64
 	CandidateHash      string
-	State              string
+	State              IntegrationState
 	CandidateRef       *workflowstate.EvidenceRef
 	Blocker            *IntegrationBlocker
 	StopIntent         string
@@ -116,7 +116,7 @@ func newWorkflowIntegrationEntry(run workflowInvocationFile, request Integration
 		SchemaVersion: 1, InvocationID: run.ID, Unit: request.Unit, CoordinatorID: coordinator.ID,
 		Repository: repository, TargetRef: request.TargetRef,
 		QueueSequence: sequence, AdmissionKey: request.AdmissionKey, FrozenScopeHash: hash,
-		State: "queued", StateRevision: 1, BudgetRef: workflowIntegrationBudgetPath(run.ID),
+		State: IntegrationQueued, StateRevision: 1, BudgetRef: workflowIntegrationBudgetPath(run.ID),
 	}
 
 	return entry, validateWorkflowIntegrationEntry(entry)
@@ -165,6 +165,6 @@ func (s *Store) TransitionWorkflowIntegration(ctx context.Context, request Integ
 	return entry, err
 }
 
-func workflowIntegrationTerminal(state string) bool {
+func workflowIntegrationTerminal(state IntegrationState) bool {
 	return state == "integrated" || state == "cancelled"
 }

@@ -125,7 +125,7 @@ func (s *Store) reviewWorkflowNativeContinuation(ctx context.Context, guard Inte
 	return s.transitionWorkflowNativeContinuation(ctx, entry, guard, "ready_to_publish")
 }
 
-func (s *Store) transitionWorkflowNativeContinuation(ctx context.Context, entry IntegrationEntry, guard IntegrationBudgetGuard, state string) error {
+func (s *Store) transitionWorkflowNativeContinuation(ctx context.Context, entry IntegrationEntry, guard IntegrationBudgetGuard, state IntegrationState) error {
 	hash := ""
 	if entry.CandidateRef != nil {
 		hash = entry.CandidateRef.Hash

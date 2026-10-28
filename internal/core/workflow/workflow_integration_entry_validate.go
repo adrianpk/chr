@@ -51,8 +51,8 @@ func validWorkflowIntegrationTarget(entry IntegrationEntry) bool {
 	return err == nil && repository == entry.Repository && strings.HasPrefix(entry.TargetRef, "refs/heads/") && workflowstate.ValidBranch(strings.TrimPrefix(entry.TargetRef, "refs/heads/"))
 }
 
-func validWorkflowIntegrationState(state string) bool {
-	return slices.Contains([]string{"queued", "preparing", "merging", "validating", "reviewing", "waiting_review", "ready_to_publish", "publishing", "observing", "finalizing", "integrated", "blocked", "paused", "cancelled"}, state)
+func validWorkflowIntegrationState(state IntegrationState) bool {
+	return slices.Contains([]IntegrationState{IntegrationQueued, IntegrationPreparing, IntegrationMerging, IntegrationValidating, IntegrationReviewing, IntegrationWaitingReview, IntegrationReadyToPublish, IntegrationPublishing, IntegrationObserving, IntegrationFinalizing, IntegrationIntegrated, IntegrationBlocked, IntegrationPaused, IntegrationCancelled}, state)
 }
 
 func validateWorkflowIntegrationEntryPhase(entry IntegrationEntry) error {
@@ -68,7 +68,7 @@ func validateWorkflowIntegrationEntryPhase(entry IntegrationEntry) error {
 		return err
 	}
 
-	if slices.Contains([]string{"reviewing", "waiting_review", "ready_to_publish", "publishing", "observing", "finalizing", "integrated"}, entry.State) && entry.CandidateRef == nil {
+	if slices.Contains([]IntegrationState{IntegrationReviewing, IntegrationWaitingReview, IntegrationReadyToPublish, IntegrationPublishing, IntegrationObserving, IntegrationFinalizing, IntegrationIntegrated}, entry.State) && entry.CandidateRef == nil {
 		return workflowstate.IntegrationConflict("requires exact candidate evidence")
 	}
 
@@ -76,11 +76,11 @@ func validateWorkflowIntegrationEntryPhase(entry IntegrationEntry) error {
 }
 
 func validateWorkflowIntegrationPublicationRefs(entry IntegrationEntry) error {
-	if slices.Contains([]string{"publishing", "observing", "finalizing", "integrated"}, entry.State) && (entry.SubmissionRef == nil || !validWorkflowSubmissionProjection(*entry.SubmissionRef)) {
+	if slices.Contains([]IntegrationState{IntegrationPublishing, IntegrationObserving, IntegrationFinalizing, IntegrationIntegrated}, entry.State) && (entry.SubmissionRef == nil || !validWorkflowSubmissionProjection(*entry.SubmissionRef)) {
 		return workflowstate.IntegrationConflict("requires retained submission authority")
 	}
 
-	if (entry.State == "finalizing" || entry.State == "integrated") && entry.ReceiptRef == nil {
+	if (entry.State == IntegrationFinalizing || entry.State == IntegrationIntegrated) && entry.ReceiptRef == nil {
 		return workflowstate.IntegrationConflict("requires verified receipt evidence")
 	}
 
@@ -88,7 +88,7 @@ func validateWorkflowIntegrationPublicationRefs(entry IntegrationEntry) error {
 }
 
 func validateWorkflowIntegrationBlocker(entry IntegrationEntry) error {
-	if entry.State == "blocked" {
+	if entry.State == IntegrationBlocked {
 		if !validWorkflowIntegrationBlocker(entry.Blocker) {
 			return workflowstate.IntegrationConflict("requires a typed reconciliation blocker")
 		}
@@ -100,7 +100,7 @@ func validateWorkflowIntegrationBlocker(entry IntegrationEntry) error {
 }
 
 func validWorkflowIntegrationBlocker(blocker *IntegrationBlocker) bool {
-	return blocker != nil && workflowstate.ValidRequestKey(blocker.Reason) && workflowstate.ValidRequestKey(blocker.RequiredAction) && validWorkflowIntegrationState(blocker.ResumeState) && !slices.Contains([]string{"blocked", "cancelled", "integrated"}, blocker.ResumeState)
+	return blocker != nil && workflowstate.ValidRequestKey(blocker.Reason) && workflowstate.ValidRequestKey(blocker.RequiredAction) && validWorkflowIntegrationState(blocker.ResumeState) && !slices.Contains([]IntegrationState{IntegrationBlocked, IntegrationCancelled, IntegrationIntegrated}, blocker.ResumeState)
 }
 
 func validateWorkflowIntegrationBindings(run workflowInvocationFile) error {
@@ -143,10 +143,10 @@ func workflowIntegrationCurrentBinding(run workflowInvocationFile, binding workf
 	return run.Integration != nil && *run.Integration == binding
 }
 
-func workflowIntegrationNextState(entry IntegrationEntry, next string) error {
+func workflowIntegrationNextState(entry IntegrationEntry, next IntegrationState) error {
 	allowed := workflowIntegrationSuccessors(entry.State)
-	if entry.State == "blocked" && entry.Blocker != nil {
-		allowed = []string{entry.Blocker.ResumeState}
+	if entry.State == IntegrationBlocked && entry.Blocker != nil {
+		allowed = []IntegrationState{entry.Blocker.ResumeState}
 	}
 
 	if !slices.Contains(allowed, next) {
@@ -156,41 +156,41 @@ func workflowIntegrationNextState(entry IntegrationEntry, next string) error {
 	return nil
 }
 
-func workflowIntegrationSuccessors(state string) []string {
+func workflowIntegrationSuccessors(state IntegrationState) []IntegrationState {
 	switch state {
-	case "queued":
-		return []string{"preparing", "paused", "cancelled", "blocked"}
-	case "preparing", "merging", "validating", "reviewing", "waiting_review":
+	case IntegrationQueued:
+		return []IntegrationState{IntegrationPreparing, IntegrationPaused, IntegrationCancelled, IntegrationBlocked}
+	case IntegrationPreparing, IntegrationMerging, IntegrationValidating, IntegrationReviewing, IntegrationWaitingReview:
 		return workflowIntegrationPreparationSuccessors(state)
-	case "ready_to_publish":
-		return []string{"publishing", "queued", "blocked", "paused", "cancelled"}
-	case "publishing":
-		return []string{"observing", "queued", "blocked"}
-	case "observing":
-		return []string{"finalizing", "blocked"}
-	case "finalizing":
-		return []string{"integrated", "blocked"}
-	case "paused":
-		return []string{"queued", "cancelled"}
+	case IntegrationReadyToPublish:
+		return []IntegrationState{IntegrationPublishing, IntegrationQueued, IntegrationBlocked, IntegrationPaused, IntegrationCancelled}
+	case IntegrationPublishing:
+		return []IntegrationState{IntegrationObserving, IntegrationQueued, IntegrationBlocked}
+	case IntegrationObserving:
+		return []IntegrationState{IntegrationFinalizing, IntegrationBlocked}
+	case IntegrationFinalizing:
+		return []IntegrationState{IntegrationIntegrated, IntegrationBlocked}
+	case IntegrationPaused:
+		return []IntegrationState{IntegrationQueued, IntegrationCancelled}
 	default:
 		return nil
 	}
 }
 
-func workflowIntegrationPreparationSuccessors(state string) []string {
-	allowed := []string{"queued", "blocked", "paused", "cancelled"}
+func workflowIntegrationPreparationSuccessors(state IntegrationState) []IntegrationState {
+	allowed := []IntegrationState{IntegrationQueued, IntegrationBlocked, IntegrationPaused, IntegrationCancelled}
 
 	switch state {
-	case "preparing":
-		return append(allowed, "merging", "validating")
-	case "merging":
-		return append(allowed, "validating")
-	case "validating":
-		return append(allowed, "reviewing", "merging")
-	case "reviewing":
-		return append(allowed, "waiting_review", "ready_to_publish", "merging")
-	case "waiting_review":
-		return append(allowed, "ready_to_publish", "merging")
+	case IntegrationPreparing:
+		return append(allowed, IntegrationMerging, IntegrationValidating)
+	case IntegrationMerging:
+		return append(allowed, IntegrationValidating)
+	case IntegrationValidating:
+		return append(allowed, IntegrationReviewing, IntegrationMerging)
+	case IntegrationReviewing:
+		return append(allowed, IntegrationWaitingReview, IntegrationReadyToPublish, IntegrationMerging)
+	case IntegrationWaitingReview:
+		return append(allowed, IntegrationReadyToPublish, IntegrationMerging)
 	default:
 		return nil
 	}

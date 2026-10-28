@@ -95,7 +95,7 @@ func (s *Store) workflowIntegrationPreparationTarget(run workflowInvocationFile)
 }
 
 func workflowIntegrationPrepared(run workflowInvocationFile, entry IntegrationEntry) bool {
-	if entry.PreparationReserved || entry.CandidateRef != nil || slices.Contains([]string{"preparing", "merging", "validating", "reviewing", "ready_to_publish", "publishing", "observing", "finalizing"}, entry.State) {
+	if entry.PreparationReserved || entry.CandidateRef != nil || slices.Contains([]IntegrationState{"preparing", "merging", "validating", "reviewing", "ready_to_publish", "publishing", "observing", "finalizing"}, entry.State) {
 		return true
 	}
 
@@ -198,7 +198,7 @@ func (s *Store) guardWorkflowIntegrationRoleOwner(run workflowInvocationFile) er
 		return err
 	}
 
-	if run.StopIntent != "" || entry.StopIntent != "" || !slices.Contains([]string{"queued", "preparing", "merging", "validating", "reviewing"}, entry.State) {
+	if run.StopIntent != "" || entry.StopIntent != "" || !slices.Contains([]IntegrationState{"queued", "preparing", "merging", "validating", "reviewing"}, entry.State) {
 		return ErrWorkflowOwned
 	}
 

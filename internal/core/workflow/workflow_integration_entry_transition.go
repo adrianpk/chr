@@ -65,7 +65,7 @@ func guardWorkflowIntegrationTransition(entry IntegrationEntry, request Integrat
 }
 
 func workflowIntegrationPublicationStop(entry IntegrationEntry, request IntegrationTransition) bool {
-	return request.State == entry.State && request.StopIntent != "" && request.CandidateRef == nil && request.Blocker == nil && slices.Contains([]string{"publishing", "observing"}, entry.State)
+	return request.State == entry.State && request.StopIntent != "" && request.CandidateRef == nil && request.Blocker == nil && slices.Contains([]IntegrationState{"publishing", "observing"}, entry.State)
 }
 
 func (s *Store) checkWorkflowIntegrationTransition(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, request IntegrationTransition) error {
@@ -94,7 +94,7 @@ func (s *Store) checkWorkflowIntegrationTransition(ctx context.Context, run work
 		return err
 	}
 
-	if slices.Contains([]string{"ready_to_publish", "publishing"}, next.State) {
+	if slices.Contains([]IntegrationState{IntegrationReadyToPublish, IntegrationPublishing}, next.State) {
 		if err := s.checkWorkflowIntegrationAuthorization(run, next); err != nil {
 			return err
 		}
@@ -112,7 +112,7 @@ func updateWorkflowIntegrationEntry(entry *IntegrationEntry, request Integration
 		entry.CandidateRef = request.CandidateRef
 	}
 
-	if entry.State == "queued" && request.State == "preparing" {
+	if entry.State == IntegrationQueued && request.State == IntegrationPreparing {
 		entry.ClaimGeneration++
 	}
 
@@ -121,7 +121,7 @@ func updateWorkflowIntegrationEntry(entry *IntegrationEntry, request Integration
 		entry.StopIntent = request.StopIntent
 	}
 
-	if request.CandidateRef != nil || slices.Contains([]string{"preparing", "merging", "validating"}, request.State) {
+	if request.CandidateRef != nil || slices.Contains([]IntegrationState{"preparing", "merging", "validating"}, request.State) {
 		entry.PreparationReserved = true
 	}
 
@@ -168,7 +168,7 @@ func (s *Store) checkWorkflowIntegrationAuthorization(run workflowInvocationFile
 func (s *Store) checkWorkflowIntegrationPublication(ctx context.Context, run workflowInvocationFile, old, next IntegrationEntry) error {
 	journal, err := s.readWorkflowSubmissionJournal(ctx, run)
 	if errors.Is(err, os.ErrNotExist) {
-		if run.Submission != nil || next.SubmissionRef != nil || slices.Contains([]string{"publishing", "observing", "finalizing", "integrated"}, next.State) {
+		if run.Submission != nil || next.SubmissionRef != nil || slices.Contains([]IntegrationState{IntegrationPublishing, IntegrationObserving, IntegrationFinalizing, IntegrationIntegrated}, next.State) {
 			return workflowstate.IntegrationConflict("has no native submission journal")
 		}
 
@@ -196,11 +196,11 @@ func (s *Store) checkWorkflowIntegrationPublication(ctx context.Context, run wor
 }
 
 func guardWorkflowIntegrationSubmissionPhase(entry IntegrationEntry, submission workflowstate.Submission) error {
-	if submission.State == "awaiting_observation" && !slices.Contains([]string{"publishing", "observing", "blocked"}, entry.State) {
+	if submission.State == "awaiting_observation" && !slices.Contains([]IntegrationState{"publishing", "observing", "blocked"}, entry.State) {
 		return ErrWorkflowObservationRequired
 	}
 
-	if submission.State == "confirmed" && !slices.Contains([]string{"observing", "finalizing", "integrated", "blocked"}, entry.State) {
+	if submission.State == "confirmed" && !slices.Contains([]IntegrationState{"observing", "finalizing", "integrated", "blocked"}, entry.State) {
 		return workflowstate.IntegrationConflict("confirmed publication cannot be requeued or cancelled")
 	}
 
@@ -208,7 +208,7 @@ func guardWorkflowIntegrationSubmissionPhase(entry IntegrationEntry, submission 
 }
 
 func checkWorkflowIntegrationSubmissionBinding(run workflowInvocationFile, entry IntegrationEntry, journal workflowSubmissionJournal) error {
-	if entry.State != "publishing" && entry.State != "observing" {
+	if entry.State != IntegrationPublishing && entry.State != IntegrationObserving {
 		return nil
 	}
 
@@ -228,11 +228,11 @@ func (s *Store) checkWorkflowIntegrationFinalization(ctx context.Context, run wo
 		return s.checkWorkflowNativeNonApplication(ctx, submission)
 	}
 
-	if old.State == "publishing" && next.State == "queued" {
+	if old.State == "publishing" && next.State == IntegrationQueued {
 		return workflowstate.IntegrationConflict("requires native dispatch reconciliation before requeue")
 	}
 
-	if next.State != "finalizing" && next.State != "integrated" {
+	if next.State != IntegrationFinalizing && next.State != IntegrationIntegrated {
 		return nil
 	}
 
@@ -253,7 +253,7 @@ func (s *Store) checkWorkflowIntegrationReceiptImages(ctx context.Context, run w
 		return err
 	}
 
-	if next.State == "integrated" {
+	if next.State == IntegrationIntegrated {
 		if err := s.checkWorkflowFinalizationImages(ctx, run, receipt); err != nil {
 			return err
 		}
@@ -274,22 +274,22 @@ func projectWorkflowIntegrationPhase(run *workflowInvocationFile, entry Integrat
 	checkOwned := workflowIntegrationCheckOwned(*run)
 
 	switch entry.State {
-	case "queued":
+	case IntegrationQueued:
 		run.Status = workflowstate.InvocationPending
-	case "waiting_review":
+	case IntegrationWaitingReview:
 		run.Status = workflowstate.InvocationWaitingReview
-	case "blocked":
+	case IntegrationBlocked:
 		run.Status = workflowstate.InvocationBlocked
 		run.Blocker = &Blocker{Dependency: entry.Unit, Reason: entry.Blocker.Reason, NextActionOwner: "operator"}
-	case "paused", "cancelled":
+	case IntegrationPaused, "cancelled":
 		run.Status = workflowstate.InvocationStatus(entry.State)
-	case "integrated":
+	case IntegrationIntegrated:
 		// Verified unit completion is distinct from the existing set frontier.
 	default:
 		run.Status = workflowstate.InvocationWaitingIntegration
 	}
 
-	if entry.State != "blocked" {
+	if entry.State != IntegrationBlocked {
 		run.Blocker = nil
 	}
 
@@ -313,22 +313,22 @@ func workflowIntegrationCheckOwned(run workflowInvocationFile) bool {
 }
 
 func bindWorkflowIntegrationPublication(entry *IntegrationEntry, run workflowInvocationFile) {
-	if slices.Contains([]string{"publishing", "observing", "finalizing", "integrated"}, entry.State) {
+	if slices.Contains([]IntegrationState{"publishing", "observing", "finalizing", "integrated"}, entry.State) {
 		entry.SubmissionRef = run.Submission
 	}
 
-	if entry.State == "finalizing" || entry.State == "integrated" {
+	if entry.State == IntegrationFinalizing || entry.State == IntegrationIntegrated {
 		entry.ReceiptRef = &workflowstate.EvidenceRef{Path: run.DeliveryRef, Hash: run.DeliveryHash}
 	}
 }
 
 func guardWorkflowIntegrationStop(run workflowInvocationFile, entry IntegrationEntry, request IntegrationTransition) error {
-	if request.ClearStopIntent && entry.State != "paused" {
+	if request.ClearStopIntent && entry.State != IntegrationPaused {
 		return workflowstate.IntegrationConflict("stop intent may be cleared only at a paused checkpoint")
 	}
 
 	stopped := run.StopIntent != "" || entry.StopIntent != "" || request.StopIntent != ""
-	if stopped && !request.ClearStopIntent && (request.State == "queued" || request.State == "preparing") {
+	if stopped && !request.ClearStopIntent && (request.State == IntegrationQueued || request.State == IntegrationPreparing) {
 		return workflowstate.IntegrationConflict("retained stop intent blocks execution")
 	}
 
@@ -362,11 +362,11 @@ func workflowIntegrationReceiptOwnerMatches(receipt *Receipt, run workflowInvoca
 }
 
 func workflowIntegrationNeedsRequeueProof(entry IntegrationEntry, submission workflowstate.Submission) bool {
-	return entry.State == "queued" && submission.Native != nil
+	return entry.State == IntegrationQueued && submission.Native != nil
 }
 
 func (s *Store) guardWorkflowPreparationTransition(ctx context.Context, run workflowInvocationFile, request IntegrationTransition) error {
-	if request.CandidateRef == nil && !slices.Contains([]string{"preparing", "merging", "validating"}, request.State) {
+	if request.CandidateRef == nil && !slices.Contains([]IntegrationState{"preparing", "merging", "validating"}, request.State) {
 		return nil
 	}
 

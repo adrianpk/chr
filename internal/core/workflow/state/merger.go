@@ -147,7 +147,7 @@ type MergerUsage struct {
 type MergerResult struct {
 	ProtocolVersion       int                `json:"protocol_version"`
 	InputHash             string             `json:"input_hash"`
-	Outcome               string             `json:"outcome"`
+	Outcome               MergerOutcome      `json:"outcome"`
 	ChangedPaths          []string           `json:"changed_paths"`
 	ResolutionNotes       []MergerResolution `json:"resolution_notes"`
 	PreservedRequirements []string           `json:"preserved_requirements"`

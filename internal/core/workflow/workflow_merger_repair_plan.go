@@ -23,7 +23,7 @@ func PlanWorkflowMergerRepair(ctx context.Context, directory string, input workf
 	}
 
 	if len(decisions) > 0 {
-		plan.Outcome, plan.Decisions = "needs_decision", decisions
+		plan.Outcome, plan.Decisions = workflowstate.MergerRepairNeedsDecision, decisions
 
 		return plan, nil
 	}
@@ -38,7 +38,7 @@ func PlanWorkflowMergerRepair(ctx context.Context, directory string, input workf
 	}
 
 	if proof.Method != "rebase" {
-		plan.Outcome = "combined"
+		plan.Outcome = workflowstate.MergerRepairCombined
 
 		return plan, nil
 	}

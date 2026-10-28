@@ -84,7 +84,7 @@ func (s *Store) checkWorkflowNativeReviewFence(run workflowInvocationFile, input
 }
 
 func workflowNativeReviewEntryMatches(run workflowInvocationFile, entry IntegrationEntry, input *workflowstate.ReviewInput) bool {
-	return slices.Contains([]string{"reviewing", "waiting_review", "ready_to_publish"}, entry.State) && entry.StopIntent == "" && entry.ClaimGeneration == input.Native.ClaimGeneration && workflowNativePreparedEntryMatches(run, entry) && entry.CandidateRef.Path == input.PreparationRef && entry.CandidateRef.Hash == input.PreparationHash
+	return slices.Contains([]IntegrationState{"reviewing", "waiting_review", "ready_to_publish"}, entry.State) && entry.StopIntent == "" && entry.ClaimGeneration == input.Native.ClaimGeneration && workflowNativePreparedEntryMatches(run, entry) && entry.CandidateRef.Path == input.PreparationRef && entry.CandidateRef.Hash == input.PreparationHash
 }
 
 func validateWorkflowNativeReviewInput(input workflowstate.ReviewInput) error {

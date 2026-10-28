@@ -110,7 +110,7 @@ func serviceNativeReviewAdmit(t *testing.T, operations service, id string) {
 		t.Fatal(err)
 	}
 
-	for _, state := range []string{"preparing", "validating"} {
+	for _, state := range []workflowcore.IntegrationState{workflowcore.IntegrationPreparing, workflowcore.IntegrationValidating} {
 		run, err = store.ReadWorkflow(t.Context(), id)
 		if err != nil {
 			t.Fatal(err)

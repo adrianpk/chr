@@ -1,0 +1,1 @@
+{"input_hash":"input","outcome":"integration_fix","original_commit":"source","integration_fix":{"category":"correctness","title":"Repair compatibility","detail":"Preserve the declared behavior"},"decisions":[{"id":"owner","issue":"Select owner","requirement_ids":["source-api"],"options":["first","second"],"authority":"maintainer"}]}

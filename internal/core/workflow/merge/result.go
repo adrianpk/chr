@@ -87,7 +87,7 @@ func CheckReportedUsage(usage *workflowstate.MergerUsage, allowance *workflowsta
 
 // CheckResult checks proposal identity, scope, evidence, resolutions and outcome.
 func CheckResult(result workflowstate.MergerResult, input workflowstate.MergerInput) error {
-	if result.ProtocolVersion != input.ProtocolVersion || result.InputHash != input.InputHash || !slices.Contains([]string{"resolved", "needs_decision", "failed"}, result.Outcome) {
+	if result.ProtocolVersion != input.ProtocolVersion || result.InputHash != input.InputHash || !slices.Contains([]workflowstate.MergerOutcome{workflowstate.MergerResolved, workflowstate.MergerNeedsDecision, workflowstate.MergerFailed}, result.Outcome) {
 		return fmt.Errorf("%w: merger result version or input is stale", workflowstate.ErrConflict)
 	}
 

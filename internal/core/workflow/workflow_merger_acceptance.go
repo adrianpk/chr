@@ -8,6 +8,16 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+// MergerAcceptanceOutcome is the host-observed repair acceptance state.
+// Accepted repairs still require the exact candidate validation gate.
+type MergerAcceptanceOutcome string
+
+// Host acceptance outcomes preserve their existing retained strings.
+const (
+	MergerRejected                  MergerAcceptanceOutcome = "rejected"
+	MergerAcceptedPendingValidation MergerAcceptanceOutcome = "accepted_pending_validation"
+)
+
 // MergerAcceptance records host observations, never a validation or
 // review grant. Accepted checkpoints still require the complete candidate gate.
 type MergerAcceptance struct {
@@ -15,7 +25,7 @@ type MergerAcceptance struct {
 	AttemptID     string                               `json:"attempt_id"`
 	InputHash     string                               `json:"input_hash"`
 	CheckpointRef workflowstate.EvidenceRef            `json:"checkpoint_ref"`
-	Outcome       string                               `json:"outcome"`
+	Outcome       MergerAcceptanceOutcome              `json:"outcome"`
 	CheckedAt     time.Time                            `json:"checked_at"`
 	Repair        *workflowstate.IntegrationTreeRepair `json:"repair,omitempty"`
 	Next          *MergerRepairState                   `json:"next,omitempty"`
@@ -45,7 +55,7 @@ func (s *Store) ExecuteWorkflowMergerRepair(ctx context.Context, request MergerR
 
 func (s *Store) acceptWorkflowMerger(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, git MergerRepairGit, attempt *MergerAttempt) (err error) {
 	claim := claimed.Claim
-	acceptance := &MergerAcceptance{SchemaVersion: 1, AttemptID: claim.AttemptID, InputHash: attempt.Input.InputHash, CheckpointRef: *attempt.Input.RepairCheckpointRef, Outcome: "rejected", CheckedAt: time.Now().UTC()}
+	acceptance := &MergerAcceptance{SchemaVersion: 1, AttemptID: claim.AttemptID, InputHash: attempt.Input.InputHash, CheckpointRef: *attempt.Input.RepairCheckpointRef, Outcome: MergerRejected, CheckedAt: time.Now().UTC()}
 
 	attempt.Acceptance = acceptance
 	defer func() {
@@ -105,7 +115,7 @@ func (s *Store) commitWorkflowMergerRepair(ctx context.Context, claimed workflow
 		return err
 	}
 
-	acceptance.Outcome = "accepted_pending_validation"
+	acceptance.Outcome = MergerAcceptedPendingValidation
 
 	return nil
 }

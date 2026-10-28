@@ -13,13 +13,18 @@ import (
 
 func recordWireFactories() map[string]func() any {
 	return map[string]func() any{
-		"guided-session":  func() any { return &authoringcore.Session{} },
-		"guided-control":  func() any { return &authoringcore.GuidedControlState{} },
-		"workflow-start":  func() any { return &StartRequest{} },
-		"invocation":      func() any { return &Invocation{} },
-		"merger-input":    func() any { return &workflowstate.MergerInput{} },
-		"indexed-ticket":  func() any { return &ticketcore.Indexed{} },
-		"invocation-file": func() any { return &workflowInvocationFile{} },
+		// These record snapshots retain the shapes from cdf69b8822f8e498cbff8914d7d93e68cd78ff15.
+		"integration-entry":  func() any { return &IntegrationEntry{} },
+		"merger-result":      func() any { return &workflowstate.MergerResult{} },
+		"merger-repair-plan": func() any { return &workflowstate.MergerRepairPlan{} },
+		"merger-acceptance":  func() any { return &MergerAcceptance{} },
+		"guided-session":     func() any { return &authoringcore.Session{} },
+		"guided-control":     func() any { return &authoringcore.GuidedControlState{} },
+		"workflow-start":     func() any { return &StartRequest{} },
+		"invocation":         func() any { return &Invocation{} },
+		"merger-input":       func() any { return &workflowstate.MergerInput{} },
+		"indexed-ticket":     func() any { return &ticketcore.Indexed{} },
+		"invocation-file":    func() any { return &workflowInvocationFile{} },
 	}
 }
 
