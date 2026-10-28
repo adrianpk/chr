@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 14, Forge publication and review stages; reviewing after verified integration of PR #450.
+Active slice: Slice 14, Forge publication and review stages; canonical PR #451 reviewing after verified integration of PR #450.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -236,7 +236,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 | 11 | delivered | TKT-20261026084831 | #448 | d0d65c114cf8ddffcd0492f7fc0b746a832adc0d | `ops/default/report/slices/code-quality-remediation/slice-11-tickets.md` |
 | 12 | delivered | TKT-20261026084832 | #449 | a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e | `ops/default/report/slices/code-quality-remediation/slice-12-workflow.md` |
 | 13 | delivered | TKT-20261026084833 | #450 | 53b2adb23b9b1d20529d00bbe3b32b3be5990b4e | `ops/default/report/slices/code-quality-remediation/slice-13-integration.md` |
-| 14 | reviewing | TKT-20261026084834 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-14-publication.md` |
+| 14 | reviewing | TKT-20261026084834 | #451 | — | `ops/default/report/slices/code-quality-remediation/slice-14-publication.md` |
 | 15 | pending | TKT-20261026084835 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-15-closeout.md` |
 | 16 | pending | TKT-20261026084836 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-16-closure.md` |
 
