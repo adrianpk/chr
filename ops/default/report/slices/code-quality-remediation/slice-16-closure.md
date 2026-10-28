@@ -97,8 +97,14 @@ observable. No generic close helper replaces their distinct failure contracts.
 - `go run ./scripts/goquality` passed with 9,411 declarations, maximum five and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./...` passed with zero issues.
 
-Current declaration/hash provenance is reconciled separately after this source
-commit; frozen source evidence remains unchanged.
+Current declaration/hash provenance now identifies source commit
+`436f6742f7f224ac8c25bfde7cc61bb6ab328332`. The reconciliation verifies all 4,445 workflow backbone
+hashes, 217 current compatibility images and all 771 final signature rows.
+Thirty current rows across ten existing ledgers are updated for the exact error
+names, constructor consumers or cleanup comments. Frozen source/baseline/entry
+fields, original introduction commits and CSV line endings are unchanged. The
+method map remains 908 assessed source methods and 777 guarded Store methods.
+Runtime checks are not repeated for this metadata reconciliation.
 
 ## Risks and Follow-ups
 
