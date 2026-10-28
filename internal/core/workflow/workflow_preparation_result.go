@@ -8,7 +8,10 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) commitWorkflowPreparationInput(ctx context.Context, run *workflowInvocationFile, record Record, observation workflowSliceObservation, input workflowstate.PreparationInput, lane workflowstate.Lane) (workflowPreparedTask, error) {
+func (s *Store) commitWorkflowPreparationInput(ctx context.Context, run *workflowInvocationFile, change workflowPreparationInputChange) (workflowPreparedTask, error) {
+	record, observation := change.Record, change.Observation
+	input, lane := change.Preparation.Input, change.Preparation.Lane
+
 	run.Attempts[len(run.Attempts)-1].ContractHash = workflowUnitContractHash(observation)
 
 	taskInput, err := s.workflowSliceInput(ctx, *run, record, observation)
@@ -82,7 +85,10 @@ func (s *Store) checkWorkflowPreparationSource(ctx context.Context, run workflow
 	return nil
 }
 
-func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, claim *Claim, prepared workflowPreparedTask, candidate *workflowstate.IntegrationCandidate, provider PublicationGuardProvider, validationErr error, interrupted bool) error {
+func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, operation workflowIntegrationValidation, completion workflowintegrate.Completion) error {
+	claim, prepared := operation.claim, operation.prepared
+	candidate := completion.Candidate
+
 	return s.withLock(ctx, func() error {
 		claimObservation, err := s.checkWorkflowCredential(ctx, claim, workflowCredentialIdentity)
 		if err != nil {
@@ -98,7 +104,7 @@ func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, claim *
 			return err
 		}
 
-		if workflowExecutionStopped(claimObservation.Run, interrupted) {
+		if workflowExecutionStopped(claimObservation.Run, completion.Interrupted) {
 			return owner.finishStoppedWorkflowTask(claimObservation.Run, claimObservation.Record, claim, &candidate.Validation)
 		}
 
@@ -106,9 +112,9 @@ func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, claim *
 			return err
 		}
 
-		failure := owner.checkWorkflowPreparationCompletion(ctx, claimObservation.Run, prepared, candidate, provider, validationErr)
+		failure := owner.checkWorkflowPreparationCompletion(ctx, claimObservation.Run, operation, completion)
 		if failure != nil {
-			return owner.checkpointWorkflowPreparationFailure(ctx, claimObservation.Run, claimObservation.Record, claim, *candidate, prepared, provider, validationErr, failure)
+			return owner.checkpointWorkflowPreparationFailure(ctx, claimObservation, operation, completion, failure)
 		}
 
 		if err := owner.persistWorkflowPreparation(&claimObservation.Run, claimObservation.Record, *candidate); err != nil {
@@ -119,7 +125,10 @@ func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, claim *
 	})
 }
 
-func (s *Store) checkpointWorkflowPreparationFailure(ctx context.Context, run workflowInvocationFile, record Record, claim *Claim, candidate workflowstate.IntegrationCandidate, prepared workflowPreparedTask, provider PublicationGuardProvider, validationErr, failure error) error {
+func (s *Store) checkpointWorkflowPreparationFailure(ctx context.Context, observed workflowClaimObservation, operation workflowIntegrationValidation, completion workflowintegrate.Completion, failure error) error {
+	run, record := observed.Run, observed.Record
+	candidate, provider := *completion.Candidate, operation.provider
+
 	// Only an observed command failure on the still-current clean result can
 	// request semantic repair. Stops, mutation and stale fences remain failures.
 	actionable := candidate.Input.Native != nil && workflowintegrate.WorkflowCandidateGateFailed(candidate.Validation) && s.checkWorkflowCandidateFailureCurrent(ctx, run, candidate, provider) == nil
@@ -129,17 +138,24 @@ func (s *Store) checkpointWorkflowPreparationFailure(ctx context.Context, run wo
 		return errors.Join(failure, err)
 	}
 
-	repairErr := s.retainWorkflowPreparationFailureRepair(ctx, run, candidate, provider, actionable && validationErr != nil, targetMoved)
+	mode := workflowPreparationSourceCheck
+	if targetMoved {
+		mode = workflowPreparationTargetDrift
+	} else if actionable && completion.Failure != nil {
+		mode = workflowPreparationCandidateRepair
+	}
 
-	return errors.Join(failure, repairErr, claim.releaseReservation())
+	repairErr := s.retainWorkflowPreparationFailureRepair(ctx, run, candidate, provider, mode)
+
+	return errors.Join(failure, repairErr, operation.claim.releaseReservation())
 }
 
-func (s *Store) retainWorkflowPreparationFailureRepair(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, provider PublicationGuardProvider, actionable, targetMoved bool) error {
-	if targetMoved {
+func (s *Store) retainWorkflowPreparationFailureRepair(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, provider PublicationGuardProvider, mode workflowPreparationFailureMode) error {
+	if mode == workflowPreparationTargetDrift {
 		return s.retainWorkflowNativeTargetDrift(run.ID)
 	}
 
-	if actionable {
+	if mode == workflowPreparationCandidateRepair {
 		return s.retainWorkflowFailedCandidate(ctx, run, candidate)
 	}
 
@@ -159,8 +175,10 @@ func (s *Store) checkWorkflowCandidateFailureCurrent(ctx context.Context, run wo
 	return errors.Join(s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, candidate), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
 }
 
-func (s *Store) checkWorkflowPreparationCompletion(ctx context.Context, run workflowInvocationFile, prepared workflowPreparedTask, candidate *workflowstate.IntegrationCandidate, provider PublicationGuardProvider, validationErr error) error {
-	failure := errors.Join(validationErr, s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, *candidate), workflowintegrate.ValidateWorkflowPreparationGate(prepared.input.Contract.Validation, candidate.Validation), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
+func (s *Store) checkWorkflowPreparationCompletion(ctx context.Context, run workflowInvocationFile, operation workflowIntegrationValidation, completion workflowintegrate.Completion) error {
+	candidate, prepared, provider := completion.Candidate, operation.prepared, operation.provider
+
+	failure := errors.Join(completion.Failure, s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, *candidate), workflowintegrate.ValidateWorkflowPreparationGate(prepared.input.Contract.Validation, candidate.Validation), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
 	if failure != nil {
 		return failure
 	}

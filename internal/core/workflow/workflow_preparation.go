@@ -49,14 +49,17 @@ type PreparationBinding struct {
 // PrepareWorkflowSliceIntegration validates the configured combined result on
 // a separate owned lane. It preserves task proofs and the canonical PR identity.
 func (s *Store) PrepareWorkflowSliceIntegration(ctx context.Context, id string, provider PublicationGuardProvider, git PreparationGit) (candidate workflowstate.IntegrationCandidate, err error) {
-	claim, prepared, input, round, cached, err := s.prepareWorkflowIntegrationValidation(ctx, id, provider, git)
-	if err != nil || cached != nil {
-		if cached != nil {
-			return *cached, err
+	selection, err := s.prepareWorkflowIntegrationValidation(ctx, id, provider, git)
+	if err != nil || selection.Cached != nil {
+		if selection.Cached != nil {
+			return *selection.Cached, err
 		}
 
 		return candidate, err
 	}
+
+	claim, prepared, input := selection.Claimed.Claim, selection.Claimed.Prepared, selection.Claimed.Input
+
 	defer func() { err = errors.Join(err, closeWorkflowSliceCapacity(claim)) }()
 
 	if err := beginWorkflowClaimExecution(claim); err != nil {
@@ -75,7 +78,7 @@ func (s *Store) PrepareWorkflowSliceIntegration(ctx context.Context, id string, 
 
 	validation := workflowIntegrationValidation{store: s, claim: claim, prepared: prepared, provider: provider}
 
-	return workflowintegrate.ExecuteWorkflowValidation(deadline, watched, workflowintegrate.ValidationInput{InvocationID: id, Round: round, Preparation: input, Lane: prepared.input.Lane, Result: newWorkflowTaskResult(prepared)}, validation)
+	return workflowintegrate.ExecuteWorkflowValidation(deadline, watched, workflowintegrate.ValidationInput{InvocationID: id, Round: selection.Round, Preparation: input, Lane: prepared.input.Lane, Result: newWorkflowTaskResult(prepared)}, validation)
 }
 
 // CheckWorkflowPublicationGuard rechecks policy, review, combined validation,

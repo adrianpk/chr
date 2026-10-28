@@ -22,7 +22,7 @@ func (operation workflowIntegrationValidation) Validate(ctx context.Context, res
 }
 
 func (operation workflowIntegrationValidation) Accept(ctx context.Context, completion workflowintegrate.Completion) error {
-	return operation.store.finishWorkflowIntegrationValidation(ctx, operation.claim, operation.prepared, completion.Candidate, operation.provider, completion.Failure, completion.Interrupted)
+	return operation.store.finishWorkflowIntegrationValidation(ctx, operation, completion)
 }
 
 type workflowReviewDecisions struct {
