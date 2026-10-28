@@ -9,7 +9,9 @@ them through admission, execution, review, integration and closure.
 
 `Store` owns repository locking, journals, guarded source-image checks, atomic
 multi-record writes and recovery. Closing history, receipt and retry policy now
-belong to closeout through a read-only evidence adapter. Remaining Store methods
+belong to closeout through a read-only evidence adapter. Frozen input assembly
+and actual-member policy use the stage InputSource and shared native record data.
+Remaining Store methods
 are still being reconciled under Slice 15; their count does not establish final
 persistence ownership.
 Core composition and application adapters call this owner directly. The package
@@ -21,7 +23,10 @@ implementations retain private claim/prepared/provider or journal identities;
 the merger evidence contract is implemented directly by the store. Stage policy
 extraction uses these operation boundaries without moving mutation authority.
 
-Shared retained values live in `workflow/state`. That package has a separate,
+Shared retained values, including native records/snapshots and delivery proofs,
+live in `workflow/state`. Record/snapshot validation stays in explicit host
+functions at the original boundaries; the shared data owns no validation or IO.
+That package has a separate,
 narrow import contract and cannot import this coordinator or its configuration.
 Ticket projections and SQL indexing use the existing ticket and database owners;
 the parsed workspace configuration has its own owner under `workspace/config`.

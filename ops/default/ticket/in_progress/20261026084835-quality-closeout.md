@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-15
 source: review
 reported_at: 2026-10-26T08:48:35Z
-commits: [66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96]
+commits: [66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
 started_at: 2026-10-28T08:07:25Z
 branch: refactor/slice-15-quality-closeout
 ready_at: 2026-10-26T08:57:09Z
@@ -75,3 +75,12 @@ regression references and retirement conditions. Links, case rows and named
 regression declarations are checked. Remaining legacy schema/path/control
 references stay open under T15.5; no exhaustive compatibility acceptance is
 claimed.
+
+Native record/task/receipt/snapshot/proof values now have one shared state owner,
+while record/snapshot validation stays explicit in the host. Closing input
+assembly and actual-member selection execute in closeout through finite
+InputSource observations. Nine direct and five normalized validation moves
+match; 31 real tests, five races, affected broad short tests, wire and strict
+checks pass. Original 908 Store source rows retain current references to 899
+Store methods and nine stage/adapter owners. Slice-proof policy, final method
+ownership, compatibility and slice acceptance remain active.

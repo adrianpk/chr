@@ -115,3 +115,15 @@ keeps the common pool bound of eight. ValidProcessIdentity checks only retained
 PID/boot/birth shape. Live identity/group observation, process handles, capacity
 reservation, registration-before-permit, stop/recovery and journals remain with
 the host. Shared records confer no process execution or release authority.
+
+## Native namespace records
+
+Record, Task, TaskDelivery, Receipt, Snapshot, WorkflowSchema and SliceDeliveryProof
+are shared data used directly by native persistence, adapters and closeout input
+policy. Field and embedded-field order, tags, enum strings, unknown metadata and
+domain maps, nil/empty forms and receipt hashes remain unchanged. These values
+have no persistence, validation, IO or mutation methods. Record/snapshot domain
+validation stays in explicit host functions before existing guarded writes and
+reads; former value receivers retain their value-copy behavior, including
+explicit dereference at pointer call sites. No coordinator aliases remain for
+these values.

@@ -47,6 +47,13 @@ preserves partial target/proof observations. Upgrade preparation distinguishes
 journal presence from validity and retains its original pending/archive order,
 partial journal/image outcomes and joined reconstruction errors.
 
+Closing input construction and actual-member selection now have closeout owners.
+The InputSource port supplies finite host observations while BuildInput retains
+contract hashing, partial returns, descriptor order and the original shared
+evidence map. Native record, task, receipt, snapshot and delivery-proof values
+have one state owner. Record/snapshot validation remains explicit in the host,
+with original value copies and guarded writes preserved.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -61,11 +68,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 31 source/extraction/consolidation images. Current identities and hashes are updated
+retains 47 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. Seven former Store methods now have actual
-closeout policy or host evidence adapter owners. The original 908 method rows retain frozen source evidence and
-current identities; 901 methods remain on Store. This count does not establish
+frozen source fields remain unchanged. Nine former Store methods now have actual
+closeout policy or host evidence adapter owners. The original 908 method rows
+retain frozen source evidence and current identities; 899 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -88,6 +95,11 @@ defines frontier, adoption, loose selection, continuation, amendment and closing
 from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Ten current compatibility/control cases identify actual
 consumers, existing regression protection and retirement conditions. Remaining
 legacy/schema/control references are explicitly unreconciled; T15.5 stays active.
+
+Frozen input/shared-record extraction is in `c737a56d85e5fb0532d20b18a3c56c9d86a21fb1`. Nine owner/name moves
+and five value-receiver validations match after explicit call/receiver
+normalization. The input/member policy split uses real InputSource operations
+and has semantic integration evidence. The internal attempt validator is private.
 
 ## Contracts Added or Changed
 
@@ -119,7 +131,9 @@ Capacity/continuation passed 27 real tests and five focused races, control/recei
 passed 24 and five, and amendment/frontier/upgrade passed 31 and five. These are
 separate task selections, not a unique-test total or the full gate. The later
 closing-history extraction passed 30 real tests and five focused races. All passed
-without skips; owned-fixture cleanup reported no leaked descendants.
+without skips; owned-fixture cleanup reported no leaked descendants. The later
+input/shared-record extraction passed 31 real tests and five focused races.
+Affected core, authoring, app, TUI and web short tests and strict lint also pass.
 
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|UseCase|Reopen|SetAdvance|Budget|Recovery|Journal|PostObservation|Stop)|NativeClosing(Gate|Divergence|Evidence|PublicationRace)|WorkflowParallelClosingRecovery|QualityRecordWire)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow ./internal/core/workflow/closeout -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|Execute)$' -count=1 -timeout=10m -json`
@@ -135,11 +149,16 @@ without skips; owned-fixture cleanup reported no leaked descendants.
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing.*|NativeClosing.*|WorkflowProcess(Birth|Edit|Signal|Observation)|WorkflowCapacity(Process|Overlap|Orphan)|QualityRecordWire)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|WorkflowCapacityOverlap|QualityRecordWire)$' -count=1 -timeout=10m -json`
 
+- `go test ./internal/core/workflow -run '^Test(WorkflowClosing.*|NativeClosing.*|WorkflowPlanAdoption(Rejects|Restart)|WorkflowMaterialization(Rejects|Recovery)|WorkflowRoundTrip|WorkflowRecord|WorkflowHierarchy|WorkflowIndex|QualityRecordWire)$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|WorkflowMaterializationConcurrent|QualityRecordWire)$' -count=1 -timeout=10m -json`
+
+- `go test -short ./internal/core/... ./internal/app/... ./internal/tui/... ./internal/webui/... ./scripts/goquality`
 - `go test ./internal/core/workflow/closeout -count=1`
 - `go test -short ./internal/core/workflow/... ./internal/app ./scripts/goquality`
-- `make check-go-style` — 9,366 production declarations, zero exact debts and one external exception.
+- `make check-go-style` — 9,378 production declarations, zero exact debts and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app ./scripts/goquality` — zero issues.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./scripts/goquality` — zero issues after the final private-result conversions.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/... ./internal/app/... ./internal/tui/... ./internal/webui/... ./scripts/goquality` — zero issues after native input/record extraction.
 - `git diff --check`
 
 The vocabulary-only update checked all relative links, six definitions, ten case

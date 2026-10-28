@@ -32,6 +32,16 @@ The package imports shared `workflow/state` protocol values and `contenthash`
 within the module. Remaining closeout policy extraction and final Store
 responsibility dispositions are active Slice 15 work.
 
+`Request` owns the unchanged observed-set/revision/source/target input. The host
+continues to enforce admission and authority. `BuildInput` owns contract hashing,
+ordered frozen input assembly and partial results. Its `InputSource` supplies
+bounded configuration, target/tree, namespace, slice-proof and hash observations.
+`Members` selects all actual integrated members without active attempts and
+returns their deterministic key order. Empty membership remains an empty slice;
+selection failure returns nil. The stage retains the same shared evidence map
+through ordered slice observations and never reorders the source descriptors.
+The host keeps record/snapshot validation and final current-image/member guards.
+
 ## Validation
 
 Stage boundary tests cover partial failures, nonzero exit, changed checkout,
