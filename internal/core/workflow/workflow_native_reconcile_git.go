@@ -88,7 +88,7 @@ func (s *Store) workflowNativeReconciliationInput(ctx context.Context, guard Int
 
 func observeWorkflowNativeGit(ctx context.Context, submission workflowstate.Submission, request GitPublication, observers workflowNativeGitObservers) (workflowstate.NativeGitObservation, error) {
 	advertisement, err := observers.Transport.InspectWorkflowGitPublication(ctx, request)
-	if err != nil && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, ErrWorkflowObservationRequired) && !errors.Is(err, workflowstate.ErrAtomicGuard) {
+	if err != nil && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, workflowstate.ErrObservationRequired) && !errors.Is(err, workflowstate.ErrAtomicGuard) {
 		return workflowstate.NativeGitObservation{}, err
 	}
 
@@ -122,7 +122,7 @@ func (s *Store) retainWorkflowNativeGitObservation(ctx context.Context, update N
 		}
 
 		if len(update.Facts.GitObservationRefs) >= workflowstate.PageLimit {
-			return ErrWorkflowObservationRequired
+			return workflowstate.ErrObservationRequired
 		}
 
 		ref, err := invocationLocation2.Owner.writeWorkflowNativeDispatchEvidence(submission, observation)

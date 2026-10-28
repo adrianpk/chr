@@ -203,7 +203,7 @@ func TestNativeEntryUnknown(t *testing.T) {
 	transition := nativeEntryTransition(t, f.store, entry, "cancelled")
 
 	before := workflowTestRead(t, f.store, run.ID)
-	if _, err := f.store.TransitionWorkflowIntegration(t.Context(), transition); !errors.Is(err, ErrWorkflowObservationRequired) {
+	if _, err := f.store.TransitionWorkflowIntegration(t.Context(), transition); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("unknown publication was cancelled", err)
 	}
 

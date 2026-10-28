@@ -24,7 +24,7 @@ func (s *Store) workflowNativeObservationBinding(ctx context.Context, submission
 func (s *Store) readWorkflowNativeObservationBinding(submission workflowstate.Submission, request GitPublication, binding *workflowstate.NativePublicationBinding) error {
 	native := submission.Native
 	if native.ApplicationState != workflowstate.NativeApplicationGitApplied || native.TransportResponseRef == nil {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	binding.PullRequest, binding.Git, binding.SourceDirectory = submission.Guard.PullRequest, request.Git, request.Directory
@@ -118,7 +118,7 @@ func appendWorkflowNativeCanonicalObservation(native *workflowstate.NativeSubmis
 	}
 
 	if len(refs) >= workflowstate.PageLimit {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	native.ObservationRefs = append(refs, ref)

@@ -20,7 +20,7 @@ func (s *Store) retainWorkflowNativeDispatch(ctx context.Context, run workflowIn
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.ID != submission.ID || last.Native == nil || last.Native.DispatchState != workflowstate.NativeDispatchNotStarted {
-		return last, ErrWorkflowObservationRequired
+		return last, workflowstate.ErrObservationRequired
 	}
 
 	identity, err := workflowProcessIdentity(os.Getpid())

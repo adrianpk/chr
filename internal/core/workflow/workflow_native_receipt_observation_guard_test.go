@@ -106,7 +106,7 @@ func TestNativeReceiptTransition(t *testing.T) {
 	entry := nativeReviewEntry(t, f.store, run.ID)
 
 	request := IntegrationTransition{InvocationID: run.ID, InvocationRevision: run.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, CandidateHash: entry.CandidateRef.Hash, State: "finalizing"}
-	if _, err := f.store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowObservationRequired) {
+	if _, err := f.store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("queue callback skipped receipt reconciliation", err)
 	}
 

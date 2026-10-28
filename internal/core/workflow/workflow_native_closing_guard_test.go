@@ -237,7 +237,7 @@ func TestNativeClosingPRChange(t *testing.T) {
 	}}
 
 	failed, err := f.fixture.f.store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports)
-	if !errors.Is(err, ErrWorkflowObservationRequired) || failed.Outcome != "closing_validation_failed" || failed.Set.Set.ClosureRef != "" || len(failed.Receipt.Validation) != 1 || failed.Receipt.Validation[0].ExitCode != 0 {
+	if !errors.Is(err, workflowstate.ErrObservationRequired) || failed.Outcome != "closing_validation_failed" || failed.Set.Set.ClosureRef != "" || len(failed.Receipt.Validation) != 1 || failed.Receipt.Validation[0].ExitCode != 0 {
 		t.Fatal("successful gate hid a changed native PR", err)
 	}
 }

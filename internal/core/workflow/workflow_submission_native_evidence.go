@@ -250,7 +250,7 @@ func (s *Store) checkWorkflowNativeNonApplication(_ context.Context, submission 
 	}
 
 	if alive && native.DispatchCompletionRef == nil {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	var proof NativeNonApplicationProof

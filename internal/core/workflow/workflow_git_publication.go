@@ -151,7 +151,7 @@ func validateWorkflowPublicationRefs(request GitPublication) error {
 
 	proof := request.Git
 	if request.SourceRef == request.TargetRef || proof.SourceCommit == proof.ResultCommit || proof.BaseCommit == proof.ResultCommit {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	for _, id := range []string{proof.SourceCommit, proof.BaseCommit, proof.ResultCommit} {
@@ -170,16 +170,16 @@ func exchangeWorkflowPublication(session workflowReceivePack, request GitPublica
 
 	report, err := session.Send(commands)
 	if err != nil {
-		return result, fmt.Errorf("%w: publication exchange failed", ErrWorkflowObservationRequired)
+		return result, fmt.Errorf("%w: publication exchange failed", workflowstate.ErrObservationRequired)
 	}
 
 	state, err := readWorkflowPublicationReport(report, request)
 	if err != nil {
-		return result, fmt.Errorf("%w: %w", ErrWorkflowObservationRequired, err)
+		return result, fmt.Errorf("%w: %w", workflowstate.ErrObservationRequired, err)
 	}
 
 	if err := session.Finish(); err != nil {
-		return result, fmt.Errorf("%w: publication transport did not finish", ErrWorkflowObservationRequired)
+		return result, fmt.Errorf("%w: publication transport did not finish", workflowstate.ErrObservationRequired)
 	}
 
 	result.State = state

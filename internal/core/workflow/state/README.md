@@ -127,3 +127,10 @@ validation stays in explicit host functions before existing guarded writes and
 reads; former value receivers retain their value-copy behavior, including
 explicit dereference at pointer call sites. No coordinator aliases remain for
 these values.
+
+ReceiptMatchesProof, ReceiptGitMatches, FinalizedTaskMatches and
+ReceiptTargetProofMatches are immutable delivery-binding predicates shared by
+closing, finalization and frontier consumers. TaskInputHash retains the exact
+ordered task membership/contract digest. ErrObservationRequired has one shared
+identity and unchanged text for uncertain canonical delivery. These helpers do
+not read files, observe providers, mutate state or grant confirmation authority.

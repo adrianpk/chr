@@ -77,7 +77,7 @@ func (s *Store) readWorkflowAggregateMembership(ctx context.Context, run workflo
 	}
 
 	observation.set = selection.sets[observation.tasks[0].Task.SetID]
-	if observation.descriptor.TaskInputHash != TaskInputHash(observation.tasks, observation.descriptor.ID) {
+	if observation.descriptor.TaskInputHash != workflowstate.TaskInputHash(observation.tasks, observation.descriptor.ID) {
 		return observation, fmt.Errorf("%w: aggregate membership changed", workflowstate.ErrConflict)
 	}
 

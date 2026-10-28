@@ -60,7 +60,7 @@ func TestNativeDispatchConcurrent(t *testing.T) {
 	nativePublication, err := restarted.PublishWorkflowNativeSubmission(t.Context(), current, f.provider, publisher)
 
 	submission := nativePublication.Submission
-	if !errors.Is(err, ErrWorkflowObservationRequired) || submission.Native.DispatchIdentity == nil || publisher.calls.Load() != 0 {
+	if !errors.Is(err, workflowstate.ErrObservationRequired) || submission.Native.DispatchIdentity == nil || publisher.calls.Load() != 0 {
 		t.Fatal("replacement bypassed a live prior dispatch", err)
 	}
 

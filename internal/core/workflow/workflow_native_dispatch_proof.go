@@ -120,7 +120,7 @@ func (s *Store) checkWorkflowNativeDefiniteNonApplication(submission workflowsta
 	}
 
 	if !workflowNativeDefiniteResponse(*native, result) {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	var observation workflowstate.NativeGitObservation

@@ -3,42 +3,43 @@ package workflow
 import (
 	"context"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowClosingNativeDeliveryProof(ctx context.Context, receipt workflowstate.Record) (workflowClosingProof, error) {
+func (s *Store) workflowClosingNativeDeliveryProof(ctx context.Context, receipt workflowstate.Record) (workflowcloseout.DeliveryProof, error) {
 	native := receipt.Receipt.Native
 
 	run, err := s.readWorkflowInvocation(native.InvocationID)
 	if err != nil {
-		return workflowClosingProof{Proof: workflowstate.SliceDeliveryProof{}, VerificationHash: ""}, err
+		return workflowcloseout.DeliveryProof{Proof: workflowstate.SliceDeliveryProof{}, VerificationHash: ""}, err
 	}
 
 	entry, err := s.workflowClosingNativeEntry(run, receipt)
 	if err != nil {
-		return workflowClosingProof{Proof: workflowstate.SliceDeliveryProof{}, VerificationHash: ""}, err
+		return workflowcloseout.DeliveryProof{Proof: workflowstate.SliceDeliveryProof{}, VerificationHash: ""}, err
 	}
 
 	if err := s.checkWorkflowClosingNativeSubmission(ctx, run, entry, receipt); err != nil {
-		return workflowClosingProof{Proof: workflowstate.SliceDeliveryProof{}, VerificationHash: ""}, err
+		return workflowcloseout.DeliveryProof{Proof: workflowstate.SliceDeliveryProof{}, VerificationHash: ""}, err
 	}
 
 	view, err := workflowClosingNativeView(run, receipt)
 	if err != nil {
-		return workflowClosingProof{Proof: workflowstate.SliceDeliveryProof{}, VerificationHash: ""}, err
+		return workflowcloseout.DeliveryProof{Proof: workflowstate.SliceDeliveryProof{}, VerificationHash: ""}, err
 	}
 
 	proof, err := s.readWorkflowDeliveryProof(view)
-	if err != nil || proof.NativeReceiptRef == nil || !workflowReceiptMatchesProof(receipt, proof, receipt.Receipt.VerificationRef) {
-		return workflowClosingProof{Proof: proof, VerificationHash: ""}, errorsOrConflict(err)
+	if err != nil || proof.NativeReceiptRef == nil || !workflowstate.ReceiptMatchesProof(receipt, proof, receipt.Receipt.VerificationRef) {
+		return workflowcloseout.DeliveryProof{Proof: proof, VerificationHash: ""}, errorsOrConflict(err)
 	}
 
 	refs := native.ObservationRefs
 	if len(refs) == 0 || refs[len(refs)-1].Path != receipt.Receipt.VerificationRef {
-		return workflowClosingProof{Proof: proof, VerificationHash: ""}, workflowstate.ErrConflict
+		return workflowcloseout.DeliveryProof{Proof: proof, VerificationHash: ""}, workflowstate.ErrConflict
 	}
 
-	return workflowClosingProof{Proof: proof, VerificationHash: refs[len(refs)-1].Hash}, nil
+	return workflowcloseout.DeliveryProof{Proof: proof, VerificationHash: refs[len(refs)-1].Hash}, nil
 }
 
 func (s *Store) workflowClosingNativeEntry(run workflowInvocationFile, receipt workflowstate.Record) (IntegrationEntry, error) {
@@ -80,7 +81,7 @@ func workflowClosingNativeView(run workflowInvocationFile, receipt workflowstate
 func (s *Store) checkWorkflowClosingNativeSubmission(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, receipt workflowstate.Record) error {
 	binding := entry.SubmissionRef
 	if binding == nil || binding.State != workflowstate.SubmissionConfirmed {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	path, err := workflowSubmissionPath(ctx, s.layout.ProjectDir(), binding.JournalKey)
@@ -99,7 +100,7 @@ func (s *Store) checkWorkflowClosingNativeSubmission(ctx context.Context, run wo
 	}
 
 	if last.ID != receipt.Receipt.SubmissionID || last.State != workflowstate.SubmissionConfirmed || !workflowNativeSubmissionEntryMatches(last, entry) {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	return s.checkWorkflowNativeRetainedReceipt(run, last, receipt)
@@ -110,63 +111,4 @@ func workflowClosingNativeJournalMatches(journal workflowSubmissionJournal, run 
 	actual := [4]string{journal.sourceHash, journal.OwnerRoot, journal.Namespace, journal.InvocationID}
 
 	return actual == expected && journal.Unit == receipt.Receipt.Unit
-}
-
-func (s *Store) observeWorkflowClosingNativeSlice(ctx context.Context, input workflowstate.ClosingInput, receipt workflowstate.Record, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
-	observation, err := s.observeWorkflowNativeReceipt(ctx, receipt, ports.Provider, ports.Observer)
-	if err != nil {
-		return workflowstate.IntegrationProof{}, err
-	}
-
-	if observation.State != workflowstate.NativeMerged || observation.Git == nil {
-		return workflowstate.IntegrationProof{}, ErrWorkflowObservationRequired
-	}
-
-	proof := *observation.Git
-	if proof.Repository != input.Target.Repository || proof.TargetBranch != input.Branch || !workflowFrontierReceiptProofMatches(proof, receipt, input.Target) {
-		return proof, workflowstate.ErrConflict
-	}
-
-	return proof, nil
-}
-
-func (s *Store) checkWorkflowClosingNativeCanonical(ctx context.Context, input workflowstate.ClosingInput, ports FrontierPorts) error {
-	for _, slice := range input.Slices {
-		receipt, err := s.readRecord(slice.Receipt.Ref)
-		if err != nil {
-			return err
-		}
-
-		if receipt.Receipt == nil || receipt.SourceHash != slice.Receipt.Hash {
-			return workflowstate.ErrConflict
-		}
-
-		if receipt.Receipt.Native == nil {
-			continue
-		}
-
-		if _, err := s.observeWorkflowClosingNativeSlice(ctx, input, receipt, ports); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func workflowClosingNativeEvidence(receipt workflowstate.Record, proof workflowstate.SliceDeliveryProof) []string {
-	native := receipt.Receipt.Native
-	if native == nil {
-		return nil
-	}
-
-	refs := []string{proof.CandidateRef, native.CandidateRef.Path, native.TransactionProofRef.Path}
-	if native.GitApplicationRef != nil {
-		refs = append(refs, native.GitApplicationRef.Path)
-	}
-
-	for _, ref := range append(native.EvidenceRefs(), native.ObservationRefs...) {
-		refs = append(refs, ref.Path)
-	}
-
-	return refs
 }

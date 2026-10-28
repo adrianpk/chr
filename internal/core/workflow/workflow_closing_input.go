@@ -32,7 +32,7 @@ func (source workflowClosingInputSource) Snapshot(ctx context.Context) (workflow
 }
 
 func (source workflowClosingInputSource) Slice(ctx context.Context, input workflowstate.ClosingInput, descriptor workflowstate.WorkflowSlice) (workflowstate.ClosingSlice, error) {
-	return source.store.workflowClosingSliceProof(ctx, input, descriptor, source.ports)
+	return workflowClosingProofs(source.store, source.ports).Slice(ctx, input, descriptor)
 }
 
 func (source workflowClosingInputSource) Check(hashes map[string]string) error {

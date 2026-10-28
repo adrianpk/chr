@@ -121,7 +121,7 @@ func (s *Store) guardWorkflowPublicationJournal(ctx context.Context, run workflo
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.State != workflowstate.SubmissionUnpublished || run.Submission == nil || *run.Submission != workflowSubmissionProjection(journal) {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	return nil
@@ -149,7 +149,7 @@ func workflowSubmissionMatchesCandidate(run workflowInvocationFile, submission w
 
 func checkWorkflowSupersededSubmission(ctx context.Context, run workflowInvocationFile, submission workflowstate.Submission, provider PublicationProvider) error {
 	if submission.State != workflowstate.SubmissionUnpublished {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	sealed, err := provider.ObserveWorkflowSubmission(ctx, submission)
@@ -158,7 +158,7 @@ func checkWorkflowSupersededSubmission(ctx context.Context, run workflowInvocati
 	}
 
 	if sealed.SubmissionID != submission.ID || !sealed.Unpublished {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	return checkWorkflowSupersededTarget(ctx, run, provider)
@@ -171,7 +171,7 @@ func checkWorkflowSupersededTarget(ctx context.Context, run workflowInvocationFi
 	}
 
 	if workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}) != "" || pr.Merged {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	target, err := provider.ReadWorkflowBranch(ctx, pr.Repository, pr.BaseBranch)

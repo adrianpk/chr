@@ -149,7 +149,7 @@ func sealWorkflowSubmissionCrash(t *testing.T, store *Store, f workflowPreparati
 		return "confirmed"
 	}
 
-	if _, err := store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f)); !errors.Is(err, ErrWorkflowObservationRequired) {
+	if _, err := store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f)); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("an unobserved crash licensed a retry", err)
 	}
 

@@ -42,6 +42,16 @@ selection failure returns nil. The stage retains the same shared evidence map
 through ordered slice observations and never reorders the source descriptors.
 The host keeps record/snapshot validation and final current-image/member guards.
 
+`Proofs` owns ordered slice assembly, retained receipt/schema binding, finalized
+member and contract checks, bounded evidence accumulation and fresh native or
+legacy canonical proof decisions. `ProofSource` supplies contained reads,
+canonical observations and native journal/authority checks in the bound project,
+namespace and repository scope. The host delegates history verification to the
+existing integration stage. Partial decoded or observed proofs, native
+observation-required outcomes, the shared evidence map and source order remain
+unchanged. Confirmation still rechecks authority and frozen inputs after all
+external observations. No forwarding Store methods replace these policies.
+
 ## Validation
 
 Stage boundary tests cover partial failures, nonzero exit, changed checkout,

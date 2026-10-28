@@ -45,7 +45,7 @@ func (s *Store) prepareWorkflowSubmission(ctx context.Context, run *workflowInvo
 	}
 
 	if journal.Schema == "chr-integration-journal/v2" {
-		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, ErrWorkflowObservationRequired
+		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, workflowstate.ErrObservationRequired
 	}
 
 	submissionIntent2, err := s.checkWorkflowSubmissionRetry(ctx, run, &journal, workflowSubmissionServices{Provider: provider, Git: git})
@@ -231,7 +231,7 @@ func (s *Store) checkWorkflowLegacyPublicationGuard(ctx context.Context, run *wo
 	}
 
 	if guard.Capability.Mechanism == workspaceconfig.WorkflowPublicationGitAtomicDualRef {
-		return guard, ErrWorkflowObservationRequired
+		return guard, workflowstate.ErrObservationRequired
 	}
 
 	return guard, nil

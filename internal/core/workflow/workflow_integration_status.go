@@ -309,7 +309,7 @@ func (s *Store) QueryWorkflowIntegrationSetClosure(ctx context.Context, setPath 
 
 func (s *Store) workflowIntegrationClosureStatus(ctx context.Context, snapshot workflowIntegrationSnapshot, set workflowstate.Record) (IntegrationClosureStatus, error) {
 	status := IntegrationClosureStatus{}
-	if err := s.checkWorkflowIntegrationSetReceipts(ctx, set); err != nil {
+	if err := workflowClosingProofs(s, FrontierPorts{}).CheckReceipts(ctx, set); err != nil {
 		status.Blockers = append(status.Blockers, "unit_receipts_or_fanout_required")
 
 		return status, err
@@ -345,39 +345,6 @@ func (s *Store) workflowIntegrationClosureStatus(ctx context.Context, snapshot w
 	status.CanClose = len(status.Blockers) == 0 && status.GateVerified
 
 	return status, nil
-}
-
-func (s *Store) checkWorkflowIntegrationSetReceipts(ctx context.Context, set workflowstate.Record) error {
-	snapshot, err := s.readSnapshot(ctx)
-	if err != nil {
-		return err
-	}
-
-	if _, err := workflowcloseout.Members(snapshot.Records, set.ID); err != nil {
-		return err
-	}
-
-	for _, descriptor := range set.Set.Slices {
-		if descriptor.Phase != "integrated" || descriptor.DeliveryRef == "" {
-			return workflowstate.ErrConflict
-		}
-
-		receipt, err := s.readRecord(descriptor.DeliveryRef)
-		if err != nil {
-			return err
-		}
-
-		observed, err := s.workflowClosingDeliveryProof(ctx, receipt)
-		if err != nil {
-			return err
-		}
-
-		if err := s.workflowClosingSliceMembers(ctx, descriptor, receipt, observed.Proof); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 // QueryWorkflowPublicationBarriers returns current uncertain journal heads.

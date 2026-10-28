@@ -74,7 +74,7 @@ func (s *Store) guardMutationSlices(record workflowstate.Record, snapshot workfl
 		}
 
 		members := workflowMutationSetMembers(snapshot, record.ID)
-		if slice.TaskInputHash != TaskInputHash(members, slice.ID) {
+		if slice.TaskInputHash != workflowstate.TaskInputHash(members, slice.ID) {
 			return workflowstate.ErrConflict
 		}
 	}

@@ -91,7 +91,7 @@ func nativeDispatchNoRepeat(t *testing.T, f nativeSubmissionFixture, publisher *
 	nativePublication2, err := restarted.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
 
 	again := nativePublication2.Submission
-	if !errors.Is(err, ErrWorkflowObservationRequired) || again.ID != submission.ID || publisher.calls.Load() != 1 {
+	if !errors.Is(err, workflowstate.ErrObservationRequired) || again.ID != submission.ID || publisher.calls.Load() != 1 {
 		t.Fatal("restart repeated native dispatch", err)
 	}
 

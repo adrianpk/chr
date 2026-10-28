@@ -91,7 +91,7 @@ func TestNativeFaultLease(t *testing.T) {
 	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
 	submission := nativePublication.Submission
 
-	if !errors.Is(err, ErrWorkflowObservationRequired) || publisher.calls.Load() != 0 {
+	if !errors.Is(err, workflowstate.ErrObservationRequired) || publisher.calls.Load() != 0 {
 		t.Fatal("expired lease replaced a live native dispatcher", err)
 	}
 
@@ -158,7 +158,7 @@ func checkNativeFaultCrash(t *testing.T, stage string) {
 	nativePublication2, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
 
 	submission := nativePublication2.Submission
-	if !errors.Is(err, ErrWorkflowObservationRequired) || publisher.calls.Load() != 0 || submission.ID == "" {
+	if !errors.Is(err, workflowstate.ErrObservationRequired) || publisher.calls.Load() != 0 || submission.ID == "" {
 		t.Fatal("restart dispatched another publication", err)
 	}
 

@@ -110,7 +110,7 @@ func (s *Store) workflowResultReceipt(run workflowInvocationFile) (ResultReceipt
 	}
 
 	record, err := s.readRecord(run.DeliveryRef)
-	if err != nil || !workflowSliceReceiptHeaderMatches(record, run) || !workflowReceiptMatchesProof(record, proof, run.DeliveryProofRef) {
+	if err != nil || !workflowSliceReceiptHeaderMatches(record, run) || !workflowstate.ReceiptMatchesProof(record, proof, run.DeliveryProofRef) {
 		return ResultReceipt{}, errors.Join(workflowstate.ErrConflict, err)
 	}
 

@@ -71,7 +71,7 @@ func checkWorkflowFinalizedTasks(t *testing.T, fixture workflowIntegrationFixtur
 
 	for _, task := range fixture.hierarchy.Tasks[:3] {
 		record, err := fixture.store.Read(t.Context(), task.Path)
-		if err != nil || !workflowFinalizedTaskMatches(record, fixture.run.Lane.Branch, receipt) || len(record.Task.Evidence) == 0 {
+		if err != nil || !workflowstate.FinalizedTaskMatches(record, fixture.run.Lane.Branch, receipt) || len(record.Task.Evidence) == 0 {
 			t.Fatal("task finalization did not share the receipt and retained proof")
 		}
 	}

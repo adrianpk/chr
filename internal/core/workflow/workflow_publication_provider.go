@@ -42,5 +42,5 @@ func (adapter RemoteReviewAdapter) SubmitWorkflowIntegration(_ context.Context, 
 // ObserveWorkflowSubmission cannot seal an operation through a provider path
 // that lacks a stable guarded submission contract.
 func (adapter RemoteReviewAdapter) ObserveWorkflowSubmission(_ context.Context, _ workflowstate.Submission) (workflowstate.SubmissionObservation, error) {
-	return workflowstate.SubmissionObservation{}, ErrWorkflowObservationRequired
+	return workflowstate.SubmissionObservation{}, workflowstate.ErrObservationRequired
 }

@@ -91,7 +91,7 @@ func checkNativeFanoutMembers(t *testing.T, store *Store, run workflowInvocation
 
 	for _, member := range run.Members {
 		record, err := store.Read(t.Context(), member.Admission.Path)
-		if err != nil || !workflowFinalizedTaskMatches(record, run.Lane.Branch, receipt) {
+		if err != nil || !workflowstate.FinalizedTaskMatches(record, run.Lane.Branch, receipt) {
 			t.Fatal("member did not retain its shared receipt", err)
 		}
 	}

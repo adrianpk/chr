@@ -201,7 +201,7 @@ func checkWorkflowHTTPOutcome(t *testing.T, mode string, result workflowstate.Gi
 	case "partial":
 		expectedState, sent = "unknown", true
 
-		if !errors.Is(err, ErrWorkflowObservationRequired) {
+		if !errors.Is(err, workflowstate.ErrObservationRequired) {
 			t.Fatalf("partial response lost uncertainty: %v", err)
 		}
 	default:

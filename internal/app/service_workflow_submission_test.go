@@ -5,7 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -56,7 +55,7 @@ func assertServiceWorkflowSubmission(t *testing.T, operations service, id string
 		t.Fatalf("submission: %+v, %v", first, err)
 	}
 
-	if _, err := operations.SubmitWorkflowSliceIntegration(t.Context(), id); !errors.Is(err, workflowcore.ErrWorkflowObservationRequired) {
+	if _, err := operations.SubmitWorkflowSliceIntegration(t.Context(), id); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("central service retried an unknown result", err)
 	}
 

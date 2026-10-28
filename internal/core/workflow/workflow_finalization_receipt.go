@@ -77,7 +77,7 @@ func (s *Store) readWorkflowFinalizationReceipt(ctx context.Context, run workflo
 	}
 
 	record, err := s.readRecord(run.DeliveryRef)
-	if err != nil || !workflowSliceReceiptHeaderMatches(record, run) || !workflowReceiptMatchesProof(record, proof, run.DeliveryProofRef) {
+	if err != nil || !workflowSliceReceiptHeaderMatches(record, run) || !workflowstate.ReceiptMatchesProof(record, proof, run.DeliveryProofRef) {
 		return record, workflowstate.ErrConflict
 	}
 
@@ -90,44 +90,6 @@ func (s *Store) readWorkflowFinalizationReceipt(ctx context.Context, run workflo
 
 func workflowSliceReceiptHeaderMatches(record workflowstate.Record, run workflowInvocationFile) bool {
 	return record.SourceHash == run.DeliveryHash && record.ID == workflowSliceReceiptID(run) && record.ProjectID == run.ProjectID && record.Namespace == run.Namespace
-}
-
-func workflowReceiptMatchesProof(record workflowstate.Record, proof workflowstate.SliceDeliveryProof, ref string) bool {
-	if record.Receipt == nil || record.Revision != 1 {
-		return false
-	}
-
-	receipt := record.Receipt
-	if proof.NativeReceiptRef != nil {
-		return workflowNativeReceiptMatchesProof(record, proof)
-	}
-
-	return workflowLegacyReceiptMatchesProof(*receipt, proof, ref)
-}
-
-func workflowLegacyReceiptMatchesProof(receipt workflowstate.Receipt, proof workflowstate.SliceDeliveryProof, ref string) bool {
-	if receipt.Unit != proof.Unit || receipt.CandidateID != proof.CandidateID || receipt.SubmissionID != proof.SubmissionID || receipt.VerificationRef != ref || !receipt.ConfirmedAt.Equal(proof.ConfirmedAt) {
-		return false
-	}
-
-	return workflowReceiptGitMatches(receipt, proof.Git) && receipt.PullRequest == proof.PullRequest.URL && slices.Contains(receipt.ValidationRefs, proof.CandidateRef)
-}
-
-func workflowNativeReceiptMatchesProof(record workflowstate.Record, proof workflowstate.SliceDeliveryProof) bool {
-	receipt := record.Receipt
-	if receipt.Native == nil || *proof.NativeReceiptRef != (workflowstate.EvidenceRef{Path: record.Path, Hash: record.SourceHash}) || receipt.Unit != proof.Unit || receipt.CandidateID != proof.CandidateID || receipt.SubmissionID != proof.SubmissionID {
-		return false
-	}
-
-	return receipt.ConfirmedAt.Equal(proof.ConfirmedAt) && workflowReceiptGitMatches(*receipt, proof.Git) && receipt.PullRequest == proof.PullRequest.URL
-}
-
-func workflowReceiptGitMatches(receipt workflowstate.Receipt, git workflowstate.IntegrationProof) bool {
-	if receipt.Repository != git.Repository || receipt.Method != git.Method || receipt.SourceCommit != git.SourceCommit || receipt.BaseCommit != git.BaseCommit {
-		return false
-	}
-
-	return receipt.PreparedTree == git.PreparedTree && receipt.VerifiedTree == git.VerifiedTree && receipt.HistoryProof == git.HistoryHash && receipt.ResultCommit == git.ResultCommit && receipt.ObservedTarget == git.ObservedTarget
 }
 
 func validateWorkflowTaskDelivery(task workflowstate.Task) error {

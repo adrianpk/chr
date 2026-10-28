@@ -181,7 +181,7 @@ func (s *Store) checkWorkflowIntegrationPublication(ctx context.Context, run wor
 
 	latest := journal.Attempts[len(journal.Attempts)-1]
 	if workflowIntegrationCandidateExcluded(next, latest) {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	if err := guardWorkflowIntegrationSubmissionPhase(next, latest); err != nil {
@@ -197,7 +197,7 @@ func (s *Store) checkWorkflowIntegrationPublication(ctx context.Context, run wor
 
 func guardWorkflowIntegrationSubmissionPhase(entry IntegrationEntry, submission workflowstate.Submission) error {
 	if submission.State == workflowstate.SubmissionAwaitingObservation && !slices.Contains([]IntegrationState{"publishing", "observing", "blocked"}, entry.State) {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	if submission.State == workflowstate.SubmissionConfirmed && !slices.Contains([]IntegrationState{"observing", "finalizing", "integrated", "blocked"}, entry.State) {
@@ -222,7 +222,7 @@ func checkWorkflowIntegrationSubmissionBinding(run workflowInvocationFile, entry
 func (s *Store) checkWorkflowIntegrationFinalization(ctx context.Context, run workflowInvocationFile, old, next IntegrationEntry, submission workflowstate.Submission) error {
 	if workflowIntegrationNeedsRequeueProof(next, submission) {
 		if submission.State != workflowstate.SubmissionUnpublished {
-			return ErrWorkflowObservationRequired
+			return workflowstate.ErrObservationRequired
 		}
 
 		return s.checkWorkflowNativeNonApplication(ctx, submission)

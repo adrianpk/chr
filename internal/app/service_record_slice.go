@@ -58,7 +58,7 @@ func prepareSliceDescriptor(parent *workflowstate.Record, request RecordMutation
 	}
 
 	descriptor.Phase = "pending"
-	descriptor.TaskInputHash = workflowcore.TaskInputHash(nil, descriptor.ID)
+	descriptor.TaskInputHash = workflowstate.TaskInputHash(nil, descriptor.ID)
 	parent.Set.Slices = append(parent.Set.Slices, descriptor)
 
 	return nil

@@ -36,7 +36,7 @@ func TestNativeDriftExclusion(t *testing.T) {
 	submission := beginNativeSubmission(t, submit)
 	nativeDriftMoveTarget(t, &f, "Externally advanced target")
 
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git); !errors.Is(err, ErrWorkflowObservationRequired) {
+	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("pending native intent admitted replacement", err)
 	}
 

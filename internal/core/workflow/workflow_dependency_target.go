@@ -30,7 +30,7 @@ type DependencyTarget struct {
 
 func (s *Store) resumeWorkflowDependencyTarget(ctx context.Context, run *workflowInvocationFile, ports ResumePorts) ([]workflowstate.FileChange, error) {
 	if !workflowDependencyTargetReady(*run, ports) {
-		return nil, ErrWorkflowObservationRequired
+		return nil, workflowstate.ErrObservationRequired
 	}
 
 	target, err := s.observeWorkflowDependencyTarget(ctx, *run, ports)

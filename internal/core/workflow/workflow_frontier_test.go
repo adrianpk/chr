@@ -104,7 +104,7 @@ func checkWorkflowFrontierBarrier(t *testing.T, fixture workflowIntegrationFixtu
 
 	before := workflowTestRead(t, fixture.store, fixture.run.ID)
 	if before.DeliveryRef == "" && before.Lane != nil {
-		if _, err := fixture.store.AdvanceWorkflowFrontier(t.Context(), before.ID, workflowFrontierPorts(fixture)); !errors.Is(err, ErrWorkflowObservationRequired) {
+		if _, err := fixture.store.AdvanceWorkflowFrontier(t.Context(), before.ID, workflowFrontierPorts(fixture)); !errors.Is(err, workflowstate.ErrObservationRequired) {
 			t.Fatalf("unfinalized frontier advanced: %v", err)
 		}
 	}

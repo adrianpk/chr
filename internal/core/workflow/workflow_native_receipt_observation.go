@@ -69,7 +69,7 @@ func (s *Store) readWorkflowNativeReceiptPublication(native workflowstate.Native
 
 func (s *Store) retainWorkflowNativeReceiptObservation(ctx context.Context, run workflowInvocationFile, observation workflowstate.NativePublicationObservation) (workflowInvocationFile, error) {
 	if observation.CanonicalPR == "" || observation.State == "" {
-		return run, ErrWorkflowObservationRequired
+		return run, workflowstate.ErrObservationRequired
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)

@@ -117,7 +117,7 @@ func (s *Store) checkWorkflowFinalizationImages(ctx context.Context, run workflo
 		}
 
 		record, err := s.readRecord(member.Admission.Path)
-		if err != nil || !workflowFinalizedTaskMatches(record, run.Lane.Branch, receipt) {
+		if err != nil || !workflowstate.FinalizedTaskMatches(record, run.Lane.Branch, receipt) {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -137,12 +137,4 @@ func (s *Store) checkWorkflowFinalizationImages(ctx context.Context, run workflo
 	}
 
 	return nil
-}
-
-func workflowFinalizedTaskMatches(record workflowstate.Record, branch string, receipt workflowstate.Record) bool {
-	return record.Task != nil && record.Task.Phase == "integrated" && record.Task.Status == string(ticketcore.StatusDone) && record.Task.DeliveryRef == receipt.Path && workflowTaskDeliveryMatches(record.Task.Delivery, branch, *receipt.Receipt)
-}
-
-func workflowTaskDeliveryMatches(delivery *workflowstate.TaskDelivery, branch string, receipt workflowstate.Receipt) bool {
-	return delivery != nil && delivery.PullRequest == receipt.PullRequest && delivery.Branch == branch && delivery.Method == receipt.Method && delivery.ResultCommit == receipt.ResultCommit && delivery.ConfirmedAt.Equal(receipt.ConfirmedAt)
 }

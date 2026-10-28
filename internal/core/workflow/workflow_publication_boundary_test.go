@@ -25,7 +25,7 @@ func TestWorkflowPublicationUnknown(t *testing.T) {
 	before := workflowTestRead(t, f.store, f.run.ID)
 
 	ports := workflowPublicationPorts(f, p)
-	if _, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports); !errors.Is(err, ErrWorkflowObservationRequired) {
+	if _, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("unknown result allowed another publication phase", err)
 	}
 
@@ -114,7 +114,7 @@ func checkWorkflowPublicationUnknownInputs(t *testing.T, f workflowPreparationFi
 	}
 	for _, check := range checks {
 		t.Run(check.name, func(t *testing.T) {
-			if err := check.run(); !errors.Is(err, ErrWorkflowObservationRequired) {
+			if err := check.run(); !errors.Is(err, workflowstate.ErrObservationRequired) {
 				t.Fatal("pending publication inputs could change", err)
 			}
 		})

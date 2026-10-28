@@ -67,7 +67,7 @@ func TestWorkflowGitAlreadyPrepared(t *testing.T) {
 			workflowIntegrationCommand(t, fixture.remote, "update-ref", fullRef, fixture.request.Git.ResultCommit)
 
 			result, err := NewWorkflowGitPublisher(fixture.request.Repository, fixture.remote).PublishWorkflowGit(t.Context(), fixture.request)
-			if !errors.Is(err, ErrWorkflowObservationRequired) || result.CommandsSent {
+			if !errors.Is(err, workflowstate.ErrObservationRequired) || result.CommandsSent {
 				t.Fatalf("already-P advertisement was partially published: %+v, %v", result, err)
 			}
 

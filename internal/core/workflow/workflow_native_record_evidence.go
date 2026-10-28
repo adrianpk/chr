@@ -304,7 +304,7 @@ func validateWorkflowNativeReceiptObservation(receipt workflowstate.Receipt, obs
 		return workflowstate.ErrConflict
 	}
 
-	if !workflowstate.NativeRecordGitMatches(native.NativeRecordBinding, git) || !workflowReceiptGitMatches(receipt, git) {
+	if !workflowstate.NativeRecordGitMatches(native.NativeRecordBinding, git) || !workflowstate.ReceiptGitMatches(receipt, git) {
 		return workflowstate.ErrConflict
 	}
 

@@ -142,7 +142,7 @@ func (s *Store) workflowFrontierReady(ctx context.Context, run workflowInvocatio
 	}
 
 	if run.DeliveryRef == "" {
-		return false, ErrWorkflowObservationRequired
+		return false, workflowstate.ErrObservationRequired
 	}
 
 	return true, nil

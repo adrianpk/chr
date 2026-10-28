@@ -105,7 +105,7 @@ func TestNativeSubmissionNonApplication(t *testing.T) {
 	ref := retainNativeRecordEvidence(t, f.store, submission.InvocationID, "no-application", proof)
 
 	update.Facts.NonApplicationRef = &ref
-	if _, err := f.store.RetainWorkflowNativeSubmission(t.Context(), update); !errors.Is(err, ErrWorkflowObservationRequired) {
+	if _, err := f.store.RetainWorkflowNativeSubmission(t.Context(), update); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("live dispatch released target", err)
 	}
 

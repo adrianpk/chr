@@ -68,7 +68,7 @@ func (s *Store) prepareWorkflowNativeDispatch(ctx context.Context, guard Integra
 		}
 
 		if !fresh {
-			return ErrWorkflowObservationRequired
+			return workflowstate.ErrObservationRequired
 		}
 
 		nativeDispatch2, readErr := invocationLocation.Owner.authorizeWorkflowNativeDispatch(ctx, submission, provider)

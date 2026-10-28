@@ -116,7 +116,7 @@ func (s *Store) continueWorkflowNativePhase(ctx context.Context, owner workflowN
 
 		return err
 	default:
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 }
 

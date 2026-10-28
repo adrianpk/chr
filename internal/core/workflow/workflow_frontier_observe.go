@@ -21,7 +21,7 @@ type workflowFrontierObservation struct {
 
 func (s *Store) observeWorkflowFrontier(ctx context.Context, unit workflowFrontierUnit, ports FrontierPorts) (workflowFrontierObservation, error) {
 	if ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
-		return workflowFrontierObservation{}, ErrWorkflowObservationRequired
+		return workflowFrontierObservation{}, workflowstate.ErrObservationRequired
 	}
 
 	run := unit.Run
@@ -64,8 +64,8 @@ func (s *Store) workflowFrontierReceiptProof(ctx context.Context, unit workflowF
 		return workflowstate.IntegrationProof{}, failure
 	}
 
-	if retained.Blocker != nil || observation.State != workflowstate.NativeMerged || observation.Git == nil || !workflowFrontierReceiptProofMatches(*observation.Git, receipt, target) {
-		return workflowstate.IntegrationProof{}, ErrWorkflowObservationRequired
+	if retained.Blocker != nil || observation.State != workflowstate.NativeMerged || observation.Git == nil || !workflowstate.ReceiptTargetProofMatches(*observation.Git, receipt, target) {
+		return workflowstate.IntegrationProof{}, workflowstate.ErrObservationRequired
 	}
 
 	return *observation.Git, nil
@@ -94,13 +94,9 @@ func observeWorkflowFrontierProof(ctx context.Context, unit workflowFrontierUnit
 		return proof, err
 	}
 
-	if !workflowFrontierReceiptProofMatches(proof, receipt, target) {
+	if !workflowstate.ReceiptTargetProofMatches(proof, receipt, target) {
 		return proof, workflowstate.ErrConflict
 	}
 
 	return proof, nil
-}
-
-func workflowFrontierReceiptProofMatches(proof workflowstate.IntegrationProof, receipt workflowstate.Record, target workflowstate.PreviewTarget) bool {
-	return proof.ObservedTarget == target.Commit && proof.HistoryHash == receipt.Receipt.HistoryProof && proof.VerifiedTree == receipt.Receipt.VerifiedTree
 }

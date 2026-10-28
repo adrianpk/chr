@@ -85,7 +85,7 @@ func testWorkflowSubmissionExclusion(t *testing.T, intent string) {
 	}
 
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
-	if _, err := restarted.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, git); !errors.Is(err, ErrWorkflowObservationRequired) || provider.calls != 1 {
+	if _, err := restarted.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, git); !errors.Is(err, workflowstate.ErrObservationRequired) || provider.calls != 1 {
 		t.Fatal("stop intent or restart cleared an unknown submission", err)
 	}
 
@@ -183,7 +183,7 @@ func TestWorkflowSubmissionStop(t *testing.T) {
 		t.Fatal("owned provider call did not start")
 	}
 
-	if _, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f)); !errors.Is(err, ErrWorkflowObservationRequired) {
+	if _, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f)); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("concurrent publisher repeated an uncertain intent", err)
 	}
 

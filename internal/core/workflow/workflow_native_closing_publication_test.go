@@ -73,7 +73,7 @@ func TestNativeClosingPublication(t *testing.T) {
 		t.Fatal("read-only closure status hid or changed the shared intent", status, err)
 	}
 
-	if _, err := f.fixture.f.store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports); !errors.Is(err, ErrWorkflowObservationRequired) {
+	if _, err := f.fixture.f.store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("another namespace's intent did not block closure", err)
 	}
 
@@ -121,7 +121,7 @@ func TestNativeClosingPublicationRace(t *testing.T) {
 
 	select {
 	case closed := <-results:
-		if !errors.Is(closed.err, ErrWorkflowObservationRequired) || closed.result.Outcome != "closing_validation_failed" || closed.result.Set.Set.ClosureRef != "" || len(closed.result.Receipt.Validation) != 1 || closed.result.Receipt.Validation[0].ExitCode != 0 {
+		if !errors.Is(closed.err, workflowstate.ErrObservationRequired) || closed.result.Outcome != "closing_validation_failed" || closed.result.Set.Set.ClosureRef != "" || len(closed.result.Receipt.Validation) != 1 || closed.result.Receipt.Validation[0].ExitCode != 0 {
 			t.Fatal("successful gate ignored the new publication barrier", closed.err)
 		}
 	case <-t.Context().Done():

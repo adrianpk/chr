@@ -14,7 +14,7 @@ func (s *Store) checkWorkflowClosingPublications(ctx context.Context) error {
 
 	for _, journal := range journals {
 		if journal.Attempts[len(journal.Attempts)-1].State == workflowstate.SubmissionAwaitingObservation {
-			return ErrWorkflowObservationRequired
+			return workflowstate.ErrObservationRequired
 		}
 	}
 

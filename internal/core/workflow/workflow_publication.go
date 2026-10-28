@@ -188,7 +188,7 @@ func (s *Store) reconcileWorkflowUnmergedSubmission(ctx context.Context, run *wo
 
 	publisher, ok := ports.Provider.(PublicationProvider)
 	if !ok {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
@@ -215,7 +215,7 @@ func (s *Store) reconcileWorkflowUnmergedSubmission(ctx context.Context, run *wo
 
 	// Delivery can occur while the unpublished observation is being checked.
 	if observed.State == workflowstate.SubmissionConfirmed {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	return nil

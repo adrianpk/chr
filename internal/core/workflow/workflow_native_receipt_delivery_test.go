@@ -56,7 +56,7 @@ func testNativeReceiptObservation(t *testing.T, fixture nativeCanonicalFixture, 
 		return
 	}
 
-	if !errors.Is(err, ErrWorkflowObservationRequired) {
+	if !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("unmerged or incompatible PR accepted", err)
 	}
 

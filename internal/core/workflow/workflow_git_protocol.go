@@ -149,7 +149,7 @@ func (advertisement workflowAdvertisement) check(request GitPublication) error {
 
 	source, target := advertisement.refs[request.SourceRef], advertisement.refs[request.TargetRef]
 	if source == request.Git.ResultCommit || target == request.Git.ResultCommit {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	if source != request.Git.SourceCommit || target != request.Git.BaseCommit {

@@ -66,7 +66,7 @@ func (s *Store) checkWorkflowClosingConfirmation(ctx context.Context, claim *wor
 		return errorsOrConflict(err)
 	}
 
-	if err := s.checkWorkflowClosingNativeCanonical(ctx, claim.input, ports); err != nil {
+	if err := workflowClosingProofs(s, ports).CheckCanonical(ctx, claim.input); err != nil {
 		return err
 	}
 

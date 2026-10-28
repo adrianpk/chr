@@ -181,7 +181,7 @@ func (s *Store) checkMaterializationSlices(set workflowstate.Record, receipt wor
 
 	for i, slice := range receipt.Slices {
 		current := set.Set.Slices[i]
-		if current.ID != slice.ID || current.Order != slice.Order || current.ContractHash != slice.ContractHash || current.TaskInputHash != TaskInputHash(snapshot.Records, slice.ID) {
+		if current.ID != slice.ID || current.Order != slice.Order || current.ContractHash != slice.ContractHash || current.TaskInputHash != workflowstate.TaskInputHash(snapshot.Records, slice.ID) {
 			return workflowstate.ErrConflict
 		}
 

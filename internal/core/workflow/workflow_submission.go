@@ -9,10 +9,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ErrWorkflowObservationRequired retains target exclusion until a submitted
-// operation is verified delivered or definitively sealed without publication.
-var ErrWorkflowObservationRequired = errors.New("workflow submission requires canonical observation")
-
 // ErrWorkflowIntegrationBudget requires an explicit operator decision after the
 // per-unit, per-invocation submission budget is consumed.
 var ErrWorkflowIntegrationBudget = errors.New("workflow integration submission budget exhausted")
@@ -77,7 +73,7 @@ func (s *Store) ReconcileWorkflowSubmission(ctx context.Context, id string, prov
 	}
 
 	if submission.Native != nil {
-		return submission, ErrWorkflowObservationRequired
+		return submission, workflowstate.ErrObservationRequired
 	}
 
 	observed, err := observeWorkflowSubmission(ctx, submission, provider, git)

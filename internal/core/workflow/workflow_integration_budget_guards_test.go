@@ -129,7 +129,7 @@ func TestNativeBudgetLegacy(t *testing.T) {
 func nativeBudgetLegacyUncertainty(t *testing.T, f workflowPreparationFixture, provider *workflowSubmissionProviderFixture, entry IntegrationEntry, submission workflowstate.Submission, path string, before []byte) {
 	t.Helper()
 
-	if submissionIntent2, err := f.store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, entry.InvocationID), provider); !errors.Is(err, ErrWorkflowObservationRequired) || submissionIntent2.Dispatch || submissionIntent2.Submission.ID != submission.ID {
+	if submissionIntent2, err := f.store.BeginWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, entry.InvocationID), provider); !errors.Is(err, workflowstate.ErrObservationRequired) || submissionIntent2.Dispatch || submissionIntent2.Submission.ID != submission.ID {
 		t.Fatal("legacy uncertainty converted to empty native intent", err)
 	}
 

@@ -47,7 +47,7 @@ func (s *Store) beginWorkflowNativeSubmission(ctx context.Context, run workflowI
 func (s *Store) retryWorkflowNativeSubmission(run *workflowInvocationFile, journal workflowSubmissionJournal) (SubmissionIntent, error) {
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.Native == nil {
-		return SubmissionIntent{Submission: last, Dispatch: false}, ErrWorkflowObservationRequired
+		return SubmissionIntent{Submission: last, Dispatch: false}, workflowstate.ErrObservationRequired
 	}
 
 	return SubmissionIntent{Submission: last, Dispatch: false}, s.projectWorkflowNativeSubmission(run, journal)

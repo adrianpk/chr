@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
-	"sort"
-	"strings"
 	"time"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
@@ -156,25 +154,5 @@ func materializationSlice(input generationcore.GeneratedWorkflowSlice, set workf
 		return workflowstate.WorkflowSlice{}, err
 	}
 
-	return workflowstate.WorkflowSlice{ID: input.ID, Order: input.Order, Title: input.Title, ContractRef: filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", "slice-"+input.ID+".json")), ContractHash: contenthash.Sum(contract), TaskInputHash: TaskInputHash(tasks, input.ID), DependsOn: resolveMaterializationRefs(input.DependsOn, keys), Phase: "pending"}, nil
-}
-
-// TaskInputHash detects membership or contract changes in a slice.
-func TaskInputHash(records []workflowstate.Record, sliceID string) string {
-	tasks := []workflowstate.Task{}
-
-	for _, record := range records {
-		if record.Task != nil && record.Task.SliceID == sliceID {
-			tasks = append(tasks, *record.Task)
-		}
-	}
-
-	sort.Slice(tasks, func(i, j int) bool { return tasks[i].Order < tasks[j].Order })
-
-	values := []string{}
-	for _, task := range tasks {
-		values = append(values, fmt.Sprintf("%d:%q:%q", task.Order, task.Key, task.ContractHash))
-	}
-
-	return contenthash.Sum([]byte(strings.Join(values, "\n")))
+	return workflowstate.WorkflowSlice{ID: input.ID, Order: input.Order, Title: input.Title, ContractRef: filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", "slice-"+input.ID+".json")), ContractHash: contenthash.Sum(contract), TaskInputHash: workflowstate.TaskInputHash(tasks, input.ID), DependsOn: resolveMaterializationRefs(input.DependsOn, keys), Phase: "pending"}, nil
 }

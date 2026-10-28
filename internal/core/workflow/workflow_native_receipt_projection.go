@@ -53,7 +53,7 @@ func (s *Store) checkWorkflowNativeReceiptContinuation(submission workflowstate.
 
 	refs := submission.Native.ObservationRefs
 	if len(refs) == 0 {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	var observation workflowstate.NativePublicationObservation
@@ -62,7 +62,7 @@ func (s *Store) checkWorkflowNativeReceiptContinuation(submission workflowstate.
 	}
 
 	if observation.State != workflowstate.NativeMerged {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	return nil

@@ -71,7 +71,7 @@ func checkMaterializedHierarchy(t *testing.T, store *Store, result Materializati
 	t.Helper()
 
 	for _, slice := range result.Set.Set.Slices {
-		if slice.TaskInputHash != TaskInputHash(result.Tasks, slice.ID) {
+		if slice.TaskInputHash != workflowstate.TaskInputHash(result.Tasks, slice.ID) {
 			t.Fatal("slice task fingerprint differs")
 		}
 

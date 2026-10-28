@@ -33,7 +33,7 @@ func observeWorkflowSubmission(ctx context.Context, submission workflowstate.Sub
 	}
 
 	if observation.SubmissionID != submission.ID || !observation.Unpublished {
-		return submission, ErrWorkflowObservationRequired
+		return submission, workflowstate.ErrObservationRequired
 	}
 
 	if err := checkWorkflowUnpublishedObservation(ctx, submission, provider); err != nil {
@@ -53,7 +53,7 @@ func checkWorkflowUnpublishedObservation(ctx context.Context, submission workflo
 	}
 
 	if !workflowforge.MatchesPullRequest(submission, pr) || pr.Merged {
-		return ErrWorkflowObservationRequired
+		return workflowstate.ErrObservationRequired
 	}
 
 	target, err := provider.ReadWorkflowBranch(ctx, pr.Repository, pr.BaseBranch)

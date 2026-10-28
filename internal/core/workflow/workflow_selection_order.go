@@ -74,7 +74,7 @@ func (selection workflowSelection) validateMemberInputs(members []PreviewMember)
 		}
 
 		descriptor := selection.slices[member.SliceID]
-		if descriptor.TaskInputHash != TaskInputHash(selection.snapshot.Records, member.SliceID) {
+		if descriptor.TaskInputHash != workflowstate.TaskInputHash(selection.snapshot.Records, member.SliceID) {
 			return fmt.Errorf("%w: slice %s membership fingerprint changed", workflowstate.ErrConflict, member.SliceID)
 		}
 

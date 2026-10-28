@@ -105,7 +105,7 @@ func (s *Store) workflowNativeReceiptObservation(submission workflowstate.Submis
 
 	native := submission.Native
 	if native.ApplicationState != workflowstate.NativeApplicationGitApplied || native.TransportResponseRef == nil || len(native.ObservationRefs) == 0 {
-		return workflowNativeReceiptEvidence{Observation: observation, Ref: workflowstate.EvidenceRef{}}, ErrWorkflowObservationRequired
+		return workflowNativeReceiptEvidence{Observation: observation, Ref: workflowstate.EvidenceRef{}}, workflowstate.ErrObservationRequired
 	}
 
 	ref := native.ObservationRefs[len(native.ObservationRefs)-1]
@@ -114,7 +114,7 @@ func (s *Store) workflowNativeReceiptObservation(submission workflowstate.Submis
 	}
 
 	if observation.State != workflowstate.NativeMerged || !s.workflowNativeCanonicalObservationValid(submission, observation) {
-		return workflowNativeReceiptEvidence{Observation: observation, Ref: ref}, ErrWorkflowObservationRequired
+		return workflowNativeReceiptEvidence{Observation: observation, Ref: ref}, workflowstate.ErrObservationRequired
 	}
 
 	return workflowNativeReceiptEvidence{Observation: observation, Ref: ref}, nil

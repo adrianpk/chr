@@ -22,23 +22,6 @@ func (e workflowClosingEvidence) Read(relative string) ([]byte, error) {
 	return opsfile.Read(path)
 }
 
-func (s *Store) workflowClosingEvidenceHashes(hashes map[string]string, refs []string) error {
-	for _, ref := range refs {
-		if len(hashes) >= workflowstate.RecordLimit {
-			return fmt.Errorf("closing evidence observation bound exceeded")
-		}
-
-		hash, err := s.workflowEvidenceHash(ref)
-		if err != nil || hash == "missing" {
-			return errorsOrConflict(err)
-		}
-
-		hashes[ref] = hash
-	}
-
-	return nil
-}
-
 func (s *Store) checkWorkflowClosingInputs(ctx context.Context, claim *workflowClosingClaim) error {
 	if err := s.checkWorkflowClosingPublications(ctx); err != nil {
 		return err
@@ -89,7 +72,7 @@ func (s *Store) checkWorkflowClosingMembers(ctx context.Context, claim *workflow
 		return fmt.Errorf("%w: actual closing members changed", workflowstate.ErrConflict)
 	}
 
-	return s.checkWorkflowIntegrationSetReceipts(ctx, set)
+	return workflowClosingProofs(s, FrontierPorts{}).CheckReceipts(ctx, set)
 }
 
 func (s *Store) readWorkflowClosedSet(set workflowstate.Record) (SetClosureResult, error) {

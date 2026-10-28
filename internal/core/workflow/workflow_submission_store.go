@@ -218,7 +218,7 @@ func (s *Store) checkWorkflowSubmissionProjection(ctx context.Context, run workf
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.State != workflowstate.SubmissionAwaitingObservation && journal.sourceHash != run.Submission.JournalHash {
-		return fmt.Errorf("%w: %w: resolved journal needs fresh owner observation", ErrWorkflowOwned, ErrWorkflowObservationRequired)
+		return fmt.Errorf("%w: %w: resolved journal needs fresh owner observation", ErrWorkflowOwned, workflowstate.ErrObservationRequired)
 	}
 
 	return nil
