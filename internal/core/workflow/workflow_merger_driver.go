@@ -34,13 +34,13 @@ func runWorkflowMergerDriver(ctx context.Context, input workflowMergerDriverInpu
 		return workflowMergerDriverResult{err: err}
 	}
 
-	defer func() { _ = commandOutput.Stdout.File.Close(); _ = commandOutput.Stderr.File.Close() }() //nolint:errcheck
+	defer func() { _ = commandOutput.Stdout.File.Close(); _ = commandOutput.Stderr.File.Close() }() //nolint:errcheck // Owned capture handles close after the supervised result; close cannot grant acceptance.
 
 	gate, permit, err := os.Pipe()
 	if err != nil {
 		return workflowMergerDriverResult{err: err}
 	}
-	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
+	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck // Owned launch pipes close on every path; dispatch and process failures are returned separately.
 
 	return executeWorkflowMergerDriver(ctx, input, workflowMergerDriverIO{Gate: gate, Permit: permit, Index: index, Output: commandOutput})
 }
@@ -62,10 +62,10 @@ func executeWorkflowMergerDriver(ctx context.Context, input workflowMergerDriver
 		return workflowMergerDriverResult{err: err}
 	}
 
-	defer func() { _ = stdin.Close() }() //nolint:errcheck
+	defer func() { _ = stdin.Close() }() //nolint:errcheck // Owned child input closes after broker/process completion; protocol and wait errors are retained.
 
 	reader, writer := io.Pipe()
-	defer func() { _ = reader.Close(); _ = writer.Close() }() //nolint:errcheck
+	defer func() { _ = reader.Close(); _ = writer.Close() }() //nolint:errcheck // Closing owned in-memory pipes only unblocks peers; broker and process outcomes remain authoritative.
 
 	process.Stdout, process.Stderr = io.MultiWriter(stdout, writer), stderr
 	if err := process.Start(); err != nil {
@@ -80,7 +80,7 @@ func executeWorkflowMergerDriver(ctx context.Context, input workflowMergerDriver
 
 	go func() {
 		command, waitErr := runWorkflowSupervisedProcess(ctx, claim, prepared, workflowProcessExecution{Command: prepared.input.Worker, Process: process, Permit: permit, Index: index, Output: workflowCommandOutput{Stdout: stdout, Stderr: stderr}})
-		_ = writer.Close() //nolint:errcheck
+		_ = writer.Close() //nolint:errcheck // Signal EOF after the supervised wait; pipe close has no durable state to flush.
 
 		finished <- workflowMergerDriverResult{command: command, err: waitErr}
 	}()
@@ -89,7 +89,7 @@ func executeWorkflowMergerDriver(ctx context.Context, input workflowMergerDriver
 	if brokerErr != nil {
 		cancel()
 
-		_ = reader.Close() //nolint:errcheck
+		_ = reader.Close() //nolint:errcheck // Unblock the owned writer after cancellation; the broker failure is returned.
 	}
 
 	result := <-finished

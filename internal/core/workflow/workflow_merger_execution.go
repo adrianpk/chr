@@ -97,7 +97,7 @@ func (s *Store) runWorkflowMerger(ctx context.Context, claimed workflowClaimedMe
 	if err != nil {
 		return workflowMergerDriverResult{err: fmt.Errorf("merger checkout access: %w", err)}
 	}
-	defer func() { _ = root.Close() }() //nolint:errcheck
+	defer func() { _ = root.Close() }() //nolint:errcheck // Release the owned directory handle; tool operations return their IO failures.
 
 	tools := workflowmerge.NewTools(*prepared.input.Merger, root, func(ctx context.Context) error {
 		return s.checkWorkflowMergerPrepared(ctx, claimed, provider)

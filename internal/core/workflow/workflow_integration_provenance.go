@@ -62,15 +62,15 @@ func validateWorkflowIntegrationProvenance(proof workflowstate.IntegrationProof)
 		return nil
 	}
 
-	if !workflowintegrate.ValidWorkflowProvenanceHeader(proof, *p) {
+	if !workflowintegrate.ValidProvenanceHeader(proof, *p) {
 		return workflowstate.ErrConflict
 	}
 
-	if err := workflowintegrate.ValidateWorkflowProvenanceCommits(proof, *p); err != nil {
+	if err := workflowintegrate.CheckProvenanceCommits(proof, *p); err != nil {
 		return err
 	}
 
-	if p.Preparation != nil && !workflowintegrate.ValidWorkflowPreparationMetadata(proof, *p.Preparation) {
+	if p.Preparation != nil && !workflowintegrate.ValidPreparationMetadata(proof, *p.Preparation) {
 		return workflowstate.ErrConflict
 	}
 

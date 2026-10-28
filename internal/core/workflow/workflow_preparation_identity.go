@@ -49,7 +49,7 @@ func (reader workflowIntegrationReader) prepareDistinctResult(ctx context.Contex
 		return reader.prepareCombinedCommit(ctx, proof)
 	}
 
-	return workflowintegrate.WorkflowDistinctPreparation(proof.SourceCommit, reader.preparation, build)
+	return workflowintegrate.DistinctResult(proof.SourceCommit, reader.preparation, build)
 }
 
 func (reader workflowIntegrationReader) addPreparationMetadata(ctx context.Context, proof workflowstate.IntegrationProof, provenance *workflowstate.IntegrationProvenance) error {
@@ -63,11 +63,16 @@ func (reader workflowIntegrationReader) addPreparationMetadata(ctx context.Conte
 	}
 
 	p := *metadata
-	p.Identity = workflowintegrate.WorkflowPreparationIdentity(proof, p)
+	p.Identity = workflowintegrate.PreparationIdentity(proof, p)
 	p.Signatures = nil
 
 	for i, entry := range provenance.Prepared {
-		if !workflowintegrate.WorkflowPreparationCommitterMatches(entry, p, i < len(provenance.Prepared)-len(provenance.IntegrationFixes)) {
+		mode := workflowintegrate.HostFixCommitter
+		if i < len(provenance.Prepared)-len(provenance.IntegrationFixes) {
+			mode = workflowintegrate.ReplayCommitter
+		}
+
+		if !workflowintegrate.CommitterMatches(entry, p, mode) {
 			return workflowstate.ErrConflict
 		}
 

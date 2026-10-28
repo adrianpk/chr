@@ -23,12 +23,8 @@ type (
 		Entry  IntegrationEntry
 		Budget IntegrationBudget
 	}
-	workflowTokenTotals    struct{ Settled, Reserved int64 }
-	workflowRoleUsage      struct{ Consumed, Limit int64 }
-	workflowAnsweredRepair struct {
-		Plan  MergerRepairPlan
-		Found bool
-	}
+	workflowTokenTotals   struct{ Settled, Reserved int64 }
+	workflowRoleUsage     struct{ Consumed, Limit int64 }
 	workflowDecisionRetry struct {
 		Record IntegrationDecisions
 		Found  bool
@@ -78,4 +74,10 @@ type workflowPreparationCommit struct {
 	Tree       string
 	Parents    []string
 	Authorship workflowPreparationAuthorship
+}
+
+// workflowAnsweredRepair retains an explicit repair answer without granting acceptance.
+type workflowAnsweredRepair struct {
+	Plan  MergerRepairPlan
+	Found bool
 }

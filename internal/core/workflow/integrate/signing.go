@@ -9,16 +9,16 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ValidWorkflowSigningProfile checks the retained SSH key/principal checksum without using the private key.
-func ValidWorkflowSigningProfile(p workflowstate.CommitSigningProfile) bool {
-	if !validWorkflowSigningPrincipal(p.Principal) || !validWorkflowSigningPublicKey(p.PublicKey) {
+// ValidSigningProfile checks the retained SSH key/principal checksum without using the private key.
+func ValidSigningProfile(p workflowstate.CommitSigningProfile) bool {
+	if !validSigningPrincipal(p.Principal) || !validSigningPublicKey(p.PublicKey) {
 		return false
 	}
 
 	return p.Hash == contenthash.Sum([]byte("chr-ssh-commit-signing/v1:"+p.Principal+":"+p.PublicKey))
 }
 
-func validWorkflowSigningPrincipal(principal string) bool {
+func validSigningPrincipal(principal string) bool {
 	if principal == "" || len(principal) > 128 {
 		return false
 	}
@@ -32,7 +32,7 @@ func validWorkflowSigningPrincipal(principal string) bool {
 	return true
 }
 
-func validWorkflowSigningPublicKey(publicKey string) bool {
+func validSigningPublicKey(publicKey string) bool {
 	if len(publicKey) > 128 {
 		return false
 	}
@@ -50,12 +50,12 @@ func validWorkflowSigningPublicKey(publicKey string) bool {
 	return publicKey == strings.Join(fields, " ")
 }
 
-func validWorkflowPreparationSignatures(proof workflowstate.IntegrationProof, p workflowstate.IntegrationPreparation) bool {
+func validSignatures(proof workflowstate.IntegrationProof, p workflowstate.IntegrationPreparation) bool {
 	if !p.RequiredSignatures {
 		return p.Signing == nil && len(p.Signatures) == 0
 	}
 
-	if p.Signing == nil || !ValidWorkflowSigningProfile(*p.Signing) || len(p.Signatures) != len(proof.Provenance.Prepared) {
+	if p.Signing == nil || !ValidSigningProfile(*p.Signing) || len(p.Signatures) != len(proof.Provenance.Prepared) {
 		return false
 	}
 
@@ -68,11 +68,11 @@ func validWorkflowPreparationSignatures(proof workflowstate.IntegrationProof, p 
 	return true
 }
 
-// WorkflowPreparationSignaturePayload extracts exact unsigned bytes and one required SSH signature.
-func WorkflowPreparationSignaturePayload(data string) (WorkflowSignedPayload, error) {
+// SignaturePayload extracts exact unsigned bytes and one required SSH signature.
+func SignaturePayload(data string) (SignedPayload, error) {
 	header, message, ok := strings.Cut(data, "\n\n")
 	if !ok {
-		return WorkflowSignedPayload{Payload: "", Signature: ""}, workflowstate.ErrConflict
+		return SignedPayload{Payload: "", Signature: ""}, workflowstate.ErrConflict
 	}
 
 	var unsigned, signature []string
@@ -82,7 +82,7 @@ func WorkflowPreparationSignaturePayload(data string) (WorkflowSignedPayload, er
 	for _, line := range strings.Split(header, "\n") {
 		switch {
 		case strings.HasPrefix(line, "gpgsig ") && len(signature) != 0:
-			return WorkflowSignedPayload{Payload: "", Signature: ""}, workflowstate.ErrConflict
+			return SignedPayload{Payload: "", Signature: ""}, workflowstate.ErrConflict
 		case strings.HasPrefix(line, "gpgsig "):
 			inside = true
 
@@ -97,11 +97,11 @@ func WorkflowPreparationSignaturePayload(data string) (WorkflowSignedPayload, er
 	}
 
 	if len(signature) == 0 {
-		return WorkflowSignedPayload{Payload: "", Signature: ""}, fmt.Errorf("prepared commit lacks a required signature")
+		return SignedPayload{Payload: "", Signature: ""}, fmt.Errorf("prepared commit lacks a required signature")
 	}
 
-	return WorkflowSignedPayload{Payload: strings.Join(unsigned, "\n") + "\n\n" + message, Signature: strings.Join(signature, "\n") + "\n"}, nil
+	return SignedPayload{Payload: strings.Join(unsigned, "\n") + "\n\n" + message, Signature: strings.Join(signature, "\n") + "\n"}, nil
 }
 
-// WorkflowSignedPayload retains exact unsigned bytes and the extracted SSH signature.
-type WorkflowSignedPayload struct{ Payload, Signature string }
+// SignedPayload retains exact unsigned bytes and the extracted SSH signature.
+type SignedPayload struct{ Payload, Signature string }

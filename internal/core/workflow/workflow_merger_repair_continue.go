@@ -28,7 +28,7 @@ func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Con
 		return state, err
 	}
 
-	if err := checkWorkflowRepairPredecessors(state, repair.Input); err != nil {
+	if err := checkWorkflowRepairPredecessors(workflowRepairHistory{ReplayIndex: state.ReplayIndex, History: state.History}, repair.Input); err != nil {
 		return state, err
 	}
 
@@ -49,7 +49,7 @@ func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Con
 	return state, err
 }
 
-func checkWorkflowRepairPredecessors(state MergerRepairState, input workflowstate.MergerInput) error {
+func checkWorkflowRepairPredecessors(state workflowRepairHistory, input workflowstate.MergerInput) error {
 	if input.Method != "rebase" {
 		return nil
 	}

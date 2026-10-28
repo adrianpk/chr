@@ -43,7 +43,7 @@ func workflowSSHSigningProfile(signing *SSHCommitSigning) (workflowstate.CommitS
 	p := workflowstate.CommitSigningProfile{PublicKey: strings.TrimSpace(signing.PublicKey), Principal: signing.Principal}
 
 	p.Hash = contenthash.Sum([]byte("chr-ssh-commit-signing/v1:" + p.Principal + ":" + p.PublicKey))
-	if !workflowintegrate.ValidWorkflowSigningProfile(p) {
+	if !workflowintegrate.ValidSigningProfile(p) {
 		return p, workflowstate.ErrConflict
 	}
 
@@ -80,7 +80,7 @@ func (reader workflowIntegrationReader) signPreparationObject(ctx context.Contex
 }
 
 func (reader workflowIntegrationReader) verifyPreparationSignature(ctx context.Context, commit string, profile *workflowstate.CommitSigningProfile) (workflowstate.IntegrationSignature, error) {
-	if profile == nil || !workflowintegrate.ValidWorkflowSigningProfile(*profile) {
+	if profile == nil || !workflowintegrate.ValidSigningProfile(*profile) {
 		return workflowstate.IntegrationSignature{}, workflowstate.ErrConflict
 	}
 
@@ -89,7 +89,7 @@ func (reader workflowIntegrationReader) verifyPreparationSignature(ctx context.C
 		return workflowstate.IntegrationSignature{}, err
 	}
 
-	signedPayload, err := workflowintegrate.WorkflowPreparationSignaturePayload(data)
+	signedPayload, err := workflowintegrate.SignaturePayload(data)
 
 	payload, signature := signedPayload.Payload, signedPayload.Signature
 

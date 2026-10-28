@@ -94,7 +94,7 @@ func checkWorkflowMergerExecutable(command []string, hash string) error {
 	if err != nil {
 		return err
 	}
-	defer func() { _ = file.Close() }() //nolint:errcheck
+	defer func() { _ = file.Close() }() //nolint:errcheck // Read-only executable handle; mode, content and read failures are returned before closing.
 
 	if err := checkWorkflowMergerExecutableMode(file); err != nil {
 		return err

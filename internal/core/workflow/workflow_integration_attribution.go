@@ -17,7 +17,7 @@ func (reader workflowIntegrationReader) commitAttribution(ctx context.Context, c
 		return workflowstate.IntegrationAttribution{}, err
 	}
 
-	return workflowintegrate.WorkflowCommitAttribution(commit, data)
+	return workflowintegrate.ParseCommit(commit, data)
 }
 
 func (reader workflowIntegrationReader) sourceAttributions(ctx context.Context, proof workflowstate.IntegrationProof) ([]workflowstate.IntegrationAttribution, error) {

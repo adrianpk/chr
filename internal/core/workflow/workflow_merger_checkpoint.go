@@ -103,7 +103,7 @@ func (s *Store) readWorkflowMergerCheckpoint(input workflowstate.MergerInput) (M
 		return record.State, workflowstate.ErrConflict
 	}
 
-	return record.State, checkWorkflowRepairPredecessors(record.State, input)
+	return record.State, checkWorkflowRepairPredecessors(workflowRepairHistory{ReplayIndex: record.State.ReplayIndex, History: record.State.History}, input)
 }
 
 func (s *Store) checkWorkflowMergerCheckpointOwner(run workflowInvocationFile, entry IntegrationEntry, state MergerRepairState) error {

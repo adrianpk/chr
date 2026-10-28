@@ -247,7 +247,7 @@ func TestNativeCollisionBudget(t *testing.T) {
 				return nativeCollisionBuild(tc.name, calls)
 			}
 
-			result, err := workflowintegrate.WorkflowDistinctPreparation("source", p, build)
+			result, err := workflowintegrate.DistinctResult("source", p, build)
 			if calls != tc.calls || p.NoOpCollisions != tc.collisions || p.CommitterDate != tc.date || result != tc.result || (tc.result != "") != (err == nil) {
 				t.Fatal("collision bound or recorded metadata changed")
 			}

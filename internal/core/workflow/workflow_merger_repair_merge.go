@@ -34,17 +34,22 @@ func (reader workflowIntegrationReader) mergerTree(ctx context.Context, original
 		return workflowMergerTree{}, workflowstate.ErrConflict
 	}
 
-	return parseWorkflowMergerTree(stdout.Buffer.String(), err != nil)
+	mode := workflowMergerTreeClean
+	if err != nil {
+		mode = workflowMergerTreeConflicted
+	}
+
+	return parseWorkflowMergerTree(stdout.Buffer.String(), mode)
 }
 
-func parseWorkflowMergerTree(data string, conflicted bool) (workflowMergerTree, error) {
+func parseWorkflowMergerTree(data string, mode workflowMergerTreeMode) (workflowMergerTree, error) {
 	fields := strings.Split(data, "\x00")
 	if len(fields) < 2 || !workflowstate.ValidCommitID(fields[0]) {
 		return workflowMergerTree{}, workflowstate.ErrConflict
 	}
 
 	result := workflowMergerTree{tree: fields[0]}
-	if !conflicted {
+	if mode == workflowMergerTreeClean {
 		return result, nil
 	}
 
@@ -79,3 +84,10 @@ func (reader workflowIntegrationReader) materializeMergerTree(ctx context.Contex
 
 	return err
 }
+
+type workflowMergerTreeMode uint8
+
+const (
+	workflowMergerTreeClean workflowMergerTreeMode = iota
+	workflowMergerTreeConflicted
+)

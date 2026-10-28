@@ -98,7 +98,7 @@ func nativeAlteredPreparationDate(proof *workflowstate.IntegrationProof) {
 	p := proof.Provenance.Preparation
 	p.InitialCommitterDate, p.CommitterDate = "1700000000 +0000", "1700000000 +0000"
 
-	p.Identity = workflowintegrate.WorkflowPreparationIdentity(*proof, *p)
+	p.Identity = workflowintegrate.PreparationIdentity(*proof, *p)
 	for i := range proof.Provenance.Prepared {
 		proof.Provenance.Prepared[i].Committer.Date = p.CommitterDate
 	}

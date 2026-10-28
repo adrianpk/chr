@@ -43,7 +43,7 @@ func (reader workflowIntegrationReader) rebaseProvenance(ctx context.Context, pr
 
 	for i, entry := range proof.History {
 		prepared, err := reader.commitAttribution(ctx, entry.Commit)
-		if err != nil || i >= len(p.Source) || !workflowintegrate.WorkflowReplayAttributionMatches(p.Source[i], prepared) {
+		if err != nil || i >= len(p.Source) || !workflowintegrate.ReplayAttributionMatches(p.Source[i], prepared) {
 			return nil, fmt.Errorf("rebase must preserve original author, date and message")
 		}
 

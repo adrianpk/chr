@@ -22,7 +22,7 @@ func validateWorkflowRepairHistory(proof workflowstate.IntegrationProof) error {
 			return workflowstate.ErrConflict
 		}
 
-		state := MergerRepairState{ReplayIndex: index, History: proof.History[:index]}
+		state := workflowRepairHistory{ReplayIndex: index, History: proof.History[:index]}
 		if err := checkWorkflowRepairPredecessors(state, repair.Input); err != nil {
 			return err
 		}

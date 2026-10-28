@@ -66,3 +66,8 @@ type workflowMergerPathCheck struct {
 	After  string
 	Mode   workflowMergerPathMode
 }
+
+type workflowRepairHistory struct {
+	ReplayIndex int
+	History     []workflowstate.IntegrationCommit
+}

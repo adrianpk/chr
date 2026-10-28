@@ -16,7 +16,7 @@ func (reader workflowIntegrationReader) replayCommit(ctx context.Context, tree, 
 		return "", err
 	}
 
-	attribution, err := workflowintegrate.WorkflowCommitAttribution(source, data)
+	attribution, err := workflowintegrate.ParseCommit(source, data)
 	if err != nil {
 		return "", err
 	}
@@ -42,7 +42,7 @@ func (reader workflowIntegrationReader) preparationObject(ctx context.Context, o
 	tree, parents := object.Tree, object.Parents
 	author, encoding, message := object.Authorship.Author, object.Authorship.Encoding, object.Authorship.Message
 
-	if !workflowintegrate.ValidWorkflowPreparationObject(tree, parents, author, encoding) {
+	if !workflowintegrate.ValidCommitObject(tree, parents, author, encoding) {
 		return "", workflowstate.ErrConflict
 	}
 
