@@ -2,10 +2,7 @@ package workflow
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 
-	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
@@ -25,34 +22,9 @@ func NewWorkflowNativeReviewAdapter(remote RemoteReviewAdapter, store *Store, id
 	return &NativeReviewAdapter{remote, store, id, configDir}
 }
 
-// WorkflowIntegrationCapability is a preliminary mechanism check. Publication
-// additionally requires the prepared result's current transport capability.
+// WorkflowIntegrationCapability composes current host grants with configured provider observations.
 func (adapter *NativeReviewAdapter) WorkflowIntegrationCapability(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowstate.PublicationCapability, error) {
-	policy, err := adapter.ReadWorkflowNativePolicy(ctx, pr, method)
-	if err != nil {
-		return workflowstate.PublicationCapability{}, err
-	}
-
-	observation, err := adapter.readWorkflowNativePolicy(ctx, pr, method)
-	if err != nil {
-		return workflowstate.PublicationCapability{}, err
-	}
-
-	if len(observation.Unsupported) != 0 || !workflowforge.NativeObservationContractMatches(observation.Contract, policy.ObservationContract) {
-		return workflowstate.PublicationCapability{}, fmt.Errorf("%w: current repository policy does not support the publisher profile", workflowstate.ErrAtomicGuard)
-	}
-
-	identity, err := adapter.readWorkflowNativeIdentity(ctx, pr)
-	if err != nil || identity != policy.APIIdentityFingerprint {
-		return workflowstate.PublicationCapability{}, fmt.Errorf("%w: publisher identity changed", workflowstate.ErrConflict)
-	}
-
-	host, err := json.Marshal(policy)
-	if err != nil {
-		return workflowstate.PublicationCapability{}, err
-	}
-
-	return workflowstate.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, Revision: contenthash.Sum(append(host, observation.Data...)), AtomicSourceBase: true, ExactResult: true}, nil
+	return workflowforge.ObserveNativePublicationCapability(ctx, pr, method, workflowforge.NativeCapabilityReaders{Provider: adapter.RemoteReviewAdapter, Policy: adapter})
 }
 
 // WorkflowPreparedNativeCapability observes the actual receive-pack server for

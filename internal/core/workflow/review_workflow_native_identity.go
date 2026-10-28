@@ -6,7 +6,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (adapter RemoteReviewAdapter) readWorkflowNativeIdentity(ctx context.Context, pr workflowstate.PullRequestSnapshot) (string, error) {
+// ReadWorkflowPublisherIdentity resolves current enabled host configuration before identity IO.
+func (adapter RemoteReviewAdapter) ReadWorkflowPublisherIdentity(ctx context.Context, pr workflowstate.PullRequestSnapshot) (string, error) {
 	resolved, err := adapter.resolve(pr.URL)
 	if err != nil {
 		return "", err
