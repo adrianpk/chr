@@ -123,6 +123,13 @@ action/receipt transaction. The existing frozen request/digest and partial
 acceptance values cross that boundary. Acceptance cancellation still precedes
 caller-context continuation; verified receipt replay returns without steps.
 
+Canonical PR provider read/find/create sequencing now has a private host under
+the unchanged minute-bounded repository lock. Store retains current-candidate
+revalidation, creating intent before send and complete observation/binding/task/
+set transactions. Exact PR identity and URL policy have actual forge owners and
+direct consumers. Uncertain creation remains observation-only; neither absence
+nor merged metadata can authorize a replacement PR or confirmed delivery.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -137,11 +144,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 228 source/extraction/consolidation images. Current identities and hashes are updated
+retains 244 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. Eighty-six former Store methods now have actual
+frozen source fields remain unchanged. Eighty-seven former Store method rows now have actual
 closeout policy, host evidence, coordinator, lifecycle or private-function owners. The original 908 method rows
-retain frozen source evidence and current identities; 822 methods remain on Store. This count does not establish
+retain frozen source evidence and current identities; 821 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -161,7 +168,7 @@ replaces the removed policy methods.
 
 The [vocabulary and compatibility ledger](../../../plan/code-quality-remediation-slice-15-vocabulary.md)
 defines frontier, adoption, loose selection, continuation, amendment and closing
-from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Seventeen current compatibility/control cases identify actual
+from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Eighteen current compatibility/control cases identify actual
 consumers, existing regression protection and retirement conditions. Remaining
 legacy/schema/control references are explicitly unreconciled; T15.5 stays active.
 
@@ -194,11 +201,11 @@ final Store API assessment remains active.
 
 Closing status extraction is in `5f506a41dee1e172f8915f5712bbc9d6292a7bea`, with three exact declaration
 comparisons and four frozen source images. The port map now records 22 actual
-contracts. Final method inspection now records 514 body-specific decisions in
-the existing 908-row method map: 428 guarded-persistence methods, 23 closing
+contracts. Final method inspection now records 584 body-specific decisions in
+the existing 908-row method map: 497 guarded-persistence methods, 23 closing
 policies, one host evidence adapter, five coordinator functions, one persistence
-reader, 21 lifecycle owners and 35 coordinator operation mappings. The remaining
-394 source rows stay explicitly pending final assessment.
+reader, 22 lifecycle owners and 35 coordinator operation mappings. The remaining
+324 source rows stay explicitly pending final assessment.
 
 Unused-receiver cleanup is in `3ed65239b85570183865b74e169bcbf5a62c1819`. Five complete declarations
 match after receiver removal and the Markdown reader name; all 879 remaining
@@ -275,6 +282,17 @@ and tracker order-source reads. Store still has 822 methods; count reduction is
 not an ownership result. C15.17 records exact lifecycle request receipt/replay
 and the independent post-acceptance continuation boundary.
 
+Canonical PR ownership separation is in `85256e808df3824ddaf4b1eb230ff4a5ad8ae757`. All 16 affected
+production declaration streams match after explicit owner/call normalization and
+creation-intent helper recomposition. The remaining Store helper is individually
+verified, and the original public timeout/lock ordering is exact. This is a
+semantic responsibility split, not an unchanged whole-method move; the original
+creation method row follows the guarded intent facet while its new source image
+follows the actual provider host. No tests are edited. Seventy new source-specific
+decisions cover these PR paths and retained plan-order, adoption, materialization
+and receipt guards. Store has 821 methods; 324 source rows remain pending. C15.18
+records retained uncertain creation and canonical identity without replacement.
+
 ## Contracts Added or Changed
 
 The [assigned signature ledger](../../../plan/code-quality-remediation-slice-15-signatures.csv)
@@ -298,6 +316,24 @@ changes.
 - Existing Store method, declaration, authority/dependency and ownership ledgers.
 
 ## Validation
+
+Canonical PR task checks passed all 19 selected real fixtures and four focused
+races without skips or owned fixture leaks. They cover durable intent before
+send, restart/reuse, uncertain creation, closed/ambiguous/fork/changed-head
+observations, candidate/repair fences, crash recovery and actual application
+consumers. Affected short tests and signature/style checks pass. Strict lint first
+reported six import-group formatting errors; only imports were regrouped and the
+same lint command then passed with zero issues. Executable declaration comparisons
+still match; runtime fixtures were not repeated for import-only formatting.
+Guided parity and final exact-head controller validation remain pending.
+
+- `go test -p=1 ./internal/core/workflow ./internal/app -run '^Test(WorkflowSlicePR(Concurrent|Reuse|Observation|Block|Existing|Repair|Source|Crash)|WorkflowPublication(Revision|LateResponse|DuringIO)|WorkflowTicketClosedPR|WorkflowReview(Modes|Approval)|WorkflowFrontier(Reject|Recovery)|ServiceWorkflow(SlicePR|Review|Frontier))$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowSlicePR(Concurrent|Observation|Crash)|WorkflowPublicationDuringIO)$' -count=1 -timeout=10m -json`
+- `go test -short ./internal/core/workflow/... ./internal/app/... ./scripts/goquality`
+- `make check-go-style` — 9,410 declarations; zero exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app/... ./scripts/goquality` — zero issues after import grouping.
+- `git diff --check`
+
 
 Lifecycle-control task checks passed all 20 selected real fixtures and four
 focused races, with no skips or owned fixture leaks. They cover crash recovery,
@@ -523,6 +559,14 @@ ownership decisions with 394 pending rows. Frozen source/baseline/introduction
 fields remain unchanged across 33 ledgers. Current owner declarations, relative
 links, named regressions, 17 compatibility cases, T15 columns and whitespace pass.
 Runtime checks are not repeated for this metadata-only update.
+
+Canonical PR ledger reconciliation verifies 4,358 current declaration hashes,
+all 908 original method mappings, four signature ledgers, 16 new frozen source
+preimages, 75 commit objects and 22 actual ports. It records 584 specific ownership
+decisions with 324 pending rows. Frozen source/baseline/introduction fields remain
+unchanged across 33 ledgers. Current owner declarations, relative links, named
+regressions, 18 compatibility cases, T15 columns and whitespace pass. Runtime
+checks are not repeated for this metadata-only update.
 
 ## Risks and Follow-ups
 
