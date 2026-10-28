@@ -26,7 +26,7 @@ func (s *Store) acquireWorkflowWorkerSlot(ctx context.Context) (reservation work
 		return reservation, err
 	}
 
-	limits, err := s.workflowRepositoryCapacity(ctx, runs)
+	limits, err := (workflowCapacityObserver{store: s}).repository(ctx, runs)
 	if err != nil {
 		return reservation, err
 	}

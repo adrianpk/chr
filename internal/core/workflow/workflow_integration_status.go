@@ -35,7 +35,7 @@ func (s *Store) QueryWorkflowIntegrationCapacity(ctx context.Context) (result wo
 }
 
 func (observer workflowCapacityObserver) observe(ctx context.Context, runs []workflowInvocationFile) (workflowstate.Capacity, error) {
-	limits, err := observer.store.workflowRepositoryCapacity(ctx, runs)
+	limits, err := (workflowCapacityObserver{store: observer.store}).repository(ctx, runs)
 	if err != nil {
 		return workflowstate.Capacity{}, err
 	}

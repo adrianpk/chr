@@ -45,7 +45,7 @@ func workflowIntegrationLowerPriority(purpose string) bool {
 }
 
 func (s *Store) guardWorkflowPreparedCapacity(ctx context.Context, snapshot workflowIntegrationSnapshot, run workflowInvocationFile) error {
-	limits, err := s.workflowRepositoryCapacity(ctx, snapshot.Runs)
+	limits, err := (workflowCapacityObserver{store: s}).repository(ctx, snapshot.Runs)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (s *Store) guardWorkflowPreparedCapacity(ctx context.Context, snapshot work
 		return err
 	}
 
-	preparedOccupancy, err := s.workflowPreparedTargetCount(snapshot, run, repository, target)
+	preparedOccupancy, err := (workflowIntegrationRoleSelector{store: s}).preparedTargetCount(snapshot, run, repository, target)
 
 	count, retained := preparedOccupancy.Count, preparedOccupancy.Retained
 
@@ -122,7 +122,7 @@ func workflowIntegrationOwnMerger(role IntegrationRoleSelection, run workflowInv
 	return purpose == workflowMergerPurpose && role.Role == workflowMergerPurpose && role.Entry.InvocationID == run.ID && role.Entry.Namespace == run.Namespace
 }
 
-func (s *Store) workflowPreparedTargetCount(snapshot workflowIntegrationSnapshot, run workflowInvocationFile, repository, target string) (workflowPreparedOccupancy, error) {
+func (host workflowIntegrationRoleSelector) preparedTargetCount(snapshot workflowIntegrationSnapshot, run workflowInvocationFile, repository, target string) (workflowPreparedOccupancy, error) {
 	count := 0
 
 	for _, view := range snapshot.Views {
@@ -147,7 +147,7 @@ func (s *Store) workflowPreparedTargetCount(snapshot workflowIntegrationSnapshot
 		count++
 	}
 
-	preparedOccupancy, err := s.workflowLegacyPreparedCount(snapshot.Runs, run, repository, target)
+	preparedOccupancy, err := (workflowIntegrationRoleSelector{store: host.store}).legacyPreparedCount(snapshot.Runs, run, repository, target)
 
 	legacy, retained := preparedOccupancy.Count, preparedOccupancy.Retained
 
@@ -158,7 +158,7 @@ func workflowIntegrationOwnPreparation(owner, run workflowInvocationFile, entry 
 	return owner.ID == run.ID && owner.OwnerRoot == run.OwnerRoot && run.Integration != nil && run.Integration.EntryID == entry.ID
 }
 
-func (s *Store) workflowLegacyPreparedCount(runs []workflowInvocationFile, run workflowInvocationFile, repository, target string) (workflowPreparedOccupancy, error) {
+func (host workflowIntegrationRoleSelector) legacyPreparedCount(runs []workflowInvocationFile, run workflowInvocationFile, repository, target string) (workflowPreparedOccupancy, error) {
 	count := 0
 
 	for _, peer := range runs {
@@ -166,7 +166,7 @@ func (s *Store) workflowLegacyPreparedCount(runs []workflowInvocationFile, run w
 			continue
 		}
 
-		preparationTarget, err := s.workflowIntegrationPreparationTarget(peer)
+		preparationTarget, err := host.store.workflowIntegrationPreparationTarget(peer)
 
 		peerRepository, peerTarget := preparationTarget.Repository, preparationTarget.Ref
 

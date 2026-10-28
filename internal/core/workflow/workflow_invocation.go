@@ -213,7 +213,7 @@ func (s *Store) startNewWorkflow(ctx context.Context, request StartRequest, hash
 		return StartResult{}, err
 	}
 
-	limits, err := s.workflowRepositoryCapacity(ctx, runs)
+	limits, err := (workflowCapacityObserver{store: s}).repository(ctx, runs)
 	if err != nil {
 		return StartResult{}, err
 	}
@@ -246,7 +246,7 @@ func (s *Store) freezeWorkflowSelection(ctx context.Context, request workflowsta
 			return all, err
 		}
 
-		if err := s.observePrerequisites(ctx, selection, request, &page); err != nil {
+		if err := (workflowWorkObserver{store: s}).prerequisites(ctx, selection, request, &page); err != nil {
 			return all, err
 		}
 

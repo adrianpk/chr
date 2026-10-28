@@ -33,13 +33,13 @@ func workflowCapacityConfig(projectDir string) (workflowCapacityLimits, error) {
 
 // Linked host worktrees must resolve one policy. Lane worktrees retain immutable
 // admission snapshots; their copied config does not define another worker pool.
-func (s *Store) workflowRepositoryCapacity(ctx context.Context, runs []workflowInvocationFile) (workflowCapacityLimits, error) {
-	limits, err := workflowCapacityConfig(s.layout.ProjectDir())
+func (host workflowCapacityObserver) repository(ctx context.Context, runs []workflowInvocationFile) (workflowCapacityLimits, error) {
+	limits, err := workflowCapacityConfig(host.store.layout.ProjectDir())
 	if err != nil {
 		return limits, err
 	}
 
-	worktrees, err := (executioncore.OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
+	worktrees, err := (executioncore.OSWorktreeGit{}).WorktreeList(ctx, host.store.layout.ProjectDir())
 	if err != nil {
 		return limits, err
 	}

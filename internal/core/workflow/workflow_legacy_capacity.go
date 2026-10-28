@@ -21,7 +21,7 @@ func acquireLegacyWorkflowCapacity(ctx context.Context, projectDir string) (rese
 			return readErr
 		}
 
-		if _, err := store.workflowRepositoryCapacity(ctx, runs); err != nil {
+		if _, err := (workflowCapacityObserver{store: store}).repository(ctx, runs); err != nil {
 			return err
 		}
 

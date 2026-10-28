@@ -50,7 +50,7 @@ func (s *Store) QueryWorkflowIntegrationRoles(ctx context.Context, q Integration
 			return readErr
 		}
 
-		limits, readErr := s.workflowRepositoryCapacity(ctx, snapshot.Runs)
+		limits, readErr := (workflowCapacityObserver{store: s}).repository(ctx, snapshot.Runs)
 		if readErr != nil {
 			return readErr
 		}

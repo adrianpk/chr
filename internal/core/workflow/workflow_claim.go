@@ -146,7 +146,7 @@ func (s *Store) observeWorkflowClaim(ctx context.Context, run workflowInvocation
 	request := run.ExecutionSelection()
 	request.Selector = workflowstate.Selector{Extent: "ticket", Identity: member.Admission.Key}
 
-	request, err = s.workflowLaneSelection(ctx, run, selection.records[member.Admission.Key], request)
+	request, err = (workflowLaneHost{store: s}).selection(ctx, run, selection.records[member.Admission.Key], request)
 	if err != nil {
 		return workflowstate.Record{}, err
 	}
@@ -156,7 +156,7 @@ func (s *Store) observeWorkflowClaim(ctx context.Context, run workflowInvocation
 		return workflowstate.Record{}, err
 	}
 
-	if err := s.observePrerequisites(ctx, selection, request, &preview); err != nil {
+	if err := (workflowWorkObserver{store: s}).prerequisites(ctx, selection, request, &preview); err != nil {
 		return workflowstate.Record{}, err
 	}
 

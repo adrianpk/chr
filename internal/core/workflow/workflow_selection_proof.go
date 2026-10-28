@@ -191,7 +191,7 @@ func (reader *workflowProofReader) branchAtCommit(ctx context.Context) bool {
 	return err == nil && actual == reader.request.CumulativeCommit
 }
 
-func (s *Store) observePrerequisites(ctx context.Context, selection workflowSelection, request workflowstate.PreviewRequest, preview *Preview) error {
+func (host workflowWorkObserver) prerequisites(ctx context.Context, selection workflowSelection, request workflowstate.PreviewRequest, preview *Preview) error {
 	dependencies, err := newWorkflowDependencies(selection)
 	if err != nil {
 		return fmt.Errorf("workflow prerequisites: %w", err)
@@ -201,7 +201,7 @@ func (s *Store) observePrerequisites(ctx context.Context, selection workflowSele
 		return err
 	}
 
-	reader := workflowProofReader{store: s, selection: selection, request: request, observations: map[workflowProofKey]string{}}
+	reader := workflowProofReader{store: host.store, selection: selection, request: request, observations: map[workflowProofKey]string{}}
 
 	for i := range preview.Members {
 		member := &preview.Members[i]

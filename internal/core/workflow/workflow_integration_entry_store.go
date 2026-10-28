@@ -182,7 +182,7 @@ func workflowIntegrationAdmissionCurrent(run workflowInvocationFile, request Int
 }
 
 func (s *Store) nextWorkflowIntegrationSequence(ctx context.Context, runs []workflowInvocationFile, entries []IntegrationEntry) (uint64, error) {
-	limits, err := s.workflowRepositoryCapacity(ctx, runs)
+	limits, err := (workflowCapacityObserver{store: s}).repository(ctx, runs)
 	if err != nil {
 		return 0, err
 	}

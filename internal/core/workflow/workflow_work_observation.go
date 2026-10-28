@@ -21,6 +21,9 @@ type WorkObservation struct {
 	Excluded    map[string]int
 }
 
+// workflowWorkObserver observes read-only queue and prerequisite previews under Store-owned snapshot locks.
+type workflowWorkObserver struct{ store *Store }
+
 // InspectWorkflowWork observes all bounded native records without recovering,
 // claiming, admitting work, rebuilding SQL or maintaining tracker projections.
 func (s *Store) InspectWorkflowWork(ctx context.Context, target workflowstate.PreviewTarget) (observation WorkObservation, err error) {
@@ -37,7 +40,7 @@ func (s *Store) InspectWorkflowWork(ctx context.Context, target workflowstate.Pr
 		observation.Tickets = selection.tickets
 
 		observation.Excluded = map[string]int{}
-		if readErr = s.observeWorkflowQueues(ctx, selection, target, &observation); readErr != nil {
+		if readErr = (workflowWorkObserver{store: s}).queues(ctx, selection, target, &observation); readErr != nil {
 			return readErr
 		}
 
@@ -58,7 +61,7 @@ func (s *Store) InspectWorkflowWork(ctx context.Context, target workflowstate.Pr
 	return observation, err
 }
 
-func (s *Store) observeWorkflowQueues(ctx context.Context, selection workflowSelection, target workflowstate.PreviewTarget, observation *WorkObservation) error {
+func (host workflowWorkObserver) queues(ctx context.Context, selection workflowSelection, target workflowstate.PreviewTarget, observation *WorkObservation) error {
 	sets := slices.Collect(maps.Values(selection.sets))
 	slices.SortFunc(sets, func(a, b workflowstate.Record) int {
 		if a.CreatedAt.Before(b.CreatedAt) {
@@ -84,7 +87,7 @@ func (s *Store) observeWorkflowQueues(ctx context.Context, selection workflowSel
 			return err
 		}
 
-		if err = s.observeWorkflowQueue(ctx, selection, request, observation); err != nil {
+		if err = (workflowWorkObserver{store: host.store}).queue(ctx, selection, request, observation); err != nil {
 			return err
 		}
 	}
@@ -92,14 +95,14 @@ func (s *Store) observeWorkflowQueues(ctx context.Context, selection workflowSel
 	return nil
 }
 
-func (s *Store) observeWorkflowQueue(ctx context.Context, selection workflowSelection, request workflowstate.PreviewRequest, observation *WorkObservation) error {
+func (host workflowWorkObserver) queue(ctx context.Context, selection workflowSelection, request workflowstate.PreviewRequest, observation *WorkObservation) error {
 	for {
 		preview, err := selection.preview(request)
 		if err != nil {
 			return err
 		}
 
-		if err = s.observePrerequisites(ctx, selection, request, &preview); err != nil {
+		if err = (workflowWorkObserver{store: host.store}).prerequisites(ctx, selection, request, &preview); err != nil {
 			return err
 		}
 

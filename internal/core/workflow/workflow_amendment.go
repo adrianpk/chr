@@ -74,7 +74,7 @@ func (s *Store) amendWorkflowSet(ctx context.Context, request SetAmendmentReques
 	}
 	defer func() { err = errors.Join(err, s.releaseWorkflowAllocation(guard)) }()
 
-	prepared, err := s.buildWorkflowAmendment(ctx, set, request, body)
+	prepared, err := (workflowAmendmentHost{store: s}).build(ctx, set, request, body)
 	result = prepared.Result
 
 	if err != nil {

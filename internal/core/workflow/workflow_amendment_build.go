@@ -27,14 +27,17 @@ type workflowAmendmentPreparation struct {
 	Files  []workflowstate.FileChange
 }
 
-func (s *Store) buildWorkflowAmendment(ctx context.Context, set workflowstate.Record, request SetAmendmentRequest, body []byte) (workflowAmendmentPreparation, error) {
-	builder, err := s.workflowAmendmentBuilder(ctx, set)
+// workflowAmendmentHost sequences bounded amendment construction under Store-owned allocation and mutation locks.
+type workflowAmendmentHost struct{ store *Store }
+
+func (host workflowAmendmentHost) build(ctx context.Context, set workflowstate.Record, request SetAmendmentRequest, body []byte) (workflowAmendmentPreparation, error) {
+	builder, err := host.store.workflowAmendmentBuilder(ctx, set)
 	if err != nil {
 		return workflowAmendmentPreparation{Result: builder.result}, err
 	}
 
 	plan := generationcore.OrderedWorkflowPlan(request.Plan)
-	if err := s.buildWorkflowAmendmentTasks(ctx, &builder, plan, request.ReserveTicketKey); err != nil {
+	if err := (workflowAmendmentHost{store: host.store}).tasks(ctx, &builder, plan, request.ReserveTicketKey); err != nil {
 		return workflowAmendmentPreparation{Result: builder.result}, err
 	}
 
@@ -42,7 +45,7 @@ func (s *Store) buildWorkflowAmendment(ctx context.Context, set workflowstate.Re
 		return workflowAmendmentPreparation{Result: builder.result}, err
 	}
 
-	if err := s.finishWorkflowAmendment(ctx, &builder, request, body); err != nil {
+	if err := host.store.finishWorkflowAmendment(ctx, &builder, request, body); err != nil {
 		return workflowAmendmentPreparation{Result: builder.result}, err
 	}
 
@@ -87,12 +90,12 @@ func (s *Store) workflowAmendmentBuilder(ctx context.Context, set workflowstate.
 	return builder, nil
 }
 
-func (s *Store) buildWorkflowAmendmentTasks(ctx context.Context, builder *workflowAmendmentBuild, plan generationcore.GeneratedWorkflowPlan, allocate func(context.Context) (string, error)) error {
+func (host workflowAmendmentHost) tasks(ctx context.Context, builder *workflowAmendmentBuild, plan generationcore.GeneratedWorkflowPlan, allocate func(context.Context) (string, error)) error {
 	seen := map[string]bool{}
 
 	for _, slice := range plan.Slices {
 		for _, input := range slice.Tasks {
-			task, err := s.buildWorkflowAmendedTask(ctx, builder, slice, input, allocate)
+			task, err := (workflowAmendmentHost{store: host.store}).task(ctx, builder, slice, input, allocate)
 			if err != nil {
 				return err
 			}
@@ -117,12 +120,12 @@ func (s *Store) buildWorkflowAmendmentTasks(ctx context.Context, builder *workfl
 	return nil
 }
 
-func (s *Store) buildWorkflowAmendedTask(ctx context.Context, builder *workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (workflowstate.Record, error) {
+func (host workflowAmendmentHost) task(ctx context.Context, builder *workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (workflowstate.Record, error) {
 	if task, exists := builder.tasks[input.ID]; exists {
 		return task, checkWorkflowAmendedTask(task, input, slice)
 	}
 
-	return s.newWorkflowAmendmentTask(ctx, builder, slice, input, allocate)
+	return (workflowAmendmentHost{store: host.store}).newTask(ctx, builder, slice, input, allocate)
 }
 
 func checkWorkflowAmendedTask(task workflowstate.Record, input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice) error {
@@ -141,7 +144,7 @@ func checkWorkflowAmendedTask(task workflowstate.Record, input generationcore.Ge
 	return nil
 }
 
-func (s *Store) newWorkflowAmendmentTask(ctx context.Context, builder *workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (workflowstate.Record, error) {
+func (host workflowAmendmentHost) newTask(ctx context.Context, builder *workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (workflowstate.Record, error) {
 	if err := checkWorkflowAmendmentAddition(*builder, slice, input); err != nil {
 		return workflowstate.Record{}, err
 	}
@@ -151,7 +154,7 @@ func (s *Store) newWorkflowAmendmentTask(ctx context.Context, builder *workflowA
 		return workflowstate.Record{}, err
 	}
 
-	task, err := s.materializationTask(input, slice, builder.result.Set, key, workflowArtifactAllocation{Number: builder.number, Time: time.Now().UTC()})
+	task, err := host.store.materializationTask(input, slice, builder.result.Set, key, workflowArtifactAllocation{Number: builder.number, Time: time.Now().UTC()})
 	if err != nil {
 		return task, err
 	}

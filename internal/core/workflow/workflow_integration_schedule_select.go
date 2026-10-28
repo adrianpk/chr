@@ -72,7 +72,7 @@ func (scheduler *workflowIntegrationScheduler) selectTask(ctx context.Context, e
 		return workflowTaskSelection{Item: IntegrationSelection{}, Reason: ""}, err
 	}
 
-	task, err := owner.workflowIntegrationScheduledTask(ctx, run, selection)
+	task, err := (workflowIntegrationRoleSelector{store: owner}).scheduledTask(ctx, run, selection)
 	if err != nil {
 		return workflowTaskSelection{Item: IntegrationSelection{}, Reason: ""}, err
 	}
@@ -136,13 +136,13 @@ func workflowIntegrationExecutorFrontier(run workflowInvocationFile, entry Integ
 	return run.Integration != nil && run.Integration.EntryID == entry.ID && run.Cursor < len(run.Members) && workflowMemberOwnsUnit(run.Members[run.Cursor], entry.Unit)
 }
 
-func (s *Store) workflowIntegrationScheduledTask(ctx context.Context, run workflowInvocationFile, selection workflowSelection) (workflowstate.PreviewMember, error) {
+func (host workflowIntegrationRoleSelector) scheduledTask(ctx context.Context, run workflowInvocationFile, selection workflowSelection) (workflowstate.PreviewMember, error) {
 	request := run.ExecutionSelection()
 	request.Selector = workflowstate.Selector{Extent: "ticket", Identity: run.Members[run.Cursor].Admission.Key}
 	request.Offset, request.Limit, request.SnapshotHash = 0, 1, ""
 
 	if run.Lane != nil {
-		if _, err := s.observeWorkflowLane(ctx, *run.Lane); err != nil {
+		if _, err := host.store.observeWorkflowLane(ctx, *run.Lane); err != nil {
 			return workflowstate.PreviewMember{}, err
 		}
 
@@ -154,7 +154,7 @@ func (s *Store) workflowIntegrationScheduledTask(ctx context.Context, run workfl
 		return workflowstate.PreviewMember{}, err
 	}
 
-	if err := s.observePrerequisites(ctx, selection, request, &preview); err != nil {
+	if err := workflowWorkObserver(host).prerequisites(ctx, selection, request, &preview); err != nil {
 		return workflowstate.PreviewMember{}, err
 	}
 

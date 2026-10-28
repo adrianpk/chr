@@ -20,7 +20,7 @@ func (s *Store) admitWorkflowLaterMembers(ctx context.Context, run *workflowInvo
 	}
 
 	preview := Preview{Members: later, admitted: workflowAdmittedRefs(ordered, run.Selection.Selector)}
-	if err := s.observePrerequisites(ctx, selection, run.ExecutionSelection(), &preview); err != nil {
+	if err := (workflowWorkObserver{store: s}).prerequisites(ctx, selection, run.ExecutionSelection(), &preview); err != nil {
 		return err
 	}
 
@@ -136,7 +136,7 @@ func (s *Store) checkWorkflowLaterOwnership(ctx context.Context, run workflowInv
 		return err
 	}
 
-	limits, err := s.workflowRepositoryCapacity(ctx, runs)
+	limits, err := (workflowCapacityObserver{store: s}).repository(ctx, runs)
 	if err != nil {
 		return err
 	}

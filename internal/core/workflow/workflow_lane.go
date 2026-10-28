@@ -17,6 +17,9 @@ type workflowLaneImage struct {
 	Tree   string
 }
 
+// workflowLaneHost owns lane setup and retained selection IO under the original caller-owned exclusion.
+type workflowLaneHost struct{ store *Store }
+
 func workflowTaskUnit(record workflowstate.Record) workflowstate.Ref {
 	if record.Task.SliceID != "" {
 		return workflowstate.Ref{Kind: "slice", ID: record.Task.SliceID}
@@ -68,13 +71,13 @@ func workflowRunHasLane(run workflowInvocationFile, namespace string, unit workf
 	return run.Namespace == namespace && run.Lane != nil && run.Lane.Unit == unit
 }
 
-func (s *Store) workflowLaneSelection(ctx context.Context, run workflowInvocationFile, record workflowstate.Record, request workflowstate.PreviewRequest) (workflowstate.PreviewRequest, error) {
-	lane, err := s.retainedWorkflowLane(ctx, run, record)
+func (host workflowLaneHost) selection(ctx context.Context, run workflowInvocationFile, record workflowstate.Record, request workflowstate.PreviewRequest) (workflowstate.PreviewRequest, error) {
+	lane, err := host.store.retainedWorkflowLane(ctx, run, record)
 	if err != nil || lane == nil {
 		return request, err
 	}
 
-	if _, err := s.observeWorkflowLane(ctx, *lane); err != nil {
+	if _, err := host.store.observeWorkflowLane(ctx, *lane); err != nil {
 		return request, err
 	}
 
@@ -90,11 +93,11 @@ func (s *Store) newWorkflowLane(run workflowInvocationFile, record workflowstate
 	return workflowstate.Lane{Unit: unit, Branch: "refs/heads/chr/workflow/" + id, Worktree: filepath.Join(s.layout.WorktreeRoot(), "workflow-"+id), BaseCommit: run.ExecutionSelection().Target.Commit, HeadCommit: run.ExecutionSelection().Target.Commit}
 }
 
-func (s *Store) ensureWorkflowLane(ctx context.Context, lane workflowstate.Lane) error {
+func (host workflowLaneHost) ensure(ctx context.Context, lane workflowstate.Lane) error {
 	git := executioncore.OSWorktreeGit{}
 	branch := strings.TrimPrefix(lane.Branch, "refs/heads/")
 
-	exists, err := git.BranchExists(ctx, s.layout.ProjectDir(), branch)
+	exists, err := git.BranchExists(ctx, host.store.layout.ProjectDir(), branch)
 	if err != nil {
 		return err
 	}
@@ -104,29 +107,29 @@ func (s *Store) ensureWorkflowLane(ctx context.Context, lane workflowstate.Lane)
 			return fmt.Errorf("%w: retained lane branch is missing", workflowstate.ErrConflict)
 		}
 
-		if err := git.CreateBranch(ctx, s.layout.ProjectDir(), branch, lane.BaseCommit); err != nil {
+		if err := git.CreateBranch(ctx, host.store.layout.ProjectDir(), branch, lane.BaseCommit); err != nil {
 			return err
 		}
 	}
 
-	entries, err := git.WorktreeList(ctx, s.layout.ProjectDir())
+	entries, err := git.WorktreeList(ctx, host.store.layout.ProjectDir())
 	if err != nil {
 		return err
 	}
 
 	for _, entry := range entries {
 		if entry.Path == lane.Worktree {
-			_, err := s.observeWorkflowLane(ctx, lane)
+			_, err := host.store.observeWorkflowLane(ctx, lane)
 
 			return err
 		}
 	}
 
-	if err := git.AddWorktree(ctx, s.layout.ProjectDir(), lane.Worktree, branch); err != nil {
+	if err := git.AddWorktree(ctx, host.store.layout.ProjectDir(), lane.Worktree, branch); err != nil {
 		return err
 	}
 
-	_, err = s.observeWorkflowLane(ctx, lane)
+	_, err = host.store.observeWorkflowLane(ctx, lane)
 
 	return err
 }

@@ -31,7 +31,7 @@ func (s *Store) admitWorkflowLooseLater(ctx context.Context, run *workflowInvoca
 	selection.orderLooseMembers(later, run.Selection.Order)
 
 	preview := Preview{Members: later, admitted: workflowAdmittedRefs(append(workflowLooseAdmissions(run.Members), later...), run.Selection.Selector)}
-	if err := s.observePrerequisites(ctx, selection, run.ExecutionSelection(), &preview); err != nil {
+	if err := (workflowWorkObserver{store: s}).prerequisites(ctx, selection, run.ExecutionSelection(), &preview); err != nil {
 		return err
 	}
 

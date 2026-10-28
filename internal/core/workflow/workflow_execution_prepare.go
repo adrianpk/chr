@@ -88,7 +88,7 @@ func (s *Store) prepareWorkflowAttempt(ctx context.Context, preparation workflow
 		return workflowPreparedTask{}, err
 	}
 
-	if err := s.ensureWorkflowLane(ctx, *lane); err != nil {
+	if err := (workflowLaneHost{store: s}).ensure(ctx, *lane); err != nil {
 		return workflowPreparedTask{}, err
 	}
 

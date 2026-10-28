@@ -61,7 +61,7 @@ func (s *Store) Preview(ctx context.Context, request workflowstate.PreviewReques
 			return readErr
 		}
 
-		return s.observePrerequisites(ctx, selection, request, &preview)
+		return (workflowWorkObserver{store: s}).prerequisites(ctx, selection, request, &preview)
 	})
 
 	if err == nil && request.SnapshotHash != "" && request.SnapshotHash != preview.SnapshotHash {
