@@ -18,10 +18,10 @@ type ValidationInput struct {
 	Result       workflowstate.TaskResult
 }
 
-// ExecuteWorkflowValidation records the observed validation and requests atomic
+// ValidateCandidate records the observed validation and requests atomic
 // acceptance through the bound port. The execution deadline and stop context
 // remain distinct: a deadline is a validation failure, not an operator stop.
-func ExecuteWorkflowValidation(ctx, watched context.Context, input ValidationInput, validation Validation) (workflowstate.IntegrationCandidate, error) {
+func ValidateCandidate(ctx, watched context.Context, input ValidationInput, validation Validation) (workflowstate.IntegrationCandidate, error) {
 	result := input.Result
 	result.Schema, result.Outcome, result.IntegrationPending = "chr-integration-validation/v1", "integration_validated", true
 

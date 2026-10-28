@@ -8,26 +8,26 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (tools *WorkflowMergerTools) read(path string) (workflowMergerToolResponse, error) {
+func (tools *Tools) read(path string) (toolResponse, error) {
 	file, err := tools.root.Open(path)
 	if err != nil {
-		return workflowMergerToolResponse{}, err
+		return toolResponse{}, err
 	}
 	defer func() { _ = file.Close() }() //nolint:errcheck
 
 	data, err := io.ReadAll(io.LimitReader(file, workflowstate.FileLimit+1))
 	if err != nil {
-		return workflowMergerToolResponse{}, err
+		return toolResponse{}, err
 	}
 
 	if len(data) > workflowstate.FileLimit || !utf8.Valid(data) {
-		return workflowMergerToolResponse{}, workflowstate.ErrConflict
+		return toolResponse{}, workflowstate.ErrConflict
 	}
 
-	return workflowMergerToolResponse{Content: string(data)}, nil
+	return toolResponse{Content: string(data)}, nil
 }
 
-func (tools *WorkflowMergerTools) write(path, content string) (err error) {
+func (tools *Tools) write(path, content string) (err error) {
 	if len(content) > workflowstate.FileLimit || !utf8.ValidString(content) {
 		return workflowstate.ErrConflict
 	}

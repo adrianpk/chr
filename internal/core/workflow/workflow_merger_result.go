@@ -60,7 +60,7 @@ func decodeWorkflowMergerResult(data []byte, result *workflowstate.MergerResult)
 		return fmt.Errorf("%w: merger result exceeds file bound", workflowstate.ErrConflict)
 	}
 
-	if err := workflowmerge.CheckWorkflowMergerJSON(data); err != nil {
+	if err := workflowmerge.CheckJSON(data); err != nil {
 		return err
 	}
 
@@ -83,12 +83,12 @@ func validateWorkflowMergerResult(result workflowstate.MergerResult, input workf
 		return fmt.Errorf("%w: merger result version or input is stale", workflowstate.ErrConflict)
 	}
 
-	if err := workflowmerge.ValidateWorkflowMergerPaths(result.ChangedPaths); err != nil {
+	if err := workflowmerge.CheckPaths(result.ChangedPaths); err != nil {
 		return err
 	}
 
 	for _, path := range result.ChangedPaths {
-		if !workflowmerge.WorkflowMergerPathAllowed(input, path) {
+		if !workflowmerge.PathAllowed(input, path) {
 			return fmt.Errorf("%w: merger result escapes approved scope", workflowstate.ErrConflict)
 		}
 	}

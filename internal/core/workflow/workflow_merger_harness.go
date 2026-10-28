@@ -81,7 +81,7 @@ func (s *Store) checkWorkflowMergerHarness(ctx context.Context, input workflowst
 }
 
 func checkWorkflowMergerExecutable(command []string, hash string) error {
-	if !workflowmerge.ValidWorkflowMergerCommand(command) || !filepath.IsAbs(command[0]) || !validWorkflowNativeFingerprint(hash) {
+	if !workflowmerge.ValidCommand(command) || !filepath.IsAbs(command[0]) || !validWorkflowNativeFingerprint(hash) {
 		return workflowstate.ErrConflict
 	}
 
@@ -118,7 +118,7 @@ func encodeWorkflowMergerAttempt(attempt MergerAttempt) ([]byte, error) {
 }
 
 func checkWorkflowMergerCertificate(certificate MergerHarnessCertificate, command []string) error {
-	if certificate.SchemaVersion != 1 || certificate.Protocol != workflowmerge.WorkflowMergerBrokerProtocol || !certificate.BuiltinToolsDisabled || !slices.Equal(certificate.Command, command) || !validWorkflowNativeFingerprint(certificate.CapabilityRevision) {
+	if certificate.SchemaVersion != 1 || certificate.Protocol != workflowmerge.BrokerProtocol || !certificate.BuiltinToolsDisabled || !slices.Equal(certificate.Command, command) || !validWorkflowNativeFingerprint(certificate.CapabilityRevision) {
 		return fmt.Errorf("%w: certified broker-only merger driver required", workflowstate.ErrConflict)
 	}
 

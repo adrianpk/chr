@@ -62,7 +62,7 @@ func checkWorkflowMergerSnapshotFiles(directory string) error {
 			return err
 		}
 
-		if !workflowmerge.WorkflowMergerRegularFile(info) {
+		if !workflowmerge.RegularFile(info) {
 			return workflowstate.ErrConflict
 		}
 
@@ -93,7 +93,7 @@ func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Con
 	}
 
 	for _, path := range paths {
-		if !slices.Contains(declared, path) || !workflowmerge.WorkflowMergerPathAllowed(input, path) {
+		if !slices.Contains(declared, path) || !workflowmerge.PathAllowed(input, path) {
 			return workflowstate.ErrConflict
 		}
 	}

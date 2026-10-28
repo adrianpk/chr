@@ -96,8 +96,8 @@ func (s *Store) runWorkflowMerger(ctx context.Context, claim *Claim, prepared wo
 	}
 	defer func() { _ = root.Close() }() //nolint:errcheck
 
-	tools := workflowmerge.NewWorkflowMergerTools(*prepared.input.Merger, root, func(ctx context.Context) error { return s.checkWorkflowMergerPrepared(ctx, claim, prepared, provider) })
-	result := runWorkflowMergerDriver(ctx, claim, prepared, tools, call)
+	tools := workflowmerge.NewTools(*prepared.input.Merger, root, func(ctx context.Context) error { return s.checkWorkflowMergerPrepared(ctx, claim, prepared, provider) })
+	result := runWorkflowMergerDriver(ctx, workflowMergerDriverInput{Claim: claim, Prepared: prepared, Tools: tools, Call: call})
 
 	result.checks = tools.Checks()
 	if err := checkWorkflowMergerHarnessUsage(*prepared.input.Merger, certificate, result.usage); err != nil {

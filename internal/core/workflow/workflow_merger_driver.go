@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 
-	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -20,7 +19,9 @@ type workflowMergerDriverResult struct {
 	err     error
 }
 
-func runWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflowPreparedTask, tools *workflowmerge.WorkflowMergerTools, call workflowmerge.WorkflowMergerCall) workflowMergerDriverResult {
+func runWorkflowMergerDriver(ctx context.Context, input workflowMergerDriverInput) workflowMergerDriverResult {
+	claim := input.Claim
+
 	run, err := claim.store.ReadWorkflow(ctx, claim.InvocationID)
 	if err != nil {
 		return workflowMergerDriverResult{err: err}
@@ -41,10 +42,14 @@ func runWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflo
 	}
 	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
 
-	return executeWorkflowMergerDriver(ctx, claim, prepared, tools, call, gate, permit, index, commandOutput.Stdout, commandOutput.Stderr)
+	return executeWorkflowMergerDriver(ctx, input, workflowMergerDriverIO{Gate: gate, Permit: permit, Index: index, Output: commandOutput})
 }
 
-func executeWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflowPreparedTask, tools *workflowmerge.WorkflowMergerTools, call workflowmerge.WorkflowMergerCall, gate, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) workflowMergerDriverResult {
+func executeWorkflowMergerDriver(ctx context.Context, input workflowMergerDriverInput, execution workflowMergerDriverIO) workflowMergerDriverResult {
+	claim, prepared, tools, call := input.Claim, input.Prepared, input.Tools, input.Call
+	gate, permit, index := execution.Gate, execution.Permit, execution.Index
+	stdout, stderr := execution.Output.Stdout, execution.Output.Stderr
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -80,7 +85,7 @@ func executeWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared wor
 		finished <- workflowMergerDriverResult{command: command, err: waitErr}
 	}()
 
-	proposal, usage, brokerErr := exchangeWorkflowMerger(ctx, tools, call, reader, stdin)
+	broker, brokerErr := exchangeWorkflowMerger(ctx, tools, call, reader, stdin)
 	if brokerErr != nil {
 		cancel()
 
@@ -88,15 +93,29 @@ func executeWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared wor
 	}
 
 	result := <-finished
-	result.data, result.usage, result.err = proposal, usage, errors.Join(result.err, brokerErr)
+	result.data, result.usage, result.err = broker.Proposal, broker.Usage, errors.Join(result.err, brokerErr)
 
 	return result
 }
 
-func exchangeWorkflowMerger(ctx context.Context, tools *workflowmerge.WorkflowMergerTools, call workflowmerge.WorkflowMergerCall, reader io.Reader, writer io.Writer) (json.RawMessage, *workflowstate.MergerUsage, error) {
+func exchangeWorkflowMerger(ctx context.Context, tools *workflowmerge.Tools, call workflowmerge.Call, reader io.Reader, writer io.Writer) (workflowmerge.BrokerResult, error) {
 	if err := json.NewEncoder(writer).Encode(call); err != nil {
-		return nil, nil, err
+		return workflowmerge.BrokerResult{}, err
 	}
 
-	return workflowmerge.ServeWorkflowMergerBroker(ctx, tools, reader, writer)
+	return workflowmerge.ServeBroker(ctx, tools, reader, writer)
+}
+
+type workflowMergerDriverInput struct {
+	Claim    *Claim
+	Prepared workflowPreparedTask
+	Tools    *workflowmerge.Tools
+	Call     workflowmerge.Call
+}
+
+type workflowMergerDriverIO struct {
+	Gate   *os.File
+	Permit *os.File
+	Index  int
+	Output workflowCommandOutput
 }

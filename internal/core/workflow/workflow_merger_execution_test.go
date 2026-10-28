@@ -71,7 +71,7 @@ func nativeMergerTestHarness(t *testing.T, store *Store, id string) MergerHarnes
 	}
 
 	command := []string{executable, "-test.run=^TestNativeMergerChild$"}
-	certificate := MergerHarnessCertificate{SchemaVersion: 1, Protocol: workflowmerge.WorkflowMergerBrokerProtocol, Command: command, ExecutableHash: hash, CapabilityRevision: contenthash.Sum([]byte("fixture-broker/v1")), BuiltinToolsDisabled: true}
+	certificate := MergerHarnessCertificate{SchemaVersion: 1, Protocol: workflowmerge.BrokerProtocol, Command: command, ExecutableHash: hash, CapabilityRevision: contenthash.Sum([]byte("fixture-broker/v1")), BuiltinToolsDisabled: true}
 
 	return MergerHarness{Command: command, Certificate: retainNativeRecordEvidence(t, store, id, "execution-harness", certificate)}
 }
@@ -239,7 +239,7 @@ func TestNativeMergerChild(t *testing.T) {
 
 	decoder, encoder := json.NewDecoder(os.Stdin), json.NewEncoder(os.Stdout)
 
-	var call workflowmerge.WorkflowMergerCall
+	var call workflowmerge.Call
 	if err := decoder.Decode(&call); err != nil {
 		os.Exit(70)
 	}

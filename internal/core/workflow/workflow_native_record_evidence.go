@@ -193,7 +193,7 @@ func (s *Store) checkWorkflowNativeValidationInput(b workflowstate.NativeRecordB
 		return workflowstate.ErrConflict
 	}
 
-	return workflowintegrate.ValidateWorkflowPreparationGate(input.Contract.Validation, result)
+	return workflowintegrate.CheckGate(input.Contract.Validation, result)
 }
 
 func (s *Store) checkWorkflowNativeReceipt(record Record) error {

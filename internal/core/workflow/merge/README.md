@@ -8,12 +8,12 @@ input through the workflow owner.
 
 ## Contract
 
-`ServeWorkflowMergerBroker` accepts bounded UTF-8 JSON messages and one terminal
+`ServeBroker` accepts bounded UTF-8 JSON messages and one terminal
 proposal. Duplicate/unknown keys, excessive depth, trailing output, extra terminal
 messages and byte/message budget violations remain errors. The protocol and tool
 request/response fields retain their original wire encodings.
 
-`NewWorkflowMergerTools` binds the exact input, an already opened owned checkout
+`NewTools` binds the exact input, an already opened owned checkout
 and its claim guard. Every operation rechecks that guard. Path policy excludes
 control records, protected paths, aliases, symlinks and multiply linked files.
 Model tools can read/write/delete within the granted scope; host validation runs

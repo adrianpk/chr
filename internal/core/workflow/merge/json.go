@@ -11,14 +11,14 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// CheckWorkflowMergerJSON rejects invalid encoding, duplicate keys, nesting and trailing output.
-func CheckWorkflowMergerJSON(data []byte) error {
+// CheckJSON rejects invalid encoding, duplicate keys, nesting and trailing output.
+func CheckJSON(data []byte) error {
 	if !utf8.Valid(data) {
 		return fmt.Errorf("%w: merger JSON is not UTF-8", workflowstate.ErrConflict)
 	}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	if err := workflowMergerJSONValue(decoder, 0); err != nil {
+	if err := jsonValue(decoder, 0); err != nil {
 		return fmt.Errorf("%w: malformed merger JSON: %w", workflowstate.ErrConflict, err)
 	}
 
@@ -29,7 +29,7 @@ func CheckWorkflowMergerJSON(data []byte) error {
 	return nil
 }
 
-func workflowMergerJSONValue(decoder *json.Decoder, depth int) error {
+func jsonValue(decoder *json.Decoder, depth int) error {
 	if depth > 32 {
 		return fmt.Errorf("merger JSON nesting exceeds bound")
 	}
@@ -45,7 +45,7 @@ func workflowMergerJSONValue(decoder *json.Decoder, depth int) error {
 	}
 
 	if delimiter == '{' {
-		return workflowMergerJSONObject(decoder, depth+1)
+		return jsonObject(decoder, depth+1)
 	}
 
 	if delimiter != '[' {
@@ -53,7 +53,7 @@ func workflowMergerJSONValue(decoder *json.Decoder, depth int) error {
 	}
 
 	for decoder.More() {
-		if err := workflowMergerJSONValue(decoder, depth+1); err != nil {
+		if err := jsonValue(decoder, depth+1); err != nil {
 			return err
 		}
 	}
@@ -63,7 +63,7 @@ func workflowMergerJSONValue(decoder *json.Decoder, depth int) error {
 	return err
 }
 
-func workflowMergerJSONObject(decoder *json.Decoder, depth int) error {
+func jsonObject(decoder *json.Decoder, depth int) error {
 	seen := map[string]bool{}
 
 	for decoder.More() {
@@ -79,7 +79,7 @@ func workflowMergerJSONObject(decoder *json.Decoder, depth int) error {
 
 		seen[key] = true
 
-		if err := workflowMergerJSONValue(decoder, depth); err != nil {
+		if err := jsonValue(decoder, depth); err != nil {
 			return err
 		}
 	}

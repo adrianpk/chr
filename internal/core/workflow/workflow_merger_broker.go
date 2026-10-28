@@ -7,8 +7,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowMergerCall(input workflowstate.MergerInput) (workflowmerge.WorkflowMergerCall, error) {
-	call := workflowmerge.WorkflowMergerCall{Protocol: workflowmerge.WorkflowMergerBrokerProtocol, Input: input, Evidence: map[string]string{}}
+func (s *Store) workflowMergerCall(input workflowstate.MergerInput) (workflowmerge.Call, error) {
+	call := workflowmerge.Call{Protocol: workflowmerge.BrokerProtocol, Input: input, Evidence: map[string]string{}}
 	total := 0
 
 	for _, ref := range input.EvidenceRefs() {

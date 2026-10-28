@@ -7,7 +7,7 @@ consumer contract for guarded acceptance.
 
 ## Contract
 
-`ExecuteWorkflowValidation` runs the bound validation, builds the exact candidate
+`ValidateCandidate` runs the bound validation, builds the exact candidate
 and requests acceptance through `Validation`. It keeps validation deadlines
 separate from operator stops and preserves bounded detached cleanup. Gate checks
 compare the exact ordered commands, exit/truncation outcomes or explicit waiver.

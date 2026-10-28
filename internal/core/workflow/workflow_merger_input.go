@@ -68,7 +68,7 @@ func validateWorkflowMergerInputContent(input workflowstate.MergerInput, now tim
 		return err
 	}
 
-	if err := workflowmerge.ValidateWorkflowMergerScope(input); err != nil {
+	if err := workflowmerge.CheckScope(input); err != nil {
 		return err
 	}
 

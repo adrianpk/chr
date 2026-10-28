@@ -131,7 +131,7 @@ func (s *Store) checkpointWorkflowPreparationFailure(ctx context.Context, observ
 
 	// Only an observed command failure on the still-current clean result can
 	// request semantic repair. Stops, mutation and stale fences remain failures.
-	actionable := candidate.Input.Native != nil && workflowintegrate.WorkflowCandidateGateFailed(candidate.Validation) && s.checkWorkflowCandidateFailureCurrent(ctx, run, candidate, provider) == nil
+	actionable := candidate.Input.Native != nil && workflowintegrate.GateFailed(candidate.Validation) && s.checkWorkflowCandidateFailureCurrent(ctx, run, candidate, provider) == nil
 
 	targetMoved := s.workflowNativePreparationTargetMoved(ctx, run, candidate, provider)
 	if err := s.checkpointWorkflowAttempt(run, record, "interrupted", &candidate.Validation); err != nil {
@@ -178,7 +178,7 @@ func (s *Store) checkWorkflowCandidateFailureCurrent(ctx context.Context, run wo
 func (s *Store) checkWorkflowPreparationCompletion(ctx context.Context, run workflowInvocationFile, operation workflowIntegrationValidation, completion workflowintegrate.Completion) error {
 	candidate, prepared, provider := completion.Candidate, operation.prepared, operation.provider
 
-	failure := errors.Join(completion.Failure, s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, *candidate), workflowintegrate.ValidateWorkflowPreparationGate(prepared.input.Contract.Validation, candidate.Validation), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
+	failure := errors.Join(completion.Failure, s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, *candidate), workflowintegrate.CheckGate(prepared.input.Contract.Validation, candidate.Validation), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
 	if failure != nil {
 		return failure
 	}

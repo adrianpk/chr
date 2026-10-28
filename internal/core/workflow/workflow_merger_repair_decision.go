@@ -63,7 +63,7 @@ func workflowMergerProcedureRequired(conflict workflowstate.MergerConflict) bool
 }
 
 func workflowMergerProcedureDeclared(input workflowstate.MergerInput, conflict workflowstate.MergerConflict) bool {
-	return workflowmerge.ValidWorkflowMergerCommand(conflict.RegenerationCommand) && workflowmerge.ValidWorkflowMergerCommand(conflict.ValidationCommand) && slices.ContainsFunc(input.ValidationCommands, func(command []string) bool { return slices.Equal(command, conflict.ValidationCommand) })
+	return workflowmerge.ValidCommand(conflict.RegenerationCommand) && workflowmerge.ValidCommand(conflict.ValidationCommand) && slices.ContainsFunc(input.ValidationCommands, func(command []string) bool { return slices.Equal(command, conflict.ValidationCommand) })
 }
 
 func validateWorkflowMergerIntentConflicts(requirements []workflowstate.MergerRequirement) error {

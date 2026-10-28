@@ -116,7 +116,7 @@ func workflowMergerChangedPaths(data string) ([]string, error) {
 		paths = nil
 	}
 
-	if err := workflowmerge.ValidateWorkflowMergerPaths(paths); err != nil {
+	if err := workflowmerge.CheckPaths(paths); err != nil {
 		return nil, err
 	}
 

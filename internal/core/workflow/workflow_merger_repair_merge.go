@@ -53,7 +53,7 @@ func parseWorkflowMergerTree(data string, conflicted bool) (workflowMergerTree, 
 			break
 		}
 
-		if !workflowmerge.ValidWorkflowMergerPath(path) || len(result.conflicts) >= workflowstate.PageLimit {
+		if !workflowmerge.ValidPath(path) || len(result.conflicts) >= workflowstate.PageLimit {
 			return workflowMergerTree{}, workflowstate.ErrConflict
 		}
 

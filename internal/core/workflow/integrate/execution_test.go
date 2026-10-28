@@ -61,7 +61,7 @@ func TestValidationCompletion(t *testing.T) {
 
 			port := &validationPort{acceptErr: test.acceptErr}
 
-			candidate, err := ExecuteWorkflowValidation(ctx, watched, ValidationInput{InvocationID: "invocation", Round: 7}, port)
+			candidate, err := ValidateCandidate(ctx, watched, ValidationInput{InvocationID: "invocation", Round: 7}, port)
 			checkValidationErrors(t, err, test.validateErr, test.acceptErr)
 
 			if port.cleanupErr != nil || port.completion.Interrupted != test.stopped || !errors.Is(port.completion.Failure, test.validateErr) {

@@ -72,7 +72,7 @@ func (s *Store) checkWorkflowRetainedPreparationInput(run workflowInvocationFile
 		return workflowstate.ErrConflict
 	}
 
-	return workflowintegrate.ValidateWorkflowPreparationGate(input.Contract.Validation, result)
+	return workflowintegrate.CheckGate(input.Contract.Validation, result)
 }
 
 func workflowPreparationInputMatches(input TaskInput, candidate workflowstate.IntegrationCandidate) bool {

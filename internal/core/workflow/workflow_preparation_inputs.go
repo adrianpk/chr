@@ -62,7 +62,7 @@ func (s *Store) checkWorkflowPublicationGuard(ctx context.Context, run workflowI
 		return workflowstate.PublicationGuard{}, err
 	}
 
-	source := workflowintegrate.WorkflowPreparationSource(review)
+	source := workflowintegrate.SourceInput(review)
 
 	candidate, err := s.currentWorkflowPreparation(ctx, run, source)
 	if err != nil {

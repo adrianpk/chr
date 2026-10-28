@@ -6,16 +6,16 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowPreparationSource removes prepared-only evidence before source observation.
-func WorkflowPreparationSource(input workflowstate.ReviewInput) workflowstate.ReviewInput {
+// SourceInput removes prepared-only evidence before source observation.
+func SourceInput(input workflowstate.ReviewInput) workflowstate.ReviewInput {
 	input.PreparationRef, input.PreparationHash, input.PreparedGit = "", "", nil
 	input.Native = nil
 
 	return input
 }
 
-// WorkflowCandidateGateFailed recognizes a complete command failure eligible for repair.
-func WorkflowCandidateGateFailed(result workflowstate.TaskResult) bool {
+// GateFailed recognizes a complete command failure eligible for repair.
+func GateFailed(result workflowstate.TaskResult) bool {
 	for _, command := range result.Validation {
 		if command.ExitCode != 0 && !command.Truncated {
 			return true
@@ -25,8 +25,8 @@ func WorkflowCandidateGateFailed(result workflowstate.TaskResult) bool {
 	return false
 }
 
-// ValidateWorkflowPreparationGate binds exact commands or the explicit waiver.
-func ValidateWorkflowPreparationGate(gate workflowstate.Validation, result workflowstate.TaskResult) error {
+// CheckGate binds exact commands or the explicit waiver.
+func CheckGate(gate workflowstate.Validation, result workflowstate.TaskResult) error {
 	if !gate.Required {
 		if result.WaiverReason != gate.WaiverReason || len(result.Validation) != 0 {
 			return workflowstate.ErrConflict

@@ -11,15 +11,21 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowMergerCall binds the immutable input and retained evidence to a driver call.
-type WorkflowMergerCall struct {
+// Call binds the immutable input and retained evidence to a driver call.
+type Call struct {
 	Protocol string                    `json:"protocol"`
 	Input    workflowstate.MergerInput `json:"input"`
 	Evidence map[string]string         `json:"evidence"`
 }
 
-// ServeWorkflowMergerBroker exchanges bounded tool messages and one terminal proposal.
-func ServeWorkflowMergerBroker(ctx context.Context, tools *WorkflowMergerTools, reader io.Reader, writer io.Writer) (proposal json.RawMessage, usage *workflowstate.MergerUsage, err error) {
+// BrokerResult retains a raw proposal and its reported usage for host validation.
+type BrokerResult struct {
+	Proposal json.RawMessage
+	Usage    *workflowstate.MergerUsage
+}
+
+// ServeBroker exchanges bounded tool messages and one terminal proposal.
+func ServeBroker(ctx context.Context, tools *Tools, reader io.Reader, writer io.Writer) (result BrokerResult, err error) {
 	scanner := bufio.NewScanner(reader)
 	scanner.Buffer(make([]byte, 4096), workflowstate.FileLimit+1)
 
@@ -28,39 +34,39 @@ func ServeWorkflowMergerBroker(ctx context.Context, tools *WorkflowMergerTools, 
 	total, messages := 0, 0
 	for scanner.Scan() {
 		total, messages = total+len(scanner.Bytes()), messages+1
-		if total > 8*workflowstate.FileLimit || messages > workflowstate.PageLimit || proposal != nil {
-			return nil, nil, workflowstate.ErrConflict
+		if total > 8*workflowstate.FileLimit || messages > workflowstate.PageLimit || result.Proposal != nil {
+			return BrokerResult{}, workflowstate.ErrConflict
 		}
 
-		request, decodeErr := decodeWorkflowMergerTool(scanner.Bytes())
+		request, decodeErr := decodeTool(scanner.Bytes())
 		if decodeErr != nil {
-			return nil, nil, decodeErr
+			return BrokerResult{}, decodeErr
 		}
 
 		if request.Operation != "result" {
-			if err := writeWorkflowMergerToolResponse(ctx, tools, encoder, request); err != nil {
-				return nil, nil, err
+			if err := writeToolResponse(ctx, tools, encoder, request); err != nil {
+				return BrokerResult{}, err
 			}
 
 			continue
 		}
 
-		proposal, usage, err = writeWorkflowMergerTerminal(encoder, request)
+		result, err = writeTerminal(encoder, request)
 		if err != nil {
-			return nil, nil, err
+			return BrokerResult{}, err
 		}
 	}
 
-	if err := workflowMergerBrokerComplete(scanner, proposal, ctx); err != nil {
-		return nil, nil, err
+	if err := brokerComplete(scanner, result.Proposal, ctx); err != nil {
+		return BrokerResult{}, err
 	}
 
-	return proposal, usage, nil
+	return result, nil
 }
 
-func decodeWorkflowMergerTool(data []byte) (workflowMergerToolRequest, error) {
-	var request workflowMergerToolRequest
-	if err := CheckWorkflowMergerJSON(data); err != nil {
+func decodeTool(data []byte) (toolRequest, error) {
+	var request toolRequest
+	if err := CheckJSON(data); err != nil {
 		return request, err
 	}
 
@@ -75,15 +81,15 @@ func decodeWorkflowMergerTool(data []byte) (workflowMergerToolRequest, error) {
 	return request, err
 }
 
-func workflowMergerTerminal(request workflowMergerToolRequest) (json.RawMessage, *workflowstate.MergerUsage, error) {
+func terminal(request toolRequest) (BrokerResult, error) {
 	if request.Path != "" || request.Content != "" || request.Check != nil || len(request.Result) == 0 {
-		return nil, nil, workflowstate.ErrConflict
+		return BrokerResult{}, workflowstate.ErrConflict
 	}
 
-	return request.Result, request.Usage, nil
+	return BrokerResult{Proposal: request.Result, Usage: request.Usage}, nil
 }
 
-func workflowMergerBrokerComplete(scanner *bufio.Scanner, proposal json.RawMessage, ctx context.Context) error {
+func brokerComplete(scanner *bufio.Scanner, proposal json.RawMessage, ctx context.Context) error {
 	if scanner.Err() != nil || proposal == nil || ctx.Err() != nil {
 		return fmt.Errorf("%w: merger driver did not finish a bounded proposal", workflowstate.ErrConflict)
 	}
@@ -91,7 +97,7 @@ func workflowMergerBrokerComplete(scanner *bufio.Scanner, proposal json.RawMessa
 	return nil
 }
 
-func writeWorkflowMergerToolResponse(ctx context.Context, tools *WorkflowMergerTools, encoder *json.Encoder, request workflowMergerToolRequest) error {
+func writeToolResponse(ctx context.Context, tools *Tools, encoder *json.Encoder, request toolRequest) error {
 	response, err := tools.apply(ctx, request)
 	if err != nil {
 		response.Error = err.Error()
@@ -103,11 +109,11 @@ func writeWorkflowMergerToolResponse(ctx context.Context, tools *WorkflowMergerT
 	return encoder.Encode(response)
 }
 
-func writeWorkflowMergerTerminal(encoder *json.Encoder, request workflowMergerToolRequest) (json.RawMessage, *workflowstate.MergerUsage, error) {
-	proposal, usage, err := workflowMergerTerminal(request)
+func writeTerminal(encoder *json.Encoder, request toolRequest) (BrokerResult, error) {
+	result, err := terminal(request)
 	if err != nil {
-		return nil, nil, err
+		return BrokerResult{}, err
 	}
 
-	return proposal, usage, encoder.Encode(workflowMergerToolResponse{})
+	return result, encoder.Encode(toolResponse{})
 }

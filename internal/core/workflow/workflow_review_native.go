@@ -111,7 +111,7 @@ func validateWorkflowNativeReviewInput(input workflowstate.ReviewInput) error {
 		return workflowstate.ErrConflict
 	}
 
-	preparation := workflowstate.PreparationInput{Source: workflowintegrate.WorkflowPreparationSource(input), Git: *input.PreparedGit}
+	preparation := workflowstate.PreparationInput{Source: workflowintegrate.SourceInput(input), Git: *input.PreparedGit}
 
 	return validateWorkflowPreparedNativeCapability(preparation, native.Capability)
 }

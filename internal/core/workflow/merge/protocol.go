@@ -1,4 +1,4 @@
 package merge
 
-// WorkflowMergerBrokerProtocol identifies the certified model-driver wire contract.
-const WorkflowMergerBrokerProtocol = "chr-merger-broker/v1"
+// BrokerProtocol identifies the certified model-driver wire contract.
+const BrokerProtocol = "chr-merger-broker/v1"

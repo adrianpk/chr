@@ -19,11 +19,11 @@ func TestNativeMergerTools(t *testing.T) {
 
 	nativeMergerDeniedTools(t, tools)
 
-	if _, err := tools.apply(t.Context(), workflowMergerToolRequest{Operation: "write", Path: "src/service.go", Content: "compatible result"}); err != nil {
+	if _, err := tools.apply(t.Context(), toolRequest{Operation: "write", Path: "src/service.go", Content: "compatible result"}); err != nil {
 		t.Fatal(err)
 	}
 
-	response, err := tools.apply(t.Context(), workflowMergerToolRequest{Operation: "read", Path: "src/service.go"})
+	response, err := tools.apply(t.Context(), toolRequest{Operation: "read", Path: "src/service.go"})
 	if err != nil || response.Content != "compatible result" {
 		t.Fatal("owned edit not readable", err)
 	}
@@ -36,13 +36,13 @@ func TestNativeMergerTools(t *testing.T) {
 	}
 }
 
-func nativeMergerDeniedTools(t *testing.T, tools *WorkflowMergerTools) {
+func nativeMergerDeniedTools(t *testing.T, tools *Tools) {
 	t.Helper()
 
 	for _, path := range []string{"../external.go", "/etc/passwd", "src/../Makefile", ".git/config", ".chr/receipt.json", "ops/default/ticket/ready/scope.md", "src/validation.go", "src/alias.go", "src/hard.go"} {
 		t.Run(path, func(t *testing.T) {
 			for _, operation := range []string{"read", "write", "delete"} {
-				if _, err := tools.apply(t.Context(), workflowMergerToolRequest{Operation: operation, Path: path}); !errors.Is(err, workflowstate.ErrConflict) {
+				if _, err := tools.apply(t.Context(), toolRequest{Operation: operation, Path: path}); !errors.Is(err, workflowstate.ErrConflict) {
 					t.Fatal("escaped model tool permission", operation, err)
 				}
 			}
@@ -50,7 +50,7 @@ func nativeMergerDeniedTools(t *testing.T, tools *WorkflowMergerTools) {
 	}
 }
 
-func nativeMergerToolFiles(t *testing.T, input workflowstate.MergerInput) (*WorkflowMergerTools, string, string) {
+func nativeMergerToolFiles(t *testing.T, input workflowstate.MergerInput) (*Tools, string, string) {
 	t.Helper()
 
 	dir := t.TempDir()
@@ -83,7 +83,7 @@ func nativeMergerToolFiles(t *testing.T, input workflowstate.MergerInput) (*Work
 
 	t.Cleanup(func() { _ = root.Close() }) //nolint:errcheck
 
-	tools := &WorkflowMergerTools{input: input, root: root, guard: func(ctx context.Context) error { return ctx.Err() }}
+	tools := &Tools{input: input, root: root, guard: func(ctx context.Context) error { return ctx.Err() }}
 
 	return tools, protected, external
 }

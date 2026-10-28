@@ -78,7 +78,7 @@ func (s *Store) PrepareWorkflowSliceIntegration(ctx context.Context, id string, 
 
 	validation := workflowIntegrationValidation{store: s, claim: claim, prepared: prepared, provider: provider}
 
-	return workflowintegrate.ExecuteWorkflowValidation(deadline, watched, workflowintegrate.ValidationInput{InvocationID: id, Round: selection.Round, Preparation: input, Lane: prepared.input.Lane, Result: newWorkflowTaskResult(prepared)}, validation)
+	return workflowintegrate.ValidateCandidate(deadline, watched, workflowintegrate.ValidationInput{InvocationID: id, Round: selection.Round, Preparation: input, Lane: prepared.input.Lane, Result: newWorkflowTaskResult(prepared)}, validation)
 }
 
 // CheckWorkflowPublicationGuard rechecks policy, review, combined validation,

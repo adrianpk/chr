@@ -89,7 +89,7 @@ func (s *Store) runWorkflowMergerProcedure(ctx context.Context, claim *Claim, pr
 		return workflowstate.CommandResult{}, err
 	}
 
-	if !workflowmerge.ValidWorkflowMergerCommand(command) || time.Now().After(prepared.leaseUntil) {
+	if !workflowmerge.ValidCommand(command) || time.Now().After(prepared.leaseUntil) {
 		return workflowstate.CommandResult{}, workflowstate.ErrConflict
 	}
 
