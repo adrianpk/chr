@@ -83,6 +83,12 @@ actual Evidence port and have explicit semantic evidence, not a whole-method
 token-equivalence claim. No compatibility alias or forwarding Store facade
 replaces the removed policy methods.
 
+The [vocabulary and compatibility ledger](../../../plan/code-quality-remediation-slice-15-vocabulary.md)
+defines frontier, adoption, loose selection, continuation, amendment and closing
+from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Ten current compatibility/control cases identify actual
+consumers, existing regression protection and retirement conditions. Remaining
+legacy/schema/control references are explicitly unreconciled; T15.5 stays active.
+
 ## Contracts Added or Changed
 
 The [assigned signature ledger](../../../plan/code-quality-remediation-slice-15-signatures.csv)
@@ -135,6 +141,11 @@ without skips; owned-fixture cleanup reported no leaked descendants.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app ./scripts/goquality` — zero issues.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./scripts/goquality` — zero issues after the final private-result conversions.
 - `git diff --check`
+
+The vocabulary-only update checked all relative links, six definitions, ten case
+rows and every named regression declaration against the current source. T15
+tracker columns and whitespace checks pass. Runtime checks were not repeated for
+that documentation change.
 
 ## Risks and Follow-ups
 
