@@ -33,7 +33,7 @@ func (s *Store) checkWorkflowNativeDispatchGuard(ctx context.Context, run workfl
 		return workflowstate.PublicationGuard{}, err
 	}
 
-	hash, err := workflowreview.WorkflowReviewInputHash(input)
+	hash, err := workflowreview.InputHash(input)
 	if err != nil || hash != run.Review.InputHash {
 		return workflowstate.PublicationGuard{}, workflowstate.ErrConflict
 	}

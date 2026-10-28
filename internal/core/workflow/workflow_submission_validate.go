@@ -98,7 +98,7 @@ func validateWorkflowSubmissionGuard(guard workflowstate.PublicationGuard) error
 		return workflowstate.ErrConflict
 	}
 
-	if err := workflowreview.ValidateWorkflowReviewPolicy(guard.Policy); err != nil {
+	if err := workflowreview.CheckPolicy(guard.Policy); err != nil {
 		return err
 	}
 

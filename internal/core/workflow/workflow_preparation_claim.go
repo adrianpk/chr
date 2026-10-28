@@ -99,7 +99,7 @@ func (s *Store) cachedWorkflowPreparation(ctx context.Context, run workflowInvoc
 		return nil, err
 	}
 
-	hash, err := workflowreview.WorkflowReviewInputHash(source)
+	hash, err := workflowreview.InputHash(source)
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +254,7 @@ func (s *Store) beginWorkflowPreparation(run *workflowInvocationFile, source wor
 		return workflowstate.Lane{}, fmt.Errorf("workflow preparation history budget exhausted")
 	}
 
-	hash, err := workflowreview.WorkflowReviewInputHash(source)
+	hash, err := workflowreview.InputHash(source)
 	if err != nil {
 		return workflowstate.Lane{}, err
 	}

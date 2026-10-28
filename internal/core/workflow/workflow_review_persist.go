@@ -31,7 +31,7 @@ func (s *Store) persistWorkflowReviewInput(run *workflowInvocationFile, observat
 		return fmt.Errorf("workflow review history budget exhausted")
 	}
 
-	data, err := workflowreview.WorkflowReviewInputBytes(input)
+	data, err := workflowreview.InputBytes(input)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (s *Store) readWorkflowReview(run workflowInvocationFile) (workflowstate.Re
 		return input, workflowstate.ReviewDecision{}, workflowstate.ErrConflict
 	}
 
-	if err := workflowreview.ValidateWorkflowReviewPolicy(input.Policy); err != nil {
+	if err := workflowreview.CheckPolicy(input.Policy); err != nil {
 		return input, workflowstate.ReviewDecision{}, err
 	}
 

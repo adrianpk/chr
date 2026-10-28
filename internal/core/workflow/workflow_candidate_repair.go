@@ -84,7 +84,7 @@ func (s *Store) repairWorkflowNativeReview(ctx context.Context, run workflowInvo
 	}
 
 	_, fresh, err := s.workflowReviewInputs(ctx, run, provider)
-	if err != nil || workflowreview.CheckWorkflowReviewInputHash(fresh, run.Review.InputHash) != nil {
+	if err != nil || workflowreview.CheckInputHash(fresh, run.Review.InputHash) != nil {
 		return errorsOrConflict(err)
 	}
 

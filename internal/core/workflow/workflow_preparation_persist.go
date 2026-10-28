@@ -93,7 +93,7 @@ func validateWorkflowPreparationCandidate(run workflowInvocationFile, candidate 
 		return workflowstate.ErrConflict
 	}
 
-	hash, err := workflowreview.WorkflowReviewInputHash(candidate.Input.Source)
+	hash, err := workflowreview.InputHash(candidate.Input.Source)
 	if err != nil || hash != b.SourceHash {
 		return workflowstate.ErrConflict
 	}

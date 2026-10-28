@@ -48,7 +48,7 @@ func (s *Store) checkWorkflowPreparationSource(ctx context.Context, run workflow
 		return err
 	}
 
-	if err := workflowreview.CheckWorkflowReviewInputHash(source, run.Preparation.SourceHash); err != nil {
+	if err := workflowreview.CheckInputHash(source, run.Preparation.SourceHash); err != nil {
 		return err
 	}
 

@@ -62,7 +62,7 @@ func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider P
 }
 
 func (s *Store) ensureWorkflowReviewInput(run *workflowInvocationFile, observation workflowSliceObservation, input workflowstate.ReviewInput) error {
-	hash, err := workflowreview.WorkflowReviewInputHash(input)
+	hash, err := workflowreview.InputHash(input)
 	if err != nil {
 		return err
 	}

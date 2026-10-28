@@ -10,8 +10,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ParseWorkflowReviewDecision preserves the retained review input and decision contract.
-func ParseWorkflowReviewDecision(stdout string, input *workflowstate.ReviewInput) (workflowstate.ReviewDecision, error) {
+// ParseDecision decodes one strict decision and checks its immutable candidate binding.
+func ParseDecision(stdout string, input *workflowstate.ReviewInput) (workflowstate.ReviewDecision, error) {
 	var decision workflowstate.ReviewDecision
 	if input == nil {
 		return decision, workflowstate.ErrConflict
@@ -28,12 +28,12 @@ func ParseWorkflowReviewDecision(stdout string, input *workflowstate.ReviewInput
 		return decision, fmt.Errorf("workflow review contains trailing output")
 	}
 
-	return decision, ValidateWorkflowReviewDecision(decision, *input)
+	return decision, CheckDecision(decision, *input)
 }
 
-// ValidateWorkflowReviewDecision preserves the retained review input and decision contract.
-func ValidateWorkflowReviewDecision(decision workflowstate.ReviewDecision, input workflowstate.ReviewInput) error {
-	hash, err := WorkflowReviewInputHash(input)
+// CheckDecision checks outcome, blocking findings and the retained repair task.
+func CheckDecision(decision workflowstate.ReviewDecision, input workflowstate.ReviewInput) error {
+	hash, err := InputHash(input)
 	if err != nil || hash != decision.BindingHash {
 		return fmt.Errorf("%w: review decision names another candidate", workflowstate.ErrConflict)
 	}
@@ -54,10 +54,10 @@ func ValidateWorkflowReviewDecision(decision workflowstate.ReviewDecision, input
 		return nil
 	}
 
-	return validateWorkflowReviewRepairDecision(decision, input)
+	return checkRepairDecision(decision, input)
 }
 
-func validateWorkflowReviewRepairDecision(decision workflowstate.ReviewDecision, input workflowstate.ReviewInput) error {
+func checkRepairDecision(decision workflowstate.ReviewDecision, input workflowstate.ReviewInput) error {
 	if !slices.ContainsFunc(input.Slice.Tasks, func(task workflowstate.SliceTaskProof) bool { return task.Key == decision.RepairTaskKey }) {
 		return fmt.Errorf("review repair task is outside the retained slice")
 	}

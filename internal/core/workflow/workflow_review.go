@@ -69,16 +69,12 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 		return result, executionErr
 	}
 
-	decision, parseErr := workflowreview.ParseWorkflowReviewDecision(command.Stdout, prepared.input.Review)
+	decisions := workflowReviewDecisions{store: s, claim: claim, prepared: prepared, provider: provider}
+	completed, err := workflowreview.Complete(ctx, watched, workflowreview.Execution{Input: prepared.input.Review, Output: command, Failure: executionErr}, decisions)
 
-	cleanup, finish := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
-	defer finish()
-
-	var decisions workflowreview.Decisions = workflowReviewDecisions{store: s, claim: claim, prepared: prepared, provider: provider}
-
-	result, err = decisions.Accept(cleanup, workflowreview.Completion{Decision: decision, Failure: errors.Join(executionErr, parseErr), Interrupted: watched.Err() != nil})
+	result = completed.Binding
 	if err == nil && result.State == "needs_repair" {
-		err = s.repairWorkflowReviewedSlice(ctx, id, decision.RepairTaskKey, provider)
+		err = s.repairWorkflowReviewedSlice(ctx, id, completed.RepairTaskKey, provider)
 	}
 
 	return result, err

@@ -128,7 +128,7 @@ func (s *Store) readWorkflowReviewEvidence(run workflowInvocationFile, input wor
 		return evidence, err
 	}
 
-	if err := workflowreview.ValidateWorkflowReviewDecision(evidence.Decision, input); err != nil {
+	if err := workflowreview.CheckDecision(evidence.Decision, input); err != nil {
 		return evidence, err
 	}
 

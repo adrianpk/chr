@@ -122,7 +122,7 @@ func (s *Store) checkWorkflowReviewGrant(ctx context.Context, run workflowInvoca
 		return input, err
 	}
 
-	hash, err := workflowreview.WorkflowReviewInputHash(input)
+	hash, err := workflowreview.InputHash(input)
 	if err != nil || hash != run.Review.InputHash {
 		return input, fmt.Errorf("%w: review grant inputs changed", workflowstate.ErrConflict)
 	}
@@ -144,7 +144,7 @@ func (s *Store) approveWorkflowSlice(ctx context.Context, run workflowInvocation
 		return *run.Review, err
 	}
 
-	hash, err := workflowreview.WorkflowReviewInputHash(input)
+	hash, err := workflowreview.InputHash(input)
 	if err != nil || hash != bindingHash {
 		return *run.Review, fmt.Errorf("%w: approval inputs changed", workflowstate.ErrConflict)
 	}

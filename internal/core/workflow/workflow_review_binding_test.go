@@ -86,7 +86,7 @@ func TestWorkflowReviewDecisionChecks(t *testing.T) {
 			d := valid
 			test.change(&d)
 
-			if err := workflowreview.ValidateWorkflowReviewDecision(d, input); err == nil {
+			if err := workflowreview.CheckDecision(d, input); err == nil {
 				t.Fatal("unsafe role evidence accepted")
 			}
 		})

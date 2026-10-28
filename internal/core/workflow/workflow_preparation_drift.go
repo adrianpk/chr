@@ -67,7 +67,7 @@ func (s *Store) reprepareWorkflowNativeInputs(ctx context.Context, run *workflow
 }
 
 func workflowNativePreparationChanged(ctx context.Context, run workflowInvocationFile, previous workflowstate.PreparationInput, source workflowstate.ReviewInput, provider PublicationGuardProvider) (bool, error) {
-	hash, err := workflowreview.WorkflowReviewInputHash(source)
+	hash, err := workflowreview.InputHash(source)
 	if err != nil || hash != run.Preparation.SourceHash {
 		return err == nil, err
 	}
@@ -100,7 +100,7 @@ func (s *Store) retainedWorkflowNativePreparation(run workflowInvocationFile) (w
 			return workflowstate.PreparationInput{}, errorsOrConflict(err)
 		}
 
-		if err := workflowreview.CheckWorkflowReviewInputHash(input.Preparation.Source, run.Preparation.SourceHash); err != nil {
+		if err := workflowreview.CheckInputHash(input.Preparation.Source, run.Preparation.SourceHash); err != nil {
 			return workflowstate.PreparationInput{}, err
 		}
 

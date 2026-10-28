@@ -46,5 +46,5 @@ func parseWorkflowReviewPolicy(data []byte) (workflowstate.ReviewPolicy, error) 
 	value := workspaceconfig.WorkflowValue(config, "review.mode", string(config.Review.Mode))
 	policy := workflowstate.ReviewPolicy{Mode: config.Review.Mode, Method: config.Work.MergeStrategy, Source: value.Source, Revision: config.Revision()}
 
-	return policy, workflowreview.ValidateWorkflowReviewPolicy(policy)
+	return policy, workflowreview.CheckPolicy(policy)
 }

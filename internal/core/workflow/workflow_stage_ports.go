@@ -34,7 +34,7 @@ type workflowReviewDecisions struct {
 }
 
 func (operation workflowReviewDecisions) Accept(ctx context.Context, completion workflowreview.Completion) (workflowstate.ReviewBinding, error) {
-	return operation.store.finishWorkflowReview(ctx, operation.claim, operation.prepared, operation.provider, completion.Decision, completion.Failure, completion.Interrupted)
+	return operation.store.finishWorkflowReview(ctx, operation, completion)
 }
 
 type workflowSubmissionResponses struct {

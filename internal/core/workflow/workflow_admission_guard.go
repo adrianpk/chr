@@ -36,7 +36,7 @@ func validateWorkflowAdmissionPolicy(guard *workflowstate.AdmissionGuard) error 
 		return workflowstate.ErrConflict
 	}
 
-	return workflowreview.ValidateWorkflowReviewPolicy(guard.Policy)
+	return workflowreview.CheckPolicy(guard.Policy)
 }
 
 func (s *Store) checkWorkflowAdmissionGuard(ctx context.Context, request StartRequest) error {

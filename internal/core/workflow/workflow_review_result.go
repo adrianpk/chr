@@ -9,7 +9,10 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) finishWorkflowReview(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, decision workflowstate.ReviewDecision, executionErr error, interrupted bool) (result workflowstate.ReviewBinding, err error) {
+func (s *Store) finishWorkflowReview(ctx context.Context, operation workflowReviewDecisions, completion workflowreview.Completion) (result workflowstate.ReviewBinding, err error) {
+	claim, prepared := operation.claim, operation.prepared
+	executionErr, interrupted := completion.Failure, completion.Interrupted
+
 	err = s.withLock(ctx, func() error {
 		claimObservation, readErr := s.checkWorkflowCredential(ctx, claim, workflowCredentialIdentity)
 		if readErr != nil {
@@ -31,7 +34,7 @@ func (s *Store) finishWorkflowReview(ctx context.Context, claim *Claim, prepared
 			return errors.Join(executionErr, ErrWorkflowStop, readErr)
 		}
 
-		result, readErr = owner.acceptWorkflowReview(ctx, claim, claimObservation.Run, claimObservation.Record, provider, decision, executionErr)
+		result, readErr = owner.acceptWorkflowReview(ctx, claimObservation, operation, completion)
 
 		return readErr
 	})
@@ -39,21 +42,24 @@ func (s *Store) finishWorkflowReview(ctx context.Context, claim *Claim, prepared
 	return result, err
 }
 
-func (s *Store) acceptWorkflowReview(ctx context.Context, claim *Claim, run workflowInvocationFile, record Record, provider PullRequestProvider, decision workflowstate.ReviewDecision, executionErr error) (workflowstate.ReviewBinding, error) {
+func (s *Store) acceptWorkflowReview(ctx context.Context, claimed workflowClaimObservation, operation workflowReviewDecisions, completion workflowreview.Completion) (workflowstate.ReviewBinding, error) {
+	claim, run, record := operation.claim, claimed.Run, claimed.Record
+	provider, decision, executionErr := operation.provider, completion.Decision, completion.Failure
+
 	if err := workflowAttemptQuiescent(run.Attempts[len(run.Attempts)-1]); err != nil {
 		return workflowstate.ReviewBinding{}, err
 	}
 
 	observation, input, err := s.workflowReviewInputs(ctx, run, provider)
 	if err == nil {
-		err = workflowreview.CheckWorkflowReviewInputHash(input, run.Review.InputHash)
+		err = workflowreview.CheckInputHash(input, run.Review.InputHash)
 	}
 
 	if failure := errors.Join(executionErr, err); failure != nil {
 		return workflowstate.ReviewBinding{}, s.checkpointFailedWorkflowReview(claim, run, record, failure)
 	}
 
-	state := workflowreview.WorkflowReviewDecisionState(decision.Result.Decision)
+	state := workflowreview.DecisionState(decision.Result.Decision)
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	attempt.Outcome, attempt.FinishedAt = "reviewed", time.Now().UTC()
 

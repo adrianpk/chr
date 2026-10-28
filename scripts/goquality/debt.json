@@ -232,16 +232,6 @@
       "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/workflow/workflow_review_result.go::Store.finishWorkflowReview",
-      "signature": "func(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, decision workflowstate.ReviewDecision, executionErr error, interrupted bool) (result workflowstate.ReviewBinding, err error)",
-      "reason": "Existing above-six workflow debt; assigned to approved Slice 14. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_review_result.go::Store.acceptWorkflowReview",
-      "signature": "func(ctx context.Context, claim *Claim, run workflowInvocationFile, record Record, provider PullRequestProvider, decision workflowstate.ReviewDecision, executionErr error) (workflowstate.ReviewBinding, error)",
-      "reason": "Existing above-six workflow debt; assigned to approved Slice 14. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
-    },
-    {
       "id": "internal/core/workflow/workflow_submission_native.go::Store.BeginWorkflowNativeSubmission",
       "signature": "func(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider) (submission workflowstate.Submission, dispatch bool, err error)",
       "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
