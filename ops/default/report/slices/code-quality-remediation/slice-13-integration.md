@@ -25,9 +25,10 @@ failure mode replaces the actionable/target-moved pair with the same precedence.
 Together with the broker/driver contracts, 18 of 87 assigned signature rows are
 implemented; 69 remain pending. The exact debt manifest now has 101 entries at
 ceiling six, with one external exception.
+
 The first merge batch relocates 28 broker, JSON, path/scope and contained-tool
-declarations into workflow/merge. The mechanical commit preserves declaration tokens in 27 of 28 entries after
-owner naming; the response formatter inlines the same 4096-byte failure bound.
+declarations into workflow/merge. The mechanical commit preserves declaration
+tokens in 27 of 28 entries after owner naming; the response formatter inlines the same 4096-byte failure bound.
 The host still opens/closes the checkout and supervises the exact claimed driver.
 Existing tool escape/alias assertions move beside their owner; the child fixture
 retains independent original request/response fields.
@@ -44,13 +45,25 @@ The predecessor PR #449 is verified merged into dev at
 `a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`. Its exact-head controller evidence
 is `EVFKMQZNCCYQDPLZLRXOYO2S7M`; all four recorded commands passed.
 
+Completed task commits:
+
+- Candidate stage: `05a7a106029d64ee5aa1ba8b62703afc40437d72`.
+- Preparation contracts: `c7a15133e0a07f8eb3fec735e36c967730aff038`.
+- Mechanical merger broker: `962e03aef96bf7aefd2b075fe218041b9cd00dc6`.
+- Stage naming and broker/driver contracts: `8e3630b9b074ec7b15d7b0de252429c3844dd283`.
+
+All 908 Store methods retain one local receiver owner. Current method and move
+hashes follow these changes while their original source identities/hashes remain
+frozen. The current-file owner map records the actual stage files and private
+preparation resource bindings.
+
 ## Contracts Added or Changed
 
 `ValidationInput` carries immutable candidate identity, preparation, lane and
 initial task result. The stage consumes `Validation`; it receives neither a
 mutable store nor claim/process resources. Execution and stop contexts remain
-explicit parameters. The stage import bound remains shared-state-only. No alias or forwarding
-compatibility layer retains the moved names.
+explicit parameters. The stage import bound remains shared-state-only. No alias
+or forwarding compatibility layer retains the moved names.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-13-moves.csv)
 retains the frozen source identities and hashes for the extracted policy.

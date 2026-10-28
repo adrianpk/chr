@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-13
 source: review
 reported_at: 2026-10-26T08:48:33Z
-commits: []
+commits: [290ebfc8f299cf5ab2a6ef28174b44d2b34b18bb, 05a7a106029d64ee5aa1ba8b62703afc40437d72, c7a15133e0a07f8eb3fec735e36c967730aff038, 962e03aef96bf7aefd2b075fe218041b9cd00dc6, 8e3630b9b074ec7b15d7b0de252429c3844dd283]
 started_at: 2026-10-28T02:15:11Z
 branch: refactor/slice-13-quality-integration
 ready_at: 2026-10-26T08:57:09Z
@@ -60,5 +60,7 @@ Existing preparation/admission/merger repair/cancellation and lost-ack fixtures 
 All commands above are planned. None ran as implementation validation during this planning task.
 
 Slice 12 PR #449 is verified integrated at
-`a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`. Candidate validation and merge
-extraction are active; no Slice 13 validation or PR has been completed.
+`a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`. Candidate validation and merger broker extraction are active. Eighteen assigned
+signature rows are implemented; 69 remain pending. Focused real IO/process and
+race checks and strict lint pass. No Slice 13 PR or final controller validation
+has been completed.
