@@ -77,6 +77,13 @@ receiver. The Markdown reader is a private persistence function; readRecord
 still resolves its contained path first. Six actual callers use these functions
 directly, preserving the original bodies, partial outcomes and atomic guards.
 
+`CloseSet` and `CloseInvocationSet` now sequence closing as actual coordinator
+operations. A private closing host owns watched deadlines, isolated checkout IO
+and process/permit/output lifetime. Its finite Workspace/Commands binding keeps
+the original private claim. Store still owns guarded admission, process records,
+credential/input/target fences, receipt confirmation and interrupted recovery.
+Application and continuation callers use the new operations directly.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -91,11 +98,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 123 source/extraction/consolidation images. Current identities and hashes are updated
+retains 134 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. Twenty-nine former Store methods now have actual
-closeout policy, host evidence adapter or private coordinator/read owners. The original 908 method rows
-retain frozen source evidence and current identities; 879 methods remain on Store. This count does not establish
+frozen source fields remain unchanged. Thirty-five former Store methods now have actual
+closeout policy, host evidence, coordinator, lifecycle or private-function owners. The original 908 method rows
+retain frozen source evidence and current identities; 873 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -115,7 +122,7 @@ replaces the removed policy methods.
 
 The [vocabulary and compatibility ledger](../../../plan/code-quality-remediation-slice-15-vocabulary.md)
 defines frontier, adoption, loose selection, continuation, amendment and closing
-from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Twelve current compatibility/control cases identify actual
+from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Thirteen current compatibility/control cases identify actual
 consumers, existing regression protection and retirement conditions. Remaining
 legacy/schema/control references are explicitly unreconciled; T15.5 stays active.
 
@@ -148,21 +155,30 @@ final Store API assessment remains active.
 
 Closing status extraction is in `5f506a41dee1e172f8915f5712bbc9d6292a7bea`, with three exact declaration
 comparisons and four frozen source images. The port map now records 22 actual
-contracts. Final method inspection now records 104 body-specific decisions in
-the existing 908-row method map: 75 guarded-persistence methods, 23 closing
-policies, one contained host evidence adapter, four private coordinator
-functions and one private Markdown reader. The remaining 804 source rows stay
-explicitly pending final assessment; filename, receiver-use and lock-reachability
-counts do not establish durable ownership.
+contracts. Final method inspection now records 156 body-specific decisions in
+the existing 908-row method map: 121 guarded-persistence methods, 23 closing
+policies, one host evidence adapter, four coordinator functions, one persistence
+reader, four closing lifecycle methods and two coordinator operations. The
+remaining 752 source rows stay explicitly pending final assessment.
 
 Unused-receiver cleanup is in `3ed65239b85570183865b74e169bcbf5a62c1819`. Five complete declarations
 match after receiver removal and the Markdown reader name; all 879 remaining
-Store receivers have actual uses. Source inspection adds explicit decisions for
+Store receivers had actual uses at that checkpoint. Source inspection adds explicit decisions for
 contract/allocation reads, invocation/owner lookup, control receipts, process
 records, publication journals and immutable upgrade recovery, plus every already
 extracted closing method. None is accepted from its filename alone. The retained
 upgrade snapshot case permits omitted publication/prepared-limit keys only at
 their established defaults, with changed policy still rejected.
+
+Closing lifecycle separation is in `b5b75ade5cbf21eb68ab3521b26545a20c5ee970`. Eleven full declarations
+match after explicit coordinator, receiver, private host, port and caller
+substitutions. Original admission and detached confirmation critical sections,
+command ordering, partial results and cleanup/error joins are preserved. All
+closing methods now have specific ownership decisions; tracker replacement,
+registration and versioned-projection methods also retain individual source
+bases. The v1/v2 tracker compatibility case preserves default schema, original
+bytes, bound order-map requirements and hash-guarded replacement without granting
+execution authority. Final repository-wide API acceptance remains active.
 
 ## Contracts Added or Changed
 
@@ -220,6 +236,12 @@ concurrency races, without skips or leaked owned descendants. Affected
 workflow/app/checker short tests, unchanged production signature bounds and
 strict lint pass.
 
+The closing host change passed 31 selected workflow regressions plus one real
+application closing fixture and six focused lifecycle races, without skips or
+leaked owned descendants. Affected workflow/app/checker short tests, unchanged
+signature bounds and strict lint pass. These are task checks; final slice
+validation and guided parity remain pending.
+
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|UseCase|Reopen|SetAdvance|Budget|Recovery|Journal|PostObservation|Stop)|NativeClosing(Gate|Divergence|Evidence|PublicationRace)|WorkflowParallelClosingRecovery|QualityRecordWire)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow ./internal/core/workflow/closeout -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|Execute)$' -count=1 -timeout=10m -json`
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|Budget|Recovery|Journal|Stop)|NativeClosing(Gate|Divergence|Evidence|Lost))$' -count=1 -timeout=15m -json`
@@ -252,6 +274,9 @@ strict lint pass.
 - `go test -race ./internal/core/workflow -run '^Test(WorkflowMaterializationConcurrent|WorkflowPlanAdoptionRestart|WorkflowAmendmentRecovery|WorkflowPlanOrderRecovery)$' -count=1 -timeout=10m -json`
 - `go test -short ./internal/core/workflow/... ./internal/app/... ./scripts/goquality`
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app/... ./scripts/goquality`
+
+- `go test -p=1 ./internal/core/workflow ./internal/app -run '^Test(WorkflowClosing.*|NativeClosing.*|WorkflowParallelClosingRecovery|WorkflowContinuation.*|WorkflowCapacityRoleWait|NativeQueueClosure|ServiceWorkflowClosing)$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|WorkflowContinuationRecovery|WorkflowCapacityRoleWait|NativeQueueClosure)$' -count=1 -timeout=10m -json`
 
 - `go test -short ./internal/core/... ./internal/app/... ./internal/tui/... ./internal/webui/... ./scripts/goquality`
 - `go test ./internal/core/workflow/closeout -count=1`
@@ -287,6 +312,14 @@ ownership decisions. Relative links, named regression declarations, twelve
 compatibility rows, T15 columns and whitespace pass. Original source fields and
 introduction commits stay frozen; runtime checks are not repeated for this
 metadata-only update.
+
+Closing host ledger reconciliation checks 4,248 current declaration hashes,
+all 908 original method mappings, four signature ledgers, eleven new frozen
+source preimages, 63 commit objects, 22 actual ports and 156 explicit ownership
+decisions. Source images retain both their full revision and declaration ID,
+keeping the earlier gate extraction distinct from this host extraction. Relative
+links, named regression declarations, thirteen compatibility rows, T15 columns
+and whitespace pass. Runtime checks are not repeated for this metadata update.
 
 ## Risks and Follow-ups
 
