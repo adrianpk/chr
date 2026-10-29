@@ -233,6 +233,10 @@ func (m *Model) completeSpecAction(message specActionFinishedMsg) {
 	}
 
 	m.applySpecActionResult(message.Result)
+
+	if message.Request.Action == SpecActionGenerate {
+		m.offerGenerationResult(ViewSpecs, message.Result.SelectedPath, message.Result.Scope, false)
+	}
 }
 
 func (m *Model) applySpecActionResult(result SpecActionResult) {

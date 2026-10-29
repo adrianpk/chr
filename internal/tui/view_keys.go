@@ -10,7 +10,7 @@ var viewKeyHints = map[View]string{
 	ViewDumps:     "Keys: enter edit  a append  alt+e external  c create  r refresh",
 	ViewQuizzes:   "Keys: s start  m Deep/Fast  u resume  x cancel  enter answer  r refresh  alt+e source",
 	ViewSpecs:     "Keys: c create  e edit  g generate spec  f generate feature  r refresh  alt+e source",
-	ViewPlans:     "Keys: g generate missing plan  G regenerate  r refresh  alt+e source",
+	ViewPlans:     "Keys: g prepare plan + tickets  G regenerate  r refresh  alt+e source",
 	ViewBoard:     "Keys: left/right column  alt+a attention  up/down select  / filter  alt+e source",
 	ViewDash:      "Keys: enter start selected  v preview  w workflow  [/] page  a run all ready  p priority  o order  x repair  s stop",
 	ViewProject:   "Keys: enter edit  s save  r refresh  h Harness defaults",

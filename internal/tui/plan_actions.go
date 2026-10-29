@@ -233,6 +233,10 @@ func (m *Model) completePlanAction(message planActionFinishedMsg) {
 	}
 
 	m.applyPlanActionResult(message.Result)
+
+	if message.Request.Action != PlanActionRefresh {
+		m.offerGenerationResult(ViewPlans, message.Result.DocumentPath, message.Result.Scope, message.Result.Prepared && len(message.Result.Tickets) > 0)
+	}
 }
 
 func (m *Model) applyPlanActionResult(result PlanActionResult) {

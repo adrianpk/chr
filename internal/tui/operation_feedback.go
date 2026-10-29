@@ -11,11 +11,12 @@ import (
 type feedbackRecovery func(*Model) tea.Cmd
 
 type operationFeedback struct {
-	Context       interactionContext
-	Scroll        int
-	Result        operation.Result
-	Open          bool
-	Reload, Retry feedbackRecovery
+	Context                   interactionContext
+	Scroll                    int
+	Result                    operation.Result
+	Open                      bool
+	Reload, Retry             feedbackRecovery
+	OpenDocument, ViewTickets feedbackRecovery
 }
 
 type draftConfirmation struct {
@@ -64,13 +65,7 @@ func (m *Model) operationFeedbackLines() []string {
 		lines = append(lines, "Changed: "+path)
 	}
 
-	if m.feedback.Reload != nil && result.Reload && m.feedbackCurrent() {
-		lines = append(lines, "r Reload the captured source")
-	}
-
-	if m.feedback.Retry != nil && result.Retry && m.feedbackCurrent() {
-		lines = append(lines, "y Retry the original operation")
-	}
+	lines = append(lines, m.generationFeedbackActions()...)
 
 	lines = append(lines, "", "Esc returns to the retained input; alt+o opens this result again.")
 
@@ -111,6 +106,10 @@ func (m *Model) runFeedbackKey(key string) tea.Cmd {
 		return m.runFeedbackRecovery(m.feedback.Result.Reload, m.feedback.Reload)
 	case "y":
 		return m.runFeedbackRecovery(m.feedback.Result.Retry, m.feedback.Retry)
+	case "o":
+		return m.runFeedbackRecovery(true, m.feedback.OpenDocument)
+	case "t":
+		return m.runFeedbackRecovery(true, m.feedback.ViewTickets)
 	}
 
 	return nil
@@ -161,14 +160,24 @@ func (m *Model) feedbackCurrent() bool { return m.feedback.Context == m.currentI
 func (m *Model) operationFeedbackKeys() string {
 	keys := "Keys: esc return  up/down scroll"
 
-	if m.feedbackCurrent() {
-		if m.feedback.Reload != nil && m.feedback.Result.Reload {
-			keys += "  r reload"
-		}
+	if !m.feedbackCurrent() {
+		return keys
+	}
 
-		if m.feedback.Retry != nil && m.feedback.Result.Retry {
-			keys += "  y retry original"
-		}
+	if m.feedback.Reload != nil && m.feedback.Result.Reload {
+		keys += "  r reload"
+	}
+
+	if m.feedback.Retry != nil && m.feedback.Result.Retry {
+		keys += "  y retry original"
+	}
+
+	if m.feedback.OpenDocument != nil {
+		keys += "  o open document"
+	}
+
+	if m.feedback.ViewTickets != nil {
+		keys += "  t view tickets"
 	}
 
 	return keys

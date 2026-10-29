@@ -1,7 +1,7 @@
 # Document catalog frames
 
 Producer: `documentCatalogFrames` using the production TUI renderer. Plan frames
-retain the original ef54c01fec17 baseline. Spec frames include concrete document
+show combined plan/ticket preparation hints without a second tracking step. Spec frames include concrete document
 titles, the complete catalog's empty state and manual Create/Edit hints.
 The frozen frames cover both artifact kinds, empty/missing/generated/busy states,
 selected records, the plain screen and all maximized-pane layouts.

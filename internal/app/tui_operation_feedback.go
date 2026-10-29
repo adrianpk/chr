@@ -76,10 +76,7 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(request tui.PlanActionRequest) 
 	if err != nil && result.Committed && outcome.Status != operation.Stale && !outcome.Reload {
 		outcome.Status, outcome.Retry = operation.Blocked, request.OperationID != ""
 
-		outcome.Summary = "Plan saved; ticket preparation is incomplete. Retry the original operation."
-		if result.Prepared {
-			outcome.Summary = "Plan and tickets saved; refresh failed. Retry the original operation."
-		}
+		outcome.Summary = tuiPlanRecoverySummary(request, result)
 	}
 
 	outcome.ChangedFiles = result.Outcome.ChangedFiles
