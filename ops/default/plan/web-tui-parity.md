@@ -186,7 +186,7 @@ Prerequisite: Slice 6 integrated into dev.
 
 ### Slice 8: Plan and ticket preparation
 
-Ticket: `TKT-20261029101143` — `ops/default/ticket/in_progress/20261029101143-web-tui-parity-plans.md`
+Ticket: `TKT-20261029101143` — `ops/default/ticket/reviewing/20261029101143-web-tui-parity-plans.md`
 Findings: G-004, G-025.
 Prerequisite: Slice 7 integrated into dev.
 

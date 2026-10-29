@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101143
 title: "Plan and ticket preparation"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -15,6 +15,8 @@ commits:
   - 77f84ecbda38bac787f65d35c993cfbfbdbd6ade
   - 1523b132f98fdf8c8022c0a1572fdce6bf09341e
 branch: feat/slice-8-tui-plans
+pr: 462
+reviewed_at: 2026-10-29T14:51:39Z
 started_at: 2026-10-29T14:24:15Z
 ready_at: 2026-10-29T10:11:43Z
 ---
@@ -58,4 +60,4 @@ One branch and one PR to `dev`; tasks T8.1-T8.5 are the canonical work units. Lo
 
 ## Evidence
 
-T8.1-T8.4 are implemented. The production adapter shares combined plan/native-ticket preparation with Web. Real IO/HTTP and production PTY checks retain original retries, prevent duplicate preparation, reject stale replacement, preserve cancellation, and open documents/case tickets without starting work. Independent CLI tracking remains available. Exact commands and correction evidence are in the Slice 8 report; final exact-HEAD controller validation and integration remain pending.
+T8.1-T8.4 are implemented. The production adapter shares combined plan/native-ticket preparation with Web. Real IO/HTTP and production PTY checks retain original retries, prevent duplicate preparation, reject stale replacement, preserve cancellation, and open documents/case tickets without starting work. Independent CLI tracking remains available. Exact commands and correction evidence are in the Slice 8 report; PR #462 is open; final exact-HEAD controller validation and integration remain pending.
