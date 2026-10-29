@@ -16,6 +16,7 @@ Task-oriented guides:
 - [Select worker and generation harnesses](how-to/select-harnesses.md)
 - [Configure native integration](how-to/configure-native-integration.md)
 - [Run the local Web UI](how-to/run-local-web-ui.md)
+- [Capture the showcase galleries](how-to/capture-showcase-galleries.md)
 - [Configure single-user Web login](how-to/configure-web-login.md)
 - [Expose the local Web UI deliberately](how-to/expose-local-web-ui.md)
 - [Full-system lab runbook](how-to/full-system-lab-runbook.md)
@@ -135,4 +136,6 @@ Rationale and system shape:
 Visual examples:
 
 - [Gallery](explanation/gallery.md)
+- [Web gallery](explanation/gallery-web.md)
+- [TUI gallery](explanation/gallery-tui.md)
 - [Old gallery](explanation/old-gallery.md)

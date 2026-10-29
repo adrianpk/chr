@@ -1,0 +1,155 @@
+{
+  "schema": "chr-showcase/v1",
+  "chr_revision": "7b093af71c40e05d04f969dcd4a172ca1bd55de6",
+  "seed": "qa/ref/003/tictactoe",
+  "case": "cli-gameplay",
+  "prepared_target_commit": "c17a2d322e06050a065d665055b789efc2bdd7b2",
+  "tools": {
+    "go": "go1.27.1",
+    "node": "v26.8.1",
+    "playwright": "1.64.0-alpha-1790635538000",
+    "chromium": "151.0.7922.173",
+    "tmux": "3.7c",
+    "xterm": "6.0.0",
+    "font": "CaskaydiaMono Nerd Font Mono"
+  },
+  "geometry": {
+    "web_viewport": [
+      1440,
+      1000
+    ],
+    "web_crop_top": 84,
+    "web_image": [
+      1440,
+      916
+    ],
+    "tui_cells": [
+      160,
+      44
+    ],
+    "tui_image": [
+      1720,
+      1044
+    ],
+    "game_cells": [
+      80,
+      26
+    ],
+    "game_image": [
+      876,
+      630
+    ]
+  },
+  "inputs": {
+    "inputs/quiz-answers.md": "9437f96c783f21b75a32f8f35b39d034b15eaa5513d236f40e024f35180f1eec",
+    "inputs/cli-gameplay.json": "47a882d2d7146c1be68da538d702894d9fb1b9370081e4e03eeece945fcb5cc4"
+  },
+  "manual_interventions": [
+    {
+      "operation": "chr work continue --max-steps 1",
+      "reason": "Started the first task in the frozen invocation after the managed host left it pending."
+    },
+    {
+      "operation": "chr work continue --max-steps 64",
+      "reason": "Continued the remaining original tasks and integration in the same invocation and original budgets."
+    },
+    {
+      "operation": "Archived unused first-attempt authority",
+      "reason": "Four unexecuted ticket/set directories from the earlier failed setup had a different project scope in the shared QA Git repository. They were archived outside ops with all file hashes verified."
+    },
+    {
+      "operation": "Canonical merge acknowledgement",
+      "reason": "The Git result was already applied to source and target. With maintainer approval, the QA manual-merge option was temporarily enabled, the original PR was marked merged at the actual result commit through the official endpoint, and the option was restored to false."
+    }
+  ],
+  "capture_notes": [
+    "Web images frame the existing navigation and content below the project header.",
+    "Document views are scrolled to useful content without changing the retained original.",
+    "TUI pixels come from the actual tmux pane ANSI cells.",
+    "No model responses, workflow states or delivery receipts are fabricated.",
+    "The shared game image shows the final three real terminal moves and an X win; the process exited with status 0.",
+    "The TUI results detail is scrolled to the completed-work and delivery summary. Its first lines use a generic stopped-state message for completed runs in this revision.",
+    "The Web Dash image records the third task running. The TUI Dash image records the same invocation after closure, reloaded to avoid a stale earlier task panel."
+  ],
+  "publication": {
+    "git_applied_commit": "0f897632dde259a190c052451bb5a23d8bd6c833",
+    "native_receipt_confirmed": true,
+    "native_status": "completed",
+    "validated_tasks": 3,
+    "confirmed_tickets": 3,
+    "integrated_units": 1,
+    "remaining_tickets": 0,
+    "canonical_pull_request": "https://forge.adrianpk.com/adrianpk/chr-integration-qa/pulls/143",
+    "confirmed_at": "2026-10-29T23:43:13.399626528Z",
+    "delivery_receipt": {
+      "ref": "run/00005-workflow-invocation/evidence/delivery-890a165ceec9b3cd6c06644d8515710f8086e621ff9d99e20b22d703c6719a79.json",
+      "sha256": "f9796a8312831127ee15cd9e1e7a342886d5bca5f94c2972be92feffdea7bc7f"
+    },
+    "closing_receipt": {
+      "ref": "plan/00001-cli-gameplay-implementation-plan/extension/chr/closing/0001/result.json",
+      "sha256": "428c348ffb59a5ee90dc44ef7958d474c2738ec432ddc7f9911fbe95af14a956"
+    },
+    "note": "Git publication, canonical PR acknowledgement and native closing receipts agree on the delivered result. Canonical acknowledgement required the recorded maintainer-approved intervention."
+  },
+  "source_files_sha256": {
+    "go.mod": "e001635a050b51c353e3d0414c0e156b795b162aefa00f8f849784338c364f90",
+    "internal/game/game.go": "d9cc09d4df084e9cc441bd87cea6b27c4c1a7529e297af675705152f2476fd17",
+    "internal/game/game_test.go": "ec5869beac6e9e579ef5a33af3f82d0021f5256fdfefb155bc0c58ea18fba729",
+    "cmd/tictactoe/executable_test.go": "318915fa257bfa7ff464f8669b013c05813813ccf60c78ad2c23fc715dd4e2c7",
+    "cmd/tictactoe/main.go": "26fa864d899adb2cc9516de7e55cb7be5d74a796162886f2c94ab2b841599cee",
+    "cmd/tictactoe/main_test.go": "943e8caca746f852769b28a41609a4e6ce0ac8b21ef35b77ada9aa45adf3a7ef"
+  },
+  "standalone_validation": {
+    "go_test": {
+      "command": "go test -timeout=30s ./...",
+      "exit_code": 0,
+      "packages_passed": 2
+    },
+    "formatting": "gofmt -l cmd internal produced no paths",
+    "command_smoke": [
+      {
+        "case": "x-win",
+        "exit_code": 0,
+        "stderr_empty": true,
+        "expected_outcome": "Player X wins!"
+      },
+      {
+        "case": "o-win",
+        "exit_code": 0,
+        "stderr_empty": true,
+        "expected_outcome": "Player O wins!"
+      },
+      {
+        "case": "draw",
+        "exit_code": 0,
+        "stderr_empty": true,
+        "expected_outcome": "It's a draw!"
+      },
+      {
+        "case": "invalid-recovery",
+        "exit_code": 0,
+        "stderr_empty": true,
+        "expected_outcome": "Player X wins!"
+      },
+      {
+        "case": "eof",
+        "exit_code": 0,
+        "stderr_empty": true,
+        "expected_outcome": "Game ended."
+      },
+      {
+        "case": "help",
+        "exit_code": 0,
+        "stderr_empty": true,
+        "expected_outcome": "Run a local two-player tic-tac-toe game in the terminal."
+      }
+    ]
+  },
+  "raw_dump_sha256": "d1ac3a94b863db46e741111a1d1036f43002510058e2fcf70c8233bb3d94a441",
+  "input_format": {
+    "file": "inputs/cli-gameplay.json",
+    "key": "dump",
+    "note": "JSON preserves intentional trailing board-row spaces without source-file whitespace errors."
+  },
+  "capture_completed_at": "2026-10-29T23:50:10Z"
+}
