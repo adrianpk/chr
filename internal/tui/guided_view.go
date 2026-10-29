@@ -85,7 +85,7 @@ func (m *Model) wizardTabLines() []string {
 	lines = append(lines, m.wizardOriginalLines()...)
 
 	if m.guided.Busy {
-		lines = append(lines, "Reading or saving the retained step…")
+		lines = append(lines, "Waiting for the "+view.Session.Guided.Stage+" response; the original input remains retained…")
 	}
 
 	if m.guided.Problem != "" {

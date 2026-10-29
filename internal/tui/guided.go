@@ -92,6 +92,10 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 
 	m.guided.Busy = false
 	if message.Err != nil {
+		if sameGuidedTerminalRun(m.guided.View, message.View) {
+			m.guided.View = message.View
+		}
+
 		m.guided.Problem = message.Err.Error()
 		m.statusMessage = "Wizard: " + message.Err.Error()
 

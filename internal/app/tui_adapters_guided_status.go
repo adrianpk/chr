@@ -21,6 +21,7 @@ func projectTUIGuidedStatus(view *tui.GuidedView, observed GuidedUseCaseInspecti
 		view.Retry = &tui.GuidedRequest{Action: "input", Command: command}
 	}
 
+	view.Progress = append(view.Progress, tuiGuidedOperationLines(observed)...)
 	view.Progress = append(view.Progress, tuiGuidedAuthoringLines(observed)...)
 	view.Progress = append(view.Progress, tuiGuidedWorkLines(observed)...)
 

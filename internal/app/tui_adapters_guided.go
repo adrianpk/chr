@@ -26,7 +26,9 @@ func (e tuiGuidedExecutor) ExecuteGuided(request tui.GuidedRequest) (tui.GuidedV
 	}
 
 	if err := e.apply(ctx, request); err != nil {
-		return tui.GuidedView{}, err
+		view, readErr := e.read(ctx, tui.GuidedRequest{Action: "inspect", Command: request.Command})
+
+		return view, errors.Join(err, readErr)
 	}
 
 	return e.read(ctx, request)
@@ -110,24 +112,20 @@ func tuiGuidedView(observed GuidedUseCaseInspection) tui.GuidedView {
 		view.Problems = append(view.Problems, state.Blocker)
 	}
 
+	view.Prompt = tuiGuidedStagePrompt(observed)
 	if !authoringcore.GuidedDispatchAllowed(*observed.Session) || state.PendingOperation != nil {
-		view.Prompt = "Saved input and the original operation are retained."
-
 		return view
 	}
 
 	switch state.Stage {
 	case "name":
-		view.Prompt, view.InputAction = "What is the use-case name?", "name"
+		view.InputAction = "name"
 	case "dump":
-		view.Prompt, view.InputAction = "Add the known context. Continue to quiz submits the current editor content.", "append"
+		view.InputAction = "append"
 	case "quiz":
-		view.Prompt = observed.Question
 		if observed.Question != "" {
 			view.InputAction = "answer"
 		}
-	default:
-		view.Prompt = "The shared workflow is progressing or waiting for its recorded prerequisite."
 	}
 
 	return view
