@@ -52,6 +52,10 @@ func (m *Model) handleWorkflowBrowseKey(key string) (tea.Cmd, bool) {
 	}
 
 	switch key {
+	case "b":
+		m.openWorkPreviewForm()
+
+		return nil, true
 	case "w", "esc":
 		m.dashWorkflowDetails = false
 

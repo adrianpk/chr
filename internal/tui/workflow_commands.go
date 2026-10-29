@@ -5,6 +5,7 @@ func nativeWorkflowCommands() []Command {
 		id, title string
 		action    WorkActionID
 	}{
+		{"workflow-preview", "Preview bounded work scope", WorkActionWorkflowPreview},
 		{"workflow-ticket", "Work native selected ticket", WorkActionWorkflowTicket},
 		{"workflow-slice", "Work selected ticket's slice", WorkActionWorkflowSlice},
 		{"workflow-set", "Work selected ticket's slice set", WorkActionWorkflowSet},

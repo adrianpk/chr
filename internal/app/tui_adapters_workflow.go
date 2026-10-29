@@ -43,7 +43,7 @@ func (e tuiWorkActionExecutor) nativeWorkExtentResult(request tui.WorkActionRequ
 			return tui.WorkActionResult{}, err
 		}
 
-		if !tuiWorkObservationMatches(request, bound) {
+		if !e.tuiWorkObservationMatches(request, bound) {
 			return tui.WorkActionResult{}, fmt.Errorf("reload the selected ticket before previewing: %w", workflowstate.ErrConflict)
 		}
 
@@ -73,18 +73,18 @@ func (e tuiWorkActionExecutor) nativeWorkExtentResult(request tui.WorkActionRequ
 	return view, errors.Join(err, readErr)
 }
 
-func tuiWorkObservationMatches(request tui.WorkActionRequest, bound WorkflowBoundPreview) bool {
+func (e tuiWorkActionExecutor) tuiWorkObservationMatches(request tui.WorkActionRequest, bound WorkflowBoundPreview) bool {
 	if request.TicketKey == "" {
 		return true
 	}
 
-	for _, member := range bound.View.Preview.Members {
-		if member.Key == request.TicketKey {
-			return request.TicketRevision != "" && member.SourceHash == request.TicketRevision
-		}
+	if request.TicketRevision == "" || bound.Selected == nil || bound.Selected.Key != request.TicketKey {
+		return false
 	}
 
-	return false
+	document, err := e.operations.ReadTicketDocument(request.TicketKey)
+
+	return err == nil && document.Revision == request.TicketRevision
 }
 
 func (e tuiWorkActionExecutor) nativeWorkStatusResult(request tui.WorkActionRequest) (tui.WorkActionResult, error) {

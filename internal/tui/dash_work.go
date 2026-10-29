@@ -27,6 +27,10 @@ func (m *Model) handleDashKey(key string) (tea.Cmd, bool) {
 	}
 
 	switch key {
+	case "b":
+		m.openWorkPreviewForm()
+
+		return nil, true
 	case "v":
 		return m.inspectDashWork(WorkActionWorkflowTicket), true
 	case "w":

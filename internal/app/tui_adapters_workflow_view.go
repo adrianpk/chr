@@ -105,6 +105,8 @@ func nativeWorkPreviewLines(bound WorkflowBoundPreview) []string {
 		fmt.Sprintf("Policy: %s; method: %s; source: %s", view.Policy.Mode, view.Policy.Method, view.Policy.Source),
 		fmt.Sprintf("Frozen limits: worker attempts %d; integration attempts %d; checkpoint steps %d", view.ExecutionPolicy.MaxWorkerAttempts, view.ExecutionPolicy.MaxIntegrationAttempts, workflowDisplayStepLimit(view.ExecutionPolicy.CheckpointStepLimit)),
 		fmt.Sprintf("Timeouts: worker %ds; validation %ds; token budget %d", view.ExecutionPolicy.WorkerTimeoutSeconds, view.ExecutionPolicy.ValidationTimeoutSeconds, view.ExecutionPolicy.AgentTokenBudget),
+		fmt.Sprintf("Include later tickets: %t", view.ExecutionPolicy.IncludeLaterTickets),
+		fmt.Sprintf("Filters: priority %v; severity %v; area %v; order %s", bound.Request.Filters.Priorities, bound.Request.Filters.Severities, bound.Request.Filters.ProjectAreas, bound.Request.Order),
 		"Execute at most one shared checkpoint; continue from retained status.",
 	}
 	if bound.Selected != nil {

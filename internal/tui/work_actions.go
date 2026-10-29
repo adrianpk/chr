@@ -320,6 +320,12 @@ func (m *Model) updateWorkActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) planWorkAction(action WorkActionID) {
+	if action == WorkActionWorkflowPreview {
+		m.openWorkPreviewForm()
+
+		return
+	}
+
 	defer m.bindWorkActionContext()
 
 	if m.dashActionBlocked(action) {

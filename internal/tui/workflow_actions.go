@@ -13,6 +13,7 @@ import (
 
 // Native workflow actions select extents or operate on displayed authorization.
 const (
+	WorkActionWorkflowPreview   WorkActionID = "workflow_preview"
 	WorkActionWorkflowTicket    WorkActionID = "workflow_ticket"
 	WorkActionWorkflowSlice     WorkActionID = "workflow_slice"
 	WorkActionWorkflowSet       WorkActionID = "workflow_set"
@@ -267,6 +268,10 @@ func (m *Model) completeNativeWorkAction(message workActionFinishedMsg) {
 	}
 
 	if message.Result.Confirmation != nil {
+		if m.textForm.WorkRequest.Workflow != nil {
+			m.textForm = textFormState{}
+		}
+
 		m.workAction = *message.Result.Confirmation
 		m.bindWorkActionContext()
 	}

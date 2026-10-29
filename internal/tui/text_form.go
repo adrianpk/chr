@@ -20,6 +20,7 @@ type textFormField struct {
 }
 
 type textFormState struct {
+	WorkRequest        WorkActionRequest
 	TicketRequest      TicketActionRequest
 	Details            []string
 	DumpRequest        DumpActionRequest
