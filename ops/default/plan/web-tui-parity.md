@@ -250,7 +250,7 @@ Prerequisite: Slice 10 integrated into dev.
 
 ### Slice 12: Wizard Quiz and preparation
 
-Ticket: `TKT-20261029101147` — `ops/default/ticket/in_progress/20261029101147-web-tui-parity-wizard-authoring.md`
+Ticket: `TKT-20261029101147` — `ops/default/ticket/reviewing/20261029101147-web-tui-parity-wizard-authoring.md`
 Findings: G-009, G-010.
 Prerequisite: Slice 11 integrated into dev.
 

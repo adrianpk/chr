@@ -16,7 +16,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   retained workflow by case. Follow progress in the normal tabs, edit capture in
   the shared Dump editor and Continue to quiz with all current text in one step.
   Retries retain that exact input; earlier originals stay read-only, and manual
-  saves cannot accidentally change wizard progression.
+  saves cannot accidentally change wizard progression. Wizard clarification uses
+  the same Deep/Fast controls, answer history and editor as manual quizzes.
+  Specs and Plans show committed inputs, partial results and actionable blockers;
+  retry after interruption reuses the saved operation and prepared tickets.
+  Stale answers keep their original text until a confirmed reload.
 
 - See all six TUI Board columns and Attention together on wide terminals while
   keeping ticket selection through resize. Browse retained workflows, members and

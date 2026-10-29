@@ -94,7 +94,11 @@ write through a wizard-bound tab; clear case context explicitly for manual work.
 | --- | --- |
 | `e` / `enter` at the current stage | Open its eligible input in a shared form/editor. |
 | `ctrl+s` in Dump | Continue to quiz using the complete current body in one retained finish operation. |
-| `enter` in an editor | Insert a newline; use Ctrl+S or its submit button for progression. |
+| `enter` in Dump or a text form | Insert a newline; use Ctrl+S or its submit button for progression. |
+| `enter` in Quiz | Submit the captured answer; Shift+Enter or Ctrl+J inserts a newline. |
+| `m` / `alt+m` in Quiz | Change Deep/Fast outside / inside the shared answer editor. |
+| `alt+s` / `alt+d` / `alt+x` in Quiz | Skip, request Done or cancel through the guided owner. Unsent text requires confirmation. |
+| `alt+y` / `alt+r` in Quiz | Retry the exact failed request / confirm reload of the current question. |
 | `alt+e` while editing Dump | Edit the unsent body through the existing owned draft editor. |
 | `p` / `u` / `x` at the current stage | Apply an available pause, resume or cancel through shared owners. |
 | `a` | Inspect an available native approval through the existing exact confirmation. |
@@ -112,7 +116,18 @@ manual Dump editing. Canonical wizard submissions are limited to 65,536 bytes. I
 progression action replaces manual Save; editing does not dispatch a separate
 append. Repeating unchanged Continue after a lost acknowledgement reuses the
 same operation, revision and content. Invalid or stale input retains the draft.
-Generic input forms also freeze run, question and revision through refresh.
+The shared Quiz component displays complete saved answer history and captures
+run, question, input digest, owner revision and operation identity before editing.
+Manual and guided modes use the same editor, history paging and control handlers;
+only the operation route differs. Guided Done still requires trusted sufficiency.
+No manual Restart or Save is advertised for a guided run.
+
+Specs and Plans reuse the document detail renderer with committed originals.
+Stage feedback distinguishes pending generation, approval, saved plans, retained
+ticket contracts, checkpoint acknowledgement, suspension and actual blockers.
+Continue uses the canonical retained command. Read-only refresh preserves failed
+requests and unsent drafts; older replies cannot replace newer run state. Explicit
+Quiz reload confirms discarding the old answer before reading a fresh binding.
 
 Inspection reads committed bytes with their actual reference/commit binding,
 independent of later working-copy replacements. Controls remain guarded by the

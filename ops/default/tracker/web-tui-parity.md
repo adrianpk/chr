@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 12 — Wizard Quiz and preparation.
 Completed slices: 11/14
-Completed tasks: 55/70
+Completed tasks: 59/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -214,18 +214,18 @@ Report: `ops/default/report/slices/web-tui-parity/slice-11-wizard-entry.md`
 
 ### Slice 12: Wizard Quiz and preparation
 
-Ticket: `TKT-20261029101147` — `ops/default/ticket/in_progress/20261029101147-web-tui-parity-wizard-authoring.md`
-State: in_progress
+Ticket: `TKT-20261029101147` — `ops/default/ticket/reviewing/20261029101147-web-tui-parity-wizard-authoring.md`
+State: reviewing
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-12-wizard-authoring.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T12.1 | Use the same Quiz component and controls in manual and wizard mode, bound to the retained run and current question. | pending | — | Planned: Deep/Fast, answer history, skip, answer, done and cancel remain functional without duplicate form logic. |
-| T12.2 | Render specification and preparation stages in their existing tabs from the shared guided operation. | pending | — | Planned: Specification auto-approval, plan/ticket preparation and committed original inputs remain domain-owned. |
-| T12.3 | Show stage-specific processing, suspended, pending-operation and blocker feedback with eligible actions. | pending | — | Planned: Partial result and timeout keep the original operation identity and saved input visible. |
-| T12.4 | Retry the retained operation and handle stale/newer revisions without UI-owned orchestration or duplicate preparation. | pending | — | Planned: Restart/re-entry and out-of-order responses preserve exact run state and finite attempts. |
-| T12.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T12.1 | Use the same Quiz component and controls in manual and wizard mode, bound to the retained run and current question. | done | 6d431246 | Shared mode/history/editor and guided answer, skip, Done and cancel pass real-owner tests; production PTY retains exact capture, approval and restart assertions. |
+| T12.2 | Render specification and preparation stages in their existing tabs from the shared guided operation. | done | fc3e0563 | Shared Specs/Plans rendering reads exact committed originals; working-copy replacement and navigation preserve bytes, bindings and one native materialization. |
+| T12.3 | Show stage-specific processing, suspended, pending-operation and blocker feedback with eligible actions. | done | d21a31eb | Real partial preparation, suspended state and lost acknowledgement show retained inputs, blockers and only owner-provided retry/control actions. |
+| T12.4 | Retry the retained operation and handle stale/newer revisions without UI-owned orchestration or duplicate preparation. | done | bfc05ca3 | Contract failure, deadline and plan/materialization acknowledgement faults restart with the same command, one plan and one ticket set; delayed stale answers write nothing and confirmed reload preserves cancellation. |
+| T12.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | report introduction pending | Focused tests and strict lint passed; canonical PR, final clean-HEAD controller validation and integration pending. |
 
 ### Slice 13: Wizard execution, results and recovery
 

@@ -453,14 +453,23 @@ stage while you are reading, use `c` before its next control.
    There is no separate manual Save Dump or append/finish ceremony. Alt+E edits
    the unsent body in the external editor. Failed submissions keep the body and
    original binding; repeating unchanged Continue reconciles that operation.
-2. Answer the current clarification with `e` and Ctrl+S. Enter adds a newline in
-   the form. Sufficient answers proceed through the existing specification
-   approval and preparation owners under project policy.
-3. Use only controls offered at the current stage. Available `p`, `u` and `x`
+2. In Quizzes, press `e` or Enter for the same answer editor used by manual
+   quizzes. Enter submits; Shift+Enter or Ctrl+J inserts a newline. `m` changes
+   Deep/Fast before editing; Alt+M changes it in the editor. Alt+S skips and
+   Alt+D requests Done; the clarification owner still checks sufficiency. Saved
+   question/answer history appears below the input, with Page Up/Page Down.
+   Alt+X requests cancellation and confirms discarding unsent text.
+3. Specs shows the committed specification approved by the existing guided
+   policy. Plans shows plan/ticket preparation and its saved partial results.
+   Pending operations explain the retained input and blocker. Correct the
+   prerequisite, then use current-stage `c` to reconcile that same operation.
+   Restarting and reopening the workflow does not regenerate its saved plan or
+   duplicate prepared tickets.
+4. Use only controls offered at the current stage. Available `p`, `u` and `x`
    pause, resume or cancel without resetting retained scope or attempt limits.
    When native approval is required, `a` opens its existing exact-candidate
    inspection and confirmation. Review waits and an open PR do not prove delivery.
-4. Use `1`–`5` to inspect complete committed dump, quiz, specification, plan and
+5. Use `1`–`5` to inspect complete committed dump, quiz, specification, plan and
    tracker originals, or `v` for retained results. Scroll with arrows or Page
    Up/Page Down. A working-copy replacement does not change the committed image.
    `i` records a later idea separately when offered.
@@ -472,7 +481,10 @@ joins the owned host; it does not cancel the canonical run. Paused runs remain
 paused when reopened. `r` reads current state; `y` retries the exact failed
 request after leaving its input, and current-stage `c` can reconcile a displayed
 retained operation. Refresh cannot replace an unsent draft's captured revision
-or question binding. See the [TUI reference](../../reference/tui.md#guided-use-cases).
+or question binding. Inside the Quiz editor, Alt+Y retries the captured failed
+request. Alt+R reloads the current question only after confirming that the unsent
+answer may be discarded; Esc keeps it. A newer observation cannot replace the
+captured question, mode or answer. See the [TUI reference](../../reference/tui.md#guided-use-cases).
 
 ## Navigate the TUI
 

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101147
 title: "Wizard Quiz and preparation"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: high
@@ -9,7 +9,12 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:47Z
-commits: []
+commits:
+  - 6d43124624539535e1c5a1cf3736e21e25488b01
+  - fc3e0563baf91c4fcb98bd6253d3473cff7e16ff
+  - d21a31eb2820f2ae2030039cef8679fcdda13c1e
+  - bfc05ca37ce59466d85010e7b274fde92c0a89d0
+reviewed_at: 2026-10-29T17:32:11Z
 started_at: 2026-10-29T17:10:35Z
 branch: feat/slice-12-tui-wizard-authoring
 ready_at: 2026-10-29T10:11:47Z
@@ -54,4 +59,9 @@ One branch and one PR to `dev`; tasks T12.1-T12.5 are the canonical work units. 
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+T12.1–T12.4 implemented with shared Quiz editing/controls/history, committed
+Specs/Plans rendering, stage-specific feedback and exact retained retry/reload.
+Real Git/filesystem/SQLite and production terminal checks pass, including
+partial preparation, deadline/lost-ack restart, duplicate prevention and stale
+answer rejection. Canonical PR, final controller checks and integration remain
+pending; this ticket remains reviewing.
