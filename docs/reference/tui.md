@@ -414,8 +414,11 @@ show the parse error. Tickets without the anchored evidence checklist show
 `missing` in Board detail; CLI list and board output render missing evidence as
 `-`.
 
-The compact Board header marks the active column explicitly and also shows a
-column strip with the active normal column or attention view in brackets.
+At width 132 and height 27 or greater, the default Board shows six normal
+columns in two rows and a separate Attention area, beside ticket detail.
+Narrower layouts retain the compact column view and maximize. The header and
+column strip mark the active column or Attention. Resizing and focus preserve
+the selected ticket key and canonical column.
 
 Create ticket, Edit ticket, Add ticket comment and Attach ticket review reference
 open the same forms from the palette or Board/Tickets keys. Tab/Shift+Tab moves
@@ -485,7 +488,8 @@ Dash actions:
 
 - `enter` opens the selected eligible ticket's work confirmation;
 - `v` loads **Preview Work** for the selected native ticket without executing it;
-- `w` reads retained **Workflow details** and focuses the Current pane;
+- `b` opens **Preview Work Scope** for ticket, slice, set, case or loose work;
+- `w` opens **Retained workflows** with independent list/detail focus;
 - `[` and `]` load the previous and next queue pages;
 - `p` cycles the priority filter, and `o` cycles the order, returning to page one;
 - `a` or `R` runs all ready work with the selected priority and order; native
@@ -499,6 +503,33 @@ without admission. Changed scope, ticket revision, snapshot or policy requires
 a fresh preview. Preview Work and retained Workflow details require native
 ticket authority; existing legacy work actions remain available under their
 configured authority.
+
+The scope form selects a named case or a ticket key. Loose work supports
+priority, severity and project-area filters and canonical ordering; other scopes
+retain hierarchy order. Preview shows actual later-ticket policy and frozen
+limits and binds the complete selection even when only a bounded member window
+is visible.
+
+In retained workflows, up/down selects the invocation, Enter reads current
+status, `r` refreshes the focused list/detail, `[` / `]` pages through invocations,
+and `n` / `m` pages through revision-bound members. Tab focuses detail and arrows
+scroll evidence. Esc or `w` returns to the queue. Controls are:
+
+| Key | Behavior |
+| --- | --- |
+| `c`, `p`, `x`, `u` | Continue one checkpoint, pause, cancel or resume. |
+| `a`, `R` | Approve the exact displayed candidate or reconcile interrupted ownership. |
+| `g` | Preview an allowance extension with kind, amount, actor and reason. |
+| `d` | Answer a retained question with its displayed option number and resolve/defer; enter actor, reason and optional original commit/fix metadata. |
+| `t`, `C` | Open the linked ticket editor or linked case. |
+| `b` | Open bounded scope preview. |
+
+Unavailable controls display reasons. Mutations require separate confirmation
+and recheck canonical invocation, entry, budget, candidate, approval and decision
+fences. A stale form submission retains its input and original guards. Reopen
+from current status before authorizing changed state. Allowance consumption is
+preserved; decision answers do not approve or publish work. Terminal states stay
+read-only. No worker exit or open PR establishes confirmed delivery.
 
 When work readiness is blocked, Dash blocks ticket execution and run-all actions
 before starting agent work. If a safe repair is available, apply `x`, confirm

@@ -12,6 +12,14 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- See all six TUI Board columns and Attention together on wide terminals while
+  keeping ticket selection through resize. Browse retained workflows, members and
+  evidence in Dash; preview ticket, slice, set, case or filtered loose work before
+  confirming. Pause, resume, cancel, continue, approve or reconcile the selected
+  invocation, extend an allowance, answer retained integration questions and open
+  linked tickets or cases. Controls explain unavailable actions and reject stale
+  confirmations while preserving entered form content.
+
 - Create and edit TUI tickets with your own title, description, case and metadata.
   Read-only fields explain their workflow owner. Enter comments, scroll retained
   history and attach review references with their provider and URL. Stale saves

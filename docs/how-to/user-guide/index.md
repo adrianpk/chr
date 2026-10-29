@@ -971,8 +971,10 @@ column cycle.
 | `enter` while filtering | Apply the filter and select the first match. |
 | `esc` while filtering | Cancel filter editing. |
 
-The compact Board shows one normal column at a time and marks the active column
-in the header and column strip. The detail pane includes status metadata,
+At 132 columns and 27 rows or larger, Board shows all six normal columns and
+Attention together, with the selected ticket detail beside them. Narrower
+terminals show one column at a time and mark it in the header and column strip.
+Resize and pane focus preserve the selected ticket and column. The detail pane includes status metadata,
 synopsis, source metadata, slice metadata, checklist counts, comment counts,
 evidence strategy status, bounded Markdown body preview, checklist preview,
 recent comment headings, attention reasons, and the ticket path when those
@@ -1073,8 +1075,31 @@ work previews the independent-ticket extent and exclusions before confirmation.
 For native tickets, `v` opens **Preview Work** with the exact scope, snapshot,
 target, policy and limits. Enter confirms one checkpoint; Esc cancels without
 starting work. A changed ticket, snapshot, scope or policy requires another
-preview. `w` opens retained **Workflow details** in the Current pane without
-continuing the workflow.
+preview. Press `b` for **Preview Work Scope**: choose ticket, slice, set, case or
+loose work. Select the case by name; enter a ticket key for ticket/slice/set.
+Loose work accepts priority, severity and project-area filters plus canonical
+ordering. Other scopes retain their hierarchy order. The preview displays the
+frozen later-ticket policy and limits before a separate confirmation.
+
+Press `w` for **Retained workflows**. Up/down selects an invocation; Enter or `r`
+refreshes it. `[` / `]` pages through workflows; `n` / `m` pages through members.
+Tab focuses detail, where arrows scroll retained evidence. Esc returns to the
+queue. This list distinguishes host-validated tasks from confirmed tickets and
+integrated units.
+
+Inside the workflow browser, `c` continues one checkpoint, `p` pauses, `x` cancels,
+`u` resumes, `a` approves the displayed candidate and `R` reconciles interrupted
+ownership. Each mutation has a separate confirmation; unavailable controls explain
+the current restriction. `g` collects allowance kind, positive amount, actor and
+reason. `d` displays retained integration questions and options, then collects the
+selected question, option number, resolve/defer, actor and reason, with optional
+original commit and integration-fix metadata. The owner checks the captured
+invocation, entry, candidate, budget and decision revisions. Stale confirmed
+form submissions preserve input; reopen from fresh status before authorizing a
+changed candidate. Grants retain consumed accounting, and answering does not
+approve publication. `t` opens the linked ticket editor; `C` opens its case (or
+the case extent). These links use retained member identities. The command palette
+also offers the preview and controls.
 
 Current and Recent panes show separate work contexts, activity and results,
 including work with no recent events. Focus a pane and scroll normally, or use

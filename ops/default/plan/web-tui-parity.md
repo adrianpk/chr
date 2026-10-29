@@ -218,7 +218,7 @@ Prerequisite: Slice 8 integrated into dev.
 
 ### Slice 10: Responsive Board and retained workflows
 
-Ticket: `TKT-20261029101145` — `ops/default/ticket/ready/20261029101145-web-tui-parity-board-workflows.md`
+Ticket: `TKT-20261029101145` — `ops/default/ticket/reviewing/20261029101145-web-tui-parity-board-workflows.md`
 Findings: G-016, G-028, G-031.
 Prerequisite: Slice 9 integrated into dev.
 

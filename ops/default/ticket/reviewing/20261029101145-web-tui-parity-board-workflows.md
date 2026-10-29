@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101145
 title: "Responsive Board and retained workflows"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -9,8 +9,13 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:45Z
-commits: []
+commits:
+  - 2e6f89388d5dd615c22765c6c1d76ca7fd61489d
+  - 8d348e4d15ab9beef1ec9581df53753b188057c8
+  - 6745653689130740a1238a5b4ba9b176f9dcb182
+  - 6f391411c3390b3392ebf3b640a53f67895c0c09
 ready_at: 2026-10-29T10:11:45Z
+reviewed_at: 2026-10-29T16:16:08Z
 ---
 
 # Responsive Board and retained workflows
@@ -52,4 +57,9 @@ One branch and one PR to `dev`; tasks T10.1-T10.5 are the canonical work units. 
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+T10.1–T10.4 implemented in the recorded branch. Wide Board and Attention retain
+selection through resize; Dash browses retained workflows and bounded members.
+Scope preview and lifecycle/integration forms use canonical guards. Focused TUI,
+real workflow grant/decision/approval, and production terminal checks passed.
+See the report for exact commands. Final clean-HEAD controller validation and
+canonical PR integration remain pending; this ticket remains reviewing.

@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 10 — Responsive Board and retained workflows.
 Completed slices: 9/14
-Completed tasks: 45/70
+Completed tasks: 49/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -182,18 +182,19 @@ Report: `ops/default/report/slices/web-tui-parity/slice-9-tickets.md`
 
 ### Slice 10: Responsive Board and retained workflows
 
-Ticket: `TKT-20261029101145` — `ops/default/ticket/in_progress/20261029101145-web-tui-parity-board-workflows.md`
-State: in_progress
+Ticket: `TKT-20261029101145` — `ops/default/ticket/reviewing/20261029101145-web-tui-parity-board-workflows.md`
+State: reviewing
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-10-board-workflows.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T10.1 | Show all Board columns and Attention by default when width permits; retain a usable narrow view and maximize. | pending | — | Planned: Wide/narrow resize and focus preserve key selection and canonical column meaning. |
-| T10.2 | Add a retained workflow list/detail surface within Dash with pagination, members, evidence and current eligible actions. | pending | — | Planned: The list handles empty/large sets and does not infer delivery from worker exit or an open PR. |
-| T10.3 | Expose bounded work preview for ticket, slice, set, case and loose scope with canonical filters and ordering. | pending | — | Planned: Selection, later-ticket inclusion, policy and confirmation match the observed application snapshot. |
-| T10.4 | Expose allowed lifecycle controls, allowance extension and integration-decision answers, plus visible case/ticket links. | pending | — | Planned: Stale/revision/budget/approval guards remain host-owned; unavailable controls explain why. |
-| T10.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T10.1 | Show all Board columns and Attention by default when width permits; retain a usable narrow view and maximize. | done | 2e6f8938 | Focused TUI resize/focus/filter tests and strict lint passed. |
+| T10.2 | Add a retained workflow list/detail surface within Dash with pagination, members, evidence and current eligible actions. | done | 8d348e4d | Real empty/17-run paging, retained members and late refresh checks passed. |
+| T10.3 | Expose bounded work preview for ticket, slice, set, case and loose scope with canonical filters and ordering. | done | 67456536 | Real bounded scope form/preview cancellation and canonical stale anchor checks passed. |
+| T10.4 | Expose allowed lifecycle controls, allowance extension and integration-decision answers, plus visible case/ticket links. | done | 6f391411 | Real grant/decision/native approval guards, retained drafts/links and production PTY stop controls passed. |
+| T10.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Focused task checks passed; report and canonical PR preparation in progress. Final clean-HEAD controller validation and integration pending. |
+
 
 ### Slice 11: Wizard entry and Dump in shared tabs
 
