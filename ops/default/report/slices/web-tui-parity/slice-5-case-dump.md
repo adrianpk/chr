@@ -1,11 +1,12 @@
 # Slice 5: Case and Dump forms
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-5-tui-case-dump`
 PR: [#459](https://forge.adrianpk.com/adrianpk/chr/pulls/459)
+Integration: Rebase + Fast-forward into dev at `1bc34edaac9b751810f776efd5ea89535908760f`.
 Base: `bcabdf02513ae95fce41b6a8640b6cae2b4bd4c0` on dev, after verified PR #458 integration and Slice 4 closure
 
 ## Purpose
@@ -90,11 +91,16 @@ Implementation checks passed locally:
 - `go test ./internal/app -run '^Test(WebCaseCreate|WebDumpCapture|WebDumpSaveDocument|TUIOperationDraft|TUIOperationTerminal)$' -count=1 -timeout=3m` — passed without short mode.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/tui ./internal/app` — passed after whitespace corrections.
 
-Final ordered validation will be recorded by Looper on the clean PR head after
-PR-reference commits: `make verify`, focused terminal race tests, focused
-application IO/HTTP/PTY race tests, then `git diff --check`. The canonical PR and
-controller evidence retain the exact command list and candidate; these earlier
-task checks do not claim final-candidate validation or dev integration.
+Controller validation `YV7TF3QYUUICJ24UVUIWR7TTC3` passed all four ordered checks on
+clean HEAD `1bc34edaac9b751810f776efd5ea89535908760f`:
+
+- `make verify`
+- `go test -race ./internal/tui -run '^Test(CaseForm.*|Dump.*|Model(.*Dump.*|CreatesAndSavesCaseMetadata|RefreshesWorkspaceGraphAfterCaseSave|ShowsUnresolvedCaseReferencesInCaseList)|Operation.*|BusyQuit)$' -count=1`
+- `go test -race ./internal/app -run '^Test(TUICaseForm|TUIDump.*|TUIForms(Terminal|StaleTerminal)|ServiceDumpEditor|TUIOperation.*|Web(CaseCreate|DumpCapture|DumpSaveDocument))$' -count=1 -timeout=3m`
+- `git diff --check`
+
+Canonical Forgejo and Acta event `01M63X9ZKG08GVTT29STXXAY7M` confirm
+PR #459 integrated at the validated commit. No checks were repeated for closure.
 
 ## Risks and Follow-ups
 

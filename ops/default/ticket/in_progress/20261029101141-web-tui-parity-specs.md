@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101141
 title: "Spec catalog and manual editing"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:41Z
 commits: []
+branch: feat/slice-6-tui-specs
+started_at: 2026-10-29T13:25:17Z
 ready_at: 2026-10-29T10:11:41Z
 ---
 
