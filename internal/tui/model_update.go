@@ -107,6 +107,7 @@ func (m *Model) updateKey(msg tea.KeyMsg) tea.Cmd {
 
 func (m *Model) updateActiveModeKey(msg tea.KeyMsg) updateOutcome {
 	modes := []keyMode{
+		{Active: m.textForm.Active, Handle: (*Model).updateTextFormKey},
 		{Active: m.artifactAction.Pending, Handle: (*Model).updateArtifactActionKey},
 		{Active: m.dumpAction.Pending, Handle: (*Model).updateDumpActionKey},
 		{Active: m.dumpEdit.Active, Handle: (*Model).updateDumpEditKey},

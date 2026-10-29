@@ -20,7 +20,7 @@ type operationBinding struct {
 }
 
 func (m *Model) currentInteraction() interactionContext {
-	draft := fmt.Sprintf("%#v", []any{m.projectEdit.Active, m.projectEdit.Field, m.projectEdit.Input.Value(), m.caseEdit.Active, m.caseEdit.Field, m.caseEdit.Input.Value(), m.dumpEdit.Active, m.dumpEdit.Path, m.dumpEdit.Input.Value(), m.quizAnswer.Active, m.quizAnswer.Binding, m.quizAnswer.Input.Value(), m.guided.Active, m.guided.Sequence, m.harnessSelection.Active, m.harnessSequence})
+	draft := fmt.Sprintf("%#v", []any{m.textForm.Active, m.textFormBinding(), m.projectEdit.Active, m.projectEdit.Field, m.projectEdit.Input.Value(), m.caseEdit.Active, m.caseEdit.Field, m.caseEdit.Input.Value(), m.dumpEdit.Active, m.dumpEdit.Path, m.dumpEdit.Input.Value(), m.quizAnswer.Active, m.quizAnswer.Binding, m.quizAnswer.Input.Value(), m.guided.Active, m.guided.Sequence, m.harnessSelection.Active, m.harnessSequence})
 
 	return interactionContext{Generation: m.draftSequence, View: m.SelectedView(), Case: m.caseContext.CaseSlug, Source: m.currentOperationTarget(), Draft: sha256.Sum256([]byte(draft))}
 }
@@ -50,6 +50,10 @@ func (m *Model) finishOperation(binding operationBinding) (bool, bool) {
 }
 
 func (m *Model) currentOperationTarget() string {
+	if m.textForm.Active {
+		return "form:" + m.textForm.Title
+	}
+
 	switch m.SelectedView() {
 	case ViewDash, ViewBoard, ViewTickets:
 		return m.currentTicketTarget()

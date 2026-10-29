@@ -112,6 +112,7 @@ type workspaceState struct {
 }
 
 type interactionState struct {
+	textForm          textFormState
 	feedback          operationFeedback
 	draftConfirmation draftConfirmation
 	operationSequence uint64

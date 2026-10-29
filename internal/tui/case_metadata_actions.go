@@ -337,18 +337,16 @@ func (m *Model) applyCaseFieldEdit() {
 }
 
 func (m *Model) newCase() {
-	m.cases = append(m.cases, authoringcore.CaseMetadata{
-		SchemaVersion: authoringcore.CaseMetadataSchemaVersion,
-		Name:          "",
-		Description:   "",
-		Context:       "",
+	if m.caseDirty {
+		m.statusMessage = "Save the current case changes before creating another case."
+
+		return
+	}
+
+	m.openTextForm(textFormState{
+		Title: "Create Case", SubmitLabel: "Create", Submit: (*Model).submitCaseForm,
+		Fields: []textFormField{newTextFormField("Name", false, 1<<20), newTextFormField("Description", true, 1<<20), newTextFormField("Context", true, 1<<20)},
 	})
-	m.selectedCase = len(m.cases) - 1
-	m.selectedCaseField = caseFieldName
-	m.caseFilter = ""
-	m.caseFilterEditing = false
-	m.caseDirty = true
-	m.startCaseFieldEdit()
 }
 
 func (m *Model) saveSelectedCase() {

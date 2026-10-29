@@ -456,40 +456,34 @@ func TestRenderProjectInputDoesNotShiftTextAtCursor(t *testing.T) {
 	}
 }
 
+// The complete new-case form keeps all fields local until one Create.
 func TestModelCreatesAndSavesCaseMetadata(t *testing.T) {
 	executor := &fakeCaseMetadataExecutor{}
-	model := NewModel(Options{
-		CaseExecutor: executor,
-	})
+	model := NewModel(Options{CaseExecutor: executor})
+	model.Update(tea.KeyMsg{Type: tea.KeyF1})
+	model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("n")})
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyF1})
-	casesView := requireUpdatedModel(t, updated)
-
-	updated, _ = casesView.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("n")})
-	editing := requireUpdatedModel(t, updated)
-
-	if !editing.caseEdit.Active {
-		t.Fatal("caseEdit.Active = false, want active new case name edit")
+	if !model.textForm.Active || len(model.cases) != 0 {
+		t.Fatal("creation added an unsubmitted catalog row")
 	}
 
-	editing.caseEdit.Input.SetValue("Blog Publishing")
-
-	updated, _ = editing.Update(tea.KeyMsg{Type: tea.KeyEnter})
-	changed := requireUpdatedModel(t, updated)
-
-	updated, _ = changed.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
-	saved := requireUpdatedModel(t, updated)
-
-	if executor.saved.Name != "Blog Publishing" {
-		t.Fatalf("saved.Name = %q, want Blog Publishing", executor.saved.Name)
+	for _, value := range []string{"Blog Publishing", "Publish useful notes.", "Retain all original material."} {
+		model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(value)})
+		model.Update(tea.KeyMsg{Type: tea.KeyTab})
 	}
 
-	if saved.caseDirty {
-		t.Fatal("caseDirty = true, want false after save")
+	if executor.saved.Name != "" {
+		t.Fatal("form saved before Create")
 	}
 
-	if len(saved.cases) != 1 || saved.cases[0].Slug != "blog-publishing" {
-		t.Fatalf("cases = %#v, want saved blog-publishing case", saved.cases)
+	model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	if [3]string{executor.saved.Name, executor.saved.Description, executor.saved.Context} != [3]string{"Blog Publishing", "Publish useful notes.", "Retain all original material."} {
+		t.Fatal(executor.saved)
+	}
+
+	if model.textForm.Active || model.caseDirty || len(model.cases) != 1 || model.cases[0].Slug != "blog-publishing" {
+		t.Fatal("created case is unavailable", model.cases)
 	}
 }
 

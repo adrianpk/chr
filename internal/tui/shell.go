@@ -102,6 +102,10 @@ func (m *Model) renderWorkspace(width, height int) string {
 		return m.renderOverlayWorkspace(width, height, overlay)
 	}
 
+	if m.textForm.Active {
+		return fitBlock(renderPanel(m.textForm.Title, m.textFormLines(width-4, height-2), width, height, true), width, height)
+	}
+
 	if workspace, ok := m.renderProductWorkspace(width, height); ok {
 		return workspace
 	}

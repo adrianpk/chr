@@ -27,7 +27,7 @@ func (m *Model) handleShellShortcut(message tea.KeyMsg) (tea.Cmd, bool) {
 
 func (m *Model) shellShortcutBlocked() bool {
 	for _, blocked := range []bool{
-		m.feedback.Open, m.draftConfirmation.Active,
+		m.feedback.Open, m.draftConfirmation.Active, m.textForm.Active,
 		m.projectEdit.Active, m.caseEdit.Active, m.caseFilterEditing,
 		m.dumpEdit.Active, m.quizAnswer.Active, m.filterEntryMode,
 		m.commandPalette.Open, m.harnessSelection.Active, m.guided.Editing,
