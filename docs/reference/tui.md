@@ -141,7 +141,7 @@ Available command families:
 - Workspace refresh.
 - Guided use-case capture, clarification, execution controls and results.
 - Selected source path inspection.
-- Default ticket creation.
+- Complete ticket creation and editing with canonical metadata choices.
 - Dump creation, edit, and refresh.
 - Quiz start, resume, answer, skip, complete, cancel, refresh, deep mode, and
   fast mode.
@@ -149,7 +149,7 @@ Available command families:
   the Specs view.
 - Plan generation, regeneration, tracking creation, and refresh, only in the
   Plans view.
-- Ticket comment and selected ticket status transitions.
+- Free-text ticket comments, retained discussion, review-reference attachment and selected ticket status transitions.
 - Work start, ready-loop start, run-all-ready, and agent stop request.
 
 `Context-aware quiz (unavailable)` explains its separate contextual authoring CLI
@@ -382,6 +382,12 @@ chr plan tracking create --use-case billing
 
 | Key | Behavior |
 | --- | --- |
+| `c` | Create a ticket with title, description, case and metadata. |
+| `e` in the ticket pane | Edit the selected ticket. In the detail pane, `e` retains external source editing. |
+| `a` | Enter a comment and read retained history. |
+| `v` | Attach an entered review reference. |
+| `r` | Refresh ticket observations. |
+| `alt+e` | Open the selected canonical source in the external editor. |
 | `up` / `down` or `k` / `j` | Select a ticket. |
 | `left` / `right` or `h` / `l` | Move between normal Board columns. |
 | `alt+a` | Toggle the virtual attention view. |
@@ -411,8 +417,25 @@ show the parse error. Tickets without the anchored evidence checklist show
 The compact Board header marks the active column explicitly and also shows a
 column strip with the active normal column or attention view in brackets.
 
-Ticket and work actions are available from the command palette and use
-confirmation prompts.
+Create ticket, Edit ticket, Add ticket comment and Attach ticket review reference
+open the same forms from the palette or Board/Tickets keys. Tab/Shift+Tab moves
+through every field, including fields beyond the current viewport; left/right
+chooses canonical options. Ctrl+S submits, and Esc confirms discarding entered
+input. Edit shows the phase, slice and owner-provided read-only reasons.
+
+Comments are separate from metadata/body edits. Shift+Tab from Comment focuses
+retained history; arrow keys scroll it without modifying saved discussion.
+Review references collect type, provider, HTTP(S) URL, optional ID, status and
+branch. Existing references and checklist content remain intact.
+
+A failed or stale submission retains all fields. From its result, r requests a
+confirmed reload; Esc keeps the complete draft. A changed case binding requires
+explicit reopening. Active claims and verified delivery values stay protected.
+If a write succeeded but refresh failed, close the retained form and refresh
+before editing again; the form cannot resubmit that committed write.
+
+Other ticket status and work actions retain their existing confirmations and
+canonical evidence requirements.
 
 CLI equivalents:
 

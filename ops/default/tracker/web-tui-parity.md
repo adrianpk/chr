@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 9 — Ticket editing, comments and references.
 Completed slices: 8/14
-Completed tasks: 40/70
+Completed tasks: 44/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -166,18 +166,19 @@ Report: `ops/default/report/slices/web-tui-parity/slice-8-plans.md`
 
 ### Slice 9: Ticket editing, comments and references
 
-Ticket: `TKT-20261029101144` — `ops/default/ticket/in_progress/20261029101144-web-tui-parity-tickets.md`
-State: in_progress
+Ticket: `TKT-20261029101144` — `ops/default/ticket/reviewing/20261029101144-web-tui-parity-tickets.md`
+State: reviewing
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-9-tickets.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T9.1 | Share neutral canonical ticket metadata options and read-only rules with the existing application owner; map Web and TUI separately. | pending | — | Planned: No TUI dependency on completeTicketEditor Web types; options and field restrictions agree. |
-| T9.2 | Create and edit tickets with user title, description, case and metadata; show phase/slice and read-only explanations. | pending | — | Planned: No fixed TUI-created body/area; revision and managed-ticket restrictions remain effective. |
-| T9.3 | Expose free-text comment input and retained history instead of the fixed action comment. | pending | — | Planned: Round trip multiple distinct comments and reject empty/stale submissions without losing input. |
-| T9.4 | Expose AttachReviewRef with user input and preserve external editing, checklist display and canonical review guards. | pending | — | Planned: Review reference is validated and attached to the selected ticket; append wiring from Slice 5 remains reachable. |
-| T9.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T9.1 | Share neutral canonical ticket metadata options and read-only rules with the existing application owner; map Web and TUI separately. | done | fc8cd8e0 | Neutral owner and separate Web/TUI mappings pass real editor-option and Web regressions; no service imports a UI. |
+| T9.2 | Create and edit tickets with user title, description, case and metadata; show phase/slice and read-only explanations. | done | f2ddfdfd | Legacy/native forms round-trip entered title/body/metadata; cancel writes nothing, stale input remains, confirmed reload and managed restrictions pass. |
+| T9.3 | Expose free-text comment input and retained history instead of the fixed action comment. | done | 29095bef | Distinct comments and retained history round-trip on both authorities; empty/stale input and comment-mode reload checks pass. |
+| T9.4 | Expose AttachReviewRef with user input and preserve external editing, checklist display and canonical review guards. | done | ad327372 | Entered references, HTTP validation, stale/active-claim/receipt guards, native reference retention, source editing, checklist and dump-append regressions pass; production PTY journey passes. |
+| T9.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | pending report introduction | Implementation checks passed; final ordered controller validation, PR reference and controller-owned integration remain pending. |
+
 
 ### Slice 10: Responsive Board and retained workflows
 

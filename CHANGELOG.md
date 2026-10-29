@@ -12,6 +12,12 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Create and edit TUI tickets with your own title, description, case and metadata.
+  Read-only fields explain their workflow owner. Enter comments, scroll retained
+  history and attach review references with their provider and URL. Stale saves
+  preserve every field until a confirmed reload; source editing and checklist
+  display remain available.
+
 - Prepare a case's TUI plan and native tickets with one action. Retry incomplete
   preparation without regenerating the plan or duplicating tickets, then open
   the saved document or case-filtered Board from the result. Spec generation

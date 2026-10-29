@@ -540,8 +540,8 @@ Some commands are view-gated. Spec and acceptance feature commands appear only
 in Specs. Plan commands appear only in Plans. Generate plan and tickets is one
 operation; independent tracking remains available through the CLI.
 
-Palette commands that change files open the same confirmation prompt used by
-direct keybindings. Confirm with `enter` or cancel with `esc`.
+Palette commands use the same form or confirmation as their direct keys.
+Submit a form with Ctrl+S. Confirm a pending action with Enter or cancel with Esc.
 
 ## Inspect TUI Operation Results
 
@@ -991,8 +991,10 @@ Ticket and work operations are available from the command palette:
 
 | Command | Behavior |
 | --- | --- |
-| Create ticket | Create a default task ticket after confirmation. |
-| Add ticket comment | Add the standard `TUI action recorded.` comment to the selected ticket. |
+| Create ticket | Enter a title, full description, case and metadata, then Create. |
+| Edit ticket | Edit the selected ticket with its captured revision and canonical field restrictions. |
+| Add ticket comment | Enter your own comment and read saved discussion. |
+| Attach ticket review reference | Enter type, provider, HTTP(S) URL and optional ID, status and branch. |
 | Move ticket to backlog | Move the selected ticket to `backlog`. |
 | Move ticket to ready_for_dev | Move the selected ticket to `ready_for_dev`. |
 | Move ticket to in_progress | Move the selected ticket to `in_progress`. |
@@ -1004,6 +1006,23 @@ Ticket and work operations are available from the command palette:
 | Run all visible ready tickets | Run the Dash ready queue with the selected filters and order. |
 | Apply safe readiness repair | Apply a non-destructive readiness repair when Dash reports one. |
 | Request agent stop | Request daemon stop through local daemon state. |
+
+Use `c`, `e`, `a`, `v` and `r` in the Board ticket pane for Create, Edit,
+Comment, Attach review reference and Refresh. `alt+e` opens the selected source
+in your external editor; `e` in the detail pane retains that shortcut.
+
+In forms, Tab/Shift+Tab reaches every field even in smaller terminals;
+left/right changes metadata options. Ctrl+S submits. Edit shows phase, slice and
+read-only explanations for managed titles, descriptions, case associations or
+verified delivery values. These restrictions remain enforced when saving.
+
+The discussion form starts on Comment. Shift+Tab focuses retained history,
+where arrows scroll saved comments. Comments do not submit unsaved metadata or
+replace the description. Failed or stale submissions keep the complete draft.
+Open the action result and press `r` to request reload; confirmation discards
+unsaved text, while Esc keeps it. If the ticket's case changed, reopen it
+explicitly. If a write saved but refresh failed, close its retained form and
+refresh tickets before editing again.
 
 Moves use the displayed ticket revision and the same ownership and evidence
 guards as Web. Reload after a concurrent edit. Native workflow phases can make
@@ -1020,7 +1039,7 @@ chr ticket board
 chr ticket list
 chr ticket show CHR-1
 chr ticket new "Add completed task support" --synopsis "Add task completion support."
-chr ticket comment CHR-1 "TUI action recorded."
+chr ticket comment CHR-1 "Observed the saved result and recorded a follow-up."
 chr ticket status CHR-1 ready
 chr ticket status CHR-1 in_progress
 chr ticket status CHR-1 reviewing

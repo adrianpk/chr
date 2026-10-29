@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101144
 title: "Ticket editing, comments and references"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -9,8 +9,9 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:44Z
-commits: []
+commits: [fc8cd8e06e07568045c79e8d08b49370d5493cc9, f2ddfdfd17490910683a2a0473a9cda53b09395d, 29095befa1a96578d8eb9a1f81435f524097ce7d, ad327372411f98e7fc5854ed3de1c56ac949dbd7]
 branch: feat/slice-9-tui-tickets
+reviewed_at: 2026-10-29T15:32:07Z
 started_at: 2026-10-29T15:00:15Z
 ready_at: 2026-10-29T10:11:44Z
 ---
@@ -54,4 +55,11 @@ One branch and one PR to `dev`; tasks T9.1-T9.5 are the canonical work units. Lo
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+Tasks T9.1-T9.4 are implemented. Canonical metadata choices, complete forms,
+separate comments/history, guarded review references and canonical source editing
+have focused local legacy/native and production-terminal evidence. Checklist
+content and the existing dump-append terminal journey remain covered.
+
+The tracker and Slice 9 report retain exact commands and task commits. Final
+controller checks and canonical PR integration remain pending; this ticket is
+reviewing and has no delivery claim.
