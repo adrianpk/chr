@@ -3,101 +3,125 @@ package tui
 import (
 	"fmt"
 	"strings"
-
-	"github.com/charmbracelet/lipgloss"
 )
 
-func (m *Model) guidedLines() []string {
-	view := m.guided.View
+func (m *Model) wizardBound() bool {
+	session := m.guided.View.Session
 
-	lines := []string{"Project: " + view.Project + " · " + view.Namespace}
-	if view.Session == nil {
-		lines = append(lines, "Develop a new use case: n. This proceeds through specification approval and exact development under project policy.")
+	return m.guided.Active && session != nil && session.Guided != nil && m.caseContext.RunID == session.ID && m.caseContext.CaseSlug == session.Guided.CaseSlug
+}
 
-		lines = append(lines, view.Policy...)
-		for index, run := range view.Runs {
-			prefix := "  "
-			if index == m.guided.Selected {
-				prefix = "> "
-			}
-
-			lines = append(lines, prefix+run.Topic+" · "+run.Guided.Stage+" · "+guidedCatalogStatus(run.Guided.Status))
-		}
-	} else {
-		lines = append(lines, "Use case: "+view.Session.Topic, "Stage: "+view.Session.Guided.Stage+" · "+view.Status, view.Prompt)
-		lines = append(lines, view.Progress...)
+func (m *Model) wizardStageView() View {
+	if m.guided.View.Session == nil {
+		return ViewCases
 	}
 
+	return wizardDocumentView(m.guided.View.Session.Guided.Stage)
+}
+
+func wizardDocumentView(stage string) View {
+	switch stage {
+	case "name":
+		return ViewCases
+	case "dump":
+		return ViewDumps
+	case "quiz":
+		return ViewQuizzes
+	case "specification":
+		return ViewSpecs
+	case "preparation", "plan", "tracker":
+		return ViewPlans
+	default:
+		return ViewBoard
+	}
+}
+
+func (m *Model) wizardStageLabel() string {
+	stage := m.guided.View.Session.Guided.Stage
+	positions := map[string]int{"name": 1, "dump": 2, "quiz": 3, "specification": 4, "preparation": 5, "execution": 6, "results": 7}
+
+	return fmt.Sprintf("Wizard: %d/7 %s", positions[stage], stage)
+}
+
+func (m *Model) wizardDocumentTab() bool {
+	if !m.wizardBound() {
+		return false
+	}
+
+	switch m.SelectedView() {
+	case ViewDumps, ViewQuizzes, ViewSpecs, ViewPlans, ViewBoard:
+		return true
+	default:
+		return false
+	}
+}
+
+func (m *Model) wizardTabLines() []string {
+	view := m.guided.View
+
+	lines := []string{"Case: " + view.Session.Guided.CaseName, m.wizardStageLabel() + " · " + guidedCatalogStatus(view.Status)}
+	if m.SelectedView() == m.wizardStageView() {
+		lines = append(lines, view.Prompt, m.guidedControlHint(), "e Input · r Refresh · F1-F7 existing tabs")
+	} else {
+		lines = append(lines, "Read-only stage. c Continue to the current stage.")
+	}
+
+	lines = append(lines, view.Progress...)
 	for _, problem := range view.Problems {
 		lines = append(lines, "Prerequisite: "+problem)
 	}
 
-	if document := view.Document; document != nil {
-		lines = append(lines, "Inspect "+document.Kind)
-		if document.Commit != "" {
-			lines = append(lines, "Original commit: "+document.Commit, "Source: "+document.Reference)
+	if original := m.wizardTabOriginal(); original != nil {
+		lines = append(lines, "Committed original (read-only)")
+		if view.Document != nil {
+			lines = append(lines, "Original commit: "+original.Commit)
 		}
 
-		lines = append(lines, document.Content)
+		lines = append(lines, original.Content)
 	}
 
-	return lines
-}
-
-func (m *Model) renderGuidedWorkspace(width, height int) string {
-	var lines []string
-	for _, line := range m.guidedLines() {
-		lines = append(lines, strings.Split(lipgloss.NewStyle().Width(max(width-4, 1)).Render(line), "\n")...)
-	}
-
-	visible := max(height-5, 1)
-	if m.guided.Editing {
-		visible = max(visible-7, 1)
-	}
-
-	offset := min(m.guided.Scroll, max(len(lines)-visible, 0))
-	if m.guided.View.Session == nil {
-		for index, line := range lines {
-			if strings.HasPrefix(line, "> ") {
-				offset = max(0, index-visible+1)
-			}
-		}
-	}
-
-	lines = lines[offset:min(offset+visible, len(lines))]
-	if m.guided.Editing {
-		lines = append(lines, strings.Split(m.guided.Input.View(), "\n")...)
-	}
-
-	lines = append(lines, fmt.Sprintf("View lines %d+ · %s", offset+1, m.guidedHint()))
 	if m.guided.Busy {
 		lines = append(lines, "Reading or saving the retained step…")
 	}
 
 	if m.guided.Problem != "" {
-		lines = append(lines, wrapPlainText(m.guided.Problem+" · y retries the original request; r reads current state.", max(width-4, 1))...)
+		lines = append(lines, m.guided.Problem+" · y retries the original request; r reads current state.")
 	}
 
-	return renderPanel("Guided use cases", lines, width, height, true)
+	return strings.Split(strings.Join(lines, "\n"), "\n")
 }
 
-func (m *Model) guidedHint() string {
-	if m.guided.Editing {
-		return "Enter saves · Ctrl+J adds a line · Esc leaves input · Ctrl+C quits"
+func (m *Model) completeWizardDraft(message guidedFinishedMsg) {
+	if message.Request.Action == "start" {
+		m.textForm = textFormState{}
+
+		return
 	}
 
-	if m.guided.View.Session == nil {
-		return "n Develop a new use case · Enter opens selected run · up/down selects · Esc returns"
+	if draft := m.textForm.GuidedRequest; draft != nil && message.Request.Action == "input" && message.Request.Command.OperationID == draft.Command.OperationID {
+		m.textForm = textFormState{}
 	}
-
-	return m.guidedControlHint() + "e input · i later idea · v results · 1-5 originals · scroll up/down · r refresh · d discard draft · b runs · Esc returns"
 }
 
-// Catalog state alone does not verify the native delivery receipts.
+// Catalog state alone does not verify native delivery receipts.
 func guidedCatalogStatus(status string) string {
 	if status == "completed" {
 		return "inspect results"
 	}
 
 	return status
+}
+
+func (m *Model) wizardTabOriginal() *GuidedDocument {
+	if original := m.guided.View.Document; original != nil && wizardDocumentView(original.Kind) == m.SelectedView() {
+		return original
+	}
+
+	for _, original := range m.guided.View.Originals {
+		if wizardDocumentView(original.Kind) == m.SelectedView() {
+			return &original
+		}
+	}
+
+	return nil
 }

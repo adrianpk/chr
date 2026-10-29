@@ -50,10 +50,6 @@ func (m *Model) renderShellStatus(width int) string {
 }
 
 func (m *Model) renderShellFooter(width int) string {
-	if m.guided.Active {
-		return strings.Join(wrapPlainText(m.guidedHint(), width), "\n")
-	}
-
 	return fitPlainLine(m.renderKeys(), width) + "\n" + m.renderShellButtons(shellFooterButtons(), width)
 }
 

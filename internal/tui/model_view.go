@@ -7,10 +7,6 @@ import (
 
 // View renders the current terminal screen.
 func (m *Model) View() string {
-	if m.guided.Active && !m.textForm.Active && m.width == 0 {
-		return m.renderGuidedWorkspace(80, 40)
-	}
-
 	if m.width > 0 && m.height > 0 {
 		return m.renderShell()
 	}
@@ -64,6 +60,10 @@ func (m *Model) View() string {
 func (m *Model) renderSelectedView() string {
 	if m.textForm.Active {
 		return m.textForm.Title + "\n" + strings.Join(m.textFormLines(76, 30), "\n")
+	}
+
+	if m.wizardDocumentTab() {
+		return strings.Join(m.wizardTabLines(), "\n")
 	}
 
 	selectedView := m.SelectedView()
@@ -201,6 +201,7 @@ func (m *Model) activeInteractionKeys() (string, bool) {
 		{Active: m.quizBusy, Text: "Keys: waiting for quiz action to finish"},
 		{Active: m.quizAnswer.Active, Text: "Keys: enter answer  alt+s skip  alt+d done  alt+x cancel quiz  alt+m mode  PgUp/PgDn history  esc discard"},
 		{Active: m.SelectedView() == ViewDash && m.dashWorkflowDetails, Text: "Keys: c continue  p pause  x cancel  u resume  a approve  R reconcile  g allowance  d decision  t/C links  esc queue"},
+		{Active: m.wizardBound(), Text: "Keys: c current stage  e input  r refresh  p/u/x controls  i later idea  F1-F7 tabs  ? Help"},
 		{Active: m.filterEntryMode, Text: "Keys: enter applies filter, esc cancels filter, ctrl+c quits"},
 	}
 	for _, hint := range hints {

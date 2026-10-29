@@ -112,14 +112,14 @@ func enterGuidedTUIInput(t *testing.T, model *tui.Model, text string) {
 
 	runGuidedTUIKey(t, model, "e", false)
 	runGuidedTUIKey(t, model, text, false)
-	runGuidedTUIKey(t, model, "enter", true)
+	runGuidedTUIKey(t, model, "ctrl+s", true)
 }
 
 func runGuidedTUIKey(t *testing.T, model *tui.Model, key string, execute bool) {
 	t.Helper()
 
 	message := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(key)}
-	if kind, ok := map[string]tea.KeyType{"f1": tea.KeyF1, "enter": tea.KeyEnter, "esc": tea.KeyEsc, "pgdown": tea.KeyPgDown}[key]; ok {
+	if kind, ok := map[string]tea.KeyType{"f1": tea.KeyF1, "f2": tea.KeyF2, "f3": tea.KeyF3, "f4": tea.KeyF4, "f5": tea.KeyF5, "f6": tea.KeyF6, "f7": tea.KeyF7, "ctrl+s": tea.KeyCtrlS, "enter": tea.KeyEnter, "esc": tea.KeyEsc, "pgdown": tea.KeyPgDown}[key]; ok {
 		message = tea.KeyMsg{Type: kind}
 	}
 

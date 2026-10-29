@@ -98,6 +98,7 @@ func tuiGuidedView(observed GuidedUseCaseInspection) tui.GuidedView {
 		return view
 	}
 
+	view.Originals = tuiWizardOriginals(observed)
 	state := observed.Session.Guided
 	projectTUIGuidedStatus(&view, observed)
 

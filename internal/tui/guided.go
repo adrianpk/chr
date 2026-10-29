@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
@@ -37,17 +36,15 @@ type GuidedView struct {
 	Cases                                   []authoringcore.CaseMetadata
 	Policy, Problems, Progress              []string
 	Document                                *GuidedDocument
+	Originals                               []GuidedDocument
 }
 
 type guidedState struct {
-	Active, Busy, Editing bool
-	Selected, Scroll      int
-	Sequence              uint64
-	View                  GuidedView
-	Input                 textarea.Model
-	Bound                 GuidedRequest
-	Pending               *GuidedRequest
-	Problem               string
+	Active, Busy bool
+	Sequence     uint64
+	View         GuidedView
+	Pending      *GuidedRequest
+	Problem      string
 }
 
 type guidedFinishedMsg struct {
@@ -103,21 +100,18 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 		message.View.Document = m.guided.View.Document
 	}
 
-	if message.Request.Action == "start" {
-		m.textForm = textFormState{}
-	}
+	m.completeWizardDraft(message)
 
 	m.guided.View = message.View
 	m.observeGuidedCase(message.View)
 
 	m.guided.Pending, m.guided.Problem = nil, ""
-	if message.Request.Command.OperationID == m.guided.Bound.Command.OperationID && message.Request.Action == "input" {
-		m.guided.Editing = false
-		m.guided.Input = textarea.Model{}
+	if message.Request.Action == "start" || message.Request.Action == "open" || message.Request.Action == "input" {
+		m.selectView(m.wizardStageView())
 	}
 
-	if message.Request.Action != "inspect" {
-		m.guided.Scroll = 0
+	if message.Request.Action == "document" {
+		m.selectView(wizardDocumentView(message.Request.Document))
 	}
 }
 

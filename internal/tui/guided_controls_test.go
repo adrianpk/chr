@@ -16,9 +16,9 @@ func TestGuidedUseCaseTUIControls(t *testing.T) {
 	m.guided.View.NativeRevision = 17
 	m.guided.View.Controls = []string{"pause", "cancel"}
 	m.editGuidedInput("answer")
-	m.guided.Input.SetValue("Unsent original answer.")
+	m.textForm.Fields[0].Input.SetValue("Unsent original answer.")
 
-	m.guided.Editing = false
+	m.textForm.Active = false
 
 	var request GuidedRequest
 
@@ -36,7 +36,7 @@ func TestGuidedUseCaseTUIControls(t *testing.T) {
 
 	m.completeGuided(guidedTestFinished(t, command()))
 
-	if request.Command.NativeRevision != 17 || request.Command.Action != "pause" || m.guided.Input.Value() != "Unsent original answer." {
+	if request.Command.NativeRevision != 17 || request.Command.Action != "pause" || m.textForm.Fields[0].value() != "Unsent original answer." {
 		t.Fatal("control replaced its native binding or unsent draft")
 	}
 
@@ -82,9 +82,11 @@ func TestGuidedUseCaseTUICatalogResult(t *testing.T) {
 	m := guidedTerminalFixture()
 	retained := *m.guided.View.Session
 	retained.Guided.Status = "completed"
-	m.guided.View.Session = nil
+	retained.Guided.Stage = "results"
+	m.guided.View.Session = &retained
+	m.guided.View.Status = "completed"
+	m.selectView(ViewBoard)
 
-	m.guided.View.Runs = []authoringcore.Session{retained}
 	if !strings.Contains(m.View(), "inspect results") || strings.Contains(m.View(), "completed") {
 		t.Fatal("catalog claimed completion without inspecting receipts")
 	}

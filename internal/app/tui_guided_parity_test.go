@@ -59,7 +59,7 @@ func TestGuidedUseCaseParityNative(t *testing.T) {
 	runGuidedTUIKey(t, model, "r", true)
 	runGuidedTUIKey(t, model, "i", false)
 	runGuidedTUIKey(t, model, "Keep an export for a later review.", false)
-	runGuidedTUIKey(t, model, "enter", true)
+	runGuidedTUIKey(t, model, "ctrl+s", true)
 
 	current := readWebGuidedSession(t, operations, original.ID)
 

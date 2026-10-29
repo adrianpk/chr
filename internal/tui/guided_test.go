@@ -18,9 +18,12 @@ func (execute guidedTestExecutor) ExecuteGuided(request GuidedRequest) (GuidedVi
 }
 
 func guidedTerminalFixture() *Model {
-	m := NewModel(Options{ProjectID: "project"})
-	session := &authoringcore.Session{ID: "guided-one", ProjectID: "project", Namespace: "default", Revision: 2, Topic: "Bounded audit", Guided: &authoringcore.GuidedUseCaseState{Stage: "quiz", Status: "waiting_input", Quiz: &authoringcore.GuidedQuizState{QuestionID: "first", InputDigest: "original"}}}
+	m := NewModel(Options{ProjectID: "project", Cases: []authoringcore.CaseMetadata{{Slug: "bounded-audit", Name: "Bounded audit"}}})
+	session := &authoringcore.Session{ID: "guided-one", ProjectID: "project", Namespace: "default", Revision: 2, Topic: "Bounded audit", Guided: &authoringcore.GuidedUseCaseState{CaseSlug: "bounded-audit", CaseName: "Bounded audit", Stage: "quiz", Status: "waiting_input", Quiz: &authoringcore.GuidedQuizState{QuestionID: "first", InputDigest: "original"}}}
 	m.guided = guidedState{Active: true, View: GuidedView{Session: session, Project: "Example", Namespace: "default", InputAction: "answer", Prompt: "What should remain bounded?"}}
+
+	m.bindCaseContext("bounded-audit", session.ID)
+	m.selectView(ViewQuizzes)
 
 	return m
 }
@@ -46,7 +49,7 @@ func TestGuidedUseCaseTUIStaleInput(t *testing.T) {
 	newer.Revision++
 	m.completeGuided(guidedFinishedMsg{Sequence: m.guided.Sequence, Request: GuidedRequest{Action: "inspect"}, View: GuidedView{Session: &newer, Namespace: "default", InputAction: "answer"}})
 
-	updated, command := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	updated, command := m.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
 
 	m = guidedTestModel(t, updated)
 	if command == nil || !m.guided.Busy {
@@ -60,7 +63,7 @@ func TestGuidedUseCaseTUIStaleInput(t *testing.T) {
 		t.Fatal("refresh rebound the unsent draft", submitted)
 	}
 
-	if !m.guided.Editing || m.guided.Input.Value() != submitted.Command.Content || m.guided.Pending == nil {
+	if !m.textForm.Active || m.textForm.Fields[0].value() != submitted.Command.Content || m.guided.Pending == nil {
 		t.Fatal("failed input discarded its draft or original operation")
 	}
 }
@@ -117,8 +120,10 @@ func TestGuidedUseCaseTUIOriginalScroll(t *testing.T) {
 	content := strings.Repeat("Full original line.\n", 100) + "Final original bytes."
 	m.guided.View.Document = &GuidedDocument{Kind: "dump", Commit: strings.Repeat("a", 40), Content: content}
 
-	m.guided.Scroll = 10000
-	if !strings.Contains(m.renderGuidedWorkspace(90, 25), "Final original bytes.") || m.guided.View.Document.Content != content {
+	m.selectView(ViewDumps)
+
+	m.detailScroll = 10000
+	if !strings.Contains(m.renderDetailPanel("Dumps", m.wizardTabLines(), 90, 25, true), "Final original bytes.") || m.guided.View.Document.Content != content {
 		t.Fatal("the complete original cannot be inspected")
 	}
 }

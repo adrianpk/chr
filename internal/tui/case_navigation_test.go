@@ -110,7 +110,7 @@ func TestCaseNavigationRun(t *testing.T) {
 
 	model.Update(tea.KeyMsg{Type: tea.KeyF2})
 
-	if model.caseContext.RunID != "retained" || model.caseContext.CaseSlug != "two" || model.guided.Active {
+	if model.caseContext.RunID != "retained" || model.caseContext.CaseSlug != "two" || !model.guided.Active {
 		t.Fatal("retained run did not bind the shared document view")
 	}
 

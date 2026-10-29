@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -20,7 +19,7 @@ func (m *Model) guidedExtraKey(key string) tea.Cmd {
 			return m.editGuidedInput("idea")
 		}
 	case "d":
-		m.guided.Input, m.guided.Bound = textarea.Model{}, GuidedRequest{}
+		m.textForm = textFormState{}
 	case "a":
 		m.inspectGuidedApproval()
 	default:

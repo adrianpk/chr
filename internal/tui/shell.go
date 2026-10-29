@@ -79,8 +79,8 @@ func (m *Model) renderShellTopbar(width int) string {
 	}
 
 	right := fmt.Sprintf(" %s ", string(m.SelectedView()))
-	if m.guided.Active {
-		right = " Guided use cases "
+	if m.wizardBound() {
+		left += m.wizardStageLabel() + " "
 	}
 
 	spacer := strings.Repeat(" ", maxInt(width-lipgloss.Width(left)-lipgloss.Width(right), 1))
@@ -89,10 +89,6 @@ func (m *Model) renderShellTopbar(width int) string {
 }
 
 func (m *Model) renderWorkspace(width, height int) string {
-	if m.guided.Active && !m.textForm.Active {
-		return m.renderGuidedWorkspace(width, height)
-	}
-
 	if m.harnessSelection.Active {
 		return m.renderHarnessWorkspace(width, height)
 	}
@@ -104,6 +100,10 @@ func (m *Model) renderWorkspace(width, height int) string {
 
 	if m.textForm.Active {
 		return fitBlock(renderPanel(m.textForm.Title, m.textFormLines(width-4, height-2), width, height, true), width, height)
+	}
+
+	if m.wizardDocumentTab() {
+		return m.renderDetailPanel(string(m.SelectedView()), m.wizardTabLines(), width, height, true)
 	}
 
 	if workspace, ok := m.renderProductWorkspace(width, height); ok {

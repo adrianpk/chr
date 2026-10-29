@@ -31,6 +31,10 @@ func (m *Model) bindCaseContext(slug, runID string) {
 		return
 	}
 
+	if session := m.guided.View.Session; session != nil && (runID != session.ID || slug != session.Guided.CaseSlug) {
+		m.guided.Active = false
+	}
+
 	m.caseContext = context
 	if caseSliceContainsSlug(m.cases, slug) {
 		m.selectedCase = m.caseIndexForSlug(slug)

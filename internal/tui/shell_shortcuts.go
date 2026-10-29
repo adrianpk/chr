@@ -19,7 +19,6 @@ func (m *Model) handleShellShortcut(message tea.KeyMsg) (tea.Cmd, bool) {
 		return nil, false
 	}
 
-	m.guided.Active = false
 	m.selectView(view)
 
 	return nil, true
@@ -30,7 +29,7 @@ func (m *Model) shellShortcutBlocked() bool {
 		m.feedback.Open, m.draftConfirmation.Active, m.textForm.Active,
 		m.projectEdit.Active, m.caseEdit.Active, m.caseFilterEditing,
 		m.dumpEdit.Active, m.quizAnswer.Active, m.filterEntryMode,
-		m.commandPalette.Open, m.harnessSelection.Active, m.guided.Editing,
+		m.commandPalette.Open, m.harnessSelection.Active,
 		m.guided.Busy, m.specBusy, m.planBusy, m.quizBusy, m.workBusy,
 		m.artifactAction.Pending, m.dumpAction.Pending, m.ticketAction.Pending,
 		m.specAction.Pending, m.planAction.Pending, m.quizAction.Pending, m.workAction.Pending,

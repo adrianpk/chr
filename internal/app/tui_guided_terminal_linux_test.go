@@ -36,7 +36,7 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 	terminal.keys(t, "f")
 	terminal.see(t, "What should the workflow preserve")
 	terminal.input(t, "Preserve the original agreed scope.")
-	terminal.see(t, "Stage: preparation")
+	terminal.see(t, "Wizard: 5/7 preparation")
 
 	before := onlyGuidedTUIRun(t, operations)
 	if before.Guided.SpecApproval == nil || len(before.Guided.Checkpoints) != 3 {
@@ -46,8 +46,8 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 	terminal.keys(t, "p")
 	terminal.see(t, "Dispatch stopped: pause")
 	terminal.keys(t, "i")
-	terminal.see(t, "Enter saves")
-	terminal.keys(t, "Retain a separate follow-up idea.\r")
+	terminal.see(t, "ctrl+s submit")
+	terminal.keys(t, "Retain a separate follow-up idea.\x13")
 	terminal.see(t, "Later idea, pending review")
 	terminal.keys(t, "1")
 	terminal.see(t, "Original commit:")
@@ -206,15 +206,15 @@ func (p *guidedTerminal) catalog(t *testing.T) {
 
 	p.keys(t, "\x1bOP")
 	p.keys(t, "o")
-	p.see(t, "Use case: ")
+	p.see(t, "Case: ")
 }
 
 func (p *guidedTerminal) input(t *testing.T, value string) {
 	t.Helper()
 
 	p.keys(t, "e")
-	p.see(t, "Enter saves")
-	p.keys(t, value+"\r")
+	p.see(t, "ctrl+s submit")
+	p.keys(t, value+"\x13")
 }
 
 func (p *guidedTerminal) see(t *testing.T, value string) {

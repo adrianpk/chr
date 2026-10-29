@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/tui"
@@ -47,4 +48,26 @@ func (e tuiGuidedExecutor) openCase(ctx context.Context, request tui.GuidedReque
 	request.Action, request.Command.RunID = "inspect", selected.ID
 
 	return e.read(ctx, request)
+}
+
+func tuiWizardOriginals(observed GuidedUseCaseInspection) []tui.GuidedDocument {
+	originals := []tui.GuidedDocument{}
+
+	for _, checkpoint := range observed.Session.Guided.Checkpoints {
+		if checkpoint.Stage != "dump" {
+			continue
+		}
+
+		for _, artifact := range checkpoint.Artifacts {
+			if strings.HasSuffix(artifact.Path, "/artifact.md") {
+				originals = append(originals, tui.GuidedDocument{Kind: "dump", Reference: artifact.Path, Commit: checkpoint.Commit, Content: observed.CommittedDump})
+			}
+		}
+	}
+
+	for _, artifact := range observed.Artifacts {
+		originals = append(originals, tui.GuidedDocument{Kind: artifact.Stage, Reference: artifact.Reference, Commit: artifact.Commit, Content: artifact.Content})
+	}
+
+	return originals
 }
