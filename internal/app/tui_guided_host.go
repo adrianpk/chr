@@ -25,6 +25,13 @@ func runManagedTUI(ctx context.Context, options tui.Options, operations service)
 	})
 
 	options.GuidedExecutor = tuiGuidedExecutor{operations: operations}
+	// Pending adapter calls share the UI lifetime. Shutdown quiesces their IO
+	// without issuing an operator cancellation to retained work.
+	options.QuizExecutor = newTUIQuizActionExecutor(operations)
+	options.SpecExecutor = newTUISpecActionExecutor(operations)
+	options.PlanExecutor = newTUIPlanActionExecutor(operations)
+	options.WorkExecutor = newTUIWorkActionExecutor(operations)
+	options.AgentWorkExecutor = newTUIAgentWorkRefreshExecutor(operations)
 
 	return tui.Run(ctx, options)
 }

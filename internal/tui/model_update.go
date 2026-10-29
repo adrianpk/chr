@@ -74,6 +74,10 @@ func (m *Model) updateActionFinishedMessage(msg tea.Msg) updateOutcome {
 }
 
 func (m *Model) updateKey(msg tea.KeyMsg) tea.Cmd {
+	if msg.Type == tea.KeyCtrlC {
+		return tea.Quit
+	}
+
 	if outcome := m.updateGuidedOrHarnessKey(msg); outcome.Handled {
 		return outcome.Command
 	}

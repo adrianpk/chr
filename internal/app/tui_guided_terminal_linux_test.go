@@ -122,6 +122,12 @@ func (b *guidedTerminalOutput) text() string {
 func startGuidedTerminal(t *testing.T, operations service) *guidedTerminal {
 	t.Helper()
 
+	return startTUITerminal(t, operations, "TestGuidedUseCaseTUIProcess")
+}
+
+func startTUITerminal(t *testing.T, operations service, processTest string) *guidedTerminal {
+	t.Helper()
+
 	master, slave := openGuidedPTY(t)
 
 	program, err := os.Executable()
@@ -130,7 +136,7 @@ func startGuidedTerminal(t *testing.T, operations service) *guidedTerminal {
 	}
 
 	ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 45*time.Second)
-	command := exec.CommandContext(ctx, program, "-test.run=^TestGuidedUseCaseTUIProcess$", "-test.timeout=40s")
+	command := exec.CommandContext(ctx, program, "-test.run=^"+processTest+"$", "-test.timeout=40s")
 
 	command.Env = append(os.Environ(), "TERM=xterm-256color", "CHR_GUIDED_TUI_PROJECT="+operations.projectContext.ProjectDir, "CHR_GUIDED_TUI_ID="+operations.projectContext.ProjectID, "CHR_GUIDED_TUI_ROOT="+filepath.Dir(filepath.Dir(operations.env.ConfigDir())))
 	command.Stdin, command.Stdout, command.Stderr = slave, slave, slave
