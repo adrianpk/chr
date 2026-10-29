@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101139
 title: "Shared queue observation and stable refresh"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:39Z
 commits: []
+branch: feat/slice-4-tui-dash
+started_at: 2026-10-29T12:08:30Z
 ready_at: 2026-10-29T10:11:39Z
 ---
 

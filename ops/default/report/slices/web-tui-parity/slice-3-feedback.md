@@ -1,12 +1,13 @@
 # Slice 3: Shared operation feedback and draft retention
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-3-tui-feedback`
 PR: [#457](https://forge.adrianpk.com/adrianpk/chr/pulls/457)
 Base: `5e28668e2d3bdad91791231292f7e52e62af1c77` on dev, after verified PR #456 integration
+Integration: PR #457 merged into dev at `c91ba4feac5b4296548a854e26b8d9cb59170ed7` using Rebase + Fast-forward.
 
 ## Purpose
 
@@ -98,9 +99,16 @@ The first controller batch `4ARNEJ3OLAZ4T4PB2SWPMQGYXB` stopped at the
 repository signature-format check. Renamed methods now use single-line
 parameter lists, and the neutral package includes its required README.
 
-Looper records the clean final HEAD and ordered required/focused commands after
-PR-reference follow-up commits. The PR Validation section contains successful
-commands from that evidence. Canonical integration remains pending.
+Controller validation `7IDEK3RU26UI7CUQSTNJ7T3NAK` passed all four ordered
+checks on clean HEAD `c91ba4feac5b4296548a854e26b8d9cb59170ed7`:
+
+- `make verify`
+- `go test -race ./internal/tui -run '^Test(Operation.*|BusyQuit|Model(Ownership|AsyncRefresh|WorkflowBinding))$' -count=1`
+- `go test -race ./internal/app -run '^Test(OperationOutcomes|TUIOperation.*|TUIDumpAdapterUsesDumpServices|TUIQuizAdapterDispatchesRuntimeQuizActions|TUISpecAdapterGeneratesAcceptanceFeature|TUIPlanGenerateReturns.*|TUIWorkflow(Preview|Stale|Controls|Start|Approval|Refresh)|TUIDashTarget|TUIBusyTerminal|GuidedUseCaseTUIJourney|WebDumpSaveDocument|WebQuizActions|ServiceDump(Capture|ProjectionFailure|WriteGuards|Reconciliation))$' -count=1 -timeout=3m`
+- `git diff --check`
+
+Canonical Forgejo and Acta integration event `01M63RT08W8774AQNFKE3AS3XT`
+confirm PR #457 merged at the validated commit. No checks were repeated for closure.
 
 ## Risks and Follow-ups
 

@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 3 — Shared operation feedback and draft retention.
-Completed slices: 2/14
-Completed tasks: 14/70
+Active slice: Slice 4 — Shared queue observation and stable refresh.
+Completed slices: 3/14
+Completed tasks: 15/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -73,8 +73,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-2-navigation.md`
 
 ### Slice 3: Shared operation feedback and draft retention
 
-Ticket: `TKT-20261029101138` — `ops/default/ticket/reviewing/20261029101138-web-tui-parity-feedback.md`
-State: reviewing
+Ticket: `TKT-20261029101138` — `ops/default/ticket/solved/20261029101138-web-tui-parity-feedback.md`
+State: delivered
 PR: [#457](https://forge.adrianpk.com/adrianpk/chr/pulls/457)
 Report: `ops/default/report/slices/web-tui-parity/slice-3-feedback.md`
 
@@ -84,13 +84,13 @@ Report: `ops/default/report/slices/web-tui-parity/slice-3-feedback.md`
 | T3.2 | Show summary, field findings, changed files and eligible reload/retry action with existing TUI styling. | done | 8046584d; bc8e124d | Action panel renders distinct outcomes, findings, changed sources and current eligible recovery; long findings scroll. |
 | T3.3 | Keep user input on validation/stale/error and require confirmation before destructive draft reload or discard. | done | 8046584d; bc8e124d | Sentinel and production IO/PTY regressions retain failed input; reload/discard require confirmation and canonical sources remain unchanged on cancellation. |
 | T3.4 | Bind pending results to captured operation, selection and revision; ignore late results for a newer interaction. | done | 8046584d; bc8e124d | Queued/reordered replies, editor generations, original retries and native revision regressions preserve current drafts and confirmations. |
-| T3.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | eb2a245a | PR #457 opened with the immutable report; exact-HEAD controller validation and integration pending. |
+| T3.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | eb2a245a; 2214eecf; c91ba4fe | PR #457 integrated into dev at c91ba4feac5b4296548a854e26b8d9cb59170ed7; all four ordered checks passed in 7IDEK3RU26UI7CUQSTNJ7T3NAK. |
 
 
 ### Slice 4: Shared queue observation and stable refresh
 
-Ticket: `TKT-20261029101139` — `ops/default/ticket/ready/20261029101139-web-tui-parity-dash.md`
-State: ready
+Ticket: `TKT-20261029101139` — `ops/default/ticket/in_progress/20261029101139-web-tui-parity-dash.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-4-dash.md`
 

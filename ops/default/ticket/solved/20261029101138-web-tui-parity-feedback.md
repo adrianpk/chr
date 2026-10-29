@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101138
 title: "Shared operation feedback and draft retention"
-status: reviewing
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -12,6 +12,8 @@ reported_at: 2026-10-29T10:11:38Z
 commits: [eb484dd34676fa4fa8f518642d797e83b7ef21a1, 8046584d910969a0be349bb85f9a7307e3f86d8a, bc8e124dadb420312d6d19bff536e588741941f3, eb2a245aa88f1291ec339ef42fbfa4394de2e139]
 branch: feat/slice-3-tui-feedback
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/457
+resolution: fixed
+closed_at: 2026-10-29T12:08:30Z
 reviewed_at: 2026-10-29T11:58:43Z
 started_at: 2026-10-29T11:17:56Z
 ready_at: 2026-10-29T10:11:38Z
@@ -56,6 +58,6 @@ One branch and one PR to `dev`; tasks T3.1-T3.5 are the canonical work units. Lo
 
 ## Evidence
 
-PR [#457](https://forge.adrianpk.com/adrianpk/chr/pulls/457) implements neutral operation outcomes, Action feedback, confirmed draft replacement and captured reply ownership. Focused component, service, Web and production PTY checks passed during implementation. The Slice 3 report and tracker record the evidence; final exact-HEAD validation and controller integration remain pending.
+PR [#457](https://forge.adrianpk.com/adrianpk/chr/pulls/457) implements neutral operation outcomes, Action feedback, confirmed draft replacement and captured reply ownership. Focused component, service, Web and production PTY checks passed during implementation. The Slice 3 report and tracker record the evidence; controller validation 7IDEK3RU26UI7CUQSTNJ7T3NAK passed all four ordered checks on c91ba4feac5b4296548a854e26b8d9cb59170ed7, and canonical Forgejo/Acta confirm integration at that exact commit.
 
 Related existing ticket: `TKT-20261023210422` (`ops/default/ticket/open/20261023210422-standardize-web-feedback-messages.md`) owns broader Web feedback consolidation; this set reuses neutral outcomes for the TUI and does not claim that separate Web work is resolved.
