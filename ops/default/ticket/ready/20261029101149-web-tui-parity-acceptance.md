@@ -1,0 +1,55 @@
+---
+id: TKT-20261029101149
+title: "Parity acceptance and capability inventory"
+status: ready
+kind: task
+severity: medium
+priority: normal
+scope: ui
+tags: tui, parity, web-tui-parity
+source: review
+reported_at: 2026-10-29T10:11:49Z
+commits: []
+ready_at: 2026-10-29T10:11:49Z
+---
+
+# Parity acceptance and capability inventory
+
+## Context
+
+Slice 14 of 14 in the maintainer-requested Web and TUI parity delivery. Source findings: I-003.
+
+## Scope
+
+- **T14.1:** Reconcile all 38 gap rows and four incidental findings with exact tests and dispositions; close runtime uncertainties without changing source claims into assumed results.
+- **T14.2:** Reconcile the palette and legacy capability inventory; gate unsupported safe checklist writers before confirmation without inventing a new domain or filesystem writer.
+- **T14.3:** Extend owned production PTY and Web reference fixtures to exercise manual forms and the complete guided journey, including focus, resize, cancel and restart.
+- **T14.4:** Update the User Guide and consolidate the delivered user-visible changelog outcomes; run final focused acceptance and publish the cycle report.
+- **T14.5:** Complete focused validation, `make verify`, the slice report, PR review and controller-owned dev integration; close this ticket only after the merge is verified.
+
+## Acceptance criteria
+
+- Every coverage row links a delivered slice/report and passing evidence or an explicit maintainer-approved exception.
+- No advertised unconditional failure remains; useful baseline extras retain tested access.
+- Real Bubble Tea process plus real HTTP/Chromium, filesystem, Git and SQLite; deterministic model/provider responses only.
+- No claims based on screenshots or reducer-only tests; no broad suite, new dependency or unapproved live project mutation.
+- Required checks pass on the exact candidate; a report links actual commands/results and the integration commit.
+
+## Dependencies and boundary
+
+Starts after Slice 13 is integrated; the tracker enforces the recorded sequence.
+Use existing application/domain owners and terminal styling. No new persistence model, dependency, UI-specific domain engine, main promotion or unrelated remediation. A discovered need outside this scope is a blocker/proposal, not implicit authority.
+
+## Delivery
+
+Plan: `ops/default/plan/web-tui-parity.md`
+Tracker: `ops/default/tracker/web-tui-parity.md`
+Specification: `ops/default/spec/web-tui-parity.md`
+Branch: `test/slice-14-tui-acceptance`
+Expected PR title: `test(slice-14): verify complete Web and TUI workflow parity`
+Report: `ops/default/report/slices/web-tui-parity/slice-14-acceptance.md`
+One branch and one PR to `dev`; tasks T14.1-T14.5 are the canonical work units. Looper owns the bounded sequence and conditional Rebase + Fast-forward merges.
+
+## Evidence
+
+Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
