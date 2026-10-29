@@ -41,13 +41,16 @@ T4.1 is `0910c75b747f267e3c13ba981c61fc5aad73601e`. T4.2 is
 `63f66c326325c6e1cdd91939891bb1d09242fbda`. T4.3 is
 `fed68882824878cb90735e3c381dd4203114f5ea`. T4.4 is
 `f265da0e8acfc14bc67a5163d44dae9c318582a5`.
+T4.2/T4.4 share the query-generation correction in `e242a9a67b20f4b3a7ba9c0409225ffef9b275d8`.
 
 Initial regressions reproduced a Board selection changing after row reorder
 and an older queue response installing after a filter change. Replacement now
 reconciles the previous Board key against its own case, column and filter,
 independently of the visible Dash queue. New queue queries disable execution
 until their observation arrives; old replies release their own read and cannot
-install obsolete rows. Document reply bindings remain independent of unrelated
+install obsolete rows. A monotonic query generation also rejects older reads
+and previews when navigation returns to the same filter/order/page values.
+Document reply bindings remain independent of unrelated
 queue refreshes.
 
 A policy-change regression also reproduced admission under a policy different
@@ -111,6 +114,13 @@ input, owned Git/SQLite/HTTP state and the existing cleanup deadlines. Preview,
 cancellation, retained detail and passive observation compare canonical bytes;
 children are stopped and joined. Native policy/scope rejection also compares
 Git bytes. No acceptance assertions or resource limits were weakened.
+
+The initial controller batch `7KJGJSIR7AP5F2T5FB72U7D5NK` passed make verify
+and focused terminal race checks before being interrupted for a reproduced
+query-generation defect. New regressions reproduced acceptance of both an older observation
+and an older preview after cycling back to the same order. Both pass after
+binding reads and previews to the monotonic query generation. This earlier
+batch is not final-candidate evidence.
 
 Looper records the final clean HEAD and ordered required/focused commands after
 PR-reference follow-up commits. The canonical PR Validation section carries
