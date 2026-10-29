@@ -458,9 +458,7 @@ func (m *Model) completeWorkAction(message workActionFinishedMsg) {
 
 func (m *Model) applyWorkActionResult(result WorkActionResult) {
 	if result.Tickets != nil {
-		m.tickets = NewTicketViews(result.Tickets)
-		m.selectFirstFilteredTicket()
-		m.reconcileDashSelection()
+		m.replaceTickets(result.Tickets)
 	}
 
 	m.observability = result.Observability

@@ -16,6 +16,10 @@ func (m *Model) selectedDashTicketView() (TicketView, bool) {
 }
 
 func (m *Model) reconcileDashSelection() {
+	if m.queuePending {
+		return
+	}
+
 	ticket, _ := m.selectedDashTicketView()
 	m.dashTicketKey = ticket.Key
 }

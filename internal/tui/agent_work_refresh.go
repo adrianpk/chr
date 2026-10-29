@@ -35,8 +35,9 @@ type AgentWorkRefreshResult struct {
 type agentWorkRefreshTickMsg struct{}
 
 type agentWorkRefreshFinishedMsg struct {
-	result AgentWorkRefreshResult
-	err    error
+	request AgentWorkRefreshRequest
+	result  AgentWorkRefreshResult
+	err     error
 }
 
 func agentWorkRefreshTickCmd() tea.Cmd {
@@ -60,12 +61,15 @@ func (m *Model) startAgentWorkRefresh() tea.Cmd {
 	return func() tea.Msg {
 		result, err := executor.RefreshAgentWork(request)
 
-		return agentWorkRefreshFinishedMsg{result: result, err: err}
+		return agentWorkRefreshFinishedMsg{request: request, result: result, err: err}
 	}
 }
 
 func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cmd {
 	m.agentWorkRefreshInFlight = false
+	if msg.request.Queue != m.queueRequest {
+		return m.requestDashRefresh()
+	}
 
 	if msg.err != nil {
 		m.statusMessage = "Agent work refresh failed: " + msg.err.Error()
@@ -74,9 +78,7 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 	}
 
 	if msg.result.Tickets != nil {
-		m.tickets = NewTicketViews(msg.result.Tickets)
-		m.selectFirstFilteredTicket()
-		m.reconcileDashSelection()
+		m.replaceTickets(msg.result.Tickets)
 	}
 
 	m.applyWorkflowPage(msg.result.Observability.WorkflowPage)
@@ -86,6 +88,7 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 	}
 
 	m.workObservation = msg.result.Observation
+	m.queuePending = false
 	m.reconcileDashSelection()
 
 	m.observability = msg.result.Observability

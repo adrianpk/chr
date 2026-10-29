@@ -49,6 +49,10 @@ func (m *Model) handleNavigationPageKey(keyType tea.KeyType) bool {
 }
 
 func (m *Model) handleNavigationActionKey(key string) tea.Cmd {
+	if command, handled := m.handleDashQueryKey(key); handled {
+		return command
+	}
+
 	if m.handleDashActionKey(key) {
 		return nil
 	}
@@ -59,9 +63,7 @@ func (m *Model) handleNavigationActionKey(key string) tea.Cmd {
 
 	switch key {
 	case "e":
-		if m.selectedPane == 1 {
-			return m.openSelectedSource()
-		}
+		return m.openSelectedPaneSource()
 	case "up", "k":
 		m.selectPreviousRecord()
 	case "down", "j":
@@ -102,10 +104,6 @@ func (m *Model) handleDashActionKey(key string) bool {
 		m.planWorkAction(WorkActionRunAllReady)
 	case "R":
 		m.planWorkAction(WorkActionRunAllReady)
-	case "p":
-		m.cycleAgentWorkPriorityFilter()
-	case "o":
-		m.cycleAgentWorkOrder()
 	case "x":
 		m.handleDashRepairReadinessKey()
 	case "s":
@@ -268,4 +266,12 @@ func lastRune(value string) string {
 	runes := []rune(value)
 
 	return string(runes[len(runes)-1])
+}
+
+func (m *Model) openSelectedPaneSource() tea.Cmd {
+	if m.selectedPane == 1 {
+		return m.openSelectedSource()
+	}
+
+	return nil
 }

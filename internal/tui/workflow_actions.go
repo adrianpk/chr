@@ -243,9 +243,7 @@ func (m *Model) completeNativeWorkAction(message workActionFinishedMsg) {
 	}
 
 	if message.Result.Tickets != nil {
-		m.tickets = NewTicketViews(message.Result.Tickets)
-		m.selectFirstFilteredTicket()
-		m.reconcileDashSelection()
+		m.replaceTickets(message.Result.Tickets)
 	}
 
 	if message.Result.WorkflowPage != nil {

@@ -254,6 +254,10 @@ func renderAppliedReadinessRepairLine(repair WorkReadinessAppliedRepairView) str
 
 func (m *Model) readyAgentWorkTickets() []TicketView {
 	if m.workObservation != nil {
+		if m.queuePending {
+			return nil
+		}
+
 		return m.observedDashTickets()
 	}
 
@@ -319,6 +323,7 @@ func (m *Model) renderAgentWorkQueueLines(limit int) []string {
 func (m *Model) cycleAgentWorkPriorityFilter() {
 	filters := []string{"", "critical", "high", "normal", "low"}
 	m.agentWorkPriorityFilter = nextStringValue(filters, m.agentWorkPriorityFilter)
+	m.changeDashQuery()
 	m.reconcileDashSelection()
 }
 
@@ -331,6 +336,7 @@ func (m *Model) cycleAgentWorkOrder() {
 		workflowstate.TicketOrderKey,
 	}
 	m.agentWorkOrder = nextTicketLoopOrder(orders, m.agentWorkOrder)
+	m.changeDashQuery()
 	m.reconcileDashSelection()
 }
 

@@ -9,9 +9,13 @@ import (
 )
 
 func (m *Model) filteredTickets() []TicketView {
+	return m.filteredTicketRows(m.SelectedView() == ViewBoard)
+}
+
+func (m *Model) filteredTicketRows(board bool) []TicketView {
 	tickets := m.caseTickets()
-	if m.SelectedView() == ViewBoard {
-		if m.boardAttentionActive() {
+	if board {
+		if m.boardColumn == boardAttentionColumn {
 			tickets = m.attentionTickets()
 		} else {
 			tickets = m.activeBoardColumnTickets()

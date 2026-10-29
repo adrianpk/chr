@@ -266,9 +266,7 @@ func (m *Model) applyPlanActionResult(result PlanActionResult) {
 	}
 
 	if result.Tickets != nil {
-		m.tickets = NewTicketViews(result.Tickets)
-		m.selectFirstFilteredTicket()
-		m.reconcileDashSelection()
+		m.replaceTickets(result.Tickets)
 	}
 
 	m.statusMessage = result.Message

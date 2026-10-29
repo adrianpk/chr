@@ -46,6 +46,10 @@ func (m *Model) observedQueueItem(key string) (work.QueueItem, bool) {
 }
 
 func (m *Model) dashQueueSummary() []string {
+	if m.queuePending {
+		return []string{"Loading queue observation..."}
+	}
+
 	if m.workObservation == nil {
 		return []string{fmt.Sprintf("Ready queue: %d", len(m.readyAgentWorkTickets()))}
 	}
@@ -70,15 +74,14 @@ func (m *Model) dashActionBlocked(action WorkActionID) bool {
 		return false
 	}
 
+	if m.queuePending && (action == WorkActionStartTicket || action == WorkActionRunAllReady) {
+		m.statusMessage = "Wait for the current queue observation."
+
+		return true
+	}
+
 	if action == WorkActionStartTicket {
-		ticket, ok := m.selectedDashTicketView()
-
-		item, observed := m.observedQueueItem(ticket.Key)
-		if !ok || !observed || item.Readiness != "ready" {
-			m.statusMessage = "Selected work is unavailable: " + item.Readiness + " " + item.Reason
-
-			return true
-		}
+		return m.dashSelectedActionBlocked()
 	}
 
 	if action == WorkActionRunAllReady && m.workObservation.Eligible == 0 {
@@ -96,4 +99,17 @@ func (m *Model) renderDashQueueSummary() string {
 	}
 
 	return "  " + strings.Join(m.dashQueueSummary(), "\n  ") + "\n"
+}
+
+func (m *Model) dashSelectedActionBlocked() bool {
+	ticket, ok := m.selectedDashTicketView()
+
+	item, observed := m.observedQueueItem(ticket.Key)
+	if !ok || !observed || item.Readiness != "ready" {
+		m.statusMessage = "Selected work is unavailable: " + item.Readiness + " " + item.Reason
+
+		return true
+	}
+
+	return false
 }

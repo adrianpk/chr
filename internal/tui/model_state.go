@@ -128,6 +128,7 @@ type workState struct {
 	dashTicketKey           string
 	workObservation         *work.Observation
 	queueRequest            work.Request
+	queuePending            bool
 	observability           ObservabilityView
 	workReadiness           WorkReadinessView
 	agentWorkPriorityFilter string
