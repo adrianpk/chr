@@ -22,6 +22,7 @@ func TestTUIHarnessSelectionRead(t *testing.T) {
 
 	model = tuiHarnessStep(t, model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p"), Alt: true})
 	model = tuiHarnessStep(t, model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("h")})
+
 	for _, expected := range []string{"Worker default: alpha", "model-a", "Generation default: Legacy dispatch", before.ID, "running", "Retained worker bindings", "remote auth not tested"} {
 		if !strings.Contains(strings.Join(strings.Fields(model.View()), " "), expected) {
 			t.Fatal("picker omitted shared selection or retained binding", expected, model.View())
