@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 13 — Wizard execution, results and recovery.
 Completed slices: 12/14
-Completed tasks: 60/70
+Completed tasks: 64/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -229,18 +229,18 @@ Report: `ops/default/report/slices/web-tui-parity/slice-12-wizard-authoring.md`
 
 ### Slice 13: Wizard execution, results and recovery
 
-Ticket: `TKT-20261029101148` — `ops/default/ticket/in_progress/20261029101148-web-tui-parity-wizard-results.md`
-State: in_progress
+Ticket: `TKT-20261029101148` — `ops/default/ticket/reviewing/20261029101148-web-tui-parity-wizard-results.md`
+State: reviewing
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-13-wizard-results.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T13.1 | Use the case-filtered Board for wizard execution, progress, review links and eligible lifecycle controls. | pending | — | Planned: Counts distinguish validated, confirmed and remaining work using retained receipts. |
-| T13.2 | Render structured terminal results with summary, branch/PR, delivery evidence and validation commands/exit codes. | pending | — | Planned: Open PR or successful worker cannot be shown as confirmed delivery; JSON export remains available. |
-| T13.3 | Confirm cancellation with the same saved-document/completed-change warning and show Pause only where domain policy permits it. | pending | — | Planned: Owned runtime evidence for G-013 proves confirmation and retained artifacts; no implicit rollback. |
-| T13.4 | Keep polling read-only, preserve unsent drafts and navigation, and retain later ideas/originals as existing secondary capabilities. | pending | — | Planned: Owned runtime evidence for G-014 proves no redirect, draft replacement or hidden progression while typing. |
-| T13.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T13.1 | Use the case-filtered Board for wizard execution, progress, review links and eligible lifecycle controls. | done | ed20cd54 | Real native admission and shared wide/narrow Board tests pass; validated, confirmed, review and remaining counters stay distinct. |
+| T13.2 | Render structured terminal results with summary, branch/PR, delivery evidence and validation commands/exit codes. | done | 8972f55d | Real open-PR versus verified delivery/closing checks pass; exact receipt hashes, refs, validation commands/exit codes and JSON toggle are asserted. |
+| T13.3 | Confirm cancellation with the same saved-document/completed-change warning and show Pause only where domain policy permits it. | done | 66d738e1 | Production PTY proves visible execution Pause, cancelled confirmation writes nothing, confirmed cancellation retains exact originals/checkpoints and worker commit; domain limits unchanged. |
+| T13.4 | Keep polling read-only, preserve unsent drafts and navigation, and retain later ideas/originals as existing secondary capabilities. | done | 24112fcb | Production PTY observes two canonical peer ideas through polling; complete draft, typing and earlier Dumps navigation survive, with zero submitted answers or passive writes. |
+| T13.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | reviewing | — | Report and PR preparation; task checks pass. Final ordered controller validation and dev integration pending. |
 
 ### Slice 14: Parity acceptance and capability inventory
 

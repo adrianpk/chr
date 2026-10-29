@@ -266,7 +266,7 @@ Prerequisite: Slice 11 integrated into dev.
 
 ### Slice 13: Wizard execution, results and recovery
 
-Ticket: `TKT-20261029101148` — `ops/default/ticket/in_progress/20261029101148-web-tui-parity-wizard-results.md`
+Ticket: `TKT-20261029101148` — `ops/default/ticket/reviewing/20261029101148-web-tui-parity-wizard-results.md`
 Findings: G-011, G-012, G-013, G-014.
 Prerequisite: Slice 12 integrated into dev.
 

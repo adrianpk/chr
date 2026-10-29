@@ -20,7 +20,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   the same Deep/Fast controls, answer history and editor as manual quizzes.
   Specs and Plans show committed inputs, partial results and actionable blockers;
   retry after interruption reuses the saved operation and prepared tickets.
-  Stale answers keep their original text until a confirmed reload.
+  Execution uses the case-filtered Board; results show confirmed deliveries,
+  receipts and validation commands with exit codes. Cancellation confirms that
+  saved documents and completed changes remain. Background refresh preserves
+  typing and navigation; stale answers keep their text until a confirmed reload.
 
 - See all six TUI Board columns and Attention together on wide terminals while
   keeping ticket selection through resize. Browse retained workflows, members and

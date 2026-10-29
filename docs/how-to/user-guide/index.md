@@ -465,13 +465,23 @@ stage while you are reading, use `c` before its next control.
    prerequisite, then use current-stage `c` to reconcile that same operation.
    Restarting and reopening the workflow does not regenerate its saved plan or
    duplicate prepared tickets.
-4. Use only controls offered at the current stage. Available `p`, `u` and `x`
-   pause, resume or cancel without resetting retained scope or attempt limits.
-   When native approval is required, `a` opens its existing exact-candidate
-   inspection and confirmation. Review waits and an open PR do not prove delivery.
-5. Use `1`–`5` to inspect complete committed dump, quiz, specification, plan and
-   tracker originals, or `v` for retained results. Scroll with arrows or Page
-   Up/Page Down. A working-copy replacement does not change the committed image.
+4. Execution uses the case-filtered Board. Move between columns with Left/Right
+   and tickets with Up/Down; Tab switches focus to the ticket detail. Progress
+   distinguishes validated tasks, confirmed deliveries and remaining work.
+   Review links identify the actual branch and PR. When approval is required,
+   `a` opens its existing exact-candidate inspection and confirmation.
+5. Use only offered controls. `p` pauses active execution where allowed; `u`
+   resumes an eligible retained run. `x` asks for confirmation with **Saved
+   documents and completed changes will be kept.** Esc leaves the run unchanged.
+   Confirming cancellation discards unsent input and retains saved artifacts,
+   completed changes, scope and consumed attempts.
+6. Results on Board show the summary, confirmed branch/commit/PR and delivery
+   receipts, plus validation commands, exit codes and closing evidence. A worker
+   success or open PR remains unconfirmed until the retained evidence proves
+   delivery. `v` opens the JSON export; press it again to return to Board.
+7. Use `1`–`5` to inspect complete committed dump, quiz, specification, plan and
+   tracker originals. Scroll with arrows or Page Up/Page Down. A working-copy
+   replacement does not change the committed image.
    `i` records a later idea separately when offered.
 
 Manual save/generate commands are blocked while this case is bound to its wizard.
@@ -480,9 +490,11 @@ case. Esc leaves an editor after confirming unsent changes. Ctrl+C quits and
 joins the owned host; it does not cancel the canonical run. Paused runs remain
 paused when reopened. `r` reads current state; `y` retries the exact failed
 request after leaving its input, and current-stage `c` can reconcile a displayed
-retained operation. Refresh cannot replace an unsent draft's captured revision
-or question binding. Inside the Quiz editor, Alt+Y retries the captured failed
-request. Alt+R reloads the current question only after confirming that the unsent
+retained operation. Background reads preserve the selected tab, case, focus and
+unsent text while typing continues. They do not submit an answer or advance the
+run. Refresh cannot replace a draft's captured revision or question binding.
+Inside the Quiz editor, Alt+Y retries the captured failed request. Alt+R reloads
+the current question only after confirming that the unsent
 answer may be discarded; Esc keeps it. A newer observation cannot replace the
 captured question, mode or answer. See the [TUI reference](../../reference/tui.md#guided-use-cases).
 

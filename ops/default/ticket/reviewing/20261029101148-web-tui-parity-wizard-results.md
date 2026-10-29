@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101148
 title: "Wizard execution, results and recovery"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: high
@@ -9,7 +9,12 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:48Z
-commits: []
+commits:
+  - ed20cd540f319ecc74809656233f01b53fe771e3
+  - 8972f55df1ff14316f8c2282953e3abbebfe772a
+  - 66d738e145954fec713ace69f28beb17907b3b74
+  - 24112fcb7cc1f4688bc1846ce2a60925214e6730
+reviewed_at: 2026-10-29T18:03:11Z
 started_at: 2026-10-29T17:38:33Z
 branch: feat/slice-13-tui-wizard-results
 ready_at: 2026-10-29T10:11:48Z
@@ -54,4 +59,10 @@ One branch and one PR to `dev`; tasks T13.1-T13.5 are the canonical work units. 
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+T13.1–T13.4 implemented with the shared case Board, verified delivery/validation
+results, guarded cancellation and stable passive reads. Real Git/filesystem/SQLite
+and production terminal checks pass. Cancellation retains exact committed
+originals, checkpoints and completed worker changes; polling preserves a complete
+unsent answer and earlier document navigation without submitting or advancing.
+Task commands and evidence are recorded in the Slice 13 report. Final controller
+validation, canonical PR reference and controller-owned dev integration pending.

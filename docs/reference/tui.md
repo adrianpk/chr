@@ -103,8 +103,10 @@ write through a wizard-bound tab; clear case context explicitly for manual work.
 | `p` / `u` / `x` at the current stage | Apply an available pause, resume or cancel through shared owners. |
 | `a` | Inspect an available native approval through the existing exact confirmation. |
 | `i` | Enter a later idea separately when an input checkpoint exists. |
-| `1`–`5` / `v` | Read committed originals or the retained result export. |
-| arrows / `pgup` / `pgdown` | Scroll the complete stage/document. |
+| `1`–`5` / `v` | Read committed originals / toggle the JSON result export and Board. |
+| arrows / `pgup` / `pgdown` | Navigate the shared Board or scroll the complete stage/document. |
+| `tab` / `shift+tab` on Board | Switch ticket/detail focus. |
+| `R` / `g` / `d` on Board | Reconcile, extend an allowance or answer an integration decision when offered by the native owner. |
 | `r` | Read canonical state without advancing it. |
 | `y` outside an editor | Retry the exact original failed request. |
 | `c` | Return to the current tab, or reconcile an offered retained operation when already there. |
@@ -129,11 +131,27 @@ Continue uses the canonical retained command. Read-only refresh preserves failed
 requests and unsent drafts; older replies cannot replace newer run state. Explicit
 Quiz reload confirms discarding the old answer before reading a fresh binding.
 
+Execution and results use the shared case-filtered Board, including its wide
+columns, narrow layout, ticket/detail focus and filters. Progress separates
+validated, confirmed and remaining work; review shows the actual branch and PR.
+Results include the summary, repository, branch, commit, PR, delivery receipt and
+hash, validation commands/exit codes and closing evidence. The JSON export is an
+additional view. A worker exit or an open PR cannot establish completion.
+
+Cancel confirms with **Saved documents and completed changes will be kept.**
+The same confirmation explains that unsent text will be discarded. Esc preserves
+both the run and draft. Pause is offered only during pending, running,
+waiting-review or waiting-integration execution. Resume and cancellation retain
+the existing domain guards, scope and consumed limits; cancellation rolls back
+neither committed originals nor completed changes.
+
 Inspection reads committed bytes with their actual reference/commit binding,
-independent of later working-copy replacements. Controls remain guarded by the
-guided/native owners. Pauses and process exit retain consumed work and original
-limits. Validated tasks, review waits, confirmed delivery and closing evidence
-remain distinct; a worker exit or an open PR cannot establish completion.
+independent of later working-copy replacements. Passive reads preserve selected
+case, tab, focus and unsent input. Typing and explicit submission remain
+available during a background read; submission still checks the captured
+revision and question. An older response cannot replace newer guided or native
+state. Polling never submits input, advances the run or redirects an earlier
+document being read. Later ideas remain a separate explicit action.
 
 ## Command Palette
 
