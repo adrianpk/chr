@@ -105,8 +105,9 @@ func renderContentReadLines(content string, width int) []string {
 	return lines
 }
 
-func (m *Model) renderSelectedDumpEditLines(_ []string, width, height int) []string {
-	lines := []string{shellMutedStyle.Render(m.dumpActionHint())}
+func (m *Model) renderSelectedDumpEditLines(context []string, width, height int) []string {
+	lines := append([]string{"Title and scope are retained; edit the body below."}, context...)
+	lines = append(lines, shellMutedStyle.Render(m.dumpActionHint()))
 
 	editorHeight := maxInt(height-len(lines)-1, 3)
 	lines = append(lines, strings.Split(m.renderDumpEditInput(maxInt(width, 1), editorHeight), "\n")...)

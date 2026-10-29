@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os/exec"
 
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	"forge.adrianpk.com/chr/internal/tui"
 )
@@ -226,9 +227,14 @@ func (e tuiDumpActionExecutor) executeEditDump(
 		return tui.DumpActionResult{}, err
 	}
 
+	body, err := opsmetadata.SplitMarkdown([]byte(result.Content))
+	if err != nil {
+		return tui.DumpActionResult{}, err
+	}
+
 	return tui.DumpActionResult{
 		Message: result.Message,
-		Content: result.Content, Revision: result.Revision,
+		Content: string(body.Body), Revision: result.Revision,
 		SelectedPath: result.RelativePath,
 	}, nil
 }
@@ -294,6 +300,7 @@ func dumpActionResult(result DumpOperationResult, operations service) (tui.DumpA
 
 	actionResult := tui.DumpActionResult{
 		Committed: result.Committed, ProjectionStale: result.ProjectionStale,
+		SelectedPath: result.RelativePath, Revision: result.Revision,
 		Message: result.Message,
 		Dumps:   dumps,
 	}

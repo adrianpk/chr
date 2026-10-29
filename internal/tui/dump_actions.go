@@ -128,6 +128,12 @@ func (m *Model) updateDumpEditKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) planDumpAction(action DumpActionID) {
+	if action == DumpActionCreate {
+		m.openDumpCreateForm()
+
+		return
+	}
+
 	m.dumpAction = m.newDumpActionState(action)
 	m.statusMessage = ""
 }
@@ -313,19 +319,8 @@ func (m *Model) defaultDumpScope() DumpScope {
 	return DumpScope{CaseSlug: selectedCase.Slug}
 }
 
-func (m *Model) defaultDumpTitle() string {
-	scope := m.defaultDumpScope()
-	if strings.TrimSpace(scope.CaseSlug) == "" {
-		return "Project dump"
-	}
-
-	return scope.CaseSlug + " dump"
-}
-
 func (m *Model) newDumpActionState(action DumpActionID) DumpActionState {
 	switch action {
-	case DumpActionCreate:
-		return m.newCreateDumpActionState(action)
 	case DumpActionAppend:
 		return m.newSelectedDumpActionState(action, "Append dump")
 	case DumpActionEdit:
@@ -336,25 +331,6 @@ func (m *Model) newDumpActionState(action DumpActionID) DumpActionState {
 		return m.newSelectedDumpActionState(action, "Refresh dumps")
 	default:
 		return DumpActionState{}
-	}
-}
-
-func (m *Model) newCreateDumpActionState(action DumpActionID) DumpActionState {
-	request := DumpActionRequest{
-		Action: action, OperationID: rand.Text(),
-		Title:   m.defaultDumpTitle(),
-		Content: "Initial dump created from the TUI.",
-		Scope:   m.defaultDumpScope(),
-	}
-
-	return DumpActionState{
-		Pending: true,
-		Request: request,
-		Title:   "Create dump",
-		Details: []string{
-			"Title: " + request.Title,
-			"Use Case: " + dumpScopeLabel(request.Scope),
-		},
 	}
 }
 

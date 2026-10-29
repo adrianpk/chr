@@ -1,24 +1,30 @@
 package tui
 
 import (
+	"crypto/rand"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type textFormChoice struct{ Label, Value, Revision string }
+
 type textFormField struct {
+	Choices   []textFormChoice
+	Choice    int
 	Label     string
 	Multiline bool
 	Input     textarea.Model
 }
 
 type textFormState struct {
+	DumpRequest        DumpActionRequest
 	Active             bool
 	Title, SubmitLabel string
 	Fields             []textFormField
 	Focus              int
-	Submit             feedbackRecovery
+	Submit             func(*Model) tea.Cmd
 }
 
 func newTextFormField(label string, multiline bool, limit int) textFormField {
@@ -71,24 +77,45 @@ func (m *Model) updateTextFormKey(message tea.KeyMsg) tea.Cmd {
 	case tea.KeyCtrlS:
 		return m.textForm.Submit(m)
 	case tea.KeyEnter:
-		if m.textForm.Focus == len(m.textForm.Fields) {
-			return m.textForm.Submit(m)
-		}
-
-		if !m.textForm.Fields[m.textForm.Focus].Multiline {
-			m.focusTextForm(m.textForm.Focus + 1)
-
-			return nil
+		if command, handled := m.enterTextForm(); handled {
+			return command
 		}
 	}
 
+	return m.updateTextFormInput(message)
+}
+
+func (m *Model) enterTextForm() (tea.Cmd, bool) {
+	if m.textForm.Focus == len(m.textForm.Fields) {
+		return m.textForm.Submit(m), true
+	}
+
+	if !m.textForm.Fields[m.textForm.Focus].Multiline {
+		m.focusTextForm(m.textForm.Focus + 1)
+
+		return nil, true
+	}
+
+	return nil, false
+}
+
+func (m *Model) updateTextFormInput(message tea.KeyMsg) tea.Cmd {
 	if m.textForm.Focus == len(m.textForm.Fields) {
 		return nil
 	}
 
 	field := &m.textForm.Fields[m.textForm.Focus]
+	if len(field.Choices) != 0 {
+		return m.updateTextFormChoice(message)
+	}
+
+	before := field.Input.Value()
 	input, command := field.Input.Update(message)
+
 	field.Input = input
+	if input.Value() != before {
+		m.rotateTextFormIntent()
+	}
 
 	return command
 }
@@ -112,9 +139,9 @@ func discardTextForm(m *Model) tea.Cmd {
 }
 
 func (m *Model) textFormBinding() string {
-	values := []string{m.textForm.Title}
+	values := []string{m.textForm.Title, m.textForm.DumpRequest.Path, m.textForm.DumpRequest.Revision, m.textForm.DumpRequest.OperationID}
 	for _, field := range m.textForm.Fields {
-		values = append(values, field.Input.Value())
+		values = append(values, field.value())
 	}
 
 	return strings.Join(values, "\x00")
@@ -124,6 +151,12 @@ func (m *Model) textFormLines(width, height int) []string {
 	lines := []string{"Tab / Shift+Tab choose a field; Ctrl+S submits.", ""}
 
 	for index, field := range m.textForm.Fields {
+		if len(field.Choices) != 0 {
+			lines = append(lines, m.textFormChoiceLine(field, index))
+
+			continue
+		}
+
 		if index != m.textForm.Focus {
 			lines = append(lines, field.Label+": "+fitPlainLine(strings.ReplaceAll(field.Input.Value(), "\n", " / "), max(1, width-len(field.Label)-2)))
 
@@ -150,4 +183,47 @@ func (m *Model) textFormLines(width, height int) []string {
 	}
 
 	return append(lines, "", prefix+"["+m.textForm.SubmitLabel+"]", "Esc cancels; Enter on the button submits.")
+}
+
+func (field textFormField) value() string {
+	if len(field.Choices) != 0 {
+		return field.Choices[field.Choice].Value
+	}
+
+	return field.Input.Value()
+}
+
+func (m *Model) rotateTextFormIntent() {
+	if m.textForm.DumpRequest.Action != "" {
+		m.textForm.DumpRequest.OperationID = rand.Text()
+	}
+}
+
+func (m *Model) updateTextFormChoice(message tea.KeyMsg) tea.Cmd {
+	field := &m.textForm.Fields[m.textForm.Focus]
+	delta := 0
+
+	switch message.String() {
+	case "right", "down", " ":
+		delta = 1
+	case "left", "up":
+		delta = -1
+	}
+
+	if delta != 0 {
+		field.Choice = (field.Choice + delta + len(field.Choices)) % len(field.Choices)
+
+		m.rotateTextFormIntent()
+	}
+
+	return nil
+}
+
+func (m *Model) textFormChoiceLine(field textFormField, index int) string {
+	prefix := "  "
+	if index == m.textForm.Focus {
+		prefix = "> "
+	}
+
+	return prefix + field.Label + ": " + field.Choices[field.Choice].Label + " (left/right choose)"
 }

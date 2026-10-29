@@ -1310,24 +1310,21 @@ func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
-	if !planned.dumpAction.Pending {
-		t.Fatal("dump action is not pending")
+	if !planned.textForm.Active || planned.dumpAction.Pending {
+		t.Fatal("create command did not open the input form")
 	}
 
-	if planned.dumpAction.Request.Scope.CaseSlug != "blog" {
-		t.Fatalf("dump scope = %#v, want blog", planned.dumpAction.Request.Scope)
+	scope := planned.textForm.Fields[0]
+	if scope.value() != "blog" {
+		t.Fatal("form lost the captured case", scope.value())
 	}
 
-	view := planned.renderDumpAction()
-	for _, want := range []string{
-		"Confirm Action",
-		"Create dump",
-		"Title: blog dump",
-		"Use Case: blog",
-	} {
-		if !strings.Contains(view, want) {
-			t.Fatalf("View() missing %q:\n%s", want, view)
-		}
+	if planned.textForm.Fields[1].Input.Value() != "" || planned.textForm.Fields[2].Input.Value() != "" {
+		t.Fatal("form manufactured title or content")
+	}
+
+	if !strings.Contains(planned.View(), "Create Dump") || !strings.Contains(planned.View(), "Scope: Blog") {
+		t.Fatal(planned.View())
 	}
 }
 
