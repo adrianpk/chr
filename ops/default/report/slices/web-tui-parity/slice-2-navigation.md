@@ -5,7 +5,7 @@ Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-2-tui-navigation`
-PR: pending
+PR: [#456](https://forge.adrianpk.com/adrianpk/chr/pulls/456)
 Base: `1ac51bac2aa5d307cc7400e7c07462c7e0542eda` on dev, after verified integration of PR #455
 
 ## Purpose
@@ -32,7 +32,9 @@ contextual Help, useful footer actions and reachable existing capabilities.
 
 T2.1-T2.3 share `f2d7961bebc10139851cdaaeae4ac28b3fafa725`: shell selection,
 case-scoped getters and contextual return state depend on one model transition.
-The task ledger records the acceptance, inventory and PR-reference commits.
+Acceptance and capability inventory are recorded in
+`5dbd0c2ba271465b3e47d66143f86658b802c3c8`; the task ledger also records
+PR preparation and the pending controller integration boundary.
 
 The first navigation regression reproduced the previous Project startup and
 nine-tab mapping. Existing fixtures now select view IDs rather than old numeric

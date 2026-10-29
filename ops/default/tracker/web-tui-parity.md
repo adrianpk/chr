@@ -57,18 +57,18 @@ Report: `ops/default/report/slices/web-tui-parity/slice-1-safe-actions.md`
 
 ### Slice 2: Case-oriented shell and contextual help
 
-Ticket: `TKT-20261029101137` — `ops/default/ticket/in_progress/20261029101137-web-tui-parity-navigation.md`
-State: in_progress
-PR: pending
+Ticket: `TKT-20261029101137` — `ops/default/ticket/reviewing/20261029101137-web-tui-parity-navigation.md`
+State: reviewing
+PR: [#456](https://forge.adrianpk.com/adrianpk/chr/pulls/456)
 Report: `ops/default/report/slices/web-tui-parity/slice-2-navigation.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T2.1 | Align tabs and initial view by View ID: Cases, Dumps, Quizzes, Specs, Plans, Board, Dash; F1-F7 and F10 Exit. | done | f2d7961b | Seven View IDs own startup, F1-F7 and actual footer clicks; focused shell and full catalog regressions pass. |
-| T2.2 | Keep Project in header context and an alt+p action; expose real ? Help outside text modes and retain palette access. | done | f2d7961b | Contextual Help returns to the same pane; text, function-key and mouse guards retain drafts; Project and Harness remain accessible. |
-| T2.3 | Propagate functional case/run binding between tabs and show active-view actions in the real shell footer. | done | f2d7961b | Case-scoped artifact and Board selection, retained-run binding, missing-case recovery and passive draft preservation regressions pass. |
-| T2.4 | Inventory useful legacy views and retain workspace-index health, runtime information and existing commands through Project, Dash or palette. | done | f2d7961b | Useful-capability inventory is in the Slice 2 report; production loader and PTY verify auxiliary access and unchanged canonical documents. |
-| T2.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Focused checks passed; final exact-HEAD controller validation, canonical PR and integration pending. |
+| T2.1 | Align tabs and initial view by View ID: Cases, Dumps, Quizzes, Specs, Plans, Board, Dash; F1-F7 and F10 Exit. | done | f2d7961b; 5dbd0c2b | Seven View IDs own startup, F1-F7 and actual footer clicks; focused shell and full catalog regressions pass. |
+| T2.2 | Keep Project in header context and an alt+p action; expose real ? Help outside text modes and retain palette access. | done | f2d7961b; 5dbd0c2b | Contextual Help returns to the same pane; text, function-key and mouse guards retain drafts; Project and Harness remain accessible. |
+| T2.3 | Propagate functional case/run binding between tabs and show active-view actions in the real shell footer. | done | f2d7961b; 5dbd0c2b | Case-scoped artifact and Board selection, retained-run binding, missing-case recovery and passive draft preservation regressions pass. |
+| T2.4 | Inventory useful legacy views and retain workspace-index health, runtime information and existing commands through Project, Dash or palette. | done | f2d7961b; 5dbd0c2b | Useful-capability inventory is in the Slice 2 report; production loader and PTY verify auxiliary access and unchanged canonical documents. |
+| T2.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 5dbd0c2b | PR #456 opened; final exact-HEAD controller validation and canonical integration pending. |
 
 ### Slice 3: Shared operation feedback and draft retention
 

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101137
 title: "Case-oriented shell and contextual help"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -9,8 +9,10 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:37Z
-commits: []
+commits: [f2d7961bebc10139851cdaaeae4ac28b3fafa725, 5dbd0c2ba271465b3e47d66143f86658b802c3c8]
 branch: feat/slice-2-tui-navigation
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/456
+reviewed_at: 2026-10-29T11:08:36Z
 started_at: 2026-10-29T10:41:26Z
 ready_at: 2026-10-29T10:11:37Z
 ---
@@ -54,4 +56,4 @@ One branch and one PR to `dev`; tasks T2.1-T2.5 are the canonical work units. Lo
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+Seven-tab navigation, contextual Help and Project access, case/run binding and the retained capability inventory are implemented in PR [#456](https://forge.adrianpk.com/adrianpk/chr/pulls/456). Component, retained-run and real-terminal regressions passed during implementation. The tracker and Slice 2 report record the commands and pending exact-HEAD validation; controller integration is required before closure.
