@@ -65,12 +65,7 @@ func (m *Model) wizardQuizLines() []string {
 		return nil
 	}
 
-	width := 72
-	if m.width != 0 {
-		width = max(1, m.width-6)
-	}
-
-	return m.renderSelectedQuizDetailLines(width)
+	return m.renderSelectedQuizDetailLines(m.wizardContentWidth())
 }
 
 func (m *Model) wizardQuizVisible() bool {

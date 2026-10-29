@@ -39,6 +39,9 @@ func (e tuiGuidedExecutor) read(ctx context.Context, request tui.GuidedRequest) 
 	}
 
 	view := tuiGuidedView(observed)
+	if err := e.projectPreparedOriginals(ctx, observed, &view); err != nil {
+		return view, err
+	}
 
 	cases, err := authoringcore.NewCaseMetadataService(e.operations.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.RecordLimit)
 	if err != nil {

@@ -82,14 +82,7 @@ func (m *Model) wizardTabLines() []string {
 		lines = append(lines, "Prerequisite: "+problem)
 	}
 
-	if original := m.wizardTabOriginal(); original != nil {
-		lines = append(lines, "Committed original (read-only)")
-		if view.Document != nil {
-			lines = append(lines, "Original commit: "+original.Commit)
-		}
-
-		lines = append(lines, original.Content)
-	}
+	lines = append(lines, m.wizardOriginalLines()...)
 
 	if m.guided.Busy {
 		lines = append(lines, "Reading or saving the retained step…")

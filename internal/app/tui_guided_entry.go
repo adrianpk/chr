@@ -58,7 +58,7 @@ func tuiWizardOriginals(observed GuidedUseCaseInspection) []tui.GuidedDocument {
 	}
 
 	for _, artifact := range observed.Artifacts {
-		if artifact.Stage == "dump" {
+		if artifact.Stage == "dump" || artifact.Stage == "preparation" {
 			continue
 		}
 
