@@ -2,6 +2,7 @@ package app
 
 import (
 	"maps"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -32,6 +33,49 @@ func TestTUISpecForm(t *testing.T) {
 			editTUISpecForm(t, operations, model, documents[0])
 			cancelTUISpecForm(t, operations, model)
 		})
+	}
+}
+
+// A committed Create whose catalog projection fails must retry its receipt,
+// rather than producing a second document after the source is repaired.
+func TestTUISpecRetry(t *testing.T) {
+	provider, _ := newWebQuizFixture(t)
+	operations := provider.service(t.Context())
+
+	seed, err := operations.CreateSpec(CreateSpecRequest{OperationID: "retry-seed", Title: "Retained seed", Body: "Seed body.", Status: "draft"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(operations.projectContext.ProjectDir, filepath.Dir(seed.Reference), "metadata.json")
+
+	before, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(path, []byte("invalid metadata"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	model := specFormModel(t, operations)
+	createTUISpecForm(t, model, "named-work")
+
+	if !strings.Contains(model.View(), "Spec saved; catalog refresh failed") {
+		t.Fatal("committed partial result was hidden", model.View())
+	}
+
+	if err := os.WriteFile(path, before, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("y")})
+
+	documents, err := operations.ListSpecDocuments()
+	checkSpecDocumentCount(t, documents, err, 2)
+
+	if strings.Contains(model.View(), "Create Spec") || !strings.Contains(model.View(), "Spec saved.") {
+		t.Fatal("unchanged retry did not reconcile its committed result", model.View())
 	}
 }
 

@@ -10,7 +10,7 @@ import (
 )
 
 // ListSpecDocuments keeps concrete-document reads separate from latest-in-scope
-// inventory queries used by generation and existing CLI/TUI adapters.
+// inventory queries used by generation and existing CLI adapters.
 func (s service) ListSpecDocuments() ([]authoringcore.SpecDocument, error) {
 	return authoringcore.ListSpecDocuments(s.ctx, s.projectContext.ProjectDir)
 }

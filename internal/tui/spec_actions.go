@@ -136,6 +136,17 @@ func (m *Model) updateSpecActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) planSpecAction(action SpecActionID) {
+	switch action {
+	case SpecActionCreate:
+		m.openSpecCreateForm()
+
+		return
+	case SpecActionEdit:
+		m.openSpecEditForm()
+
+		return
+	}
+
 	m.specAction = m.newSpecActionState(action)
 	m.statusMessage = ""
 }

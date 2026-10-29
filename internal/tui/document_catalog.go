@@ -52,10 +52,13 @@ func (catalog documentCatalogView) selectedItem() (documentCatalogItem, bool) {
 
 func (catalog documentCatalogView) focusList(limit int) []string {
 	if len(catalog.items) == 0 {
-		return []string{"No use cases found."}
+		return []string{catalog.emptyMessage()}
 	}
 
 	lines := []string{shellMutedStyle.Render("Use Case")}
+	if catalog.kind == "spec" {
+		lines[0] = shellMutedStyle.Render("Specification")
+	}
 
 	for _, spec := range catalog.items {
 		prefix := " "
@@ -75,6 +78,10 @@ func (catalog documentCatalogView) focusList(limit int) []string {
 func (catalog documentCatalogView) detailLines(width int) []string {
 	spec, ok := catalog.selectedItem()
 	if !ok {
+		if catalog.kind == "spec" {
+			return []string{"No spec selected."}
+		}
+
 		return []string{"No use case selected."}
 	}
 
@@ -108,7 +115,7 @@ func (catalog documentCatalogView) detailLines(width int) []string {
 
 func (catalog documentCatalogView) render() string {
 	if len(catalog.items) == 0 {
-		return catalog.title + "\n  No use cases found.\n\n  " + catalog.hint
+		return catalog.title + "\n  " + catalog.emptyMessage() + "\n\n  " + catalog.hint
 	}
 
 	var output strings.Builder
@@ -132,6 +139,14 @@ func (catalog documentCatalogView) render() string {
 	output.WriteString(strings.Join(catalog.detailLines(72), "\n"))
 
 	return strings.TrimRight(output.String(), "\n")
+}
+
+func (catalog documentCatalogView) emptyMessage() string {
+	if catalog.kind == "spec" {
+		return "No specs found."
+	}
+
+	return "No use cases found."
 }
 
 func (m *Model) renderDocumentCatalogWorkspace(width, height int, catalog documentCatalogView) string {

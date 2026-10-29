@@ -1,6 +1,10 @@
 package app
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -32,6 +36,24 @@ func TestTUISpecCatalog(t *testing.T) {
 	}
 
 	checkTUISpecCatalog(t, operations, terminal)
+	checkTUISpecHTTP(t, provider, terminal)
+}
+
+func checkTUISpecHTTP(t *testing.T, provider webViewProvider, terminal []tui.SpecView) {
+	t.Helper()
+
+	response := httptest.NewRecorder()
+	webQuizHandler(t, provider).ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/specs", nil))
+
+	if response.Code != http.StatusOK {
+		t.Fatal(response.Code, response.Body.String())
+	}
+
+	for _, document := range terminal {
+		if !strings.Contains(response.Body.String(), url.QueryEscape(document.RelativePath)) {
+			t.Fatal("HTTP catalog omitted canonical reference", document.RelativePath)
+		}
+	}
 }
 
 func checkTUISpecCatalog(t *testing.T, operations service, terminal []tui.SpecView) {

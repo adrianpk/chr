@@ -83,6 +83,8 @@ func DefaultCommandRegistry() []Command {
 		{ID: "quiz-mode-deep", Title: "Switch quiz to deep mode", Description: "Use deep generation for the selected quiz.", Action: CommandActionPlanQuiz, Quiz: QuizActionDeepMode},
 		{ID: "quiz-mode-fast", Title: "Switch quiz to fast mode", Description: "Use fast candidate generation for the selected quiz.", Action: CommandActionPlanQuiz, Quiz: QuizActionFastMode},
 		{ID: "generate-spec", Title: "Generate spec", Description: "Generate a draft spec from available project and use-case context.", Action: CommandActionPlanSpec, Spec: SpecActionGenerate},
+		{ID: "create-spec", Title: "Create spec", Description: "Enter scope, title, body and draft state.", Action: CommandActionPlanSpec, Spec: SpecActionCreate},
+		{ID: "edit-spec", Title: "Edit selected spec", Description: "Edit the captured document while retaining its case binding.", Action: CommandActionPlanSpec, Spec: SpecActionEdit},
 		{ID: "generate-acceptance-feature", Title: "Generate acceptance feature", Description: "Generate a Gherkin acceptance feature from the selected spec context.", Action: CommandActionPlanSpec, Spec: SpecActionGenerateFeature},
 		{ID: "refresh-specs", Title: "Refresh specs", Description: "Reload scoped specs.", Action: CommandActionPlanSpec, Spec: SpecActionRefresh},
 		{ID: "generate-plan", Title: "Generate plan", Description: "Generate an implementation plan from available project and use-case context.", Action: CommandActionPlanPlan, Plan: PlanActionGenerate},
