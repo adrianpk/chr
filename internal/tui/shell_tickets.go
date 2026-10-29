@@ -26,6 +26,10 @@ func (m *Model) renderTicketWorkspace(width, height int) string {
 		return fitBlock(m.renderDetailPanel("Detail", detailLines, width, height, true), width, height)
 	}
 
+	if m.SelectedView() == ViewBoard && width >= 132 && height >= 27 {
+		return m.renderResponsiveBoard(width, height, detailLines)
+	}
+
 	horizontal := m.splitWidths(width)
 	leftWidth, rightWidth := horizontal.Left, horizontal.Right
 	list := m.renderTicketFocusList(maxInt(leftWidth-4, 1), height-2)
@@ -101,11 +105,11 @@ func (m *Model) renderMaximizedBoardRow(columns []string, width, height int) str
 			panels = append(panels, panelVerticalGap(height))
 		}
 
-		tickets := m.ticketsForBoardColumn(column)
+		tickets := m.visibleBoardTickets(column)
 		lines := m.renderMaximizedBoardColumnLines(tickets, maxInt(columnWidth-4, 1), height-2)
 		title := fmt.Sprintf("%s (%d)", ticketcore.BoardColumnTitle(column), len(tickets))
 
-		panels = append(panels, renderPanel(title, lines, columnWidth, height, m.activeBoardColumn() == column))
+		panels = append(panels, renderPanel(title, lines, columnWidth, height, m.selectedPane == 0 && !m.boardAttentionActive() && m.activeBoardColumn() == column))
 	}
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, panels...)
@@ -252,7 +256,7 @@ func boardMaximizedRows(columnCount, columnsPerRow int) int {
 }
 
 func (m *Model) renderBoardAttentionFocusList(limit int) []string {
-	tickets := m.attentionTickets()
+	tickets := m.visibleBoardTickets(boardAttentionColumn)
 	if len(tickets) == 0 {
 		return []string{"No attention tickets."}
 	}
