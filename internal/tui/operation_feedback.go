@@ -73,12 +73,12 @@ func (m *Model) operationFeedbackLines() []string {
 }
 
 func (m *Model) updateFeedbackKey(message tea.KeyMsg) (tea.Cmd, bool) {
-	if m.guided.Active || m.harnessSelection.Active {
-		return nil, false
-	}
-
 	if m.draftConfirmation.Active {
 		return m.updateDraftConfirmation(message), true
+	}
+
+	if m.guided.Active || m.harnessSelection.Active {
+		return nil, false
 	}
 
 	if message.String() == "alt+o" && m.feedback.Result.Status != "" {

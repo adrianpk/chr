@@ -70,7 +70,7 @@ func (m *Model) wizardTabLines() []string {
 			hint = "e Input · " + hint
 		}
 
-		lines = append(lines, view.Prompt, m.guidedControlHint(), hint)
+		lines = append(lines, m.wizardStagePrompt(), m.guidedControlHint(), hint)
 	} else {
 		lines = append(lines, "Read-only stage. c Continue to the current stage.")
 	}
@@ -96,7 +96,7 @@ func (m *Model) wizardTabLines() []string {
 }
 
 func (m *Model) completeWizardDraft(message guidedFinishedMsg) {
-	if message.Request.QuizAction != "" {
+	if message.Request.QuizAction != "" || message.Request.ReloadQuiz {
 		m.quizAnswer = QuizAnswerState{}
 	}
 

@@ -70,6 +70,7 @@ type QuizAnswerState struct {
 	Guided   *GuidedRequest
 	History  []QuizAnswerRecord
 	Question string
+	Mode     string
 	Binding  QuizActionBinding
 	Active   bool
 	Scope    QuizScope
@@ -153,6 +154,10 @@ func (m *Model) updateQuizAnswerInput(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) updateQuizAnswerControl(key string) (tea.Cmd, bool) {
+	if command, handled := m.wizardQuizRecoveryKey(key); handled {
+		return command, true
+	}
+
 	if m.scrollQuizHistoryKey(key) {
 		return nil, true
 	}
@@ -338,6 +343,7 @@ func (m *Model) startQuizAnswer() {
 		Guided:   m.capturedWizardQuiz(),
 		History:  append([]QuizAnswerRecord(nil), quiz.History...),
 		Question: quiz.ActiveQuestionSummary,
+		Mode:     quiz.Mode,
 		Binding:  binding,
 		Active:   true,
 		Scope:    quiz.Scope,

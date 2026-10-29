@@ -100,7 +100,11 @@ func (m *Model) renderSelectedQuizAnswerLines(quiz QuizView, width int) []string
 	lines := []string{shellMutedStyle.Render(m.quizActionHint(quiz)), quizModeLine(quiz), ""}
 	lines = append(lines, wrapPlainText(m.quizAnswer.Question, maxInt(width, 1))...)
 	lines = append(lines, strings.Split(m.renderQuizAnswerInput(maxInt(width, 1), 6), "\n")...)
+
 	lines = append(lines, "alt+x cancels quiz  alt+m changes mode")
+	if m.quizAnswer.Guided != nil {
+		lines = append(lines, "alt+y retries the captured request  alt+r reloads after confirmation")
+	}
 
 	return append(lines, m.renderQuizHistory(m.quizAnswer.History, width)...)
 }
@@ -187,6 +191,10 @@ func (m *Model) manualQuizActionHint(quiz QuizView) string {
 }
 
 func (m *Model) selectedQuizView() (QuizView, bool) {
+	if quiz, ok := m.wizardQuizDraftView(); ok {
+		return quiz, true
+	}
+
 	if m.wizardQuizVisible() {
 		return *m.guided.View.Quiz, true
 	}

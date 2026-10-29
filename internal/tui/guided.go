@@ -15,6 +15,7 @@ type GuidedExecutor interface {
 type GuidedRequest struct {
 	Action, Document, CaseSlug string
 	QuizAction                 QuizActionID
+	ReloadQuiz                 bool
 	Command                    authoringcore.GuidedUseCaseCommand
 }
 
@@ -73,9 +74,13 @@ func (m *Model) startGuidedRequest(request GuidedRequest) tea.Cmd {
 	}
 
 	m.guidedSequence++
+
 	m.guided.Sequence, m.guided.Busy = m.guidedSequence, true
-	m.guided.Pending = &request
-	m.guided.Problem = ""
+	if request.Action == "input" || request.Action == "start" {
+		m.guided.Pending = &request
+		m.guided.Problem = ""
+	}
+
 	sequence, executor := m.guided.Sequence, m.guidedExecutor
 
 	return func() tea.Msg {
@@ -91,13 +96,12 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 	}
 
 	m.guided.Busy = false
-	if message.Err != nil {
-		if sameGuidedTerminalRun(m.guided.View, message.View) {
-			m.guided.View = message.View
-		}
+	if !m.guidedReplyCurrent(message) {
+		return
+	}
 
-		m.guided.Problem = message.Err.Error()
-		m.statusMessage = "Wizard: " + message.Err.Error()
+	if message.Err != nil {
+		m.failGuidedRequest(message)
 
 		return
 	}
@@ -111,14 +115,9 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 	m.guided.View = message.View
 	m.observeGuidedCase(message.View)
 
-	m.guided.Pending, m.guided.Problem = nil, ""
-	if message.Request.Action == "start" || message.Request.Action == "open" || message.Request.Action == "input" {
-		m.selectView(m.wizardStageView())
-	}
+	m.finishGuidedRequest(message.Request)
 
-	if message.Request.Action == "document" {
-		m.selectView(wizardDocumentView(message.Request.Document))
-	}
+	m.navigateGuidedReply(message.Request)
 }
 
 func (m *Model) observeGuidedCase(view GuidedView) {
@@ -164,4 +163,18 @@ func (m *Model) refreshGuided() tea.Cmd {
 	}
 
 	return m.startGuidedRequest(m.guidedRequest("inspect"))
+}
+
+func (m *Model) navigateGuidedReply(request GuidedRequest) {
+	if request.ReloadQuiz && m.wizardQuizCurrent() {
+		m.startQuizAnswer()
+	}
+
+	if request.Action == "start" || request.Action == "open" || request.Action == "input" {
+		m.selectView(m.wizardStageView())
+	}
+
+	if request.Action == "document" {
+		m.selectView(wizardDocumentView(request.Document))
+	}
 }

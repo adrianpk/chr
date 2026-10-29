@@ -33,6 +33,12 @@ func (m *Model) capturedWizardQuiz() *GuidedRequest {
 // They never invoke the manual quiz executor for a guided case.
 func (m *Model) startWizardQuizAction(request QuizActionRequest) tea.Cmd {
 	guided := *request.Guided
+	if request.Action == QuizActionRefresh && request.ReloadDraft {
+		guided.Action, guided.ReloadQuiz = "inspect", true
+
+		return m.startGuidedRequest(guided)
+	}
+
 	guided.QuizAction = request.Action
 	guided.Command.OperationID = request.Binding.OperationID
 	actions := map[QuizActionID]string{QuizActionAnswer: "answer", QuizActionSkip: "quiz-skip", QuizActionComplete: "quiz-done", QuizActionCancel: "cancel", QuizActionResume: "quiz", QuizActionDeepMode: "quiz-mode", QuizActionFastMode: "quiz-mode"}
@@ -61,7 +67,8 @@ func (m *Model) updateWizardQuizKey(message tea.KeyMsg) (tea.Cmd, bool) {
 }
 
 func (m *Model) wizardQuizLines() []string {
-	if !m.wizardQuizVisible() {
+	_, draft := m.wizardQuizDraftView()
+	if !m.wizardQuizVisible() && !draft {
 		return nil
 	}
 
