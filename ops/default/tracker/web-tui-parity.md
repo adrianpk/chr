@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 5 — Case and Dump forms.
 Completed slices: 4/14
-Completed tasks: 20/70
+Completed tasks: 24/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -112,11 +112,11 @@ Report: `ops/default/report/slices/web-tui-parity/slice-5-case-dump.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T5.1 | Create cases through Name, Description and Context before one Create; retain existing metadata editing and unresolved references. | pending | — | Planned: Cancel creates no blank case; entered fields survive validation failure. |
-| T5.2 | Create and edit dumps through scope, title and body using existing canonical operations. | pending | — | Planned: Project-wide and case-bound dumps preserve actual user content without fixed placeholder text. |
-| T5.3 | Expose AppendDump with free text and make external-editor shortcuts and displayed hints agree in textarea mode. | pending | — | Planned: The reachable append action uses the selected dump; editor round trips preserve edits. |
-| T5.4 | Exercise stale-save, confirmed reload/discard and unsent draft retention with owned Web and TUI fixtures. | pending | — | Planned: Runtime disposition and evidence for G-018 are recorded; no lost draft or silent overwrite. |
-| T5.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T5.1 | Create cases through Name, Description and Context before one Create; retain existing metadata editing and unresolved references. | done | 8a569106 | Real metadata validation and production PTY retain Description/Context after missing Name; confirmed cancellation leaves canonical files unchanged. |
+| T5.2 | Create and edit dumps through scope, title and body using existing canonical operations. | done | d6f933ab | Project/case capture, selected-result editing and production PTY preserve entered body and retained title/scope. |
+| T5.3 | Expose AppendDump with free text and make external-editor shortcuts and displayed hints agree in textarea mode. | done | cf8c5e4b | Captured-target append and private external-editor IO preserve user text, revision, error/size limits and late-reply ownership. |
+| T5.4 | Exercise stale-save, confirmed reload/discard and unsent draft retention with owned Web and TUI fixtures. | done | fbd0b6d5 | Owned PTY concurrent Save rejects stale input; cancelled reload retains the draft and canonical bytes, confirmed reload permits the current revision. Web HTTP references pass. |
+| T5.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Task checks passed; report and PR preparation underway. Final clean-HEAD controller validation and integration pending. |
 
 ### Slice 6: Spec catalog and manual editing
 

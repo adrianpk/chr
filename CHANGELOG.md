@@ -12,6 +12,12 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Create TUI cases with Name, Description and Context in one form. Capture
+  project-wide or case-bound dumps with your own title and body, append free text,
+  and round-trip unsaved body edits through the external editor with `alt+e`.
+  Failed or stale submissions keep the draft; reload and discard require
+  confirmation. Dump body saves retain the stored title and scope.
+
 - TUI Dash shares the work queue, readiness reasons and policy exclusions with
   Web. Browse filtered and ordered queue pages, inspect independent current work,
   recent activity and retained results, and keep Board and Dash selections through

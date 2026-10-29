@@ -188,13 +188,20 @@ chr metadata project set --name "Project" --description "Description" --context 
 | `enter` in pane 0 | Focus the use-case detail pane. |
 | `up` / `down` or `k` / `j` in pane 1 | Select a use-case field. |
 | `enter` or `e` in pane 1 | Edit the selected field. |
-| `n` | Create a new use case. |
+| `n` | Open the Name, Description and Context form. |
 | `/` in pane 0 | Filter use cases. |
 | `enter` while filtering | Apply the filter. |
 | `esc` while filtering | Cancel filter editing. |
 | `esc` in pane 0 | Clear the case filter. |
 | `s` or `ctrl+s` | Save the selected use case. |
 | `r` | Refresh workspace state. |
+
+Press `n`, enter **Name**, **Description** and **Context**, then submit once
+with `ctrl+s` or Enter on **Create**. Tab and Shift+Tab move between fields;
+Enter adds a line in Description and Context. Nothing is created before submission.
+Validation failures retain all entered fields. Esc cancels an empty form or asks
+before discarding entered text. Existing metadata editing and artifact references
+remain available after creation.
 
 Refresh is blocked while use-case edits are active or unsaved.
 
@@ -212,12 +219,29 @@ disk and shown as metadata for the selected curated dump when available.
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a dump. |
-| `c` | Plan dump creation. Confirm with `enter`. |
+| `c` | Open the Scope, Title and Body form. |
 | `enter` | Edit the selected dump in the TUI editor. |
-| `alt+e` | Open the selected dump in the external editor. |
+| `a` | Enter free text to append to the selected dump. |
+| `alt+e` | Open the selected dump externally; while editing, round-trip the unsaved body. |
 | `r` | Refresh dumps from disk. |
 | `ctrl+s` while editing | Save the TUI editor content. |
 | `esc` while editing | Confirm discarding unsaved text. |
+
+The creation form defaults to the selected case. Use left/right in **Scope**
+to choose **Project-wide** or a named case, then enter your title and body.
+Tab and Shift+Tab choose a field; `ctrl+s` or Enter on **Create** submits once.
+The Append form accepts your text for its captured document and revision.
+Esc confirms discarding entered text, and failed submissions retain the form.
+
+The body editor shows the existing title and scope as retained metadata.
+`alt+e` inside it opens a private copy containing the current unsaved text.
+Returning from the external editor retains the result in the TUI; `ctrl+s`
+saves it to the document. Editor errors retain the previous draft. Outside the
+body editor, `alt+e` opens the selected stored document and refreshes after exit.
+
+A stale Save preserves your text. Open the Action panel with `alt+o`, choose
+Reload with `r` and confirm only when ready to replace it with stored content.
+Cancelling reload keeps the draft; refresh never silently overwrites it.
 
 CLI equivalents:
 

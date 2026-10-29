@@ -9,7 +9,11 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:40Z
-commits: []
+commits:
+  - 8a5691065226ff3b8499290bc7ec39ce36145073
+  - d6f933abf9b328a3befc4837bd5744733108c4cc
+  - cf8c5e4b3d68ffb2d61349075f1cd6d7507a9b55
+  - fbd0b6d5a6dc7be995713fbbd8cbbb059ae9e6f2
 branch: feat/slice-5-tui-case-dump
 started_at: 2026-10-29T12:44:00Z
 ready_at: 2026-10-29T10:11:40Z
@@ -54,4 +58,4 @@ One branch and one PR to `dev`; tasks T5.1-T5.5 are the canonical work units. Lo
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+T5.1-T5.4 are implemented and focused checks pass. Owned production terminals prove complete creation, cancellation without canonical writes, append and unsaved external-editor round trips. A real concurrent writer reproduces a stale Save; cancellation retains the draft, while confirmed reload replaces it before a fresh Save. Web HTTP reference fixtures pass. The Slice 5 report records commands and G-018 runtime disposition; final exact-HEAD controller validation and dev integration remain pending.
