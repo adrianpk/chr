@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 7 — Complete Quiz interaction.
-Completed slices: 6/14
-Completed tasks: 34/70
+Active slice: Slice 8 — Plan and ticket preparation.
+Completed slices: 7/14
+Completed tasks: 35/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -135,8 +135,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-6-specs.md`
 
 ### Slice 7: Complete Quiz interaction
 
-Ticket: `TKT-20261029101142` — `ops/default/ticket/reviewing/20261029101142-web-tui-parity-quizzes.md`
-State: reviewing
+Ticket: `TKT-20261029101142` — `ops/default/ticket/solved/20261029101142-web-tui-parity-quizzes.md`
+State: delivered
 PR: [#461](https://forge.adrianpk.com/adrianpk/chr/pulls/461)
 Report: `ops/default/report/slices/web-tui-parity/slice-7-quizzes.md`
 
@@ -146,12 +146,12 @@ Report: `ops/default/report/slices/web-tui-parity/slice-7-quizzes.md`
 | T7.2 | Show answer history alongside the current question and retain answer, skip, done, cancel and resume. | done | 552751e3; 4fa89c65; 8958f020 | Neutral history agrees with Web ordering; real saved IO, history paging/resize, Cancel, Resume, Skip and Done pass. Narrow final-page and target-offset corrections preserve complete answers. |
 | T7.3 | Bind each submission to its exact session, current question, revision and input digest; retain draft after errors. | done | 15fbe9b9 | Reproduced missing absent-session revision. Captured binding, queued stale answer, duplicate reconciliation, retained prompt/input, confirmed reload and actual concurrent-writer PTY pass. |
 | T7.4 | Replace the always-failing context-aware quiz entry with the existing supported operation and real scope input, or explicit pre-action unavailability if unsupported. | done | 8466be11 | The contextual-authoring entry is explicitly unavailable before confirmation/executor calls. Real palette PTY compares unchanged canonical files; supported scoped runtime questions remain available. |
-| T7.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 3a6b0165 | Task checks passed; report introduced and PR #461 opened. Final exact-HEAD controller validation and integration pending. |
+| T7.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | 3a6b0165; abc766b3 | PR #461 integrated at abc766b3e15ed14cd16d215ac823d1a16d25e582; all four ordered checks passed in JRP44LHIFOTCAKMSHR3ELP542E. |
 
 ### Slice 8: Plan and ticket preparation
 
-Ticket: `TKT-20261029101143` — `ops/default/ticket/ready/20261029101143-web-tui-parity-plans.md`
-State: ready
+Ticket: `TKT-20261029101143` — `ops/default/ticket/in_progress/20261029101143-web-tui-parity-plans.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-8-plans.md`
 

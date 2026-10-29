@@ -1,6 +1,6 @@
 # Slice 7: Complete Quiz interaction
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
@@ -114,11 +114,16 @@ files, cancellation and process cleanup are real. Assertions retain all saved
 answers, unchanged files after cancelled/stale actions and no writes to other
 quiz scopes. No acceptance assertions or resource limits were weakened.
 
-Final ordered validation will be recorded by Looper on the clean PR head after
-PR-reference commits: make verify, focused terminal race tests, focused
-application IO/HTTP/PTY race tests and git diff --check. The canonical PR and
-controller evidence retain the exact candidate and command list. These task
-checks do not claim final-candidate validation or dev integration.
+Controller validation `JRP44LHIFOTCAKMSHR3ELP542E` passed all four ordered checks
+on clean HEAD `abc766b3e15ed14cd16d215ac823d1a16d25e582`:
+
+- `make verify`
+- `go test -race ./internal/tui -run '^Test(Quiz.*|Model.*Quiz.*|Operation.*|BusyQuit)$' -count=1`
+- `go test -race ./internal/app -run '^Test(TUIQuiz(StartMode|History|Binding|Draft|Terminal|AdapterDispatchesRuntimeQuizActions)|WebQuiz(Actions|History|StartResume|ReadOnly|ContinuationFailure|ObservationProjection)|TUIOperation.*|ServiceListQuizzesReturnsScopedReadModels)$' -count=1 -timeout=3m`
+- `git diff --check`
+
+Canonical Forgejo and Acta event `01M640NYJZXJJPGES9QRX8QM8R` confirm
+PR #461 integrated at the validated commit. No checks were repeated for closure.
 
 ## Risks and Follow-ups
 

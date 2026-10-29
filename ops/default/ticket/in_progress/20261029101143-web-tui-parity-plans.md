@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101143
 title: "Plan and ticket preparation"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:43Z
 commits: []
+branch: feat/slice-8-tui-plans
+started_at: 2026-10-29T14:24:15Z
 ready_at: 2026-10-29T10:11:43Z
 ---
 
