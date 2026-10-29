@@ -36,12 +36,14 @@ type PlanActionRequest struct {
 
 // PlanActionResult contains refreshed plan state after an action.
 type PlanActionResult struct {
-	Outcome   operation.Result
-	Message   string
-	Documents []DocumentView
-	Plans     []PlanView
-	Tickets   []ticketcore.Indexed
-	Scope     QuizScope
+	Committed, Prepared bool
+	DocumentPath        string
+	Outcome             operation.Result
+	Message             string
+	Documents           []DocumentView
+	Plans               []PlanView
+	Tickets             []ticketcore.Indexed
+	Scope               QuizScope
 }
 
 // PlanActionState stores pending confirmation state for a plan action.
@@ -215,12 +217,6 @@ func (m *Model) startPlanAction(request PlanActionRequest) tea.Cmd {
 		return nil
 	}
 
-	if request.Action == PlanActionGenerate && m.planExistsForScope(request.Scope) {
-		m.statusMessage = "Plan already exists. Use regenerate plan to replace it."
-
-		return nil
-	}
-
 	if planActionChangesContent(request.Action) {
 		m.selectedPane = 1
 		m.maximizedPane = 1
@@ -245,6 +241,7 @@ func (m *Model) completePlanAction(message planActionFinishedMsg) {
 	}
 
 	m.recordOperation(message.Result.Outcome)
+	m.bindPlanRecovery(message.Request)
 
 	if message.Err != nil {
 		m.statusMessage = savedArtifactFailureStatus("Plan", "plan", message.Err)

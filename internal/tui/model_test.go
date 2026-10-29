@@ -4382,39 +4382,22 @@ func TestModelReportsPlanGenerationFailureShowsLastSavedPlan(t *testing.T) {
 	}
 }
 
-func TestModelRefusesGeneratePlanWhenPlanExists(t *testing.T) {
+// Existing plans must reach the shared delivery owner for reconciliation. The
+// request keeps Generate distinct from explicit replacement.
+func TestModelPreparesExistingPlan(t *testing.T) {
 	executor := &fakePlanActionExecutor{}
-	model := NewModel(Options{
-		PlanExecutor: executor,
-		Plans: []PlanView{
-			{
-				Title:        "Generated Plan",
-				Scope:        QuizScope{CaseSlug: "blog"},
-				Status:       "planned",
-				RelativePath: ".chr/default/plans/blog-plan.md",
-				Content:      "# Generated Plan\n\nExisting.",
-			},
-		},
-	})
+	model := NewModel(Options{PlanExecutor: executor, Plans: []PlanView{{Title: "Generated Plan", Scope: QuizScope{CaseSlug: "blog"}, Status: "planned", Revision: "observed", RelativePath: "ops/default/plan/blog/artifact.md", Content: "Retained plan"}}})
 	model.selectView(ViewPlans)
 
-	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
-	confirmed := requireUpdatedModel(t, updated)
-
-	if cmd != nil {
-		t.Fatal("cmd is non-nil, want no generation command")
+	_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
+	if cmd == nil {
+		t.Fatal("existing plan blocked ticket preparation")
 	}
 
-	if confirmed.planBusy {
-		t.Fatal("planBusy = true, want false")
-	}
+	model.Update(cmd())
 
-	if executor.request.Action != "" {
-		t.Fatalf("executor action = %q, want no action", executor.request.Action)
-	}
-
-	if confirmed.statusMessage != "Plan already exists. Use regenerate plan to replace it." {
-		t.Fatalf("statusMessage = %q, want existing plan refusal", confirmed.statusMessage)
+	if executor.request.Action != PlanActionGenerate || executor.request.Revision != "observed" || executor.request.OperationID == "" {
+		t.Fatal("uncaptured or implicit replacement", executor.request)
 	}
 }
 

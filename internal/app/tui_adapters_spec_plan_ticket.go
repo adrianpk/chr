@@ -116,26 +116,33 @@ func (e tuiPlanActionExecutor) executePlanAction(request tui.PlanActionRequest) 
 	}
 
 	result, err = e.runPlanAction(request)
+
+	result.Scope = request.Scope
 	if err != nil {
-		return tui.PlanActionResult{}, err
+		return result, err
 	}
+
+	return e.refreshPlanCatalog(result, request.Action)
+}
+
+func (e tuiPlanActionExecutor) refreshPlanCatalog(result tui.PlanActionResult, action tui.PlanActionID) (tui.PlanActionResult, error) {
+	var err error
 
 	result.Documents, err = tui.LoadDocumentViews(e.operations.ctx, e.operations.projectContext.ProjectDir)
 	if err != nil {
-		return tui.PlanActionResult{}, err
+		return result, err
 	}
 
 	result.Plans, err = loadTUIPlans(e.operations)
 	if err != nil {
-		return tui.PlanActionResult{}, err
+		return result, err
 	}
 
 	if result.Message == "" {
 		result.Message = "Plans refreshed."
 	}
 
-	result.Scope = request.Scope
-	e.operations.appendPlanGenerationLog("tui_plan_action_finished", map[string]string{"action": string(request.Action), "case_slug": request.Scope.CaseSlug, "plan_count": fmt.Sprintf("%d", len(result.Plans))})
+	e.operations.appendPlanGenerationLog("tui_plan_action_finished", map[string]string{"action": string(action), "case_slug": result.Scope.CaseSlug, "plan_count": fmt.Sprintf("%d", len(result.Plans))})
 
 	return result, nil
 }

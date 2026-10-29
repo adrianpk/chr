@@ -71,6 +71,17 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(request tui.SpecActionRequest) 
 func (e tuiPlanActionExecutor) ExecutePlanAction(request tui.PlanActionRequest) (tui.PlanActionResult, error) {
 	result, err := e.executePlanAction(request)
 	outcome := operationResult(result.Message, err)
+
+	outcome.OperationID = request.OperationID
+	if err != nil && result.Committed && outcome.Status != operation.Stale && !outcome.Reload {
+		outcome.Status, outcome.Retry = operation.Blocked, request.OperationID != ""
+
+		outcome.Summary = "Plan saved; ticket preparation is incomplete. Retry the original operation."
+		if result.Prepared {
+			outcome.Summary = "Plan and tickets saved; refresh failed. Retry the original operation."
+		}
+	}
+
 	outcome.ChangedFiles = result.Outcome.ChangedFiles
 	result.Outcome = outcome
 

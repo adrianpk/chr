@@ -120,18 +120,6 @@ func (m *Model) selectedPlanScope() QuizScope {
 	return plan.Scope
 }
 
-func (m *Model) planExistsForScope(scope QuizScope) bool {
-	for _, plan := range m.visiblePlans() {
-		if plan.Scope.CaseSlug != scope.CaseSlug {
-			continue
-		}
-
-		return planHasCanonicalContent(plan)
-	}
-
-	return false
-}
-
 func normalizePlanViews(plans []PlanView) []PlanView {
 	normalized := append([]PlanView(nil), plans...)
 	for index := range normalized {
@@ -142,20 +130,6 @@ func normalizePlanViews(plans []PlanView) []PlanView {
 	}
 
 	return normalized
-}
-
-func planHasCanonicalContent(plan PlanView) bool {
-	if strings.TrimSpace(plan.RelativePath) != "" {
-		return true
-	}
-
-	if strings.TrimSpace(plan.Content) != "" {
-		return true
-	}
-
-	status := strings.TrimSpace(plan.Status)
-
-	return status != "" && status != "missing"
 }
 
 func planUseCaseTitle(plan PlanView) string {

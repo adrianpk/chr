@@ -67,7 +67,7 @@ func (m *Model) currentOperationTarget() string {
 			return spec.RelativePath + ":" + spec.Revision
 		}
 	case ViewPlans:
-		return m.selectedPlanScope().CaseSlug
+		return m.currentPlanTarget()
 	case ViewCases:
 		if metadata, ok := m.selectedCaseMetadata(); ok {
 			return metadata.Slug + ":" + metadata.SourceHash
@@ -100,4 +100,10 @@ func (m *Model) currentTicketTarget() string {
 	}
 
 	return ""
+}
+
+func (m *Model) currentPlanTarget() string {
+	plan, _ := m.selectedPlanView()
+
+	return plan.Scope.CaseSlug + ":" + plan.Revision
 }
