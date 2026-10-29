@@ -2051,7 +2051,7 @@ func TestModelPlansTicketActionCommand(t *testing.T) {
 		},
 	})
 	model.commandPalette.Open = true
-	model.commandPalette.Filter = "ticket-status-ready"
+	model.commandPalette.Filter = "ticket-status-ready-for-dev"
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
@@ -2072,8 +2072,8 @@ func TestModelPlansTicketActionCommand(t *testing.T) {
 		t.Fatalf("ticket action key = %q, want CHR-1", planned.ticketAction.Request.Key)
 	}
 
-	if planned.ticketAction.Request.Status != "ready" {
-		t.Fatalf("ticket action status = %q, want ready", planned.ticketAction.Request.Status)
+	if planned.ticketAction.Request.Status != "ready_for_dev" {
+		t.Fatalf("ticket action status = %q, want ready_for_dev", planned.ticketAction.Request.Status)
 	}
 
 	view := planned.View()
@@ -2081,7 +2081,7 @@ func TestModelPlansTicketActionCommand(t *testing.T) {
 		"Confirm Ticket Action",
 		"Move ticket status",
 		"Ticket: CHR-1",
-		"New status: ready",
+		"New status: ready_for_dev",
 		"enter confirms ticket action",
 	} {
 		if !strings.Contains(view, want) {

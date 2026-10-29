@@ -31,6 +31,7 @@ type TicketActionExecutor interface {
 type TicketActionRequest struct {
 	Action    TicketActionID
 	Key       string
+	Revision  string
 	Status    string
 	Branch    string
 	ReviewRef *ticketmetadata.ReviewRef
@@ -53,9 +54,10 @@ type TicketActionState struct {
 // NewTicketActionState builds the confirmation details for a ticket action.
 func NewTicketActionState(action TicketActionID, ticket TicketView, status string) TicketActionState {
 	request := TicketActionRequest{
-		Action: action,
-		Key:    ticket.Key,
-		Status: status,
+		Action:   action,
+		Key:      ticket.Key,
+		Revision: ticket.Revision,
+		Status:   status,
 	}
 
 	switch action {

@@ -1,10 +1,14 @@
 package app
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -165,12 +169,7 @@ func (e tuiTicketActionExecutor) ExecuteTicketAction(
 
 		return ticketActionResult(result), nil
 	case tui.TicketActionMoveStatus:
-		result, err := e.operations.MoveSelectedTicketStatus(request.Key, request.Status)
-		if err != nil {
-			return tui.TicketActionResult{}, err
-		}
-
-		return ticketActionResult(result), nil
+		return e.moveTicketStatus(request)
 	case tui.TicketActionAttachReviewRef:
 		result, err := e.operations.AttachTicketReviewReference(TicketReviewReferenceRequest{
 			Key:    request.Key,
@@ -193,6 +192,24 @@ func (e tuiTicketActionExecutor) ExecuteTicketAction(
 	default:
 		return tui.TicketActionResult{}, errors.New("unknown ticket action")
 	}
+}
+
+func (e tuiTicketActionExecutor) moveTicketStatus(request tui.TicketActionRequest) (tui.TicketActionResult, error) {
+	if !ticketcore.NormalBoardStatus(ticketcore.Status(request.Status)) {
+		return tui.TicketActionResult{}, fmt.Errorf("select a canonical Board destination")
+	}
+
+	_, err := e.operations.SaveTicketDocument(workflowcore.TicketEditRequest{
+		Key: request.Key, Revision: request.Revision, Fields: map[string]string{"status": request.Status},
+		Binding: workflowstate.MutationBinding{RequestID: rand.Text(), Operator: "tui"},
+	})
+	if err != nil {
+		return tui.TicketActionResult{}, err
+	}
+
+	board, err := e.operations.ReadTicketBoard(0)
+
+	return tui.TicketActionResult{Message: "Ticket status saved.", Tickets: board.Tickets}, err
 }
 
 func ticketActionResult(result TicketOperationResult) tui.TicketActionResult {
