@@ -115,7 +115,7 @@ func (m *Model) submitGuidedStep(action string) tea.Cmd {
 	request := m.guidedRequest("input")
 	request.Command.Action, request.Command.OperationID = action, "tui-"+rand.Text()
 
-	return m.startGuidedRequest(request)
+	return m.confirmGuidedMutation(request)
 }
 
 func (m *Model) guidedDocumentKey(key string) tea.Cmd {

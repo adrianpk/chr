@@ -10,7 +10,7 @@ import (
 func projectTUIGuidedStatus(view *tui.GuidedView, observed GuidedUseCaseInspection) {
 	view.Status = guidedVisibleStatus(observed)
 	view.Result = tuiGuidedResult(observed)
-	view.Controls = guidedControlChoices(observed)
+	view.Controls = tuiGuidedControlChoices(observed)
 	view.CanRetainIdea = len(observed.Session.Guided.Checkpoints) != 0
 
 	command, ready := guidedControlCommand(*observed.Session)

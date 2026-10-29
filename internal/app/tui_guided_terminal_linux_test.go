@@ -18,6 +18,7 @@ import (
 	"golang.org/x/sys/unix"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // TestGuidedUseCaseTUITerminal drives the production Bubble Tea loop in an owned
@@ -48,8 +49,7 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 
 	terminal.keys(t, "c")
 	terminal.see(t, "Current stage · r Refresh")
-	terminal.keys(t, "p")
-	terminal.see(t, "Dispatch stopped: pause")
+	pauseAuthoringForReentry(t, terminal, operations, before)
 	terminal.keys(t, "i")
 	terminal.see(t, "ctrl+s submit")
 	terminal.keys(t, "Retain a separate follow-up idea.\x13")
@@ -274,4 +274,16 @@ func closeGuidedPTY(t *testing.T, file *os.File) {
 	if err := file.Close(); err != nil && !errors.Is(err, os.ErrClosed) {
 		t.Errorf("close terminal: %v", err)
 	}
+}
+
+func pauseAuthoringForReentry(t *testing.T, terminal *guidedTerminal, operations service, before authoringcore.Session) {
+	t.Helper()
+	// Authoring has no Pause control. Seed the retained paused state through
+	// its existing owner; the execution terminal test verifies the visible Pause.
+	if _, err := operations.ControlGuidedUseCase(t.Context(), guidedQuizCommand(before, "paused-reentry", "pause", "")); err != nil {
+		t.Fatal(err)
+	}
+
+	terminal.keys(t, "r")
+	terminal.see(t, "Dispatch stopped: pause")
 }

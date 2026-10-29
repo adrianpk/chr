@@ -98,6 +98,8 @@ func (m *Model) wizardTabLines() []string {
 }
 
 func (m *Model) completeWizardDraft(message guidedFinishedMsg) {
+	m.completeWizardCancellation(message.Request)
+
 	if message.Request.QuizAction != "" || message.Request.ReloadQuiz {
 		m.quizAnswer = QuizAnswerState{}
 	}

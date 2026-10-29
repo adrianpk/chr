@@ -288,7 +288,7 @@ func (m *Model) updateQuizzesKey(msg tea.KeyMsg) tea.Cmd {
 	case "u":
 		return m.startQuizAction(m.newQuizActionState(QuizActionResume).Request)
 	case "x":
-		m.planQuizAction(QuizActionCancel)
+		return m.cancelSelectedQuiz()
 	case "enter":
 		m.planQuizAction(QuizActionAnswer)
 	case "r":
@@ -407,4 +407,14 @@ func quizActionMode(action QuizActionID) string {
 	default:
 		return ""
 	}
+}
+
+func (m *Model) cancelSelectedQuiz() tea.Cmd {
+	if m.wizardQuizCurrent() {
+		return m.startQuizAction(m.newQuizActionState(QuizActionCancel).Request)
+	}
+
+	m.planQuizAction(QuizActionCancel)
+
+	return nil
 }

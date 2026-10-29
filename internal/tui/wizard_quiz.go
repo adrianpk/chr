@@ -55,7 +55,7 @@ func (m *Model) startWizardQuizAction(request QuizActionRequest) tea.Cmd {
 		guided.Command.Content = request.Mode
 	}
 
-	return m.startGuidedRequest(guided)
+	return m.confirmGuidedMutation(guided)
 }
 
 func (m *Model) updateWizardQuizKey(message tea.KeyMsg) (tea.Cmd, bool) {

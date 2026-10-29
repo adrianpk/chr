@@ -204,7 +204,7 @@ func (m *Model) activeInteractionKeys() (string, bool) {
 		{Active: m.SelectedView() == ViewDash && m.dashWorkflowDetails, Text: "Keys: c continue  p pause  x cancel  u resume  a approve  R reconcile  g allowance  d decision  t/C links  esc queue"},
 		{Active: m.wizardBoardCurrent(), Text: "Keys: left/right column  up/down ticket  tab detail  / filter  " + m.guidedControlHint() + "r refresh  i later idea  v JSON"},
 		{Active: m.wizardBound() && m.SelectedView() != m.wizardStageView(), Text: "Keys: c Continue to current stage  r read state  up/down scroll  F1-F7 tabs  : palette"},
-		{Active: m.wizardBound(), Text: "Keys: c current stage  e input  r refresh  p/u/x controls  i later idea  F1-F7 tabs  ? Help"},
+		{Active: m.wizardBound(), Text: "Keys: c current stage  e input  r refresh  " + m.guidedControlHint() + "i later idea  F1-F7 tabs  ? Help"},
 		{Active: m.filterEntryMode, Text: "Keys: enter applies filter, esc cancels filter, ctrl+c quits"},
 	}
 	for _, hint := range hints {
