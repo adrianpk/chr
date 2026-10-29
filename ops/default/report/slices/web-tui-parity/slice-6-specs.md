@@ -1,11 +1,12 @@
 # Slice 6: Spec catalog and manual editing
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-6-tui-specs`
 PR: [#460](https://forge.adrianpk.com/adrianpk/chr/pulls/460)
+Integration: Rebase + Fast-forward into dev at `81e4331da3a711dd3dd8f1fb5e2bbd93083b85c3`.
 Base: `c1d0497c1c638b69533d0aae771db71a0cbeaf39` on dev, after verified PR #459 integration and Slice 5 closure
 
 ## Purpose
@@ -102,11 +103,16 @@ Implementation checks passed locally:
 - `go test ./internal/tui -run '^Test(SpecFormPalette|SpecGenerationCommandsOnlyAppearInSpecs|DocumentCatalogFrames)$' -count=1` — passed through real palette keys and unchanged generation assertions.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/tui ./internal/app` — passed.
 
-Final ordered validation is recorded by Looper on the clean PR head after the
-PR-reference commit: make verify, focused terminal race checks, focused
-application IO/HTTP/PTY race checks, then git diff --check. The canonical PR and
-controller evidence retain the exact candidate and command list. These task
-checks do not claim final-candidate validation or dev integration.
+Controller validation `BZNEGXNC3AUIASKTADDVRE26ZI` passed all four ordered checks
+on clean HEAD `81e4331da3a711dd3dd8f1fb5e2bbd93083b85c3`:
+
+- `make verify`
+- `go test -race ./internal/tui -run '^Test(Spec.*|Model.*Spec.*|DocumentCatalogFrames|Dump.*|CaseForm.*|Operation.*|BusyQuit)$' -count=1`
+- `go test -race ./internal/app -run '^Test(TUISpec.*|TUINavigationTerminal|TUIForms(Terminal|StaleTerminal)|TUIOperation.*|WebSpec(Authoring|ReadOnly|NativeFailure)|SpecDocumentCatalog)$' -count=1 -timeout=3m`
+- `git diff --check`
+
+Canonical Forgejo and Acta event `01M63YQA1QQSWVNJ9Z0RXRDBJQ` confirm
+PR #460 integrated at the validated commit. No checks were repeated for closure.
 
 ## Risks and Follow-ups
 

@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 6 — Spec catalog and manual editing.
-Completed slices: 5/14
-Completed tasks: 29/70
+Active slice: Slice 7 — Complete Quiz interaction.
+Completed slices: 6/14
+Completed tasks: 30/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -120,8 +120,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-5-case-dump.md`
 
 ### Slice 6: Spec catalog and manual editing
 
-Ticket: `TKT-20261029101141` — `ops/default/ticket/reviewing/20261029101141-web-tui-parity-specs.md`
-State: reviewing
+Ticket: `TKT-20261029101141` — `ops/default/ticket/solved/20261029101141-web-tui-parity-specs.md`
+State: delivered
 PR: [#460](https://forge.adrianpk.com/adrianpk/chr/pulls/460)
 Report: `ops/default/report/slices/web-tui-parity/slice-6-specs.md`
 
@@ -131,12 +131,12 @@ Report: `ops/default/report/slices/web-tui-parity/slice-6-specs.md`
 | T6.2 | Expose shared terminal forms for title, create-time case binding, body and draft state. | done | 0e2d48d2 | Project/case forms, actual title/body/state saves, validation retention and cancellation pass through canonical owners without generation. |
 | T6.3 | Apply canonical revision checks, field validation and confirmed reload while keeping unsent text. | done | ab927ea4 | Production PTY concurrent-save conflict, cancelled/confirmed reload and fresh Save pass; captured retries, late replies and immutable case guards pass. |
 | T6.4 | Retain generation, acceptance-feature generation and document inspection and prepare the same form for wizard mode. | done | df73bed5 | Palette keys reuse the direct Spec form; generation, feature generation, inspection and complete catalog frames pass. Unchanged committed-result retry creates no duplicate. |
-| T6.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 7b7718f6 | PR #460 opened with report and task evidence. Final clean-HEAD controller validation and dev integration pending. |
+| T6.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | 7b7718f6; 81e4331d | PR #460 integrated at 81e4331da3a711dd3dd8f1fb5e2bbd93083b85c3; all four ordered checks passed in BZNEGXNC3AUIASKTADDVRE26ZI. |
 
 ### Slice 7: Complete Quiz interaction
 
-Ticket: `TKT-20261029101142` — `ops/default/ticket/ready/20261029101142-web-tui-parity-quizzes.md`
-State: ready
+Ticket: `TKT-20261029101142` — `ops/default/ticket/in_progress/20261029101142-web-tui-parity-quizzes.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-7-quizzes.md`
 

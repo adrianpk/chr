@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101142
 title: "Complete Quiz interaction"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:42Z
 commits: []
+branch: feat/slice-7-tui-quizzes
+started_at: 2026-10-29T13:50:00Z
 ready_at: 2026-10-29T10:11:42Z
 ---
 
