@@ -7,73 +7,42 @@ slice bookkeeping, lint-only edits, and minor wording-only commits.
 
 ## Unreleased
 
-Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
-`dev`.
-
 ### Added
 
-- Start a named TUI wizard from Cases with one Name/Create action and reopen it
-  by case. Follow capture, clarification, preparation and execution in the normal
-  tabs with shared editors and Deep/Fast Quiz controls. Retained retries reuse
-  the saved input and prepared tickets. Board results show confirmed deliveries,
-  receipts and validation commands with exit codes. Earlier originals and JSON
-  exports remain available; cancellation keeps saved documents and completed
-  changes, and background reads preserve typing and navigation.
+- Develop a named use case through one resumable Web, Telegram or TUI wizard:
+  capture a Dump, answer the Quiz, then let chr approve the generated Spec,
+  prepare its tickets and start the agreed work under project policy. In Web,
+  choose **Wizard** in Cases; in the TUI, press `w` in Cases. Both follow the
+  normal Dumps, Quizzes, Specs, Plans and Board tabs with the case selected,
+  reusing the manual editors and Deep/Fast Quiz controls. In Telegram, send
+  **Develop a new use case** and follow the prompts; reopen the same run by name
+  from any interface. Saved input versions and prepared tickets survive retries
+  and restarts. Results distinguish validation and open PRs from confirmed
+  delivery and include code locations, receipts and validation commands with
+  exit codes. Original documents and JSON exports remain available. Cancellation
+  keeps saved documents and completed changes; later ideas remain separate.
 
-- Author project-wide or case-bound work through complete TUI forms. Create cases
-  with Name, Description and Context; capture titled dumps, append free text and
-  round-trip unsaved body edits through the external editor. Browse manual,
-  generated and project-wide specs, then create or revise their title, body and
-  Draft/Approved state. Quizzes show pending answers, mode and saved history.
-  Prepare a plan and its native tickets together without starting execution;
-  retry incomplete preparation without regenerating or duplicating work, and
-  open the resulting document or case Board directly.
+- Create cases with Name, Description and Context through complete TUI forms.
+  Author project-wide or case-bound documents, capture titled dumps, append
+  text and use the external editor. Create and edit manual or generated Specs,
+  including their title, body and Draft/Approved state, and browse project-wide
+  Specs in the same catalog.
+  Quizzes show pending answers, Deep/Fast mode and saved history. Generate a Plan
+  and its tickets together, retry incomplete preparation without duplicates,
+  and open the document or case Board without starting execution.
 
-- Create and edit TUI tickets with your own title, description, case and metadata.
-  Read-only fields explain their workflow owner. Enter comments, scroll retained
-  discussion and attach review references. Source editing and checklist display
-  remain available; unsupported checklist writes explain their unavailability
-  before any confirmation.
+- Create and edit TUI tickets with your own title, description, case and
+  metadata. Read-only fields explain their restrictions. Write comments, read
+  the discussion and attach review references. External source editing and
+  checklist display remain available; unsupported checklist writes explain
+  their unavailability before confirmation.
 
-- Monitor the shared work queue and retained workflows in TUI Dash. Read readiness
-  reasons, exclusions, current work, recent activity and confirmed results while
-  keeping independent queue and Board selections through refresh. Preview the
-  exact ticket, slice, set, case or filtered loose scope before confirming.
-  Browse all six Board columns and Attention on wide terminals, or use the narrow
-  layout. Eligible controls cover pause, resume, cancellation, exact approval,
-  reconciliation, allowances and integration decisions.
-
-- Navigate seven TUI tabs from Cases with functional case context, active-view
-  footer actions and `?` Help. Project and Harness defaults open with `alt+p`;
-  Runtime and workspace-index health remain in the palette. Forms keep unsent
-  input through failed or stale writes, focus changes and resize; reload and
-  discard require confirmation. Results distinguish success, validation failure,
-  stale state and blocked actions and offer only eligible recovery controls.
-
-- Develop a use case through one resumable Web, Telegram or TUI journey: name it, capture context
-  and answer clarification questions, then let chr approve the generated
-  specification, prepare its tickets and start the exact agreed work under
-  project policy. Saved Git versions preserve the inputs through later edits
-  and restarts. Pause, resume and cancel retain native controls and attempt
-  limits; new ideas wait for separate review. Results distinguish validation
-  and open PRs from confirmed delivery and show the delivered code locations.
-  In the Web UI, choose **Wizard** in Cases and enter the name. The main menu
-  follows Dumps, Quizzes, Specs, Plans and Board with the use case already
-  selected. Continue to quiz saves the Dump and advances directly; manual
-  editors retain their independent Save action. The Quiz uses the same layout,
-  Deep/Fast selector, history and action buttons as a standalone session.
-  Accepted answers update the question and history without unsaved-change
-  warnings; failed submissions retain their drafts for retry. The input screens
-  keep internal identifiers and delivery settings out of the way. Original saved
-  documents remain available on request. Workflow actions stay with their progress
-  or recovery panel; Pause appears during execution, and cancellation confirms
-  that saved documents and completed changes are kept.
-  In Telegram, start with **Develop a new use case**, answer the current prompt
-  and switch to an existing Web run by its name. Concise progress and complete
-  original attachments retain the same inputs and work across reconnects.
-  In the TUI, open Guided use cases from Cases or the command palette, edit the
-  current step and reopen named runs. Scroll complete original documents, apply
-  native controls and inspect verified results for the same retained work.
+- Monitor queue eligibility, exclusions, current work, recent activity and
+  confirmed results in TUI Dash. Preview an exact ticket, slice, set, case or
+  filtered scope before starting it. Browse retained workflows and use their
+  eligible review, recovery, allowance and integration-decision controls.
+  Board shows all six columns and Attention on wide terminals and retains a
+  usable narrow layout.
 
 - Create use cases directly from the Web Cases page. Enter a name, description
   and context; the new case is immediately available when capturing a dump.
@@ -250,6 +219,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   acceptance generation, and QA workflows.
 
 ### Changed
+
+- The TUI starts in Cases with seven tabs matching the Web navigation order.
+  Case context follows the document tabs and Board, and the footer shows the
+  current actions. Use `?` for contextual Help and `alt+p` for Project and
+  Harness defaults; Runtime and workspace-index health remain in the palette.
 
 - Telegram messages show human project/work context, the current state and a
   useful next step. Status questions can refer to recent work or reply to its
