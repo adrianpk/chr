@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 1 — Safe queue selection and canonical moves.
 Completed slices: 0/14
-Completed tasks: 0/70
+Completed tasks: 4/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -49,11 +49,11 @@ Report: `ops/default/report/slices/web-tui-parity/slice-1-safe-actions.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T1.1 | Reproduce Dash/Board target divergence, legacy review movement and busy-key swallowing through production adapters. | pending | — | Planned: Distinct Board/queue keys; alias review target without evidence; active busy operation. |
-| T1.2 | Give Dash an independent stable selected key and bind preview/start to that key and the observed revision. | pending | — | Planned: Arrow movement, empty queue, reorder/removal and stale confirmation cannot run another ticket. |
-| T1.3 | Expose the six canonical Board targets through the existing guarded ticket move operation; preserve managed-ticket and review-evidence restrictions. | pending | — | Planned: Web and TUI reject identical forbidden/stale moves; successful writes persist canonical status. |
-| T1.4 | Route Ctrl+C through graceful UI shutdown during busy operations, preserving retained-work ownership and cancellation semantics. | pending | — | Planned: Owned terminal process exits; no implicit retained-work cancellation or goroutine leak. |
-| T1.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T1.1 | Reproduce Dash/Board target divergence, legacy review movement and busy-key swallowing through production adapters. | done | 61a30044; 450d25ab; 3b8baf49 | Reproduced wrong Dash target, accepted legacy review move and swallowed busy Ctrl+C before fixes; named regressions now pass. |
+| T1.2 | Give Dash an independent stable selected key and bind preview/start to that key and the observed revision. | done | 61a30044 | Dash key/navigation/refresh tests and real native adapter preview/stale-confirmation regressions pass. |
+| T1.3 | Expose the six canonical Board targets through the existing guarded ticket move operation; preserve managed-ticket and review-evidence restrictions. | done | 450d25ab | Web/TUI move matrix, stale document and active-owner regressions pass; all six palette destinations are canonical. |
+| T1.4 | Route Ctrl+C through graceful UI shutdown during busy operations, preserving retained-work ownership and cancellation semantics. | done | 3b8baf49 | Busy-mode Ctrl+C tests and production PTY/provider shutdown pass; retained workflow inspection is unchanged. |
+| T1.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Report and PR preparation; exact clean-candidate make verify and focused race batch will follow PR-reference commits. Integration remains controller-owned. |
 
 ### Slice 2: Case-oriented shell and contextual help
 

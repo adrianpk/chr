@@ -489,6 +489,10 @@ Use the function-key tabs:
 | `F8` | Dash |
 | `F9` | Help |
 
+Ctrl+C also exits while generation or another command is busy. The managed
+host releases pending adapter IO without issuing an operator cancellation to
+retained work.
+
 Common navigation:
 
 | Key | Behavior |
@@ -898,14 +902,21 @@ Ticket and work operations are available from the command palette:
 | --- | --- |
 | Create ticket | Create a default task ticket after confirmation. |
 | Add ticket comment | Add the standard `TUI action recorded.` comment to the selected ticket. |
-| Move ticket to ready | Move the selected ticket to `ready`. This legacy status maps to the Ready For Dev Board column. |
+| Move ticket to backlog | Move the selected ticket to `backlog`. |
+| Move ticket to ready_for_dev | Move the selected ticket to `ready_for_dev`. |
 | Move ticket to in_progress | Move the selected ticket to `in_progress`. |
-| Move ticket to reviewing | Move the selected ticket to `reviewing`. |
+| Move ticket to ready_for_review | Request `ready_for_review` with the same evidence requirements as Web. |
+| Move ticket to ready_for_merge | Request `ready_for_merge` with the same review requirements as Web. |
+| Move ticket to done | Request `done`; the workflow owner must supply recorded integration. |
 | Start selected ticket | Run the configured runtime harness for the selected ticket. |
 | Start ready ticket loop | Run one ready ticket through the agent loop. |
 | Run all visible ready tickets | Run the Dash ready queue with the selected filters and order. |
 | Apply safe readiness repair | Apply a non-destructive readiness repair when Dash reports one. |
 | Request agent stop | Request daemon stop through local daemon state. |
+
+Moves use the displayed ticket revision and the same ownership and evidence
+guards as Web. Reload after a concurrent edit. Native workflow phases can make
+status read-only; the palette does not override those restrictions.
 
 Checklist toggle and checklist item creation commands are visible as capability
 checks, but they currently return an unavailable-operation message because the
@@ -947,6 +958,13 @@ Dash shows:
 - ticket, execution report, runtime log, and validation log paths when the
   event stream includes them.
 - recent execution and loop outcomes.
+
+In the Queue pane, use `up` / `down` or `k` / `j` to select a ticket. The marked
+queue item is independent of Board selection and follows its key through refresh
+and ordering changes. Enter opens confirmation for that item; native work loads
+a read-only preview before execution confirmation. A changed ticket or snapshot
+requires a fresh observation and confirmation. An empty queue cannot start a
+previously selected ticket.
 
 When readiness is blocked, Dash prevents ticket execution and run-all actions
 before the runtime worker starts. Press `x` to apply a safe repair when Dash

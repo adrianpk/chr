@@ -264,6 +264,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Fixed
 
+- TUI Dash actions use the marked queue ticket independently of Board selection
+  and reject outdated observations. Board moves offer all six canonical states
+  with the same revision, ownership and evidence checks as Web. Ctrl+C exits
+  during busy operations without cancelling retained work.
+
 - Stopping the Telegram receiver no longer reports a database interruption as
   a failure when its queries were canceled during shutdown. Unrelated database
   and checkpoint failures remain visible.
