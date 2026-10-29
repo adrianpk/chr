@@ -92,7 +92,7 @@ func DefaultCommandRegistry() []Command {
 		{ID: "materialize-plan-tracking", Title: "Create plan tracking", Description: "Create tracking and tickets from the selected plan.", Action: CommandActionPlanPlan, Plan: PlanActionMaterializeTracking},
 		{ID: "refresh-plans", Title: "Refresh plans", Description: "Reload scoped plans.", Action: CommandActionPlanPlan, Plan: PlanActionRefresh},
 		{ID: "create-authoring-session", Title: "Create authoring session", Description: "Create a spec-oriented authoring session after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateAuthoringSession},
-		{ID: "create-context-quiz", Title: "Create context-aware quiz", Description: "Plan a context-aware quiz creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateContextQuiz},
+		{ID: "create-context-quiz", Title: "Context-aware quiz (unavailable)", Description: "Explain the authoring CLI alternative before any confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateContextQuiz},
 		{ID: "ticket-add-comment", Title: "Add ticket comment", Description: "Add a standard comment to the selected ticket after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionAddComment},
 		{ID: "ticket-status-backlog", Title: "Move ticket to backlog", Description: "Move the selected ticket to backlog through canonical guards.", Action: CommandActionPlanTicket, Ticket: TicketActionMoveStatus, Status: "backlog"},
 		{ID: "ticket-status-ready-for-dev", Title: "Move ticket to ready_for_dev", Description: "Move the selected ticket to ready_for_dev through canonical guards.", Action: CommandActionPlanTicket, Ticket: TicketActionMoveStatus, Status: "ready_for_dev"},

@@ -72,16 +72,6 @@ func NewArtifactActionState(action ArtifactActionID) ArtifactActionState {
 				"Mode: tui",
 			},
 		}
-	case ArtifactActionCreateContextQuiz:
-		return ArtifactActionState{
-			Pending: true,
-			Action:  action,
-			Title:   "Create context-aware quiz",
-			Details: []string{
-				"Creates a contextual quiz through the existing authoring quiz path.",
-				"Requires model/provider configuration from the authoring stack.",
-			},
-		}
 	default:
 		return ArtifactActionState{}
 	}
@@ -145,6 +135,13 @@ func (m *Model) updateArtifactActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) planArtifactAction(action ArtifactActionID) {
+	if action == ArtifactActionCreateContextQuiz {
+		m.artifactAction = ArtifactActionState{}
+		m.recordOperation(operation.Result{Status: operation.Blocked, Summary: "Context-aware authoring quiz is unavailable in this TUI.", BlockedReason: "Use chr author quiz new for a contextual authoring document, or F3 to start project or case questions."})
+
+		return
+	}
+
 	m.artifactAction = NewArtifactActionState(action)
 	m.statusMessage = ""
 }

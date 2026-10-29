@@ -18,6 +18,7 @@ func TestTUIQuizTerminal(t *testing.T) {
 	operations := navigationTerminalFixture(t)
 	terminal := startTUITerminal(t, operations, "TestTUIQuizProcess")
 	terminal.see(t, "Alpha navigation")
+	contextTerminalQuizUnavailable(t, terminal, operations)
 	terminal.keys(t, "\x1bOR")
 	terminal.see(t, "Mode: Deep")
 	terminal.keys(t, "m")
@@ -44,6 +45,23 @@ func TestTUIQuizTerminal(t *testing.T) {
 	}
 
 	checkTerminalQuizScope(t, operations)
+}
+
+func contextTerminalQuizUnavailable(t *testing.T, terminal *guidedTerminal, operations service) {
+	t.Helper()
+
+	before := workflowCLIImage(t, filepath.Join(operations.projectContext.ProjectDir, "ops"))
+	terminal.keys(t, ":")
+	terminal.see(t, "Command Palette")
+	terminal.keys(t, "context-aware\r")
+	terminal.see(t, "Operation: blocked")
+	terminal.see(t, "chr author quiz new")
+	terminal.keys(t, "\x1b")
+	terminal.see(t, "Alpha navigation")
+
+	if !maps.Equal(before, workflowCLIImage(t, filepath.Join(operations.projectContext.ProjectDir, "ops"))) {
+		t.Fatal("unavailable command wrote canonical files")
+	}
 }
 
 func checkTerminalQuizScope(t *testing.T, operations service) {
