@@ -31,6 +31,7 @@ func TestShellTabs(t *testing.T) {
 
 		model.selectView(ViewProject)
 		model.Update(tea.MouseMsg{X: index*10 + 5, Y: 29, Action: tea.MouseActionPress, Button: tea.MouseButtonLeft})
+
 		if model.SelectedView() != view {
 			t.Fatal("footer click differs from its visible target", index)
 		}

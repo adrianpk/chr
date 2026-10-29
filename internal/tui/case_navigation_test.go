@@ -82,6 +82,13 @@ func TestCaseNavigationRemoved(t *testing.T) {
 	if model.caseContext.CaseSlug != "two" || len(model.visiblePlans()) != 0 {
 		t.Fatal("returning through Cases replaced an unavailable binding")
 	}
+
+	model.executeCommand(Command{Action: CommandActionClearCase})
+	model.selectView(ViewDumps)
+
+	if model.caseContext.CaseSlug != "" || len(model.visibleDumps()) != 2 {
+		t.Fatal("explicit context clearing did not recover all scopes")
+	}
 }
 
 // Opening a retained run binds its observed case; passive observations of the

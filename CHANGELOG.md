@@ -12,6 +12,13 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- The TUI opens on Cases with seven document and work tabs. The selected case
+  follows Dumps, Quizzes, Specs, Plans and Board, including an observed guided
+  run. Contextual Help opens with `?`, Project and Harness defaults with `alt+p`,
+  and the footer shows active-view actions. Runtime and workspace-index health
+  remain available in the command palette. Missing cases stay explicitly
+  unavailable until refreshed, replaced or cleared.
+
 - Develop a use case through one resumable Web, Telegram or TUI journey: name it, capture context
   and answer clarification questions, then let chr approve the generated
   specification, prepare its tickets and start the exact agreed work under

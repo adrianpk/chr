@@ -19,21 +19,22 @@ operation and the TUI for interactive inspection, editing, and confirmation.
 
 | Key | View | Purpose |
 | --- | --- | --- |
-| `F1` | Project | Project metadata, project context, location, and artifact counts. |
-| `F2` | Cases | Use-case list, use-case context, and related artifact counts. |
-| `F3` | Dumps | Free-form Markdown context dumps. |
-| `F4` | Quizzes | Bounded question sessions and curated quiz notes. |
-| `F5` | Specs | Generated specifications by use case. |
-| `F6` | Plans | Generated implementation plans and plan tracking creation. |
-| `F7` | Board | Ticket board grouped by status. |
-| `F8` | Dash | Agent activity and runtime evidence. |
-| `F9` | Help | Help view and command palette target. |
+| `F1` | Cases | Use-case list, use-case context, and related artifact counts. |
+| `F2` | Dumps | Free-form Markdown context dumps. |
+| `F3` | Quizzes | Bounded question sessions and curated quiz notes. |
+| `F4` | Specs | Generated specifications by use case. |
+| `F5` | Plans | Generated implementation plans and plan tracking creation. |
+| `F6` | Board | Ticket board grouped by status. |
+| `F7` | Dash | Agent activity and runtime evidence. |
+| `F10` | Exit | Graceful terminal shutdown. |
 
 ## Global Keys
 
 | Key | Behavior |
 | --- | --- |
-| `F1` to `F9` | Change view. |
+| `F1` to `F7` | Change view outside text entry or pending operations. |
+| `alt+p` | Open Project metadata, context, artifact counts and Harness defaults. |
+| `?` | Open contextual Help outside text entry; Esc returns to its originating pane. |
 | `tab` | Move to the next pane. |
 | `shift+tab` | Move to the previous pane. |
 | `up` / `k` | Select the previous row or field in the focused selection pane. |
@@ -44,12 +45,18 @@ operation and the TUI for interactive inspection, editing, and confirmation.
 | `esc` | Cancel the active mode or return focus to the primary pane. |
 | `q`, `ctrl+c`, `F10` | Quit. |
 
+Cases is the initial view. Selecting a case binds Dumps, Quizzes, Specs, Plans
+and Board to it; tab changes retain the observed run and never submit work.
+The header names the case. An unavailable case remains explicitly bound until
+refreshed or replaced; **Clear case context** in the palette returns to all
+scopes. The shell footer shows the active view's actions.
+
 The footer tabs are clickable. Mouse dragging near pane dividers resizes the
 layout.
 
 ## Guided Use Cases
 
-From Cases (`F2`), `g` opens the guided catalog. The **Guided use cases** command
+From Cases (`F1`), `g` opens the guided catalog. The **Guided use cases** command
 palette entry opens the same modal screen. The selected project and resolved
 namespace stay bound to all requests. Catalog entries use recognizable names;
 Enter inspects the selected retained run without starting or advancing it.
@@ -108,7 +115,9 @@ Open with `:`.
 
 Available command families:
 
-- Navigation to every TUI view.
+- Navigation to the seven tabs and Project, Help, Tickets, Documents, Authoring,
+  Agent and Runtime. Runtime includes workspace-index health and readiness.
+- Clear case context without writing documents.
 - Workspace refresh.
 - Guided use-case capture, clarification, execution controls and results.
 - Selected source path inspection.

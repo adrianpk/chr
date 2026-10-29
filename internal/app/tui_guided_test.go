@@ -59,9 +59,25 @@ func TestGuidedUseCaseTUIJourney(t *testing.T) {
 
 	runGuidedTUIKey(t, reopened, "enter", true)
 
+	assertGuidedTUIContext(t, reopened)
+
 	after := onlyGuidedTUIRun(t, operations)
 	if after.ID != session.ID || after.Revision != session.Revision {
 		t.Fatal("navigation advanced or replaced the retained run")
+	}
+}
+
+func assertGuidedTUIContext(t *testing.T, reopened *tui.Model) {
+	t.Helper()
+
+	reopened.Update(tea.WindowSizeMsg{Width: 120, Height: 44})
+
+	for _, key := range []string{"f2", "f3", "f4", "f5", "f6"} {
+		runGuidedTUIKey(t, reopened, key, false)
+
+		if !strings.Contains(reopened.View(), "Case: Terminal audit") || strings.Contains(reopened.View(), "(unavailable)") {
+			t.Fatal("retained run lost its observed case on document navigation", reopened.View())
+		}
 	}
 }
 

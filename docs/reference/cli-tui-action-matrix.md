@@ -18,49 +18,49 @@ Status values:
 
 | Domain | Action | TUI entrypoint | CLI command | Service path | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Navigation | Open Project view | `F1` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Cases view | `F2` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Dumps view | `F3` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Quizzes view | `F4` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Specs view | `F5` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Plans view | `F6` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Board view | `F7` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Dash view | `F8` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Help view | `F9` | `chr --help`, command-specific `--help` | `internal/tui.Model.selectView`, `urfave/cli` help | `matched` | Different surfaces, same help intent. |
+| Navigation | Open Project view | `alt+p` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Cases view | `F1` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Dumps view | `F2` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Quizzes view | `F3` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Specs view | `F4` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Plans view | `F5` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Board view | `F6` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Dash view | `F7` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Help view | `?` | `chr --help`, command-specific `--help` | `internal/tui.Model.selectView`, `urfave/cli` help | `matched` | Different surfaces, same help intent. |
 | Layout | Move pane focus | `tab`, `shift+tab`, `esc` | none | `internal/tui.Model.selectNextPane`, `selectPreviousPane`, `selectPrimaryPane` | `intentionally_interactive` | TUI-only layout state. |
 | Layout | Maximize focused pane | `alt+m` | none | `internal/tui.Model.toggleMaximizedPane` | `intentionally_interactive` | TUI-only layout state. Board ticket-pane maximization renders all normal Board columns. |
 | Layout | Resize panes | mouse drag | none | `internal/tui.Model.applyLayoutDrag` | `intentionally_interactive` | TUI-only layout state. |
 | Shell | Quit TUI | `q`, `ctrl+c`, `F10` | process exit | Bubble Tea quit | `intentionally_interactive` | Terminal lifecycle. |
 | Palette | Open command palette | `:` | none | `internal/tui.CommandPaletteState` | `intentionally_interactive` | TUI-only command launcher. |
-| Project | Edit project metadata field | `F1`, field selection, `enter` or `e` | `chr metadata project set --name ... --description ... --context ...` | `internal/tui.ProjectEditState`, `service.SaveProjectMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
-| Project | Save project metadata | `F1`, `s` or `ctrl+s` | `chr metadata project set ...` | `service.SaveProjectMetadata` through `tuiProjectMetadataExecutor` and CLI command | `matched` | Same metadata save service. |
-| Project | Refresh workspace state | `F1`, `r` | `chr index rebuild`, `chr index status` partially | `service.RefreshWorkspace` through `tuiWorkspaceRefreshExecutor` | `missing_cli` | CLI index commands cover ticket index, not full workspace graph refresh. |
-| Guided use cases | Start/resume, answer, control and inspect results | `F2`, `g`, or Guided use cases palette entry | none | `service.StartGuidedUseCase`, `ChangeGuidedUseCase`, `InspectGuidedUseCase`, `ReadGuidedUseCaseOriginal` | `missing_cli` | TUI, Web and Telegram share one retained run and native policy; standalone CLI authoring keeps its own semantics. |
-| Cases | Select/filter use cases | `F2`, arrows, `/` | none | `internal/tui` filter state | `intentionally_interactive` | List navigation/filtering is TUI-only. |
-| Cases | Create use case entry | `F2`, `n` | `chr metadata case set <slug> --name ... --description ... --context ...` | `internal/tui.Model.newCase`, saved by `service.SaveCaseMetadata` | `matched` | CLI creates by slug and metadata flags. |
-| Cases | Edit use-case metadata field | `F2`, `enter` or `e` | `chr metadata case set <slug> ...` | `internal/tui.ProjectEditState`, `service.SaveCaseMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
-| Cases | Save selected use case | `F2`, `s` or `ctrl+s` | `chr metadata case set <slug> ...` | `service.SaveCaseMetadata` through `tuiCaseMetadataExecutor` and CLI command | `matched` | Same metadata save service. |
-| Dumps | Create dump | `F3`, `c`, confirm | `chr dump new --title ... --content ... [--use-case ...]` | `service.CreateDump` through `tuiDumpActionExecutor` and CLI command | `matched` | Same dump creation service. |
-| Dumps | Edit dump in TUI editor | `F3`, `enter`, `ctrl+s` | `chr dump show <path>`, `chr dump save <path> --content ...`, `chr dump append <path> --content ...` | `service.ReadDump`, `service.SaveDump`, `service.AppendDump` | `matched` | CLI is non-interactive and path-based. |
-| Dumps | Open dump in external editor | `F3`, `alt+e` | `chr dump open <path>` | `service.OpenDump` | `matched` | CLI prints the resolved editor command. |
-| Dumps | Refresh dump list | `F3`, `r` | `chr dump list` | `service.ListDumps` | `matched` | Same dump list service. |
-| Quizzes | Start selected quiz | `F4`, `s` | `chr quiz start [--use-case ...] [--mode deep|fast]` | `service.StartQuiz` through `tuiQuizActionExecutor` and CLI command | `matched` | Same runtime quiz service. |
-| Quizzes | Answer active question | `F4`, `enter`, answer editor, `enter` | `chr quiz answer --answer ... [--use-case ...]` | `service.AnswerQuiz` | `matched` | Same runtime quiz service. |
+| Project | Edit project metadata field | `alt+p`, field selection, `enter` or `e` | `chr metadata project set --name ... --description ... --context ...` | `internal/tui.ProjectEditState`, `service.SaveProjectMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
+| Project | Save project metadata | `alt+p`, `s` or `ctrl+s` | `chr metadata project set ...` | `service.SaveProjectMetadata` through `tuiProjectMetadataExecutor` and CLI command | `matched` | Same metadata save service. |
+| Project | Refresh workspace state | `alt+p`, `r` | `chr index rebuild`, `chr index status` partially | `service.RefreshWorkspace` through `tuiWorkspaceRefreshExecutor` | `missing_cli` | CLI index commands cover ticket index, not full workspace graph refresh. |
+| Guided use cases | Start/resume, answer, control and inspect results | `F1`, `g`, or Guided use cases palette entry | none | `service.StartGuidedUseCase`, `ChangeGuidedUseCase`, `InspectGuidedUseCase`, `ReadGuidedUseCaseOriginal` | `missing_cli` | TUI, Web and Telegram share one retained run and native policy; standalone CLI authoring keeps its own semantics. |
+| Cases | Select/filter use cases | `F1`, arrows, `/` | none | `internal/tui` filter state | `intentionally_interactive` | List navigation/filtering is TUI-only. |
+| Cases | Create use case entry | `F1`, `n` | `chr metadata case set <slug> --name ... --description ... --context ...` | `internal/tui.Model.newCase`, saved by `service.SaveCaseMetadata` | `matched` | CLI creates by slug and metadata flags. |
+| Cases | Edit use-case metadata field | `F1`, `enter` or `e` | `chr metadata case set <slug> ...` | `internal/tui.ProjectEditState`, `service.SaveCaseMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
+| Cases | Save selected use case | `F1`, `s` or `ctrl+s` | `chr metadata case set <slug> ...` | `service.SaveCaseMetadata` through `tuiCaseMetadataExecutor` and CLI command | `matched` | Same metadata save service. |
+| Dumps | Create dump | `F2`, `c`, confirm | `chr dump new --title ... --content ... [--use-case ...]` | `service.CreateDump` through `tuiDumpActionExecutor` and CLI command | `matched` | Same dump creation service. |
+| Dumps | Edit dump in TUI editor | `F2`, `enter`, `ctrl+s` | `chr dump show <path>`, `chr dump save <path> --content ...`, `chr dump append <path> --content ...` | `service.ReadDump`, `service.SaveDump`, `service.AppendDump` | `matched` | CLI is non-interactive and path-based. |
+| Dumps | Open dump in external editor | `F2`, `alt+e` | `chr dump open <path>` | `service.OpenDump` | `matched` | CLI prints the resolved editor command. |
+| Dumps | Refresh dump list | `F2`, `r` | `chr dump list` | `service.ListDumps` | `matched` | Same dump list service. |
+| Quizzes | Start selected quiz | `F3`, `s` | `chr quiz start [--use-case ...] [--mode deep|fast]` | `service.StartQuiz` through `tuiQuizActionExecutor` and CLI command | `matched` | Same runtime quiz service. |
+| Quizzes | Answer active question | `F3`, `enter`, answer editor, `enter` | `chr quiz answer --answer ... [--use-case ...]` | `service.AnswerQuiz` | `matched` | Same runtime quiz service. |
 | Quizzes | Skip active question | answer editor `alt+s` | `chr quiz skip [--use-case ...]` | `service.SkipQuiz` | `matched` | Same runtime quiz service. |
 | Quizzes | Complete selected quiz | answer editor `alt+d` | `chr quiz complete [--use-case ...]` | `service.CompleteQuiz` | `matched` | Same runtime quiz service. |
-| Quizzes | Refresh quizzes | `F4`, `r` | `chr quiz list` | `service.ListQuizzes` | `matched` | Same runtime quiz list service. |
-| Specs | Generate spec | `F5`, `g` | `chr spec generate [--use-case ...]` | `service.GenerateSpec` through `tuiSpecActionExecutor` and CLI command | `matched` | Same spec generation service. |
-| Specs | Generate Gherkin acceptance feature | `F5`, `f` | `chr acceptance feature generate [--use-case ...]` | `service.GenerateAcceptanceFeature` through `tuiSpecActionExecutor` and CLI command | `partial` | Same generation service. If more information is needed, both surfaces report the feature-round note path; interactive answer collection is not implemented yet. |
-| Specs | Refresh specs | `F5`, `r` | `chr spec list` | `service.ListSpecs` | `matched` | Same spec list service. |
-| Plans | Generate missing plan | `F6`, `g` | `chr plan generate [--use-case ...]` | `service.GeneratePlan` through `tuiPlanActionExecutor` and CLI command | `matched` | Same plan generation service. |
-| Plans | Regenerate plan | `F6`, `G`, confirm | `chr plan regenerate [--use-case ...]` | `service.RegeneratePlan` | `matched` | Same plan regeneration service. |
-| Plans | Create plan tracking and tickets | `F6`, `alt+t`, confirm | `chr plan tracking create [--use-case ...]` | `service.MaterializePlanTracking` | `matched` | Same plan tracking materialization service. |
-| Plans | Refresh plans | `F6`, `r` | `chr plan list` | `service.ListPlans` | `matched` | Same plan list service. |
-| Board | Select/filter tickets | `F7`, arrows, `/` | `chr ticket list` filters | `internal/tui` filter state, `runTicketList` | `matched` | CLI exposes ticket listing/filtering, TUI provides interactive selection. |
-| Board | Move between normal Board columns | `F7`, `left` / `right` or `h` / `l` | `chr ticket board` | `internal/tui.Model.selectBoardColumn`, `service.Board` | `matched` | CLI prints all Board columns; TUI navigates one compact column at a time. |
-| Board | Toggle attention view | `F7`, `alt+a` | `chr ticket board` attention summary | `internal/tui.Model.toggleBoardAttention`, `core.BoardAttentionReasons` | `matched` | TUI shows attention tickets separately; CLI prints attention count through the same Board service. |
-| Board | Maximize Board ticket pane | `F7`, ticket pane, `alt+m` | `chr ticket board` | `internal/tui.renderMaximizedBoardWorkspace`, `service.Board` | `matched` | TUI renders a multi-column Board; CLI prints equivalent column data. |
-| Board | Selected ticket detail | `F7`, selected ticket detail pane | `chr ticket show <key>` | `internal/tui.Model.renderSelectedTicketDetail`, `runTicketShow` | `matched` | TUI detail includes indexed metadata and bounded Markdown context; CLI shows the selected ticket file. |
+| Quizzes | Refresh quizzes | `F3`, `r` | `chr quiz list` | `service.ListQuizzes` | `matched` | Same runtime quiz list service. |
+| Specs | Generate spec | `F4`, `g` | `chr spec generate [--use-case ...]` | `service.GenerateSpec` through `tuiSpecActionExecutor` and CLI command | `matched` | Same spec generation service. |
+| Specs | Generate Gherkin acceptance feature | `F4`, `f` | `chr acceptance feature generate [--use-case ...]` | `service.GenerateAcceptanceFeature` through `tuiSpecActionExecutor` and CLI command | `partial` | Same generation service. If more information is needed, both surfaces report the feature-round note path; interactive answer collection is not implemented yet. |
+| Specs | Refresh specs | `F4`, `r` | `chr spec list` | `service.ListSpecs` | `matched` | Same spec list service. |
+| Plans | Generate missing plan | `F5`, `g` | `chr plan generate [--use-case ...]` | `service.GeneratePlan` through `tuiPlanActionExecutor` and CLI command | `matched` | Same plan generation service. |
+| Plans | Regenerate plan | `F5`, `G`, confirm | `chr plan regenerate [--use-case ...]` | `service.RegeneratePlan` | `matched` | Same plan regeneration service. |
+| Plans | Create plan tracking and tickets | `F5`, `alt+t`, confirm | `chr plan tracking create [--use-case ...]` | `service.MaterializePlanTracking` | `matched` | Same plan tracking materialization service. |
+| Plans | Refresh plans | `F5`, `r` | `chr plan list` | `service.ListPlans` | `matched` | Same plan list service. |
+| Board | Select/filter tickets | `F6`, arrows, `/` | `chr ticket list` filters | `internal/tui` filter state, `runTicketList` | `matched` | CLI exposes ticket listing/filtering, TUI provides interactive selection. |
+| Board | Move between normal Board columns | `F6`, `left` / `right` or `h` / `l` | `chr ticket board` | `internal/tui.Model.selectBoardColumn`, `service.Board` | `matched` | CLI prints all Board columns; TUI navigates one compact column at a time. |
+| Board | Toggle attention view | `F6`, `alt+a` | `chr ticket board` attention summary | `internal/tui.Model.toggleBoardAttention`, `core.BoardAttentionReasons` | `matched` | TUI shows attention tickets separately; CLI prints attention count through the same Board service. |
+| Board | Maximize Board ticket pane | `F6`, ticket pane, `alt+m` | `chr ticket board` | `internal/tui.renderMaximizedBoardWorkspace`, `service.Board` | `matched` | TUI renders a multi-column Board; CLI prints equivalent column data. |
+| Board | Selected ticket detail | `F6`, selected ticket detail pane | `chr ticket show <key>` | `internal/tui.Model.renderSelectedTicketDetail`, `runTicketShow` | `matched` | TUI detail includes indexed metadata and bounded Markdown context; CLI shows the selected ticket file. |
 
 ## Command Palette Commands
 

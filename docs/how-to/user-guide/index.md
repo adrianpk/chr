@@ -251,7 +251,7 @@ quizzes, specs, plans, tickets, and execution activity. It loads durable
 workspace files from disk and writes normal Markdown artifacts back to the
 core.
 
-In **Project** (`F1`), press `h` to inspect harness defaults. Tab selects the
+In **Project** (`alt+p`), press `h` to inspect harness defaults. Tab selects the
 worker or generation role; arrows choose a named profile and `c` restores legacy
 dispatch for that role. Press Enter to save or Esc to discard unsent choices.
 Stale or failed saves retain the choices. Press `r` to discard them and reload
@@ -433,7 +433,7 @@ Unbound titles and other permitted metadata remain editable.
 
 ## Develop a Guided Use Case in the TUI
 
-Open `chr` in the intended project. Press `F2`, then `g`, or choose **Guided use
+Open `chr` in the intended project. Press `F1`, then `g`, or choose **Guided use
 cases** from the `:` command palette. Check the displayed project, namespace,
 target, policy and limits. Resolve any reported prerequisite before expecting
 execution to start.
@@ -475,19 +475,18 @@ See the [TUI reference](../../reference/tui.md#guided-use-cases) for key details
 
 ## Navigate the TUI
 
-Use the function-key tabs:
+The TUI opens on Cases. Use the function-key tabs:
 
 | Key | View |
 | --- | --- |
-| `F1` | Project |
-| `F2` | Cases |
-| `F3` | Dumps |
-| `F4` | Quizzes |
-| `F5` | Specs |
-| `F6` | Plans |
-| `F7` | Board |
-| `F8` | Dash |
-| `F9` | Help |
+| `F1` | Cases |
+| `F2` | Dumps |
+| `F3` | Quizzes |
+| `F4` | Specs |
+| `F5` | Plans |
+| `F6` | Board |
+| `F7` | Dash |
+| `F10` | Exit |
 
 Ctrl+C also exits while generation or another command is busy. The managed
 host releases pending adapter IO without issuing an operator cancellation to
@@ -504,11 +503,19 @@ Common navigation:
 | `alt+m` | Toggle maximized mode for the focused pane. |
 | `esc` | Return focus to the primary pane, cancel an active prompt, or close an active mode. |
 | `q`, `ctrl+c`, `F10` | Quit the TUI. |
+| `alt+p` | Open Project metadata and Harness defaults. |
+| `?` | Open contextual Help outside text entry; Esc returns to the same pane. |
 | `:` | Open the command palette. |
 | `/` | Open filtering where the current view supports filtering. |
 
-The footer tabs are clickable. The TUI also supports mouse resizing between
-panes: drag near the vertical divider, or near the horizontal divider in stacked
+Choose a case in Cases before opening Dumps, Quizzes, Specs, Plans or Board.
+The header identifies the bound case; changing tabs retains that case and any
+observed guided run without saving documents or starting work. A removed case
+stays unavailable until you refresh, select another case, or run **Clear case
+context** from the palette to show all scopes.
+
+The footer shows actions for the active view, and its tabs are clickable. The
+TUI also supports mouse resizing between panes: drag near the vertical divider, or near the horizontal divider in stacked
 right panes.
 
 ## Use the Command Palette
@@ -527,6 +534,8 @@ Inside the palette:
 
 The palette includes navigation, refresh, selected-source inspection, artifact
 creation, dump, quiz, spec, acceptance feature, plan, ticket, and work commands.
+Runtime and workspace-index health remain available through **Go to Runtime**.
+The palette also retains Documents, Authoring, Agent and Tickets views.
 Some commands are view-gated. Spec and acceptance feature commands appear only
 in Specs. Plan commands appear only in Plans, and plan tracking appears only
 when the selected plan exists.
@@ -536,7 +545,7 @@ direct keybindings. Confirm with `enter` or cancel with `esc`.
 
 ## Edit Project Context
 
-Open the Project view with `F1`.
+Open the Project view with `alt+p`.
 
 The Project view contains project name, description, long-form context,
 location, and artifact counts. The context here is project-wide material that
@@ -555,7 +564,7 @@ Refresh is blocked while project edits are active or unsaved.
 
 ## Manage Use Cases
 
-Open the Cases view with `F2`.
+Open the Cases view with `F1`.
 
 The system is use-case based. The list represents use cases. Use-case metadata
 and context become part of the material used by dumps, quizzes, specs, plans,
@@ -619,7 +628,7 @@ an unchanged retry refreshes the view.
 
 ## Capture Dumps in the TUI
 
-Open the Dumps view with `F3`.
+Open the Dumps view with `F2`.
 
 Dumps are free-form Markdown context. They can be project-wide or tied to a use
 case. A dump is a document type for material the user already knows or
@@ -691,7 +700,7 @@ and Resume retries continuation without recording it again.
 
 ## Run Quizzes in the TUI
 
-Open the Quizzes view with `F4`.
+Open the Quizzes view with `F3`.
 
 Quizzes collect missing project or use-case knowledge through bounded questions.
 The TUI shows quiz state, active question, recorded answers, and curated notes.
@@ -754,7 +763,7 @@ from replacing the edited document.
 
 ## Generate Specs in the TUI
 
-Open the Specs view with `F5`.
+Open the Specs view with `F4`.
 
 Specs are generated from accumulated project and use-case material: project
 metadata, project context, use-case metadata, use-case context, dumps, quizzes,
@@ -799,7 +808,7 @@ chr acceptance feature generate --use-case billing
 
 ## Generate Plans and Tracking in the TUI
 
-Open the Plans view with `F6`.
+Open the Plans view with `F5`.
 
 Plans are generated from accumulated project and use-case material, including
 existing specs. A plan decomposes implementation into reviewable slices and is
@@ -853,7 +862,7 @@ chr plan tracking create --use-case billing
 
 ## Use the Board
 
-Open the Board view with `F7`.
+Open the Board view with `F6`.
 
 The Board view groups tickets by status and shows details for the selected
 ticket. Normal Board columns are:
@@ -942,7 +951,7 @@ chr daemon stop
 
 ## Inspect Operations
 
-Open the Dash view with `F8`.
+Open the Dash view with `F7`.
 
 Dash shows agent activity and runtime evidence loaded from local state. Use it
 before work to inspect readiness, during work to watch the event stream, and
@@ -975,7 +984,7 @@ For a CLI-first inspection flow, see
 
 ## Get Help in the TUI
 
-Open Help with `F9`, or use `:` and run the Help command. The footer at the
+Open Help with `?`, or use `:` and run the Help command. The footer at the
 bottom of the TUI always shows the active key helper for the current view or
 modal state.
 
