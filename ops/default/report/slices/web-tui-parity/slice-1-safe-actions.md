@@ -1,12 +1,13 @@
 # Slice 1: Safe queue selection and canonical moves
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `fix/slice-1-tui-safe-actions`
 PR: [#455](https://forge.adrianpk.com/adrianpk/chr/pulls/455)
 Base: `b1052249998cf4c432adf1f9082ce211f52533b3`
+Integrated: `161622891a376efe97e3e2d0b3bbebaaf8235660` into dev through PR #455, verified 2026-10-29
 
 ## Purpose
 
@@ -69,29 +70,20 @@ interfaces. No persistence schema or domain lifecycle changes are introduced.
 
 ## Validation
 
-The first final-candidate `make verify` at
-`c8034b74d042484252dc6728fe613cef705e02dc` stopped in strict lint for import and
-whitespace formatting and test-helper branching. Formatting and the named
-acceptance matrix were corrected without removing assertions or changing checks.
+Looper validation `YCBB7LWNNQR5OLKQDKXKLQ62HN` passed the following ordered
+batch on clean candidate `161622891a376efe97e3e2d0b3bbebaaf8235660`, which is the verified
+canonical integration commit:
 
-Successful implementation checks:
+- `make verify` — passed.
+- `go test -race ./internal/tui -run '^Test(Dash(Target|SelectionRefresh)|BoardMoveCommands|BusyQuit|Model(Ownership|AsyncRefresh|PlansTicketActionCommand|WorkflowBinding|WorkflowStopAvailable))$' -count=1` — passed.
+- `go test -race ./internal/app -run '^Test(TUIDash(Target|Revision)|TUITicketMove|TUIBoard(Moves|Stale|Owned)|TUIBusyTerminal|TUIWorkflow(Preview|Stale|Controls|Start)|GuidedUseCaseTUITerminal|ServiceWorkflowOwner)$' -count=1 -timeout=3m` — passed.
+- `git diff --check` — passed.
 
-- `go test ./internal/tui -run '^TestDash(Target|SelectionRefresh)$' -count=1`
-- `go test ./internal/app -run '^TestTUIDashTarget$' -count=1 -timeout=1m`
-- `go test ./internal/app -run '^Test(TUIWorkflow(Preview|Stale|Start)|TUIDashRevision|ServiceWorkflowCoordinator)$' -count=1 -timeout=3m`
-- `go test ./internal/app -run '^Test(TUITicketMove|TUIBoard(Moves|Stale|Owned)|WebTicket(Editor|Revision))$' -count=1 -timeout=3m`
-- `go test ./internal/tui -run '^TestBusyQuit$' -count=1`
-- `go test ./internal/app -run '^TestTUIBusyTerminal$' -count=1 -timeout=1m`
-
-The final clean PR candidate is checked after PR-reference follow-up commits.
-Its exact HEAD, ordered commands and results are recorded in the controller's
-validation ledger; successful final commands are listed in the canonical PR.
-The required batch starts with `make verify`, followed by focused TUI and
-application race regressions, then `git diff --check`. This is the development
-gate and named local integration evidence, not nightly or live-forge coverage.
+The production PTY exercises actual terminal input and joins the delayed provider
+on shutdown. Native and legacy adapter fixtures use owned filesystem, Git and
+SQLite state. The development gate is distinct from exhaustive nightly coverage.
+The initial strict-lint failure was corrected without changing acceptance checks.
 
 ## Risks and Follow-ups
 
-Controller-owned integration into dev remains pending. T1.5 and the ticket remain
-open until that merge is verified. Broader queue observation and Board refresh
-presentation belong to their recorded later slices.
+None recorded.

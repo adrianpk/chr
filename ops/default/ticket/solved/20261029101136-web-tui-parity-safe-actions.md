@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101136
 title: "Safe queue selection and canonical moves"
-status: reviewing
+status: solved
 kind: bug
 severity: high
 priority: high
@@ -12,6 +12,8 @@ reported_at: 2026-10-29T10:11:36Z
 commits: [61a300444ff4814d9d2fbd61b4378577900060e4, 450d25ab66885018c476092716f9af6cc6823ed4, 3b8baf497125dd908d20011c4f0b5d66dea56d97, b97e23635b67fbb6ffa908380db394bb9c7ab899]
 branch: fix/slice-1-tui-safe-actions
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/455
+resolution: fixed
+closed_at: 2026-10-29T10:41:11Z
 reviewed_at: 2026-10-29T10:31:30Z
 started_at: 2026-10-29T10:17:58Z
 ready_at: 2026-10-29T10:11:36Z
@@ -56,4 +58,4 @@ One branch and one PR to `dev`; tasks T1.1-T1.5 are the canonical work units. Lo
 
 ## Evidence
 
-Implemented T1.1-T1.4 with reproduced defects, independent Dash target/revision binding, guarded canonical moves and graceful busy shutdown. Focused model, production adapter and PTY checks pass. PR #455 targets dev; exact final candidate checks are recorded by Looper after this PR-reference follow-up. T1.5 and ticket resolution await verified controller integration. See the canonical Slice 1 report and tracker for commands and task commits.
+Implemented T1.1-T1.4 with reproduced defects, independent Dash target/revision binding, guarded canonical moves and graceful busy shutdown. Focused model, production adapter and PTY checks pass. PR #455 is verified merged at 161622891a376efe97e3e2d0b3bbebaaf8235660; T1.5 and this ticket are solved. Validation YCBB7LWNNQR5OLKQDKXKLQ62HN passed all four ordered checks on that exact commit. See the canonical Slice 1 report and tracker for commands and task commits.

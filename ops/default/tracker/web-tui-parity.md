@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 1 — Safe queue selection and canonical moves.
-Completed slices: 0/14
-Completed tasks: 4/70
+Active slice: Slice 2 — Case-oriented shell and contextual help.
+Completed slices: 1/14
+Completed tasks: 5/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -42,8 +42,8 @@ The map must remain identical to the plan. Tasks below are canonical. Record act
 
 ### Slice 1: Safe queue selection and canonical moves
 
-Ticket: `TKT-20261029101136` — `ops/default/ticket/reviewing/20261029101136-web-tui-parity-safe-actions.md`
-State: reviewing
+Ticket: `TKT-20261029101136` — `ops/default/ticket/solved/20261029101136-web-tui-parity-safe-actions.md`
+State: delivered
 PR: [#455](https://forge.adrianpk.com/adrianpk/chr/pulls/455)
 Report: `ops/default/report/slices/web-tui-parity/slice-1-safe-actions.md`
 
@@ -53,12 +53,12 @@ Report: `ops/default/report/slices/web-tui-parity/slice-1-safe-actions.md`
 | T1.2 | Give Dash an independent stable selected key and bind preview/start to that key and the observed revision. | done | 61a30044 | Dash key/navigation/refresh tests and real native adapter preview/stale-confirmation regressions pass. |
 | T1.3 | Expose the six canonical Board targets through the existing guarded ticket move operation; preserve managed-ticket and review-evidence restrictions. | done | 450d25ab | Web/TUI move matrix, stale document and active-owner regressions pass; all six palette destinations are canonical. |
 | T1.4 | Route Ctrl+C through graceful UI shutdown during busy operations, preserving retained-work ownership and cancellation semantics. | done | 3b8baf49 | Busy-mode Ctrl+C tests and production PTY/provider shutdown pass; retained workflow inspection is unchanged. |
-| T1.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | reviewing | b97e2363 | PR #455 is open. The final ordered make verify, focused race regressions and git diff --check are recorded against the clean PR HEAD by Looper. Integration remains controller-owned. |
+| T1.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | b97e2363; c8034b74; 16162289 | PR #455 merged into dev at 161622891a376efe97e3e2d0b3bbebaaf8235660; all four ordered checks passed in validation YCBB7LWNNQR5OLKQDKXKLQ62HN. |
 
 ### Slice 2: Case-oriented shell and contextual help
 
-Ticket: `TKT-20261029101137` — `ops/default/ticket/ready/20261029101137-web-tui-parity-navigation.md`
-State: ready
+Ticket: `TKT-20261029101137` — `ops/default/ticket/in_progress/20261029101137-web-tui-parity-navigation.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-2-navigation.md`
 

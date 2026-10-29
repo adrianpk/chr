@@ -7,7 +7,7 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 1 — Safe queue selection and canonical moves.
+Active slice: Slice 2 — Case-oriented shell and contextual help.
 
 Spec: [Requirements](../spec/web-tui-parity.md)
 Tracker: [Tasks and evidence](../tracker/web-tui-parity.md)
@@ -74,7 +74,7 @@ Runtime uncertainties G-008, G-013, G-014, G-018 and G-024 are resolved in their
 
 ### Slice 1: Safe queue selection and canonical moves
 
-Ticket: `TKT-20261029101136` — `ops/default/ticket/ready/20261029101136-web-tui-parity-safe-actions.md`
+Ticket: `TKT-20261029101136` — `ops/default/ticket/solved/20261029101136-web-tui-parity-safe-actions.md`
 Findings: G-026, G-034, I-001.
 Prerequisite: committed planning artifacts.
 
@@ -90,7 +90,7 @@ Prerequisite: committed planning artifacts.
 
 ### Slice 2: Case-oriented shell and contextual help
 
-Ticket: `TKT-20261029101137` — `ops/default/ticket/ready/20261029101137-web-tui-parity-navigation.md`
+Ticket: `TKT-20261029101137` — `ops/default/ticket/in_progress/20261029101137-web-tui-parity-navigation.md`
 Findings: G-001, G-002, G-003, G-033, I-002.
 Prerequisite: Slice 1 integrated into dev.
 

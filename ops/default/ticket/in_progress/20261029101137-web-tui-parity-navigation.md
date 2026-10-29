@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101137
 title: "Case-oriented shell and contextual help"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:37Z
 commits: []
+branch: feat/slice-2-tui-navigation
+started_at: 2026-10-29T10:41:26Z
 ready_at: 2026-10-29T10:11:37Z
 ---
 
