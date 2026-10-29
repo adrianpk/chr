@@ -49,6 +49,7 @@ type QuizActionRequest struct {
 
 // QuizActionResult contains refreshed quiz state after an action.
 type QuizActionResult struct {
+	Committed     bool
 	Outcome       operation.Result
 	Message       string
 	Quizzes       []QuizView
@@ -126,12 +127,13 @@ func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) tea.Cmd {
 	case "enter":
 		return m.saveQuizAnswer()
 	case "shift+enter", "ctrl+j":
-		input, cmd := m.quizAnswer.Input.Update(tea.KeyMsg{Type: tea.KeyEnter})
-		m.quizAnswer.Input = input
-
-		return cmd
+		return m.updateQuizAnswerInput(tea.KeyMsg{Type: tea.KeyEnter})
 	}
 
+	return m.updateQuizAnswerInput(msg)
+}
+
+func (m *Model) updateQuizAnswerInput(msg tea.KeyMsg) tea.Cmd {
 	previous := m.quizAnswer.Input.Value()
 
 	input, cmd := m.quizAnswer.Input.Update(msg)
@@ -304,7 +306,7 @@ func (m *Model) startQuizAnswer() {
 
 	input.ShowLineNumbers = false
 	input.Prompt = ""
-	input.CharLimit = 0
+	input.CharLimit = 1 << 20
 
 	binding := quiz.Binding
 	if binding.ExpectedRevision != "" {

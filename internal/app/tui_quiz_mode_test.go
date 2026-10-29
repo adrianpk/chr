@@ -15,7 +15,7 @@ func TestTUIQuizStartMode(t *testing.T) {
 			operations, _ := newRetainedQuizFixture(t)
 
 			executor := newTUIQuizActionExecutor(operations)
-			if _, err := executor.ExecuteQuizAction(tui.QuizActionRequest{Action: tui.QuizActionStart, Mode: string(mode)}); err != nil {
+			if _, err := executor.ExecuteQuizAction(tui.QuizActionRequest{Action: tui.QuizActionStart, Mode: string(mode), Binding: observedTUIQuizBinding(t, operations, "", "start-mode")}); err != nil {
 				t.Fatal(err)
 			}
 

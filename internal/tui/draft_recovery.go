@@ -96,23 +96,32 @@ func discardCaseField(m *Model) tea.Cmd {
 }
 
 func (m *Model) bindQuizRecovery(request QuizActionRequest) {
-	if !m.feedback.Result.Reload {
-		return
+	context := m.currentInteraction()
+
+	m.feedback.Context = context
+	if m.feedback.Result.Reload {
+		m.feedback.Reload = func(m *Model) tea.Cmd {
+			if context != m.currentInteraction() {
+				return nil
+			}
+
+			return m.confirmDraftChange("Reload the current quiz and discard the unsent answer?", func(m *Model) tea.Cmd {
+				m.feedback.Open = false
+
+				return m.startQuizAction(QuizActionRequest{Action: QuizActionRefresh, Scope: request.Scope, ReloadDraft: true})
+			})
+		}
 	}
 
-	context := m.currentInteraction()
-	m.feedback.Context = context
-	m.feedback.Reload = func(m *Model) tea.Cmd {
-		if context != m.currentInteraction() {
-			m.statusMessage = "The answer changed. No reload was submitted."
+	if m.feedback.Result.Retry {
+		m.feedback.Retry = func(m *Model) tea.Cmd {
+			if context != m.currentInteraction() {
+				return nil
+			}
 
-			return nil
-		}
-
-		return m.confirmDraftChange("Reload the current quiz and discard the unsent answer?", func(m *Model) tea.Cmd {
 			m.feedback.Open = false
 
-			return m.startQuizAction(QuizActionRequest{Action: QuizActionRefresh, Scope: request.Scope, ReloadDraft: true})
-		})
+			return m.startQuizAction(request)
+		}
 	}
 }

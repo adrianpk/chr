@@ -116,8 +116,9 @@ func TestTUIQuizAdapterDispatchesRuntimeQuizActions(t *testing.T) {
 	executor := newTUIQuizActionExecutor(operations)
 
 	startResult, err := executor.ExecuteQuizAction(tui.QuizActionRequest{
-		Action: tui.QuizActionStart,
-		Scope:  tui.QuizScope{CaseSlug: "blog"},
+		Binding: observedTUIQuizBinding(t, operations, "blog", "adapter-start"),
+		Action:  tui.QuizActionStart,
+		Scope:   tui.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("ExecuteQuizAction start returned error: %v", err)
@@ -128,9 +129,10 @@ func TestTUIQuizAdapterDispatchesRuntimeQuizActions(t *testing.T) {
 	}
 
 	answerResult, err := executor.ExecuteQuizAction(tui.QuizActionRequest{
-		Action: tui.QuizActionAnswer,
-		Scope:  tui.QuizScope{CaseSlug: "blog"},
-		Answer: "Adapter answer.",
+		Binding: observedTUIQuizBinding(t, operations, "blog", "adapter-answer"),
+		Action:  tui.QuizActionAnswer,
+		Scope:   tui.QuizScope{CaseSlug: "blog"},
+		Answer:  "Adapter answer.",
 	})
 	if err != nil {
 		t.Fatalf("ExecuteQuizAction answer returned error: %v", err)
@@ -141,9 +143,10 @@ func TestTUIQuizAdapterDispatchesRuntimeQuizActions(t *testing.T) {
 	}
 
 	modeResult, err := executor.ExecuteQuizAction(tui.QuizActionRequest{
-		Action: tui.QuizActionFastMode,
-		Scope:  tui.QuizScope{CaseSlug: "blog"},
-		Mode:   string(quizcore.ModeFast),
+		Binding: observedTUIQuizBinding(t, operations, "blog", "adapter-mode"),
+		Action:  tui.QuizActionFastMode,
+		Scope:   tui.QuizScope{CaseSlug: "blog"},
+		Mode:    string(quizcore.ModeFast),
 	})
 	if err != nil {
 		t.Fatalf("ExecuteQuizAction mode returned error: %v", err)

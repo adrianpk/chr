@@ -34,6 +34,10 @@ func newTUIQuizActionExecutor(
 }
 
 func (e tuiQuizActionExecutor) executeQuizAction(request tui.QuizActionRequest) (tui.QuizActionResult, error) {
+	if request.Action != tui.QuizActionRefresh && (request.Binding.ExpectedRevision == "" || request.Binding.OperationID == "") {
+		return tui.QuizActionResult{}, errors.New("quiz action requires its captured revision and operation identity")
+	}
+
 	operation, ok := e.quizOperation(request.Action)
 	if !ok {
 		return tui.QuizActionResult{}, errors.New("unknown quiz action")
@@ -44,16 +48,14 @@ func (e tuiQuizActionExecutor) executeQuizAction(request tui.QuizActionRequest) 
 		return tui.QuizActionResult{}, err
 	}
 
-	quizzes, err := loadTUIQuizzes(e.operations)
-	if err != nil {
-		return tui.QuizActionResult{}, err
-	}
-
-	return tui.QuizActionResult{
+	result := tui.QuizActionResult{
+		Committed:     request.Action != tui.QuizActionRefresh,
 		Message:       message,
-		Quizzes:       quizzes,
 		SelectedScope: request.Scope,
-	}, nil
+	}
+	result.Quizzes, err = loadTUIQuizzes(e.operations)
+
+	return result, err
 }
 
 func (e tuiQuizActionExecutor) quizOperation(

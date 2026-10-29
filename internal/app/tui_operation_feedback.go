@@ -31,7 +31,17 @@ func (e tuiDumpActionExecutor) ExecuteDumpAction(request tui.DumpActionRequest) 
 func (e tuiQuizActionExecutor) ExecuteQuizAction(request tui.QuizActionRequest) (tui.QuizActionResult, error) {
 	result, err := e.executeQuizAction(request)
 	outcome := operationResult(result.Message, err)
+
 	outcome.OperationID = request.Binding.OperationID
+	if request.Binding.OperationID == "" {
+		outcome.Retry = false
+	}
+
+	if err != nil && result.Committed {
+		outcome.Summary = "Quiz action saved; refresh failed. Retry the original operation."
+		outcome.Retry, outcome.Reload = true, false
+	}
+
 	outcome.ChangedFiles = result.Outcome.ChangedFiles
 	result.Outcome = outcome
 

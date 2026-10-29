@@ -206,17 +206,20 @@ func (s service) quizViewFromState(title string, state quizcore.RuntimeState) (Q
 func (s service) notStartedQuizView(title string, scope quizcore.Scope) (QuizView, error) {
 	paths, err := s.quizRepository().Paths(scope)
 	if err != nil {
-		observed, err := s.quizRepository().Observe(s.ctx, scope)
-		if err != nil {
-			return QuizView{}, err
-		}
+		return QuizView{}, err
+	}
 
-		return QuizView{
-			Binding: quizcore.ActionBinding{ExpectedRevision: observed.Revision},
-		}, err
+	observed, err := s.quizRepository().Observe(s.ctx, scope)
+	if err != nil {
+		return QuizView{}, err
+	}
+
+	if observed.Exists {
+		return s.quizViewFromState(title, observed.State)
 	}
 
 	return QuizView{
+		Binding:        quizcore.ActionBinding{ExpectedRevision: observed.Revision},
 		Title:          title,
 		Scope:          scope,
 		Status:         QuizViewStatusNotStarted,
