@@ -27,6 +27,7 @@ func TestTUIHarnessSelectionRefresh(t *testing.T) {
 
 	var model tea.Model = tui.NewModel(options)
 
+	model = tuiHarnessStep(t, model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p"), Alt: true})
 	model = tuiHarnessStep(t, model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("h")})
 	model = tuiHarnessCycle(t, model, 2)
 	tuiHarnessOtherProcess(t, operations)

@@ -49,6 +49,7 @@ func TestTUIHarnessSelectionSave(t *testing.T) {
 
 	var model tea.Model = tui.NewModel(options)
 
+	model = tuiHarnessStep(t, model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p"), Alt: true})
 	model = tuiHarnessStep(t, model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("h")})
 	model = tuiHarnessCycle(t, model, 3)
 	model = tuiHarnessStep(t, model, tea.KeyMsg{Type: tea.KeyTab})

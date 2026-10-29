@@ -102,6 +102,7 @@ Implementation regressions passed locally:
 - `go test ./internal/tui -count=1` — passed, including all 32 catalog frames.
 - `go test ./internal/tui -run '^Test(Shell.*|CaseNavigation.*)$' -count=1` — passed.
 - `go test ./internal/app -run '^Test(GuidedUseCaseTUIJourney|TUINavigationTerminal)$' -count=1 -timeout=2m` — passed with owned filesystem, SQLite, Git and PTY fixtures.
+- `go test ./internal/app -run '^TestTUIHarnessSelection(Read|Save|Refresh)$' -count=1 -timeout=3m` — passed with real application adapters and independent-process updates.
 - `git diff --check` — passed.
 
 After the PR-reference follow-up, Looper records the clean final candidate and
@@ -109,8 +110,16 @@ this ordered final batch in its canonical validation evidence:
 
 - `make verify`
 - `go test -race ./internal/tui -run '^Test(Shell.*|CaseNavigation.*|DocumentCatalogFrames|GuidedUseCaseTUI(StaleInput|Replay|RetainedStep)|Model(Ownership|AsyncRefresh|WorkflowBinding))$' -count=1`
-- `go test -race ./internal/app -run '^Test(TUINavigationTerminal|GuidedUseCaseTUIJourney|GuidedUseCaseTUITerminal|TUIBusyTerminal|TUIDashTarget)$' -count=1 -timeout=3m`
+- `go test -race ./internal/app -run '^Test(TUINavigationTerminal|GuidedUseCaseTUIJourney|GuidedUseCaseTUITerminal|TUIBusyTerminal|TUIDashTarget|TUIHarnessSelection(Read|Save|Refresh))$' -count=1 -timeout=3m`
 - `git diff --check`
+
+The first controller batch `IYPMGXO2VY5S4L44QOFMZRZQYR` failed in
+`make verify`: the Harness refresh fixture still sent h from the previous
+Project startup. Read, save and refresh fixtures now open Project with alt+p;
+their stale-save, retained-choice and exact-retry assertions remain unchanged.
+The close assertion checks picker-only Worker default content, because the new
+Project footer also names Harness defaults after the picker closes.
+The final focused batch explicitly selects all three without short mode.
 
 The PR Validation section records successful final commands. Canonical dev
 integration remains pending until the controller verifies its merge.

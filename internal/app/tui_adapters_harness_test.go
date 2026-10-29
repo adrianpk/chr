@@ -20,6 +20,7 @@ func TestTUIHarnessSelectionRead(t *testing.T) {
 
 	var model tea.Model = tui.NewModel(options)
 
+	model = tuiHarnessStep(t, model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p"), Alt: true})
 	model = tuiHarnessStep(t, model, tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("h")})
 	for _, expected := range []string{"Worker default: alpha", "model-a", "Generation default: Legacy dispatch", before.ID, "running", "Retained worker bindings", "remote auth not tested"} {
 		if !strings.Contains(strings.Join(strings.Fields(model.View()), " "), expected) {
@@ -36,7 +37,7 @@ func TestTUIHarnessSelectionRead(t *testing.T) {
 	}
 
 	model = tuiHarnessStep(t, model, tea.KeyMsg{Type: tea.KeyEsc})
-	if strings.Contains(model.View(), "Harness defaults") {
+	if strings.Contains(model.View(), "Worker default:") {
 		t.Fatal("cancel did not close the picker")
 	}
 
