@@ -7,7 +7,7 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 9 — Ticket editing, comments and references.
+Active slice: Slice 10 — Responsive Board and retained workflows.
 
 Spec: [Requirements](../spec/web-tui-parity.md)
 Tracker: [Tasks and evidence](../tracker/web-tui-parity.md)

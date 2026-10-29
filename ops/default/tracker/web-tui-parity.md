@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 9 — Ticket editing, comments and references.
-Completed slices: 8/14
-Completed tasks: 44/70
+Active slice: Slice 10 — Responsive Board and retained workflows.
+Completed slices: 9/14
+Completed tasks: 45/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -166,8 +166,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-8-plans.md`
 
 ### Slice 9: Ticket editing, comments and references
 
-Ticket: `TKT-20261029101144` — `ops/default/ticket/reviewing/20261029101144-web-tui-parity-tickets.md`
-State: reviewing
+Ticket: `TKT-20261029101144` — `ops/default/ticket/solved/20261029101144-web-tui-parity-tickets.md`
+State: delivered
 PR: [#463](https://forge.adrianpk.com/adrianpk/chr/pulls/463)
 Report: `ops/default/report/slices/web-tui-parity/slice-9-tickets.md`
 
@@ -177,13 +177,13 @@ Report: `ops/default/report/slices/web-tui-parity/slice-9-tickets.md`
 | T9.2 | Create and edit tickets with user title, description, case and metadata; show phase/slice and read-only explanations. | done | f2ddfdfd | Legacy/native forms round-trip entered title/body/metadata; cancel writes nothing, stale input remains, confirmed reload and managed restrictions pass. |
 | T9.3 | Expose free-text comment input and retained history instead of the fixed action comment. | done | 29095bef | Distinct comments and retained history round-trip on both authorities; empty/stale input and comment-mode reload checks pass. |
 | T9.4 | Expose AttachReviewRef with user input and preserve external editing, checklist display and canonical review guards. | done | ad327372 | Entered references, HTTP validation, stale/active-claim/receipt guards, native reference retention, source editing, checklist and dump-append regressions pass; production PTY journey passes. |
-| T9.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 52a38b57 | PR #463 opened with the immutable report introduction; implementation checks passed. Final ordered controller validation and integration remain pending. |
+| T9.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | 52a38b57; be5cfd9a | PR #463 merged at be5cfd9ae8a1fa2899517feddcf1b87dc32ecea6; validation RNRFX3HTEIWFXQJHIKQSD4HET4 passed all five ordered checks. |
 
 
 ### Slice 10: Responsive Board and retained workflows
 
-Ticket: `TKT-20261029101145` — `ops/default/ticket/ready/20261029101145-web-tui-parity-board-workflows.md`
-State: ready
+Ticket: `TKT-20261029101145` — `ops/default/ticket/in_progress/20261029101145-web-tui-parity-board-workflows.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-10-board-workflows.md`
 

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101145
 title: "Responsive Board and retained workflows"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal

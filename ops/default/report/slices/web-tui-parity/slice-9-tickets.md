@@ -1,6 +1,6 @@
 # Slice 9: Ticket editing, comments and references
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
@@ -101,11 +101,18 @@ Implementation checks passed locally:
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/tui ./internal/app ./internal/core/ticket ./internal/core/workflow` — passed.
 - `git diff --check` — passed before task commits.
 
-Final ordered validation is recorded by the controller on the clean PR head after
-the PR-reference follow-up. Its canonical commands and immutable report link
-belong to the PR; integration evidence will close this report after merge.
+Controller validation `RNRFX3HTEIWFXQJHIKQSD4HET4` passed all five ordered checks on
+clean HEAD `be5cfd9ae8a1fa2899517feddcf1b87dc32ecea6`:
+
+- `make verify`
+- `go test -race ./internal/tui -run '^Test(Ticket.*|Model.*(Ticket|Board|Artifact|SelectedSource|Source).*|Operation.*|DocumentCatalogFrames|BusyQuit)$' -count=1`
+- `go test -race ./internal/app -run '^Test(TUITicket.*|TUIBoard.*|TUIForms(Terminal|StaleTerminal)|WebTicket.*|TicketEditorOptions|TicketRepositoryOptions|TUIOperation.*)$' -count=1 -timeout=3m`
+- `go test -race ./internal/core/workflow ./internal/core/ticket -run '^Test(Ticket(Document.*|Native.*|ReviewReceiptGuard)|Board.*)$' -count=1 -timeout=3m`
+- `git diff --check`
+
+Canonical Forgejo and Acta event `01M6456940018JDBG1GZ8BHYKW` confirm
+PR #463 integrated at that exact commit. No checks were repeated for closure.
 
 ## Risks and Follow-ups
 
-Canonical PR integration remains pending. Checklist mutation retains its existing
-unavailable-writer guard; checklist display remains covered.
+None recorded.
