@@ -111,6 +111,9 @@ func (m *Model) updateTextFormInput(message tea.KeyMsg) tea.Cmd {
 	field := &m.textForm.Fields[m.textForm.Focus]
 	if field.ReadOnly != "" {
 		m.statusMessage = field.ReadOnly
+		if field.Multiline {
+			return updateReadOnlyInput(field, message)
+		}
 
 		return nil
 	}
@@ -190,7 +193,7 @@ func (m *Model) textFormLines(width, height int) []string {
 }
 
 func (m *Model) textFormFieldLines(field textFormField, index, width, height int) []string {
-	if field.ReadOnly != "" {
+	if field.ReadOnly != "" && (index != m.textForm.Focus || !field.Multiline) {
 		prefix := "  "
 		if index == m.textForm.Focus {
 			prefix = "> "
@@ -217,7 +220,12 @@ func (m *Model) textFormFieldLines(field textFormField, index, width, height int
 
 	input.SetHeight(rows)
 
-	return append([]string{"> " + field.Label}, strings.Split(input.View(), "\n")...)
+	lines := append([]string{"> " + field.Label}, strings.Split(input.View(), "\n")...)
+	if field.ReadOnly != "" {
+		lines = append(lines, "Read-only: "+field.ReadOnly)
+	}
+
+	return lines
 }
 
 func (field textFormField) value() string {
@@ -274,4 +282,16 @@ func (m *Model) textFormChoiceLine(field textFormField, index int) string {
 	}
 
 	return line
+}
+
+func updateReadOnlyInput(field *textFormField, message tea.KeyMsg) tea.Cmd {
+	switch message.Type {
+	case tea.KeyUp, tea.KeyDown, tea.KeyLeft, tea.KeyRight, tea.KeyHome, tea.KeyEnd, tea.KeyPgUp, tea.KeyPgDown:
+		input, command := field.Input.Update(message)
+		field.Input = input
+
+		return command
+	default:
+		return nil
+	}
 }

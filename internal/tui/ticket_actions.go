@@ -73,16 +73,6 @@ func NewTicketActionState(action TicketActionID, ticket TicketView, status strin
 	}
 
 	switch action {
-	case TicketActionAddComment:
-		return TicketActionState{
-			Pending: true,
-			Request: request,
-			Title:   "Add ticket comment",
-			Details: []string{
-				"Ticket: " + ticket.Key,
-				"Comment: TUI action recorded.",
-			},
-		}
 	case TicketActionMoveStatus:
 		return TicketActionState{
 			Pending: true,
@@ -153,6 +143,12 @@ func (m *Model) updateTicketActionKey(msg tea.KeyMsg) tea.Cmd {
 func (m *Model) planTicketAction(action TicketActionID, status string) {
 	if action == TicketActionCreate {
 		m.openTicketCreateForm()
+
+		return
+	}
+
+	if action == TicketActionAddComment {
+		m.openSelectedTicketForm(action)
 
 		return
 	}

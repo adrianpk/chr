@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"forge.adrianpk.com/chr/internal/app/operation"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
@@ -26,7 +27,11 @@ func (e tuiTicketActionExecutor) executeTicketEditor(request tui.TicketActionReq
 		return tui.TicketActionResult{}, fmt.Errorf("ticket operation identity is required")
 	}
 
-	mutation := workflowcore.TicketEditRequest{Key: request.Key, Revision: request.Revision, Fields: request.Fields, Body: request.Body, Binding: workflowstate.MutationBinding{RequestID: request.OperationID, Operator: "tui"}}
+	if request.Action == tui.TicketActionAddComment && strings.TrimSpace(request.Comment) == "" {
+		return tui.TicketActionResult{}, fmt.Errorf("enter a non-empty comment")
+	}
+
+	mutation := workflowcore.TicketEditRequest{Key: request.Key, Revision: request.Revision, Fields: request.Fields, Body: request.Body, Comment: request.Comment, Binding: workflowstate.MutationBinding{RequestID: request.OperationID, Operator: "tui"}}
 
 	var (
 		document workflowcore.TicketDocument

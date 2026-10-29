@@ -2080,7 +2080,7 @@ func TestModelCancelsTicketAction(t *testing.T) {
 		t.Fatal("selectedTicketView returned no ticket")
 	}
 
-	model.ticketAction = NewTicketActionState(TicketActionAddComment, ticket, "")
+	model.ticketAction = NewTicketActionState(TicketActionMoveStatus, ticket, "backlog")
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 

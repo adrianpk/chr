@@ -16,6 +16,8 @@ func (m *Model) updateTicketKey(message tea.KeyMsg) tea.Cmd {
 		}
 
 		m.openTicketEditForm()
+	case "a":
+		m.openSelectedTicketForm(TicketActionAddComment)
 	case "r":
 		m.refreshTicketFormSource()
 	default:
@@ -32,10 +34,12 @@ func (m *Model) openTicketCreateForm() {
 		return
 	}
 
-	m.readTicketForm(TicketActionRequest{Action: TicketActionRead, CaseSlug: m.caseContext.CaseSlug})
+	m.readTicketForm(TicketActionRequest{Action: TicketActionCreate, CaseSlug: m.caseContext.CaseSlug})
 }
 
-func (m *Model) openTicketEditForm() {
+func (m *Model) openTicketEditForm() { m.openSelectedTicketForm(TicketActionSave) }
+
+func (m *Model) openSelectedTicketForm(action TicketActionID) {
 	ticket, ok := m.selectedTicketView()
 	if !ok {
 		m.statusMessage = "No ticket selected."
@@ -43,7 +47,7 @@ func (m *Model) openTicketEditForm() {
 		return
 	}
 
-	m.readTicketForm(TicketActionRequest{Action: TicketActionRead, Key: ticket.Key})
+	m.readTicketForm(TicketActionRequest{Action: action, Key: ticket.Key})
 }
 
 func (m *Model) readTicketForm(request TicketActionRequest) {
@@ -53,7 +57,7 @@ func (m *Model) readTicketForm(request TicketActionRequest) {
 		return
 	}
 
-	result, err := m.ticketExecutor.ExecuteTicketAction(request)
+	result, err := m.ticketExecutor.ExecuteTicketAction(TicketActionRequest{Action: TicketActionRead, Key: request.Key, CaseSlug: request.CaseSlug})
 	m.recordOperation(result.Outcome)
 
 	if err != nil || result.Editor == nil {
@@ -62,7 +66,7 @@ func (m *Model) readTicketForm(request TicketActionRequest) {
 		return
 	}
 
-	m.openTicketForm(*result.Editor)
+	m.openTicketInput(*result.Editor, request.Action)
 }
 
 func (m *Model) openTicketForm(editor TicketEditorView) {
@@ -184,4 +188,14 @@ func (m *Model) refreshTicketFormSource() {
 	}
 
 	m.statusMessage = result.Message
+}
+
+func (m *Model) openTicketInput(editor TicketEditorView, action TicketActionID) {
+	if action == TicketActionAddComment {
+		m.openTicketCommentForm(editor)
+
+		return
+	}
+
+	m.openTicketForm(editor)
 }

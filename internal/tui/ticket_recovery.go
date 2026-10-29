@@ -31,5 +31,5 @@ func (m *Model) reloadTicketForm(request TicketActionRequest) {
 		return
 	}
 
-	m.openTicketForm(*result.Editor)
+	m.openTicketInput(*result.Editor, request.Action)
 }
