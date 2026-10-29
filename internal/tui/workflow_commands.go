@@ -5,6 +5,8 @@ func nativeWorkflowCommands() []Command {
 		id, title string
 		action    WorkActionID
 	}{
+		{"workflow-grant", "Extend displayed workflow allowance", WorkActionWorkflowGrant},
+		{"workflow-answer", "Answer retained integration decision", WorkActionWorkflowAnswer},
 		{"workflow-preview", "Preview bounded work scope", WorkActionWorkflowPreview},
 		{"workflow-ticket", "Work native selected ticket", WorkActionWorkflowTicket},
 		{"workflow-slice", "Work selected ticket's slice", WorkActionWorkflowSlice},

@@ -31,6 +31,7 @@ type WorkActionExecutor interface {
 
 // WorkActionRequest carries selected agent work action input.
 type WorkActionRequest struct {
+	draft          *textFormState
 	Workflow       *WorkflowActionRequest
 	Action         WorkActionID
 	TicketKey      string
@@ -320,6 +321,12 @@ func (m *Model) updateWorkActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) planWorkAction(action WorkActionID) {
+	if action == WorkActionWorkflowGrant || action == WorkActionWorkflowAnswer {
+		m.openWorkflowControlForm(action)
+
+		return
+	}
+
 	if action == WorkActionWorkflowPreview {
 		m.openWorkPreviewForm()
 

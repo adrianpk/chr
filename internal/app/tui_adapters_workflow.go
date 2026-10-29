@@ -28,8 +28,11 @@ func (e tuiWorkActionExecutor) executeNativeWorkAction(request tui.WorkActionReq
 		return e.nativeWorkControlPreview(request)
 	}
 
-	native := request.Workflow
-	control := WorkflowControlRequest{Action: strings.TrimPrefix(string(request.Action), "workflow_"), ID: native.ID, ExpectedRevision: native.ExpectedRevision, BindingHash: native.BindingHash, StepLimit: 1}
+	control, err := tuiWorkflowControlRequest(request)
+	if err != nil {
+		return tui.WorkActionResult{}, err
+	}
+
 	status, err := e.operations.ControlWorkExtent(e.operations.ctx, control)
 
 	return nativeWorkStatusResult(status), err
@@ -119,12 +122,26 @@ func (e tuiWorkActionExecutor) nativeWorkControlPreview(request tui.WorkActionRe
 		return nativeWorkStatusResult(status), fmt.Errorf("approval requires the displayed exact binding")
 	}
 
+	if err := e.validateTUIIntegrationControl(request, status); err != nil {
+		return nativeWorkStatusResult(status), err
+	}
+
 	// Copy the frozen request before changing interaction state. A later refresh
 	// cannot silently replace the revision or approval hash the user confirmed.
 	copy := *native
 	copy.Preview = false
 	request.Workflow = &copy
-	confirmation := tui.WorkActionState{Pending: true, Request: request, Title: "Confirm " + strings.TrimPrefix(string(request.Action), "workflow_"), Details: tuiWorkflowView(status).Lines}
+
+	details := []string{fmt.Sprintf("Workflow %s revision %d", status.ID, status.Revision)}
+
+	for _, key := range []string{"kind", "amount", "decision_id", "choice", "answer_action", "actor", "authority", "reason", "original_commit", "fix_category", "fix_title", "fix_detail"} {
+		if value := native.Fields[key]; value != "" {
+			details = append(details, key+": "+value)
+		}
+	}
+
+	details = append(details, tuiWorkflowView(status).Lines...)
+	confirmation := tui.WorkActionState{Pending: true, Request: request, Title: "Confirm " + strings.TrimPrefix(string(request.Action), "workflow_"), Details: details}
 
 	return tui.WorkActionResult{Workflow: nativeWorkStatusResult(status).Workflow, Confirmation: &confirmation}, nil
 }

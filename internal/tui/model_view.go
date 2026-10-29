@@ -200,6 +200,7 @@ func (m *Model) activeInteractionKeys() (string, bool) {
 		{Active: m.commandPalette.Open, Text: "Keys: up/down selects command, enter runs command, esc closes palette"},
 		{Active: m.quizBusy, Text: "Keys: waiting for quiz action to finish"},
 		{Active: m.quizAnswer.Active, Text: "Keys: enter answer  alt+s skip  alt+d done  alt+x cancel quiz  alt+m mode  PgUp/PgDn history  esc discard"},
+		{Active: m.SelectedView() == ViewDash && m.dashWorkflowDetails, Text: "Keys: c continue  p pause  x cancel  u resume  a approve  R reconcile  g allowance  d decision  t/C links  esc queue"},
 		{Active: m.filterEntryMode, Text: "Keys: enter applies filter, esc cancels filter, ctrl+c quits"},
 	}
 	for _, hint := range hints {

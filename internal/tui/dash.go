@@ -209,7 +209,7 @@ func appendDashReadinessRepairGuidance(lines []string, view WorkReadinessView) [
 func (m *Model) renderDashActionLines() []string {
 	lines := append(m.dashQueueActionLines(), "p Cycle priority filter", "o Cycle queue order")
 	if m.observability.Authority == workspaceconfig.WorkStateAuthorityTickets {
-		lines = append(lines, "v Preview Work", "w Workflow details")
+		lines = append(lines, "v Preview Work", "b Preview Work Scope", "w Workflow details")
 	}
 
 	if m.workReadiness.safeRepairAvailable() {

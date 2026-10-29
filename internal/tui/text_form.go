@@ -238,6 +238,12 @@ func (field textFormField) value() string {
 }
 
 func (m *Model) rotateTextFormIntent() {
+	if native := m.textForm.WorkRequest.Workflow; native != nil {
+		copy := *native
+		copy.RequestKey = rand.Text()
+		m.textForm.WorkRequest.Workflow = &copy
+	}
+
 	if m.textForm.TicketRequest.Action != "" {
 		m.textForm.TicketRequest.OperationID = rand.Text()
 	}

@@ -13,6 +13,8 @@ import (
 
 // Native workflow actions select extents or operate on displayed authorization.
 const (
+	WorkActionWorkflowGrant     WorkActionID = "workflow_grant"
+	WorkActionWorkflowAnswer    WorkActionID = "workflow_answer_decision"
 	WorkActionWorkflowPreview   WorkActionID = "workflow_preview"
 	WorkActionWorkflowTicket    WorkActionID = "workflow_ticket"
 	WorkActionWorkflowSlice     WorkActionID = "workflow_slice"
@@ -32,6 +34,11 @@ const (
 
 // WorkflowActionRequest retains service-supplied identities and revisions.
 type WorkflowActionRequest struct {
+	Integration      *workflowstate.ControlIntegrationGuard
+	Fields           map[string]string
+	Questions        []workflowstate.MergerDecision
+	DecisionRevision uint64
+	DecisionHash     string
 	Admission        *workflowstate.AdmissionGuard
 	RequestKey       string
 	Preview          bool
@@ -45,6 +52,11 @@ type WorkflowActionRequest struct {
 
 // WorkflowView contains bounded display lines and exact control bindings.
 type WorkflowView struct {
+	Integration                               *workflowstate.ControlIntegrationGuard
+	GrantKinds                                []string
+	Questions                                 []workflowstate.MergerDecision
+	DecisionRevision                          uint64
+	DecisionHash                              string
 	Title, State, Extent, Identity, TicketKey string
 	Offset, NextOffset                        int
 	Members                                   []workflowstate.PreviewMember
@@ -182,7 +194,12 @@ func (m *Model) planNativeWorkControl(request *WorkActionRequest) bool {
 	}
 
 	request.Workflow.ID, request.Workflow.ExpectedRevision = current.ID, current.Revision
+	if !m.workflowActionAvailable(request.Action) {
+		return false
+	}
+
 	request.Workflow.BindingHash = current.ApprovalHash
+	request.Workflow.Integration = current.Integration
 	request.Workflow.Preview = request.Action != WorkActionWorkflowStatus
 
 	return true
@@ -262,18 +279,17 @@ func (m *Model) completeNativeWorkAction(message workActionFinishedMsg) {
 	}
 
 	if message.Err != nil {
+		if message.Request.draft != nil {
+			m.textForm = *message.Request.draft
+		}
+
 		m.statusMessage = "Work action failed: " + message.Err.Error()
 
 		return
 	}
 
 	if message.Result.Confirmation != nil {
-		if m.textForm.WorkRequest.Workflow != nil {
-			m.textForm = textFormState{}
-		}
-
-		m.workAction = *message.Result.Confirmation
-		m.bindWorkActionContext()
+		m.installNativeWorkConfirmation(message)
 	}
 
 	m.statusMessage = message.Result.Message
@@ -304,4 +320,18 @@ func (m *Model) renderNativeWorkflow() string {
 type WorkflowActionView struct {
 	Action        WorkActionID
 	Label, Reason string
+}
+
+func (m *Model) installNativeWorkConfirmation(message workActionFinishedMsg) {
+	if m.textForm.WorkRequest.Workflow != nil {
+		if message.Request.Action == WorkActionWorkflowGrant || message.Request.Action == WorkActionWorkflowAnswer {
+			draft := m.textForm
+			message.Result.Confirmation.Request.draft = &draft
+		}
+
+		m.textForm = textFormState{}
+	}
+
+	m.workAction = *message.Result.Confirmation
+	m.bindWorkActionContext()
 }

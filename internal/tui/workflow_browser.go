@@ -24,7 +24,9 @@ func (m *Model) renderWorkflowWorkspace(width, height int) string {
 		lines = append(lines, "No retained workflows.")
 	}
 
-	detail := m.nativeWorkflowLines()
+	detail := append([]string{"c continue; p pause; x cancel; u resume; a approve; R reconcile", "g extend allowance; d answer decision; t ticket; C case", "b preview bounded work"}, m.nativeWorkflowLines()...)
+
+	detail = append(detail, "Linked ticket (t): "+emptyValue(m.workflowLinkedTicket()), "Linked case (C): open from extent or linked ticket")
 	for _, action := range m.workflow.Actions {
 		line := action.Label
 		if action.Reason != "" {
@@ -47,15 +49,15 @@ func (m *Model) renderWorkflowWorkspace(width, height int) string {
 }
 
 func (m *Model) handleWorkflowBrowseKey(key string) (tea.Cmd, bool) {
+	if command, ok := m.handleWorkflowControlKey(key); ok {
+		return command, true
+	}
+
 	if command, ok := m.handleWorkflowPageKey(key); ok {
 		return command, true
 	}
 
 	switch key {
-	case "b":
-		m.openWorkPreviewForm()
-
-		return nil, true
 	case "w", "esc":
 		m.dashWorkflowDetails = false
 
