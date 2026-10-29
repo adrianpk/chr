@@ -41,6 +41,17 @@ func (e tuiQuizActionExecutor) ExecuteQuizAction(request tui.QuizActionRequest) 
 func (e tuiSpecActionExecutor) ExecuteSpecAction(request tui.SpecActionRequest) (tui.SpecActionResult, error) {
 	result, err := e.executeSpecAction(request)
 	outcome := operationResult(result.Message, err)
+
+	outcome.OperationID = request.OperationID
+	if request.OperationID == "" {
+		outcome.Retry = false
+	}
+
+	if err != nil && result.Committed {
+		outcome.Summary = "Spec saved; catalog refresh failed. Retry the unchanged form to refresh."
+		outcome.Retry, outcome.Reload = true, false
+	}
+
 	outcome.ChangedFiles = result.Outcome.ChangedFiles
 	result.Outcome = outcome
 

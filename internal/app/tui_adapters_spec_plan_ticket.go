@@ -45,6 +45,8 @@ func (e tuiSpecActionExecutor) executeSpecAction(request tui.SpecActionRequest) 
 	result := tui.SpecActionResult{}
 
 	switch request.Action {
+	case tui.SpecActionCreate, tui.SpecActionEdit, tui.SpecActionSave:
+		return e.executeSpecEditor(request)
 	case tui.SpecActionGenerate:
 		generated, err := e.operations.GenerateSpec(e.operations.ctx, SpecGenerateRequest{
 			Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug},
@@ -75,6 +77,10 @@ func (e tuiSpecActionExecutor) executeSpecAction(request tui.SpecActionRequest) 
 		return tui.SpecActionResult{}, errors.New("unknown spec action")
 	}
 
+	return e.refreshSpecCatalog(result, request.Scope)
+}
+
+func (e tuiSpecActionExecutor) refreshSpecCatalog(result tui.SpecActionResult, scope tui.QuizScope) (tui.SpecActionResult, error) {
 	documents, err := tui.LoadDocumentViews(e.operations.ctx, e.operations.projectContext.ProjectDir)
 	if err != nil {
 		return tui.SpecActionResult{}, err
@@ -91,7 +97,7 @@ func (e tuiSpecActionExecutor) executeSpecAction(request tui.SpecActionRequest) 
 
 	result.Documents = documents
 	result.Specs = specs
-	result.Scope = request.Scope
+	result.Scope = scope
 
 	return result, nil
 }

@@ -17,6 +17,9 @@ const (
 	SpecActionGenerate        SpecActionID = "generate_spec"
 	SpecActionGenerateFeature SpecActionID = "generate_acceptance_feature"
 	SpecActionRefresh         SpecActionID = "refresh_specs"
+	SpecActionCreate          SpecActionID = "create_spec"
+	SpecActionEdit            SpecActionID = "edit_spec"
+	SpecActionSave            SpecActionID = "save_spec"
 )
 
 // SpecActionExecutor runs confirmed spec actions.
@@ -26,8 +29,9 @@ type SpecActionExecutor interface {
 
 // SpecActionRequest carries selected spec action input.
 type SpecActionRequest struct {
-	Action SpecActionID
-	Scope  QuizScope
+	Action                                              SpecActionID
+	Scope                                               QuizScope
+	OperationID, Path, Revision, Title, Content, Status string
 }
 
 // SpecActionResult contains refreshed spec state after an action.
@@ -38,6 +42,8 @@ type SpecActionResult struct {
 	Specs                   []SpecView
 	Scope                   QuizScope
 	SelectedPath            string
+	Document                *SpecView
+	Committed               bool
 	AcceptanceFeatureStatus string
 	AcceptanceFeaturePath   string
 	AcceptanceFeatureRound  string
@@ -80,6 +86,14 @@ func (m *Model) renderSpecAction() string {
 
 func (m *Model) updateSpecsKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
+	case "c":
+		m.openSpecCreateForm()
+
+		return nil
+	case "e":
+		m.openSpecEditForm()
+
+		return nil
 	case "g":
 		cmd := m.startSpecAction(SpecActionRequest{
 			Action: SpecActionGenerate,

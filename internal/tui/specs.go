@@ -21,7 +21,7 @@ type SpecView struct {
 func (m *Model) renderSpecs() string { return m.documentCatalog(ViewSpecs).render() }
 
 func (m *Model) specActionHint() string {
-	return "g generate spec  f generate feature  r refresh"
+	return "c create  e edit  g generate spec  f generate feature  r refresh"
 }
 
 func (m *Model) selectedSpecView() (SpecView, bool) {

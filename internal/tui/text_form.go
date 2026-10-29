@@ -20,6 +20,7 @@ type textFormField struct {
 
 type textFormState struct {
 	DumpRequest        DumpActionRequest
+	SpecRequest        SpecActionRequest
 	Active             bool
 	Title, SubmitLabel string
 	Fields             []textFormField
@@ -139,7 +140,7 @@ func discardTextForm(m *Model) tea.Cmd {
 }
 
 func (m *Model) textFormBinding() string {
-	values := []string{m.textForm.Title, m.textForm.DumpRequest.Path, m.textForm.DumpRequest.Revision, m.textForm.DumpRequest.OperationID}
+	values := []string{m.textForm.Title, m.textForm.DumpRequest.Path, m.textForm.DumpRequest.Revision, m.textForm.DumpRequest.OperationID, m.textForm.SpecRequest.Path, m.textForm.SpecRequest.Revision, m.textForm.SpecRequest.OperationID, m.textForm.SpecRequest.Scope.CaseSlug}
 	for _, field := range m.textForm.Fields {
 		values = append(values, field.value())
 	}
@@ -197,6 +198,10 @@ func (m *Model) rotateTextFormIntent() {
 	if m.textForm.DumpRequest.Action != "" {
 		m.textForm.DumpRequest.OperationID = rand.Text()
 	}
+
+	if m.textForm.SpecRequest.Action != "" {
+		m.textForm.SpecRequest.OperationID = rand.Text()
+	}
 }
 
 func (m *Model) updateTextFormChoice(message tea.KeyMsg) tea.Cmd {
@@ -225,5 +230,10 @@ func (m *Model) textFormChoiceLine(field textFormField, index int) string {
 		prefix = "> "
 	}
 
-	return prefix + field.Label + ": " + field.Choices[field.Choice].Label + " (left/right choose)"
+	line := prefix + field.Label + ": " + field.Choices[field.Choice].Label
+	if len(field.Choices) > 1 {
+		line += " (left/right choose)"
+	}
+
+	return line
 }
