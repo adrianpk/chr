@@ -168,7 +168,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-8-plans.md`
 
 Ticket: `TKT-20261029101144` — `ops/default/ticket/reviewing/20261029101144-web-tui-parity-tickets.md`
 State: reviewing
-PR: pending
+PR: [#463](https://forge.adrianpk.com/adrianpk/chr/pulls/463)
 Report: `ops/default/report/slices/web-tui-parity/slice-9-tickets.md`
 
 | Task | Work | State | Commits | Validation |
@@ -177,7 +177,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-9-tickets.md`
 | T9.2 | Create and edit tickets with user title, description, case and metadata; show phase/slice and read-only explanations. | done | f2ddfdfd | Legacy/native forms round-trip entered title/body/metadata; cancel writes nothing, stale input remains, confirmed reload and managed restrictions pass. |
 | T9.3 | Expose free-text comment input and retained history instead of the fixed action comment. | done | 29095bef | Distinct comments and retained history round-trip on both authorities; empty/stale input and comment-mode reload checks pass. |
 | T9.4 | Expose AttachReviewRef with user input and preserve external editing, checklist display and canonical review guards. | done | ad327372 | Entered references, HTTP validation, stale/active-claim/receipt guards, native reference retention, source editing, checklist and dump-append regressions pass; production PTY journey passes. |
-| T9.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | pending report introduction | Implementation checks passed; final ordered controller validation, PR reference and controller-owned integration remain pending. |
+| T9.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 52a38b57 | PR #463 opened with the immutable report introduction; implementation checks passed. Final ordered controller validation and integration remain pending. |
 
 
 ### Slice 10: Responsive Board and retained workflows

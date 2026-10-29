@@ -9,8 +9,9 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:44Z
-commits: [fc8cd8e06e07568045c79e8d08b49370d5493cc9, f2ddfdfd17490910683a2a0473a9cda53b09395d, 29095befa1a96578d8eb9a1f81435f524097ce7d, ad327372411f98e7fc5854ed3de1c56ac949dbd7]
+commits: [fc8cd8e06e07568045c79e8d08b49370d5493cc9, f2ddfdfd17490910683a2a0473a9cda53b09395d, 29095befa1a96578d8eb9a1f81435f524097ce7d, ad327372411f98e7fc5854ed3de1c56ac949dbd7, 52a38b57ae4d238bad17202289bdce1d971dfd4f]
 branch: feat/slice-9-tui-tickets
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/463
 reviewed_at: 2026-10-29T15:32:07Z
 started_at: 2026-10-29T15:00:15Z
 ready_at: 2026-10-29T10:11:44Z
@@ -60,6 +61,6 @@ separate comments/history, guarded review references and canonical source editin
 have focused local legacy/native and production-terminal evidence. Checklist
 content and the existing dump-append terminal journey remain covered.
 
-The tracker and Slice 9 report retain exact commands and task commits. Final
+The tracker and Slice 9 report retain exact commands and task commits. PR #463 is open with the immutable report introduction. Final
 controller checks and canonical PR integration remain pending; this ticket is
 reviewing and has no delivery claim.

@@ -5,7 +5,7 @@ Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-9-tui-tickets`
-PR: pending
+PR: [#463](https://forge.adrianpk.com/adrianpk/chr/pulls/463)
 
 ## Purpose
 
@@ -38,6 +38,7 @@ T9.1: `fc8cd8e06e07568045c79e8d08b49370d5493cc9`.
 T9.2: `f2ddfdfd17490910683a2a0473a9cda53b09395d`.
 T9.3: `29095befa1a96578d8eb9a1f81435f524097ce7d`.
 T9.4: `ad327372411f98e7fc5854ed3de1c56ac949dbd7`.
+T9.5 report introduction: `52a38b57ae4d238bad17202289bdce1d971dfd4f`.
 
 Ticket editor choices and restrictions now have one transport-neutral application
 representation. Web and TUI map it independently. Terminal writes call
