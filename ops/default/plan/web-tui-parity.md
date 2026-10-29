@@ -7,7 +7,7 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 10 — Responsive Board and retained workflows.
+Active slice: Slice 11 — Wizard entry and Dump in shared tabs.
 
 Spec: [Requirements](../spec/web-tui-parity.md)
 Tracker: [Tasks and evidence](../tracker/web-tui-parity.md)
@@ -218,7 +218,7 @@ Prerequisite: Slice 8 integrated into dev.
 
 ### Slice 10: Responsive Board and retained workflows
 
-Ticket: `TKT-20261029101145` — `ops/default/ticket/reviewing/20261029101145-web-tui-parity-board-workflows.md`
+Ticket: `TKT-20261029101145` — `ops/default/ticket/solved/20261029101145-web-tui-parity-board-workflows.md`
 Findings: G-016, G-028, G-031.
 Prerequisite: Slice 9 integrated into dev.
 
@@ -234,7 +234,7 @@ Prerequisite: Slice 9 integrated into dev.
 
 ### Slice 11: Wizard entry and Dump in shared tabs
 
-Ticket: `TKT-20261029101146` — `ops/default/ticket/ready/20261029101146-web-tui-parity-wizard-entry.md`
+Ticket: `TKT-20261029101146` — `ops/default/ticket/in_progress/20261029101146-web-tui-parity-wizard-entry.md`
 Findings: G-005, G-006, G-007, G-008.
 Prerequisite: Slice 10 integrated into dev.
 

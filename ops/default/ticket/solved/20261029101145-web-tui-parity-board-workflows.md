@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101145
 title: "Responsive Board and retained workflows"
-status: reviewing
+status: solved
 kind: task
 severity: medium
 priority: normal
@@ -18,6 +18,8 @@ commits:
 branch: feat/slice-10-tui-board-workflows
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/464
 ready_at: 2026-10-29T10:11:45Z
+resolution: fixed
+closed_at: 2026-10-29T16:27:19Z
 reviewed_at: 2026-10-29T16:16:08Z
 ---
 
@@ -60,9 +62,7 @@ One branch and one PR to `dev`; tasks T10.1-T10.5 are the canonical work units. 
 
 ## Evidence
 
-T10.1–T10.4 implemented in the recorded branch. Wide Board and Attention retain
-selection through resize; Dash browses retained workflows and bounded members.
-Scope preview and lifecycle/integration forms use canonical guards. Focused TUI,
-real workflow grant/decision/approval, and production terminal checks passed.
-See the report for exact commands. Final clean-HEAD controller validation and
-PR #464 integration remain pending; this ticket remains reviewing.
+T10.1–T10.5 delivered in PR #464 at `728f5dd5bcc59f172ba63b9e62e386a084f86c2d`.
+Controller validation `JQCPMJ55MJPOB64VPBLMV6N4Q3` passed all four ordered checks on
+that exact clean candidate. The canonical merge is recorded in Acta. See the
+report for implementation checks, the transient failed attempt and final evidence.

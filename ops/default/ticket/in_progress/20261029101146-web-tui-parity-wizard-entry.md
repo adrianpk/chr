@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101146
 title: "Wizard entry and Dump in shared tabs"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: high
@@ -10,6 +10,7 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:46Z
 commits: []
+started_at: 2026-10-29T16:27:19Z
 ready_at: 2026-10-29T10:11:46Z
 ---
 

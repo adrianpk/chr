@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 10 — Responsive Board and retained workflows.
-Completed slices: 9/14
-Completed tasks: 49/70
+Active slice: Slice 11 — Wizard entry and Dump in shared tabs.
+Completed slices: 10/14
+Completed tasks: 50/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -182,8 +182,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-9-tickets.md`
 
 ### Slice 10: Responsive Board and retained workflows
 
-Ticket: `TKT-20261029101145` — `ops/default/ticket/reviewing/20261029101145-web-tui-parity-board-workflows.md`
-State: reviewing
+Ticket: `TKT-20261029101145` — `ops/default/ticket/solved/20261029101145-web-tui-parity-board-workflows.md`
+State: delivered
 PR: [#464](https://forge.adrianpk.com/adrianpk/chr/pulls/464)
 Report: `ops/default/report/slices/web-tui-parity/slice-10-board-workflows.md`
 
@@ -193,13 +193,13 @@ Report: `ops/default/report/slices/web-tui-parity/slice-10-board-workflows.md`
 | T10.2 | Add a retained workflow list/detail surface within Dash with pagination, members, evidence and current eligible actions. | done | 8d348e4d | Real empty/17-run paging, retained members and late refresh checks passed. |
 | T10.3 | Expose bounded work preview for ticket, slice, set, case and loose scope with canonical filters and ordering. | done | 67456536 | Real bounded scope form/preview cancellation and canonical stale anchor checks passed. |
 | T10.4 | Expose allowed lifecycle controls, allowance extension and integration-decision answers, plus visible case/ticket links. | done | 6f391411 | Real grant/decision/native approval guards, retained drafts/links and production PTY stop controls passed. |
-| T10.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 600fe4b1 | PR #464 opened; focused task checks passed. Final PR-reference HEAD controller validation and integration pending. |
+| T10.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | 600fe4b1; 728f5dd5 | PR #464 merged at 728f5dd5bcc59f172ba63b9e62e386a084f86c2d; validation JQCPMJ55MJPOB64VPBLMV6N4Q3 passed all four ordered checks. |
 
 
 ### Slice 11: Wizard entry and Dump in shared tabs
 
-Ticket: `TKT-20261029101146` — `ops/default/ticket/ready/20261029101146-web-tui-parity-wizard-entry.md`
-State: ready
+Ticket: `TKT-20261029101146` — `ops/default/ticket/in_progress/20261029101146-web-tui-parity-wizard-entry.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-11-wizard-entry.md`
 

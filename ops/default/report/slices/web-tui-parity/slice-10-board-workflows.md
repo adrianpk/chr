@@ -1,6 +1,6 @@
 # Slice 10: Responsive Board and retained workflows
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
@@ -98,9 +98,19 @@ Implementation checks passed locally:
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/tui ./internal/app` — passed.
 - `git diff --check` — passed before task commits.
 
-Required `make verify`, focused race checks and final whitespace evidence will be
-recorded by the controller for the clean PR-reference HEAD. They are pending at
-report introduction. Integration and closure remain controller-owned.
+Controller validation `JQCPMJ55MJPOB64VPBLMV6N4Q3` passed all four ordered checks on
+clean HEAD `728f5dd5bcc59f172ba63b9e62e386a084f86c2d`:
+
+- `make verify`
+- `go test -race ./internal/tui -count=1`
+- `go test -race ./internal/app -run '^Test(TUIWorkflow.*|TUIWork(ScopeForm|AnchorWindow)|TUIDash.*|TUIOperation.*)$' -count=1 -timeout=3m`
+- `git diff --check`
+
+The first required attempt failed the existing TelegramHelpHTTP uncertain-server
+replay assertion. `go test ./internal/app -run '^TestTelegramHelpHTTP$' -count=3 -timeout=3m`
+then passed; the unchanged ordered validation retry passed. No Telegram code or
+assertion changed. Canonical Forgejo and Acta event `01M647PFQ6TBQX6F6CX1YZH0S3`
+confirm PR #464 integrated at that exact candidate. Closure repeated no checks.
 
 ## Risks and Follow-ups
 
