@@ -5,7 +5,7 @@ Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-13-tui-wizard-results`
-PR: pending
+PR: [#467](https://forge.adrianpk.com/adrianpk/chr/pulls/467)
 
 ## Purpose
 
@@ -41,6 +41,7 @@ T13.1: `ed20cd540f319ecc74809656233f01b53fe771e3`.
 T13.2: `8972f55df1ff14316f8c2282953e3abbebfe772a`.
 T13.3: `66d738e145954fec713ace69f28beb17907b3b74`.
 T13.4: `24112fcb7cc1f4688bc1846ce2a60925214e6730`.
+T13.5 report introduction: `034ffe4db3a18d410b16337d15457e77616784e8`.
 
 Transport projection reads canonical tickets and the neutral verified native
 result inspection. It does not derive delivery from counters or import Web DTOs.
@@ -99,16 +100,16 @@ Implementation checks passed locally:
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/tui ./internal/app` — passed with zero issues.
 - `git diff --check` — passed before task commits.
 
-Final clean-HEAD controller validation is pending the PR-reference follow-up
-commit. Its ordered commands will be:
+Final clean-HEAD controller validation is recorded after the PR-reference
+follow-up commit using this ordered command list:
 
 - `make verify`
 - `go test -race ./internal/tui -count=1`
 - `go test -race ./internal/app -run '^Test(TUIWizard.*|GuidedUseCaseTUI.*|GuidedUseCaseParityNative|GuidedUseCaseSharedQuizWeb)$' -count=1 -timeout=3m`
 - `git diff --check`
 
-The controller ledger and Acta will record the exact candidate and validation
-identity. Dev integration and slice closure remain pending.
+The controller ledger and Acta record the exact candidate and validation
+identity. PR #467 targets dev; integration and slice closure remain pending.
 
 ## Risks and Follow-ups
 

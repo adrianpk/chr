@@ -231,7 +231,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-12-wizard-authoring.md`
 
 Ticket: `TKT-20261029101148` — `ops/default/ticket/reviewing/20261029101148-web-tui-parity-wizard-results.md`
 State: reviewing
-PR: pending
+PR: [#467](https://forge.adrianpk.com/adrianpk/chr/pulls/467)
 Report: `ops/default/report/slices/web-tui-parity/slice-13-wizard-results.md`
 
 | Task | Work | State | Commits | Validation |
@@ -240,7 +240,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-13-wizard-results.md`
 | T13.2 | Render structured terminal results with summary, branch/PR, delivery evidence and validation commands/exit codes. | done | 8972f55d | Real open-PR versus verified delivery/closing checks pass; exact receipt hashes, refs, validation commands/exit codes and JSON toggle are asserted. |
 | T13.3 | Confirm cancellation with the same saved-document/completed-change warning and show Pause only where domain policy permits it. | done | 66d738e1 | Production PTY proves visible execution Pause, cancelled confirmation writes nothing, confirmed cancellation retains exact originals/checkpoints and worker commit; domain limits unchanged. |
 | T13.4 | Keep polling read-only, preserve unsent drafts and navigation, and retain later ideas/originals as existing secondary capabilities. | done | 24112fcb | Production PTY observes two canonical peer ideas through polling; complete draft, typing and earlier Dumps navigation survive, with zero submitted answers or passive writes. |
-| T13.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | reviewing | — | Report and PR preparation; task checks pass. Final ordered controller validation and dev integration pending. |
+| T13.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | reviewing | 034ffe4d | Report introduced; PR #467 opened. Final exact-HEAD checks are recorded in the controller ledger and Acta after the PR-reference commit; dev integration pending. |
 
 ### Slice 14: Parity acceptance and capability inventory
 
