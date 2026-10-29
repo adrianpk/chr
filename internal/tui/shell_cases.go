@@ -39,6 +39,10 @@ func (m *Model) renderCasesWorkspace(width, height int) string {
 }
 
 func (m *Model) renderCaseDocumentLines(width int) []string {
+	if m.wizardBound() {
+		return []string{m.caseContextLabel(), m.wizardStageLabel(), "Wizard mode: metadata is read-only.", "c Continue to the current stage; o Open workflow."}
+	}
+
 	lines := m.renderCaseDetailLines(width)
 
 	lines = append(lines, "")

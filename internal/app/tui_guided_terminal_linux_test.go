@@ -28,11 +28,11 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 	operations, _ := guidedTUIFixture(t)
 	terminal := startGuidedTerminal(t, operations)
 	terminal.keys(t, "w")
-	terminal.see(t, "Wizard")
+	terminal.see(t, "[Create]")
 	terminal.keys(t, "Terminal process audit\x13")
 	terminal.see(t, "Add the known context")
 	terminal.keys(t, "e")
-	terminal.see(t, "Continue to quiz")
+	terminal.see(t, "ctrl+s Continue to quiz")
 	terminal.keys(t, "Preserve finite work and original inputs.")
 	terminal.keys(t, " EXACT_FINAL_CAPTURE\x13")
 	terminal.see(t, "What should the workflow preserve")
@@ -44,6 +44,8 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 		t.Fatal("terminal process did not persist exact approved inputs")
 	}
 
+	terminal.keys(t, "c")
+	terminal.see(t, "Current stage · r Refresh")
 	terminal.keys(t, "p")
 	terminal.see(t, "Dispatch stopped: pause")
 	terminal.keys(t, "i")

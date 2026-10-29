@@ -116,7 +116,7 @@ func tuiGuidedView(observed GuidedUseCaseInspection) tui.GuidedView {
 	case "name":
 		view.Prompt, view.InputAction = "What is the use-case name?", "name"
 	case "dump":
-		view.Prompt, view.InputAction = "Add the known context. Choose Finish capture when it is complete.", "append"
+		view.Prompt, view.InputAction = "Add the known context. Continue to quiz submits the current editor content.", "append"
 	case "quiz":
 		view.Prompt = observed.Question
 		if observed.Question != "" {

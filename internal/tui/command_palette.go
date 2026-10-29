@@ -210,6 +210,12 @@ func (m *Model) executeSelectedCommand() tea.Cmd {
 
 //nolint:cyclop // Central command dispatch keeps palette behavior easy to audit.
 func (m *Model) executeCommand(command Command) tea.Cmd {
+	if m.wizardManualCommand(command) {
+		m.explainWizardMode()
+
+		return nil
+	}
+
 	switch command.Action {
 	case CommandActionClearCase:
 		m.bindCaseContext("", "")

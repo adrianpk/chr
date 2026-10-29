@@ -42,7 +42,7 @@ func (m *Model) inspectGuidedApproval() {
 func (m *Model) guidedControlHint() string {
 	text := ""
 
-	labels := map[string]string{"finish": "f Finish capture", "pause": "p Pause", "resume": "u Resume", "cancel": "x Cancel"}
+	labels := map[string]string{"finish": "e Continue to quiz", "pause": "p Pause", "resume": "u Resume", "cancel": "x Cancel"}
 	for _, action := range m.guided.View.Controls {
 		text += labels[action] + " · "
 	}

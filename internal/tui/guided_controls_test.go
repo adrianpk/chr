@@ -54,7 +54,7 @@ func TestGuidedUseCaseTUIControls(t *testing.T) {
 // unchanged rather than allocating another command or refilling its allowance.
 func TestGuidedUseCaseTUIRetainedStep(t *testing.T) {
 	m := guidedTerminalFixture()
-	original := GuidedRequest{Action: "input", Command: authoringcore.GuidedUseCaseCommand{OperationID: "original-control", Action: "resume", ExpectedRevision: 4, NativeRevision: 17}}
+	original := GuidedRequest{Action: "input", Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: m.guided.View.Session.ID, ProjectID: m.projectID}, OperationID: "original-control", Action: "resume", ExpectedRevision: 4, NativeRevision: 17}}
 	m.guided.View.Retry = &original
 
 	var received GuidedRequest

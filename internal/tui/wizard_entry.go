@@ -9,6 +9,12 @@ import (
 )
 
 func (m *Model) openWizardCreateForm() {
+	if m.caseDirty {
+		m.statusMessage = "Save the existing case changes before starting a wizard."
+
+		return
+	}
+
 	request := GuidedRequest{Action: "start", Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{ProjectID: m.projectID, RunID: "tui-" + rand.Text()}}}
 	m.guided.Active = false
 	m.openTextForm(textFormState{Title: "Wizard", SubmitLabel: "Create", Submit: (*Model).submitWizardCreate, GuidedRequest: &request, Fields: []textFormField{newTextFormField("Name", false, 512)}})

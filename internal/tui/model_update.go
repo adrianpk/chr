@@ -147,6 +147,12 @@ func (m *Model) handleGlobalKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 
 		return nil, true
 	case "alt+e":
+		if m.wizardBound() {
+			m.explainWizardMode()
+
+			return nil, true
+		}
+
 		if m.SelectedView() != ViewDumps {
 			return m.openSelectedSource(), true
 		}

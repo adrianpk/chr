@@ -35,11 +35,7 @@ func TestGuidedUseCaseParityNative(t *testing.T) {
 	lifecycle := &telegramGuidedHost{receiver: f.receiver, shared: host}
 	pumpGuidedTelegram(t, lifecycle)
 	host.wait.Wait()
-	runGuidedTUIKey(t, model, "r", true)
-
-	if !strings.Contains(model.View(), "Native review requires approval") {
-		t.Fatal("terminal hid the real native wait", model.View())
-	}
+	inspectGuidedTUIWork(t, model)
 
 	started := readWebGuidedSession(t, operations, original.ID)
 	native := assertGuidedNativeAdmission(t, operations, started)
@@ -173,4 +169,15 @@ func assertGuidedTUIPreparedOriginal(t *testing.T, executor tuiGuidedExecutor, o
 	if err != nil || view.Document == nil || view.Document.Content != original.Content || view.Document.Commit != original.Commit {
 		t.Fatal("terminal followed a later prepared-input replacement", kind, err)
 	}
+}
+
+func inspectGuidedTUIWork(t *testing.T, model *tui.Model) {
+	t.Helper()
+	runGuidedTUIKey(t, model, "r", true)
+
+	if !strings.Contains(model.View(), "Native review requires approval") {
+		t.Fatal("terminal hid the real native wait", model.View())
+	}
+
+	runGuidedTUIKey(t, model, "c", false)
 }

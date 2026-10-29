@@ -65,7 +65,12 @@ func (m *Model) wizardTabLines() []string {
 	}
 
 	if m.SelectedView() == m.wizardStageView() {
-		lines = append(lines, view.Prompt, m.guidedControlHint(), "e Input · r Refresh · F1-F7 existing tabs")
+		hint := "Current stage · r Refresh · F1-F7 existing tabs"
+		if view.InputAction != "" {
+			hint = "e Input · " + hint
+		}
+
+		lines = append(lines, view.Prompt, m.guidedControlHint(), hint)
 	} else {
 		lines = append(lines, "Read-only stage. c Continue to the current stage.")
 	}

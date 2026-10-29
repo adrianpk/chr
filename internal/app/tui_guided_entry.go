@@ -16,24 +16,14 @@ func (e tuiGuidedExecutor) openCase(ctx context.Context, request tui.GuidedReque
 		return tui.GuidedView{}, err
 	}
 
-	matches := []authoringcore.Session{}
-
-	for _, run := range observed.Runs {
-		if request.CaseSlug == "" || run.Guided.CaseSlug == request.CaseSlug {
-			matches = append(matches, run)
-		}
-	}
-
-	sort.Slice(matches, func(i, j int) bool {
-		if matches[i].UpdatedAt.Equal(matches[j].UpdatedAt) {
-			return matches[i].ID < matches[j].ID
-		}
-
-		return matches[i].UpdatedAt.After(matches[j].UpdatedAt)
-	})
+	matches := tuiWizardCaseRuns(request, observed.Runs)
 
 	if len(matches) == 0 {
 		return tui.GuidedView{}, fmt.Errorf("no retained workflow for this case; choose Wizard to start one")
+	}
+
+	if request.CaseSlug == "" && len(matches) > 1 {
+		return tui.GuidedView{}, fmt.Errorf("select a named case before opening its workflow")
 	}
 
 	selected := matches[0]
@@ -61,13 +51,39 @@ func tuiWizardOriginals(observed GuidedUseCaseInspection) []tui.GuidedDocument {
 		for _, artifact := range checkpoint.Artifacts {
 			if strings.HasSuffix(artifact.Path, "/artifact.md") {
 				originals = append(originals, tui.GuidedDocument{Kind: "dump", Reference: artifact.Path, Commit: checkpoint.Commit, Content: observed.CommittedDump})
+
+				break
 			}
 		}
 	}
 
 	for _, artifact := range observed.Artifacts {
+		if artifact.Stage == "dump" {
+			continue
+		}
+
 		originals = append(originals, tui.GuidedDocument{Kind: artifact.Stage, Reference: artifact.Reference, Commit: artifact.Commit, Content: artifact.Content})
 	}
 
 	return originals
+}
+
+func tuiWizardCaseRuns(request tui.GuidedRequest, runs []authoringcore.Session) []authoringcore.Session {
+	matches := []authoringcore.Session{}
+
+	for _, run := range runs {
+		if request.CaseSlug == "" || run.Guided.CaseSlug == request.CaseSlug {
+			matches = append(matches, run)
+		}
+	}
+
+	sort.Slice(matches, func(i, j int) bool {
+		if matches[i].UpdatedAt.Equal(matches[j].UpdatedAt) {
+			return matches[i].ID < matches[j].ID
+		}
+
+		return matches[i].UpdatedAt.After(matches[j].UpdatedAt)
+	})
+
+	return matches
 }

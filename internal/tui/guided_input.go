@@ -27,6 +27,10 @@ func (m *Model) updateWizardKey(message tea.KeyMsg) (tea.Cmd, bool) {
 	}
 
 	key := message.String()
+	if m.wizardCaseKey(key) {
+		return nil, false
+	}
+
 	if delta := map[string]int{"up": -1, "k": -1, "down": 1, "j": 1, "pgup": -10, "pgdown": 10}[key]; delta != 0 {
 		m.scrollDetail(delta)
 
@@ -49,7 +53,7 @@ func (m *Model) updateWizardKey(message tea.KeyMsg) (tea.Cmd, bool) {
 
 		return m.guidedExtraKey(key), true
 	default:
-		return m.updateWizardActionKey(key)
+		return m.wizardActionKey(key)
 	}
 
 	return nil, true
@@ -125,10 +129,20 @@ func (m *Model) updateWizardActionKey(key string) (tea.Cmd, bool) {
 	case "enter", "e":
 		return m.editGuidedInput(m.guided.View.InputAction), true
 	case "f":
-		return m.submitGuidedStep("finish"), true
+		if m.guided.View.Session.Guided.Stage == "dump" {
+			m.openWizardDump()
+
+			return nil, true
+		}
+
+		m.explainWizardMode()
+
+		return nil, true
 	case "p", "u", "x", "i", "a", "v", "1", "2", "3", "4", "5":
 		return m.guidedExtraKey(key), true
 	default:
-		return nil, false
+		m.explainWizardMode()
+
+		return nil, true
 	}
 }

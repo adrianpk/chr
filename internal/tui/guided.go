@@ -66,7 +66,7 @@ func (m *Model) openGuided() tea.Cmd {
 }
 
 func (m *Model) startGuidedRequest(request GuidedRequest) tea.Cmd {
-	if m.guided.Busy || m.guidedExecutor == nil {
+	if m.guided.Busy || m.guidedExecutor == nil || !m.wizardRequestCurrent(request) {
 		return nil
 	}
 
