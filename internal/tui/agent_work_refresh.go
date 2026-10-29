@@ -18,6 +18,8 @@ type AgentWorkRefreshExecutor interface {
 
 // AgentWorkRefreshRequest identifies the displayed retained page and invocation.
 type AgentWorkRefreshRequest struct {
+	MemberOffset   int
+	MemberRevision uint64
 	WorkflowID     string
 	WorkflowOffset int
 	Queue          work.Request
@@ -52,9 +54,13 @@ func (m *Model) startAgentWorkRefresh() tea.Cmd {
 		return nil
 	}
 
-	request := AgentWorkRefreshRequest{WorkflowID: m.workflow.ID, WorkflowOffset: m.workflowPage.Offset, Queue: m.queueRequest}
+	request := AgentWorkRefreshRequest{MemberOffset: m.workflow.Offset, WorkflowID: m.workflow.ID, WorkflowOffset: m.workflowPage.Offset, Queue: m.queueRequest}
 	if request.WorkflowID == "" && len(m.observability.WorkflowPage.Items) > 0 {
 		request.WorkflowID = m.observability.WorkflowPage.Items[0].ID
+	}
+
+	if request.MemberOffset > 0 {
+		request.MemberRevision = m.workflow.Revision
 	}
 
 	executor := m.agentWorkRefreshExecutor
@@ -71,6 +77,10 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 	m.agentWorkRefreshInFlight = false
 	if msg.queueSequence != m.queueSequence || msg.request.Queue != m.queueRequest {
 		return m.requestDashRefresh()
+	}
+
+	if m.workflowRefreshObsolete(msg.request) {
+		return agentWorkRefreshTickCmd()
 	}
 
 	if msg.err != nil {
@@ -135,4 +145,8 @@ func (m *Model) updateAgentWorkRefreshMessage(msg tea.Msg) updateOutcome {
 	default:
 		return updateOutcome{Command: nil, Handled: false}
 	}
+}
+
+func (m *Model) workflowRefreshObsolete(request AgentWorkRefreshRequest) bool {
+	return m.dashWorkflowDetails && (request.WorkflowID != m.workflow.ID || request.WorkflowOffset != m.workflowPage.Offset || request.MemberOffset != m.workflow.Offset)
 }

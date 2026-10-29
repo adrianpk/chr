@@ -28,7 +28,12 @@ func tuiWorkflowView(status WorkflowWorkStatus) tui.WorkflowView {
 		lines = append(lines, fmt.Sprintf("Evidence: %s %s %s %s; slot %d; %s %s", evidence.ID, evidence.Purpose, evidence.TicketKey, evidence.Outcome, evidence.Slot, evidence.ResultRef, evidence.ResultHash))
 	}
 
-	return tui.WorkflowView{ID: status.ID, Revision: status.Revision, ApprovalHash: status.ApprovalHash, Lines: lines}
+	view := tui.WorkflowView{ID: status.ID, Title: status.WorkTitle, State: status.Status, Extent: status.Selector.Extent, Identity: status.Selector.Identity, TicketKey: status.SelectedTicket, Revision: status.Revision, ApprovalHash: status.ApprovalHash, Lines: lines, Members: status.Members, NextOffset: status.NextOffset}
+	for _, action := range workflowControlOptions(status) {
+		view.Actions = append(view.Actions, tui.WorkflowActionView{Action: tui.WorkActionID("workflow_" + action.action), Label: action.label, Reason: action.reason})
+	}
+
+	return view
 }
 
 func appendWorkflowExclusions(lines []string, excluded map[string]int) []string {

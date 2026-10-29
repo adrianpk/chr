@@ -88,10 +88,15 @@ func tuiWorkObservationMatches(request tui.WorkActionRequest, bound WorkflowBoun
 }
 
 func (e tuiWorkActionExecutor) nativeWorkStatusResult(request tui.WorkActionRequest) (tui.WorkActionResult, error) {
-	if request.Workflow.ID != "" {
-		status, err := e.operations.WorkflowStatus(e.operations.ctx, request.Workflow.ID, WorkflowStatusRequest{Limit: 8})
+	if request.Action != tui.WorkActionWorkflowPage && request.Workflow.ID != "" {
+		status, err := e.operations.WorkflowStatus(e.operations.ctx, request.Workflow.ID, WorkflowStatusRequest{Limit: 8, Offset: request.Workflow.Offset, ExpectedRevision: request.Workflow.ExpectedRevision})
 
-		return nativeWorkStatusResult(status), err
+		result := nativeWorkStatusResult(status)
+		if result.Workflow != nil {
+			result.Workflow.Offset = request.Workflow.Offset
+		}
+
+		return result, err
 	}
 
 	page, err := e.operations.WorkflowStatusPage(e.operations.ctx, request.Workflow.Offset, 16)

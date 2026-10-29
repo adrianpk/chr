@@ -67,7 +67,7 @@ func TestDashPreviewReply(t *testing.T) {
 	}
 }
 
-// Workflow details use retained read-only status and reveal the detail pane;
+// Workflow browsing uses retained read-only status and focuses its list pane;
 // unsupported authority is rejected before a confirmation or service call.
 func TestDashWorkflowDetails(t *testing.T) {
 	executor := &fakeWorkActionExecutor{}
@@ -77,13 +77,13 @@ func TestDashWorkflowDetails(t *testing.T) {
 	model.workflow = WorkflowView{ID: "retained", Revision: 7}
 
 	command, _ := model.handleDashKey("w")
-	if command == nil || model.selectedPane != 1 {
+	if command == nil || model.selectedPane != 0 || !model.dashWorkflowDetails {
 		t.Fatal("Workflow details are unreachable")
 	}
 
 	model.Update(command())
 
-	if executor.request.Action != WorkActionWorkflowStatus || executor.request.Workflow.ID != "retained" || executor.request.Workflow.ExpectedRevision != 7 {
+	if executor.request.Action != WorkActionWorkflowPage || executor.request.Workflow.Offset != 0 || model.workflow.ID != "retained" {
 		t.Fatal(executor.request)
 	}
 

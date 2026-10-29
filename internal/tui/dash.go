@@ -75,6 +75,10 @@ func (m *Model) renderDash() string {
 }
 
 func (m *Model) renderDashWorkspace(width, height int) string {
+	if m.dashWorkflowDetails {
+		return m.renderWorkflowWorkspace(width, height)
+	}
+
 	queueLines := append(m.dashQueueSummary(), []string{
 		"Priority: " + displayDashPriorityFilter(m.agentWorkPriorityFilter),
 		"Order: " + displayDashAgentWorkOrder(m.agentWorkOrder),

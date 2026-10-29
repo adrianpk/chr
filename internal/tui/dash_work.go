@@ -11,6 +11,17 @@ func (m *Model) handleDashKey(key string) (tea.Cmd, bool) {
 		return nil, false
 	}
 
+	if m.dashWorkflowDetails {
+		if m.observability.Authority != workspaceconfig.WorkStateAuthorityTickets {
+			m.dashWorkflowDetails = false
+			m.statusMessage = "Native Preview Work and Workflow details require tickets authority."
+
+			return nil, true
+		}
+
+		return m.handleWorkflowBrowseKey(key)
+	}
+
 	if command, handled := m.handleDashQueryKey(key); handled {
 		return command, true
 	}
@@ -19,10 +30,14 @@ func (m *Model) handleDashKey(key string) (tea.Cmd, bool) {
 	case "v":
 		return m.inspectDashWork(WorkActionWorkflowTicket), true
 	case "w":
-		m.dashWorkflowDetails = true
-		m.selectedPane, m.detailScroll = 1, 0
+		if m.observability.Authority != workspaceconfig.WorkStateAuthorityTickets {
+			return m.inspectDashWork(WorkActionWorkflowStatus), true
+		}
 
-		return m.inspectDashWork(WorkActionWorkflowStatus), true
+		m.dashWorkflowDetails = true
+		m.selectedPane, m.detailScroll = 0, 0
+
+		return m.readWorkflowPage(m.workflowPage.Offset), true
 	default:
 		return nil, m.handleDashActionKey(key)
 	}

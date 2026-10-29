@@ -56,12 +56,13 @@ func (e tuiAgentWorkRefreshExecutor) refreshNativeWorkflow(request tui.AgentWork
 		return nil, nil
 	}
 
-	status, err := e.operations.WorkflowStatus(e.operations.ctx, request.WorkflowID, WorkflowStatusRequest{Limit: 8})
+	status, err := e.operations.WorkflowStatus(e.operations.ctx, request.WorkflowID, WorkflowStatusRequest{Limit: 8, Offset: request.MemberOffset, ExpectedRevision: request.MemberRevision})
 	if err != nil {
 		return nil, err
 	}
 
 	view := tuiWorkflowView(status)
+	view.Offset = request.MemberOffset
 
 	return &view, nil
 }

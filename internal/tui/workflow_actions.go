@@ -44,10 +44,14 @@ type WorkflowActionRequest struct {
 
 // WorkflowView contains bounded display lines and exact control bindings.
 type WorkflowView struct {
-	ID           string
-	Revision     uint64
-	ApprovalHash string
-	Lines        []string
+	Title, State, Extent, Identity, TicketKey string
+	Offset, NextOffset                        int
+	Members                                   []workflowstate.PreviewMember
+	Actions                                   []WorkflowActionView
+	ID                                        string
+	Revision                                  uint64
+	ApprovalHash                              string
+	Lines                                     []string
 }
 
 // WorkflowPageView is a page of retained authorization, never a work queue.
@@ -289,4 +293,10 @@ func (m *Model) renderNativeWorkflow() string {
 	}
 
 	return fmt.Sprintf("\nNative Workflow\n  %s\n", strings.Join(lines, "\n  "))
+}
+
+// WorkflowActionView carries application-owned action availability hints.
+type WorkflowActionView struct {
+	Action        WorkActionID
+	Label, Reason string
 }
