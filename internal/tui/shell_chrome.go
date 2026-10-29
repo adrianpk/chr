@@ -17,6 +17,10 @@ func (m *Model) renderOverlayWorkspace(width, height int, overlay string) string
 }
 
 func (m *Model) renderShellOverlay() string {
+	if feedback := m.renderOperationFeedback(); feedback != "" {
+		return feedback
+	}
+
 	var overlays []string
 
 	for _, overlay := range []string{
@@ -38,11 +42,11 @@ func (m *Model) renderShellOverlay() string {
 }
 
 func (m *Model) renderShellStatus(width int) string {
-	if m.statusMessage == "" {
+	if m.operationStatus() == "" {
 		return ""
 	}
 
-	return shellStatusStyle.Render(fitPlainLine(" "+m.statusMessage, width))
+	return shellStatusStyle.Render(fitPlainLine(" "+m.operationStatus(), width))
 }
 
 func (m *Model) renderShellFooter(width int) string {

@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"forge.adrianpk.com/chr/internal/app/operation"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
@@ -22,6 +23,7 @@ type CaseMetadataExecutor interface {
 
 // CaseMetadataResult returns refreshed use-case metadata after a save.
 type CaseMetadataResult struct {
+	Outcome operation.Result
 	Message string
 	Case    authoringcore.CaseMetadata
 	Cases   []authoringcore.CaseMetadata
@@ -138,10 +140,12 @@ func (m *Model) handleCaseEscapeKey() {
 func (m *Model) updateCaseEditKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
-		m.caseEdit = ProjectEditState{}
-		m.statusMessage = ""
+		if m.caseEdit.Input.Value() != m.caseEdit.Original {
+			return m.confirmDraftChange("Discard the unsent case field?", discardCaseField)
+		}
 
-		return nil
+		return discardCaseField(m)
+
 	case tea.KeyEnter:
 		m.applyCaseFieldEdit()
 
@@ -288,6 +292,8 @@ func (m *Model) selectNextCaseField() {
 }
 
 func (m *Model) startCaseFieldEdit() {
+	m.draftSequence++
+
 	metadata, ok := m.selectedCaseMetadata()
 	if !ok {
 		return
@@ -360,6 +366,9 @@ func (m *Model) saveSelectedCase() {
 	}
 
 	result, err := m.caseExecutor.SaveCaseMetadata(metadata)
+	m.recordOperation(result.Outcome)
+	m.bindCaseRecovery(metadata)
+
 	if err != nil {
 		m.statusMessage = "Case metadata save failed: " + err.Error()
 

@@ -49,7 +49,7 @@ func TestModelWorkflowConflict(t *testing.T) {
 	model.workflowExecutionBusy = true
 	request := WorkActionRequest{Action: WorkActionWorkflowContinue, Workflow: &WorkflowActionRequest{ID: "run-one", ExpectedRevision: 2}}
 	current := WorkflowView{ID: "run-one", Revision: 3, Lines: []string{"State: waiting_capacity", "Host-validated tasks: 1/3; confirmed tickets: 0", "Next action owner: current_owner"}}
-	updated, _ := model.Update(workActionFinishedMsg{Request: request, Result: WorkActionResult{Workflow: &current}, Err: errors.New("workflow revision conflict")})
+	updated, _ := model.Update(workActionFinishedMsg{Binding: model.beginOperation("work:" + string(request.Action)), Request: request, Result: WorkActionResult{Workflow: &current}, Err: errors.New("workflow revision conflict")})
 
 	model = requireUpdatedModel(t, updated)
 	if model.workflowExecutionBusy || model.workAction.Pending || model.workflow.Revision != 3 || !strings.Contains(model.statusMessage, "workflow revision conflict") {

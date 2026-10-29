@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"forge.adrianpk.com/chr/internal/app/operation"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
@@ -23,15 +24,17 @@ type ProjectMetadataExecutor interface {
 
 // ProjectMetadataResult returns refreshed project metadata after a save.
 type ProjectMetadataResult struct {
+	Outcome  operation.Result
 	Message  string
 	Metadata authoringcore.ProjectMetadata
 }
 
 // ProjectEditState stores editable metadata form state.
 type ProjectEditState struct {
-	Active bool
-	Field  int
-	Input  textinput.Model
+	Original string
+	Active   bool
+	Field    int
+	Input    textinput.Model
 }
 
 func (m *Model) updateProjectKey(msg tea.KeyMsg) tea.Cmd {
@@ -81,10 +84,12 @@ func (m *Model) handleProjectFieldKey(key string) bool {
 func (m *Model) updateProjectEditKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
-		m.projectEdit = ProjectEditState{}
-		m.statusMessage = ""
+		if m.projectEdit.Input.Value() != m.projectEdit.Original {
+			return m.confirmDraftChange("Discard the unsent project field?", discardProjectField)
+		}
 
-		return nil
+		return discardProjectField(m)
+
 	case tea.KeyEnter:
 		m.applyProjectFieldEdit()
 
@@ -117,6 +122,7 @@ func (m *Model) selectNextProjectField() {
 }
 
 func (m *Model) startProjectFieldEdit() {
+	m.draftSequence++
 	switch m.selectedProjectField {
 	case projectFieldName:
 		m.projectEdit = newProjectEditState(projectFieldName, m.projectMetadata.Name)
@@ -139,9 +145,9 @@ func newProjectEditState(field int, value string) ProjectEditState {
 	input.Focus()
 
 	return ProjectEditState{
-		Active: true,
-		Field:  field,
-		Input:  input,
+		Active: true, Original: value,
+		Field: field,
+		Input: input,
 	}
 }
 
@@ -170,6 +176,9 @@ func (m *Model) saveProjectMetadata() {
 	}
 
 	result, err := m.projectExecutor.SaveProjectMetadata(m.projectMetadata)
+	m.recordOperation(result.Outcome)
+	m.bindProjectRecovery()
+
 	if err != nil {
 		m.statusMessage = "Project metadata save failed: " + err.Error()
 

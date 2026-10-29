@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"forge.adrianpk.com/chr/internal/app/operation"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
@@ -39,6 +40,7 @@ type TicketActionRequest struct {
 
 // TicketActionResult contains refreshed ticket state after an action.
 type TicketActionResult struct {
+	Outcome operation.Result
 	Message string
 	Tickets []ticketcore.Indexed
 }
@@ -166,6 +168,8 @@ func (m *Model) confirmTicketAction() {
 	}
 
 	result, err := m.ticketExecutor.ExecuteTicketAction(request)
+	m.recordOperation(result.Outcome)
+
 	if err != nil {
 		m.statusMessage = "Ticket action failed: " + err.Error()
 

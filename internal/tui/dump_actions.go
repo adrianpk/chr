@@ -8,6 +8,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"forge.adrianpk.com/chr/internal/app/operation"
 )
 
 // DumpActionID identifies a dump action awaiting TUI confirmation.
@@ -40,6 +42,7 @@ type DumpActionRequest struct {
 
 // DumpActionResult contains refreshed dump state after an action.
 type DumpActionResult struct {
+	Outcome                    operation.Result
 	Committed, ProjectionStale bool
 	Revision                   string
 	Message                    string
@@ -60,6 +63,7 @@ type DumpActionState struct {
 
 // DumpEditState stores in-terminal dump editing state.
 type DumpEditState struct {
+	Original              string
 	OperationID, Revision string
 	Active                bool
 	Path                  string
@@ -99,10 +103,12 @@ func (m *Model) updateDumpActionKey(msg tea.KeyMsg) tea.Cmd {
 func (m *Model) updateDumpEditKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.Type {
 	case tea.KeyEsc:
-		m.dumpEdit = DumpEditState{}
-		m.statusMessage = ""
+		if m.dumpEdit.Input.Value() != m.dumpEdit.Original {
+			return m.confirmDraftChange("Discard unsaved dump text?", discardDumpDraft)
+		}
 
-		return nil
+		return discardDumpDraft(m)
+
 	case tea.KeyCtrlS:
 		m.saveDumpEdit()
 
@@ -142,6 +148,8 @@ func (m *Model) confirmDumpAction() tea.Cmd {
 	}
 
 	result, err := m.dumpExecutor.ExecuteDumpAction(request)
+	m.recordOperation(result.Outcome)
+
 	if err != nil {
 		m.statusMessage = "Action failed: " + err.Error()
 
@@ -173,6 +181,7 @@ func (m *Model) confirmDumpAction() tea.Cmd {
 }
 
 func (m *Model) startDumpEdit(path, content, revision string) {
+	m.draftSequence++
 	input := textarea.New()
 	input.SetValue(content)
 	input.Focus()
@@ -182,7 +191,7 @@ func (m *Model) startDumpEdit(path, content, revision string) {
 	input.CharLimit = 0
 
 	m.dumpEdit = DumpEditState{
-		OperationID: rand.Text(), Revision: revision,
+		OperationID: rand.Text(), Revision: revision, Original: content,
 		Active: true,
 		Path:   path,
 		Input:  input,
@@ -199,12 +208,17 @@ func (m *Model) saveDumpEdit() {
 		return
 	}
 
-	result, err := m.dumpExecutor.ExecuteDumpAction(DumpActionRequest{
-		Action: DumpActionSave, OperationID: m.dumpEdit.OperationID, Revision: m.dumpEdit.Revision,
-		Path:    m.dumpEdit.Path,
-		Content: m.dumpEdit.Input.Value(),
-	})
+	request := DumpActionRequest{Action: DumpActionSave, OperationID: m.dumpEdit.OperationID, Revision: m.dumpEdit.Revision, Path: m.dumpEdit.Path, Content: m.dumpEdit.Input.Value()}
+	m.executeDumpSave(request)
+}
+
+func (m *Model) executeDumpSave(request DumpActionRequest) {
+	result, err := m.dumpExecutor.ExecuteDumpAction(request)
+	m.recordOperation(result.Outcome)
+
 	if err != nil {
+		m.bindDumpRecovery(request)
+
 		m.statusMessage = "Save failed: " + err.Error()
 
 		return
@@ -212,6 +226,7 @@ func (m *Model) saveDumpEdit() {
 
 	m.dumpEdit = DumpEditState{}
 	m.applyDumpActionResult(result)
+	m.bindDumpRecovery(request)
 }
 
 func (m *Model) applyDumpActionResult(result DumpActionResult) {

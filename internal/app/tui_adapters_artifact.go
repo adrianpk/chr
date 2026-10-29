@@ -48,7 +48,7 @@ func newTUIProjectMetadataExecutor(
 	}
 }
 
-func (e tuiProjectMetadataExecutor) SaveProjectMetadata(
+func (e tuiProjectMetadataExecutor) saveProjectMetadata(
 	metadata authoringcore.ProjectMetadata,
 ) (tui.ProjectMetadataResult, error) {
 	result, err := e.operations.SaveProjectMetadata(metadata)
@@ -74,7 +74,7 @@ func newTUICaseMetadataExecutor(
 	}
 }
 
-func (e tuiCaseMetadataExecutor) SaveCaseMetadata(
+func (e tuiCaseMetadataExecutor) saveCaseMetadata(
 	metadata authoringcore.CaseMetadata,
 ) (tui.CaseMetadataResult, error) {
 	result, err := e.operations.SaveCaseMetadata(metadata)
@@ -101,7 +101,7 @@ func newTUIArtifactActionExecutor(
 	}
 }
 
-func (e tuiArtifactActionExecutor) ExecuteArtifactAction(
+func (e tuiArtifactActionExecutor) executeArtifactAction(
 	action tui.ArtifactActionID,
 ) (tui.ArtifactActionResult, error) {
 	switch action {

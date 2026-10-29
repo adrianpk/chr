@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"forge.adrianpk.com/chr/internal/app/operation"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -40,6 +41,7 @@ type WorkActionRequest struct {
 
 // WorkActionResult contains refreshed agent work state after an action.
 type WorkActionResult struct {
+	Outcome       operation.Result
 	Workflow      *WorkflowView
 	WorkflowPage  *WorkflowPageView
 	Confirmation  *WorkActionState
@@ -58,6 +60,7 @@ type WorkActionState struct {
 }
 
 type workActionFinishedMsg struct {
+	Binding operationBinding
 	Request WorkActionRequest
 	Result  WorkActionResult
 	Err     error
@@ -366,11 +369,13 @@ func (m *Model) confirmWorkAction() tea.Cmd {
 }
 
 func (m *Model) executeWorkActionCommand(request WorkActionRequest) tea.Cmd {
+	binding := m.beginOperation("work:" + string(request.Action))
 	executor := m.workExecutor
 
 	return func() tea.Msg {
 		if executor == nil {
 			return workActionFinishedMsg{
+				Binding: binding,
 				Request: request,
 				Err:     fmt.Errorf("work action executor is unavailable"),
 			}
@@ -378,7 +383,7 @@ func (m *Model) executeWorkActionCommand(request WorkActionRequest) tea.Cmd {
 
 		result, err := executor.ExecuteWorkAction(request)
 
-		return workActionFinishedMsg{Request: request, Result: result, Err: err}
+		return workActionFinishedMsg{Binding: binding, Request: request, Result: result, Err: err}
 	}
 }
 
@@ -412,13 +417,31 @@ func (m *Model) startWorkAction(request WorkActionRequest) tea.Cmd {
 }
 
 func (m *Model) completeWorkAction(message workActionFinishedMsg) {
+	owned, apply := m.finishOperation(message.Binding)
+	if !owned {
+		return
+	}
+
+	m.workBusy = false
+	if nativeWorkExecutesIfBound(message.Request) {
+		m.workflowExecutionBusy = false
+	}
+
+	if !apply {
+		return
+	}
+
+	if observed := message.Result.Workflow; observed != nil && observed.ID == m.workflow.ID && observed.Revision < m.workflow.Revision {
+		return
+	}
+
+	m.recordOperation(message.Result.Outcome)
+
 	if message.Request.Workflow != nil {
 		m.completeNativeWorkAction(message)
 
 		return
 	}
-
-	m.workBusy = false
 
 	if message.Err != nil {
 		m.statusMessage = "Work action failed: " + message.Err.Error()
@@ -477,4 +500,8 @@ func (m *Model) blockedWorkReadinessStatus() string {
 	}
 
 	return "Work readiness blocked. Manual action required."
+}
+
+func nativeWorkExecutesIfBound(request WorkActionRequest) bool {
+	return request.Workflow != nil && nativeWorkExecutes(request)
 }

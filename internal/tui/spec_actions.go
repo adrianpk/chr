@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+
+	"forge.adrianpk.com/chr/internal/app/operation"
 )
 
 // SpecActionID identifies a spec action awaiting TUI confirmation.
@@ -30,6 +32,7 @@ type SpecActionRequest struct {
 
 // SpecActionResult contains refreshed spec state after an action.
 type SpecActionResult struct {
+	Outcome                 operation.Result
 	Message                 string
 	Documents               []DocumentView
 	Specs                   []SpecView
@@ -49,6 +52,7 @@ type SpecActionState struct {
 }
 
 type specActionFinishedMsg struct {
+	Binding operationBinding
 	Request SpecActionRequest
 	Result  SpecActionResult
 	Err     error
@@ -151,11 +155,13 @@ func (m *Model) confirmSpecAction() tea.Cmd {
 }
 
 func (m *Model) executeSpecActionCommand(request SpecActionRequest) tea.Cmd {
+	binding := m.beginOperation("spec")
 	executor := m.specExecutor
 
 	return func() tea.Msg {
 		if executor == nil {
 			return specActionFinishedMsg{
+				Binding: binding,
 				Request: request,
 				Err:     fmt.Errorf("spec action executor is unavailable"),
 			}
@@ -163,7 +169,7 @@ func (m *Model) executeSpecActionCommand(request SpecActionRequest) tea.Cmd {
 
 		result, err := executor.ExecuteSpecAction(request)
 
-		return specActionFinishedMsg{Request: request, Result: result, Err: err}
+		return specActionFinishedMsg{Binding: binding, Request: request, Result: result, Err: err}
 	}
 }
 
@@ -181,7 +187,18 @@ func (m *Model) startSpecAction(request SpecActionRequest) tea.Cmd {
 }
 
 func (m *Model) completeSpecAction(message specActionFinishedMsg) {
+	owned, apply := m.finishOperation(message.Binding)
+	if !owned {
+		return
+	}
+
 	m.specBusy = false
+
+	if !apply {
+		return
+	}
+
+	m.recordOperation(message.Result.Outcome)
 
 	if message.Err != nil {
 		m.statusMessage = specActionFailureStatus(message.Request.Action, message.Err)

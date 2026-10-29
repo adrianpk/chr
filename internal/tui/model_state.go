@@ -111,11 +111,16 @@ type workspaceState struct {
 }
 
 type interactionState struct {
-	commandPalette CommandPaletteState
-	artifactAction ArtifactActionState
-	actionExecutor ArtifactActionExecutor
-	sourceExecutor SourceOpenExecutor
-	statusMessage  string
+	feedback          operationFeedback
+	draftConfirmation draftConfirmation
+	operationSequence uint64
+	draftSequence     uint64
+	pendingOperations map[string]operationBinding
+	commandPalette    CommandPaletteState
+	artifactAction    ArtifactActionState
+	actionExecutor    ArtifactActionExecutor
+	sourceExecutor    SourceOpenExecutor
+	statusMessage     string
 }
 
 type workState struct {

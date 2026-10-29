@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"forge.adrianpk.com/chr/internal/app/operation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
@@ -40,7 +41,7 @@ func newTUIPlanActionExecutor(
 	}
 }
 
-func (e tuiSpecActionExecutor) ExecuteSpecAction(
+func (e tuiSpecActionExecutor) executeSpecAction(
 	request tui.SpecActionRequest,
 ) (tui.SpecActionResult, error) {
 	result := tui.SpecActionResult{}
@@ -55,6 +56,7 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 		}
 
 		result.Message = generated.Message
+		result.Outcome.ChangedFiles = compactChangedFiles(generated.Spec.RelativePath)
 	case tui.SpecActionGenerateFeature:
 		generated, err := e.operations.GenerateAcceptanceFeature(e.operations.ctx, AcceptanceFeatureGenerateRequest{
 			Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug},
@@ -68,6 +70,7 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 		result.AcceptanceFeaturePath = generated.Feature
 		result.AcceptanceFeatureRound = generated.FeatureRound
 		result.AcceptanceFeatureReason = generated.RejectionReason
+		result.Outcome.ChangedFiles = compactChangedFiles(generated.Feature, generated.FeatureRound)
 	case tui.SpecActionRefresh:
 	default:
 		return tui.SpecActionResult{}, errors.New("unknown spec action")
@@ -94,7 +97,7 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 	return result, nil
 }
 
-func (e tuiPlanActionExecutor) ExecutePlanAction(request tui.PlanActionRequest) (result tui.PlanActionResult, err error) {
+func (e tuiPlanActionExecutor) executePlanAction(request tui.PlanActionRequest) (result tui.PlanActionResult, err error) {
 	e.operations.appendPlanGenerationLog("tui_plan_action_started", map[string]string{"action": string(request.Action), "case_slug": request.Scope.CaseSlug})
 
 	defer func() {
@@ -133,11 +136,11 @@ func (e tuiPlanActionExecutor) runPlanAction(request tui.PlanActionRequest) (tui
 	case tui.PlanActionGenerate:
 		result, err := e.operations.GeneratePlan(e.operations.ctx, PlanGenerateRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}})
 
-		return tui.PlanActionResult{Message: result.Message}, err
+		return tui.PlanActionResult{Message: result.Message, Outcome: operation.Result{ChangedFiles: compactChangedFiles(result.Plan.RelativePath)}}, err
 	case tui.PlanActionRegenerate:
 		result, err := e.operations.RegeneratePlan(e.operations.ctx, PlanRegenerateRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}})
 
-		return tui.PlanActionResult{Message: result.Message}, err
+		return tui.PlanActionResult{Message: result.Message, Outcome: operation.Result{ChangedFiles: compactChangedFiles(result.Plan.RelativePath)}}, err
 	case tui.PlanActionMaterializeTracking:
 		result, err := e.operations.MaterializePlanTracking(e.operations.ctx, PlanTrackingRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}})
 
@@ -157,7 +160,7 @@ func newTUITicketActionExecutor(
 	}
 }
 
-func (e tuiTicketActionExecutor) ExecuteTicketAction(
+func (e tuiTicketActionExecutor) executeTicketAction(
 	request tui.TicketActionRequest,
 ) (tui.TicketActionResult, error) {
 	switch request.Action {

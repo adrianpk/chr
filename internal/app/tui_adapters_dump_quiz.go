@@ -32,7 +32,7 @@ func newTUIQuizActionExecutor(
 	}
 }
 
-func (e tuiQuizActionExecutor) ExecuteQuizAction(
+func (e tuiQuizActionExecutor) executeQuizAction(
 	request tui.QuizActionRequest,
 ) (tui.QuizActionResult, error) {
 	operation, ok := e.quizOperation(request.Action)
@@ -170,7 +170,7 @@ func (e tuiQuizActionExecutor) executeQuizOperationMode(request tui.QuizActionRe
 	return result.Message, nil
 }
 
-func (e tuiDumpActionExecutor) ExecuteDumpAction(
+func (e tuiDumpActionExecutor) executeDumpAction(
 	request tui.DumpActionRequest,
 ) (tui.DumpActionResult, error) {
 	switch request.Action {
@@ -300,6 +300,10 @@ func dumpActionResult(result DumpOperationResult, operations service) (tui.DumpA
 		Committed: result.Committed, ProjectionStale: result.ProjectionStale,
 		Message: result.Message,
 		Dumps:   dumps,
+	}
+
+	if result.Committed {
+		actionResult.Outcome.ChangedFiles = compactChangedFiles(result.RelativePath)
 	}
 
 	if result.EditorCommand != nil {

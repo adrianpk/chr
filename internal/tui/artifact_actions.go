@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"forge.adrianpk.com/chr/internal/app/operation"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
@@ -27,6 +28,7 @@ type ArtifactActionExecutor interface {
 
 // ArtifactActionResult contains refreshed artifact-facing state after an action.
 type ArtifactActionResult struct {
+	Outcome           operation.Result
 	Message           string
 	Tickets           []ticketcore.Indexed
 	Documents         []DocumentView
@@ -163,6 +165,8 @@ func (m *Model) confirmArtifactAction() {
 	}
 
 	result, err := m.actionExecutor.ExecuteArtifactAction(action)
+	m.recordOperation(result.Outcome)
+
 	if err != nil {
 		m.statusMessage = "Action failed: " + err.Error()
 

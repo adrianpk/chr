@@ -22,7 +22,7 @@ func newTUIWorkActionExecutor(
 	}
 }
 
-func (e tuiWorkActionExecutor) ExecuteWorkAction(
+func (e tuiWorkActionExecutor) executeWorkAction(
 	request tui.WorkActionRequest,
 ) (tui.WorkActionResult, error) {
 	if request.Workflow != nil {

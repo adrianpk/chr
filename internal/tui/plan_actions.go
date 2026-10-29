@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"forge.adrianpk.com/chr/internal/app/operation"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
@@ -33,6 +34,7 @@ type PlanActionRequest struct {
 
 // PlanActionResult contains refreshed plan state after an action.
 type PlanActionResult struct {
+	Outcome   operation.Result
 	Message   string
 	Documents []DocumentView
 	Plans     []PlanView
@@ -49,6 +51,7 @@ type PlanActionState struct {
 }
 
 type planActionFinishedMsg struct {
+	Binding operationBinding
 	Request PlanActionRequest
 	Result  PlanActionResult
 	Err     error
@@ -180,11 +183,13 @@ func (m *Model) confirmPlanAction() tea.Cmd {
 }
 
 func (m *Model) executePlanActionCommand(request PlanActionRequest) tea.Cmd {
+	binding := m.beginOperation("plan")
 	executor := m.planExecutor
 
 	return func() tea.Msg {
 		if executor == nil {
 			return planActionFinishedMsg{
+				Binding: binding,
 				Request: request,
 				Err:     fmt.Errorf("plan action executor is unavailable"),
 			}
@@ -192,7 +197,7 @@ func (m *Model) executePlanActionCommand(request PlanActionRequest) tea.Cmd {
 
 		result, err := executor.ExecutePlanAction(request)
 
-		return planActionFinishedMsg{Request: request, Result: result, Err: err}
+		return planActionFinishedMsg{Binding: binding, Request: request, Result: result, Err: err}
 	}
 }
 
@@ -227,7 +232,18 @@ func (m *Model) startPlanAction(request PlanActionRequest) tea.Cmd {
 }
 
 func (m *Model) completePlanAction(message planActionFinishedMsg) {
+	owned, apply := m.finishOperation(message.Binding)
+	if !owned {
+		return
+	}
+
 	m.planBusy = false
+
+	if !apply {
+		return
+	}
+
+	m.recordOperation(message.Result.Outcome)
 
 	if message.Err != nil {
 		m.statusMessage = savedArtifactFailureStatus("Plan", "plan", message.Err)

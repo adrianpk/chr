@@ -78,6 +78,10 @@ func (m *Model) updateKey(msg tea.KeyMsg) tea.Cmd {
 		return tea.Quit
 	}
 
+	if command, handled := m.updateFeedbackKey(msg); handled {
+		return command
+	}
+
 	if command, handled := m.handleShellShortcut(msg); handled {
 		return command
 	}

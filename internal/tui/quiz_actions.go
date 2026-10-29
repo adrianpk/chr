@@ -7,6 +7,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"forge.adrianpk.com/chr/internal/app/operation"
 )
 
 // QuizActionID identifies a quiz action awaiting TUI confirmation.
@@ -37,15 +39,17 @@ type QuizActionBinding struct {
 
 // QuizActionRequest carries selected quiz action input.
 type QuizActionRequest struct {
-	Binding QuizActionBinding
-	Action  QuizActionID
-	Scope   QuizScope
-	Mode    string
-	Answer  string
+	ReloadDraft bool
+	Binding     QuizActionBinding
+	Action      QuizActionID
+	Scope       QuizScope
+	Mode        string
+	Answer      string
 }
 
 // QuizActionResult contains refreshed quiz state after an action.
 type QuizActionResult struct {
+	Outcome       operation.Result
 	Message       string
 	Quizzes       []QuizView
 	SelectedScope QuizScope
@@ -68,6 +72,7 @@ type QuizAnswerState struct {
 }
 
 type quizActionFinishedMsg struct {
+	Binding operationBinding
 	Request QuizActionRequest
 	Result  QuizActionResult
 	Err     error
@@ -106,12 +111,12 @@ func (m *Model) updateQuizActionKey(msg tea.KeyMsg) tea.Cmd {
 func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "esc":
-		m.quizAnswer = QuizAnswerState{}
-		m.statusMessage = ""
-		m.maximizedPane = -1
-		m.selectPrimaryPane()
+		if m.quizAnswer.Input.Value() != "" {
+			return m.confirmDraftChange("Discard the unsent answer?", discardQuizDraft)
+		}
 
-		return nil
+		return discardQuizDraft(m)
+
 	case "enter":
 		return m.saveQuizAnswer()
 	case "shift+enter", "ctrl+j":
@@ -120,33 +125,19 @@ func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) tea.Cmd {
 
 		return cmd
 	case "alt+s":
-		scope := m.quizAnswer.Scope
-		binding := m.quizAnswer.Binding
-		m.quizAnswer = QuizAnswerState{}
-
-		cmd := m.startQuizAction(QuizActionRequest{
-			Action:  QuizActionSkip,
-			Binding: binding,
-			Scope:   scope,
-		})
-
-		return cmd
+		return m.requestQuizControl(QuizActionSkip)
 	case "alt+d":
-		scope := m.quizAnswer.Scope
-		binding := m.quizAnswer.Binding
-		m.quizAnswer = QuizAnswerState{}
-
-		cmd := m.startQuizAction(QuizActionRequest{
-			Action:  QuizActionComplete,
-			Binding: binding,
-			Scope:   scope,
-		})
-
-		return cmd
+		return m.requestQuizControl(QuizActionComplete)
 	}
 
+	previous := m.quizAnswer.Input.Value()
+
 	input, cmd := m.quizAnswer.Input.Update(msg)
+
 	m.quizAnswer.Input = input
+	if previous != input.Value() {
+		m.quizAnswer.Binding.OperationID = rand.Text()
+	}
 
 	return cmd
 }
@@ -180,7 +171,6 @@ func (m *Model) saveQuizAnswer() tea.Cmd {
 	answer := m.quizAnswer.Input.Value()
 	scope := m.quizAnswer.Scope
 	binding := m.quizAnswer.Binding
-	m.quizAnswer = QuizAnswerState{}
 
 	cmd := m.startQuizAction(QuizActionRequest{
 		Action:  QuizActionAnswer,
@@ -193,11 +183,13 @@ func (m *Model) saveQuizAnswer() tea.Cmd {
 }
 
 func (m *Model) executeQuizActionCommand(request QuizActionRequest) tea.Cmd {
+	binding := m.beginOperation("quiz")
 	executor := m.quizExecutor
 
 	return func() tea.Msg {
 		if executor == nil {
 			return quizActionFinishedMsg{
+				Binding: binding,
 				Request: request,
 				Err:     fmt.Errorf("quiz action executor is unavailable"),
 			}
@@ -205,7 +197,7 @@ func (m *Model) executeQuizActionCommand(request QuizActionRequest) tea.Cmd {
 
 		result, err := executor.ExecuteQuizAction(request)
 
-		return quizActionFinishedMsg{Request: request, Result: result, Err: err}
+		return quizActionFinishedMsg{Binding: binding, Request: request, Result: result, Err: err}
 	}
 }
 
@@ -223,12 +215,29 @@ func (m *Model) startQuizAction(request QuizActionRequest) tea.Cmd {
 }
 
 func (m *Model) completeQuizAction(message quizActionFinishedMsg) {
+	owned, apply := m.finishOperation(message.Binding)
+	if !owned {
+		return
+	}
+
 	m.quizBusy = false
+
+	if !apply {
+		return
+	}
+
+	m.recordOperation(message.Result.Outcome)
+
+	m.bindQuizRecovery(message.Request)
 
 	if message.Err != nil {
 		m.statusMessage = "Action failed: " + message.Err.Error()
 
 		return
+	}
+
+	if message.Request.Action != QuizActionRefresh || message.Request.ReloadDraft {
+		m.quizAnswer = QuizAnswerState{}
 	}
 
 	m.applyQuizActionResult(message.Result)
@@ -245,6 +254,8 @@ func (m *Model) applyQuizActionResult(result QuizActionResult) {
 }
 
 func (m *Model) startQuizAnswer() {
+	m.draftSequence++
+
 	quiz, ok := m.selectedQuizView()
 	if !ok {
 		m.statusMessage = "No quiz selected."

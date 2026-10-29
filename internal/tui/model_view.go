@@ -36,6 +36,11 @@ func (m *Model) View() string {
 	output.WriteString("\n")
 	output.WriteString(m.renderSelectedView())
 	output.WriteString(m.renderStatusMessage())
+
+	if feedback := m.renderOperationFeedback(); feedback != "" {
+		output.WriteString("\n" + feedback)
+	}
+
 	output.WriteString(m.renderArtifactAction())
 	output.WriteString(m.renderTicketAction())
 	output.WriteString(m.renderWorkAction())
@@ -146,6 +151,22 @@ func (m *Model) renderLegacySelectedView(selectedView View) string {
 }
 
 func (m *Model) renderKeys() string {
+	if m.draftConfirmation.Active {
+		return "Keys: enter confirm  esc keep complete draft"
+	}
+
+	if m.feedback.Open {
+		return m.operationFeedbackKeys()
+	}
+
+	if m.feedback.Result.Status != "" {
+		return m.renderInteractionKeys() + " | alt+o result"
+	}
+
+	return m.renderInteractionKeys()
+}
+
+func (m *Model) renderInteractionKeys() string {
 	if keys, ok := m.activeInteractionKeys(); ok {
 		return keys
 	}
@@ -186,9 +207,9 @@ func (m *Model) activeInteractionKeys() (string, bool) {
 }
 
 func (m *Model) renderStatusMessage() string {
-	if m.statusMessage == "" {
+	if m.operationStatus() == "" {
 		return ""
 	}
 
-	return "\n\nStatus\n  " + m.statusMessage
+	return "\n\nStatus\n  " + m.operationStatus()
 }
