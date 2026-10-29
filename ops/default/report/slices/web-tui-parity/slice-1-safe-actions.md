@@ -69,6 +69,11 @@ interfaces. No persistence schema or domain lifecycle changes are introduced.
 
 ## Validation
 
+The first final-candidate `make verify` at
+`c8034b74d042484252dc6728fe613cef705e02dc` stopped in strict lint for import and
+whitespace formatting and test-helper branching. Formatting and the named
+acceptance matrix were corrected without removing assertions or changing checks.
+
 Successful implementation checks:
 
 - `go test ./internal/tui -run '^TestDash(Target|SelectionRefresh)$' -count=1`

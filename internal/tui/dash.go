@@ -279,16 +279,18 @@ func (m *Model) renderAgentWorkQueueLines(limit int) []string {
 
 	selected, _ := m.selectedDashTicketView()
 	start := 0
+
 	for index, ticket := range queue {
 		if ticket.Key == selected.Key {
 			start = max(0, index-max(1, limit)+1)
+
 			break
 		}
 	}
 
 	lines := []string{}
-	for _, ticket := range queue[start:min(len(queue), start+max(1, limit))] {
 
+	for _, ticket := range queue[start:min(len(queue), start+max(1, limit))] {
 		prefix := " "
 		if ticket.Key == selected.Key {
 			prefix = ">"

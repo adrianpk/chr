@@ -19,6 +19,7 @@ func TestTUITicketMove(t *testing.T) {
 	operations := provider.service(t.Context())
 	executor := newTUITicketActionExecutor(operations)
 	before := readWebTicketFile(t, provider, original.Key)
+
 	_, err := executor.ExecuteTicketAction(tui.TicketActionRequest{Action: tui.TicketActionMoveStatus, Key: original.Key, Status: "reviewing"})
 	if err == nil || readWebTicketFile(t, provider, original.Key) != before {
 		t.Fatal("terminal accepted a legacy review move without canonical evidence", err)
@@ -28,23 +29,43 @@ func TestTUITicketMove(t *testing.T) {
 // Terminal moves and Web moves share canonical destinations, revision guards,
 // native phase restrictions and review/integration evidence requirements.
 func TestTUIBoardMoves(t *testing.T) {
+	cases := []struct {
+		status         string
+		legacy, native bool
+	}{
+		{"backlog", true, true},
+		{"ready_for_dev", true, true},
+		{"in_progress", true, false},
+		{"ready_for_review", false, false},
+		{"ready_for_merge", false, false},
+		{"done", false, false},
+		{"ready", false, false},
+		{"reviewing", false, false},
+	}
+
 	for _, native := range []bool{false, true} {
-		for _, status := range []string{"backlog", "ready_for_dev", "in_progress", "ready_for_review", "ready_for_merge", "done", "ready", "reviewing"} {
+		for _, tc := range cases {
+			allowed := tc.legacy
+			if native {
+				allowed = tc.native
+			}
+
 			for _, adapter := range []string{"web", "tui"} {
-				t.Run(fmt.Sprintf("native=%t/%s/%s", native, status, adapter), func(t *testing.T) {
-					checkTUIBoardMove(t, native, status, adapter)
+				t.Run(fmt.Sprintf("native=%t/%s/%s", native, tc.status, adapter), func(t *testing.T) {
+					checkTUIBoardMove(t, native, tc.status, adapter, allowed)
 				})
 			}
 		}
 	}
 }
 
-func checkTUIBoardMove(t *testing.T, native bool, status, adapter string) {
+func checkTUIBoardMove(t *testing.T, native bool, status, adapter string, allowed bool) {
 	t.Helper()
 
 	provider := webTicketEditorProvider(t, native)
 	operations := provider.service(t.Context())
 	body := "A guarded move target."
+
 	document, err := operations.CreateBoardTicket(workflowcore.TicketEditRequest{Body: &body, Fields: map[string]string{"title": "Move target", "status": "ready_for_dev"}, Binding: workflowstate.MutationBinding{RequestID: "create-move-target", Operator: "maintainer"}})
 	if err != nil {
 		t.Fatal(err)
@@ -55,18 +76,8 @@ func checkTUIBoardMove(t *testing.T, native bool, status, adapter string) {
 		t.Fatal(err)
 	}
 
-	allowed := status == "backlog" || status == "ready_for_dev" || (!native && status == "in_progress")
-	if adapter == "web" {
-		response, failure := provider.WriteAction(t.Context(), webui.WriteActionRequest{Action: webActionTicketMove, ID: before.Ticket.Key, Revision: before.Revision, Confirm: true, Fields: map[string]string{"status": status}})
-		if failure != nil || (response.Status == webui.WriteStatusOK) != allowed {
-			t.Fatal("Web move disagreed with the canonical guard", response, failure)
-		}
-	} else {
-		request := tui.NewTicketActionState(tui.TicketActionMoveStatus, tui.NewTicketViews([]ticketcore.Indexed{before.Ticket})[0], status).Request
-		_, failure := newTUITicketActionExecutor(operations).ExecuteTicketAction(request)
-		if (failure == nil) != allowed {
-			t.Fatal("TUI move disagreed with the canonical guard", failure)
-		}
+	if applied := runTUIBoardMove(t, provider, before, status, adapter); applied != allowed {
+		t.Fatal("adapter move disagreed with the canonical guard", adapter)
 	}
 
 	after, err := operations.ReadTicketDocument(before.Ticket.Key)
@@ -75,10 +86,29 @@ func checkTUIBoardMove(t *testing.T, native bool, status, adapter string) {
 	}
 }
 
+func runTUIBoardMove(t *testing.T, provider webViewProvider, before workflowcore.TicketDocument, status, adapter string) bool {
+	t.Helper()
+
+	if adapter == "web" {
+		response, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{Action: webActionTicketMove, ID: before.Ticket.Key, Revision: before.Revision, Confirm: true, Fields: map[string]string{"status": status}})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		return response.Status == webui.WriteStatusOK
+	}
+
+	request := tui.NewTicketActionState(tui.TicketActionMoveStatus, tui.NewTicketViews([]ticketcore.Indexed{before.Ticket})[0], status).Request
+	_, err := newTUITicketActionExecutor(provider.service(t.Context())).ExecuteTicketAction(request)
+
+	return err == nil
+}
+
 // A confirmed terminal move cannot overwrite an edit made after selection.
 func TestTUIBoardStale(t *testing.T) {
 	provider, original := webTicketWriteFixture(t)
 	before := readWebTicketFile(t, provider, original.Key)
+
 	_, err := newTUITicketActionExecutor(provider.service(t.Context())).ExecuteTicketAction(tui.TicketActionRequest{Action: tui.TicketActionMoveStatus, Key: original.Key, Revision: original.Revision, Status: "backlog"})
 	if !errors.Is(err, workflowstate.ErrConflict) || readWebTicketFile(t, provider, original.Key) != before {
 		t.Fatal("stale move changed a newer ticket", err)
@@ -88,6 +118,7 @@ func TestTUIBoardStale(t *testing.T) {
 // A live claim keeps status under its workflow owner in both adapters.
 func TestTUIBoardOwned(t *testing.T) {
 	operations, hierarchy, _ := workflowCLIFixture(t)
+
 	id := workflowCLIManualStart(t, operations, hierarchy)
 	if _, err := operations.ClaimWorkflow(t.Context(), id); err != nil {
 		t.Fatal(err)

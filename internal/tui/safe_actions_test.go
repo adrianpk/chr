@@ -22,6 +22,7 @@ func TestDashTarget(t *testing.T) {
 			}})
 			model.selectView(ViewDash)
 			model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
 			if model.workAction.Request.TicketKey != "CHR-B" {
 				t.Fatal("Dash action targeted the Board ticket", model.workAction.Request)
 			}
@@ -29,6 +30,7 @@ func TestDashTarget(t *testing.T) {
 			model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 			model.Update(tea.KeyMsg{Type: tea.KeyDown})
 			model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
 			if model.workAction.Request.TicketKey != "CHR-C" || !strings.Contains(model.renderDash(), "> CHR-C") || model.selectedTicket != 0 {
 				t.Fatal("queue navigation changed Board selection or targeted a hidden ticket")
 			}
@@ -44,6 +46,7 @@ func TestDashSelectionRefresh(t *testing.T) {
 		{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-B"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev, Priority: "high"}},
 		{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-C"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev, Priority: "normal"}},
 	}
+
 	cases := []struct {
 		name string
 		rows []ticketcore.Indexed
@@ -60,6 +63,7 @@ func TestDashSelectionRefresh(t *testing.T) {
 			model.Update(tea.KeyMsg{Type: tea.KeyDown})
 			model.completeAgentWorkRefresh(agentWorkRefreshFinishedMsg{result: AgentWorkRefreshResult{Tickets: tc.rows}})
 			model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
 			if model.workAction.Request.TicketKey != tc.want || model.workAction.Pending != (tc.want != "") {
 				t.Fatal("refresh planned a hidden queue item", model.workAction)
 			}
@@ -70,12 +74,14 @@ func TestDashSelectionRefresh(t *testing.T) {
 	model.selectView(ViewDash)
 	model.Update(tea.KeyMsg{Type: tea.KeyDown})
 	model.cycleAgentWorkOrder()
+
 	if selected, _ := model.selectedDashTicketView(); selected.Key != "CHR-C" {
 		t.Fatal("sorting changed the selected key")
 	}
 
 	model.cycleAgentWorkPriorityFilter()
 	model.planWorkAction(WorkActionStartTicket)
+
 	if model.workAction.Pending {
 		t.Fatal("empty priority filter reused a hidden selection")
 	}

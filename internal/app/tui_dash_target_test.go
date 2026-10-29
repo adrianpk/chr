@@ -18,12 +18,14 @@ import (
 func TestTUIDashTarget(t *testing.T) {
 	operations, hierarchy, _ := workflowCLIFixture(t)
 	body := "Keep Board selection independent."
+
 	backlog, err := operations.CreateBoardTicket(workflowcore.TicketEditRequest{Body: &body, Fields: map[string]string{"title": "Board target", "status": "backlog"}, Binding: workflowstate.MutationBinding{RequestID: "board-target", Operator: "maintainer"}})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	tickets := []ticketcore.Indexed{backlog.Ticket}
+
 	for _, record := range hierarchy.Tasks[:2] {
 		document, err := operations.ReadTicketDocument(record.Task.Key)
 		if err != nil {
@@ -38,6 +40,7 @@ func TestTUIDashTarget(t *testing.T) {
 	runGuidedTUIKey(t, model, "down", false)
 	runGuidedTUIKey(t, model, "enter", false)
 	runGuidedTUIKey(t, model, "enter", true)
+
 	if !strings.Contains(model.View(), "Selected ticket: "+tickets[2].Key+" revision") {
 		t.Fatal("native preview did not bind the displayed Dash key", model.View())
 	}
@@ -50,6 +53,7 @@ func TestTUIDashRevision(t *testing.T) {
 	executor := newTUIWorkActionExecutor(operations)
 	selected := hierarchy.Tasks[0]
 	request := tui.WorkActionRequest{Action: tui.WorkActionWorkflowTicket, TicketKey: selected.Task.Key, TicketRevision: selected.SourceHash, Workflow: &tui.WorkflowActionRequest{Preview: true, Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket"}}}}
+
 	preview, err := executor.ExecuteWorkAction(request)
 	if err != nil || preview.Confirmation == nil {
 		t.Fatal("initial preview failed", err)

@@ -1,8 +1,9 @@
 package tui
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
 	"testing"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 // Ctrl+C must reach Bubble Tea shutdown before a busy mode can consume it.
@@ -20,6 +21,7 @@ func TestBusyQuit(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			model := NewModel(Options{})
 			tc.busy(model)
+
 			_, command := model.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
 			if command == nil {
 				t.Fatal("busy mode swallowed Ctrl+C")

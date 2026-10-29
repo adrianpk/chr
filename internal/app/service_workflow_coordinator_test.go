@@ -55,6 +55,7 @@ func checkServiceWorkflowOwnerStarts(t *testing.T, operations service, key strin
 	t.Helper()
 
 	executor := newTUIWorkActionExecutor(operations)
+
 	document, err := operations.ReadTicketDocument(key)
 	if err != nil {
 		t.Fatal(err)

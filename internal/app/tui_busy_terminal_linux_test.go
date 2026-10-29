@@ -17,6 +17,7 @@ import (
 func TestTUIBusyTerminal(t *testing.T) {
 	operations, hierarchy, _ := workflowCLIFixture(t)
 	id := workflowCLIManualStart(t, operations, hierarchy)
+
 	before, err := operations.ReadWorkflow(t.Context(), id)
 	if err != nil {
 		t.Fatal(err)
@@ -58,6 +59,7 @@ func TestTUIBusyProcess(t *testing.T) {
 	provider := &busyTerminalProvider{started: make(chan struct{}), done: make(chan struct{})}
 	operations.quizModel = provider
 	operations.generationBinder = testGenerationBinder
+
 	options := newTUIOptions(tuiOptionsData{ctx: t.Context(), env: env, projectContext: operations.projectContext, stdin: os.Stdin, stdout: os.Stdout, assetsFS: testAssetsFS(), operations: operations})
 	if err := runManagedTUI(t.Context(), options, operations); err != nil {
 		t.Fatal(err)
@@ -83,6 +85,7 @@ type busyTerminalProvider struct {
 
 func (p *busyTerminalProvider) Invoke(ctx context.Context, _ quizmodel.Request) (quizmodel.Response, error) {
 	defer close(p.done)
+
 	close(p.started)
 
 	if _, err := fmt.Fprintln(os.Stdout, "BUSY_PROVIDER_STARTED"); err != nil {
