@@ -14,6 +14,9 @@ commits:
   - 8d348e4d15ab9beef1ec9581df53753b188057c8
   - 6745653689130740a1238a5b4ba9b176f9dcb182
   - 6f391411c3390b3392ebf3b640a53f67895c0c09
+  - 600fe4b12c7ec8ae02b38b7724d7456fa1f55b94
+branch: feat/slice-10-tui-board-workflows
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/464
 ready_at: 2026-10-29T10:11:45Z
 reviewed_at: 2026-10-29T16:16:08Z
 ---
@@ -62,4 +65,4 @@ selection through resize; Dash browses retained workflows and bounded members.
 Scope preview and lifecycle/integration forms use canonical guards. Focused TUI,
 real workflow grant/decision/approval, and production terminal checks passed.
 See the report for exact commands. Final clean-HEAD controller validation and
-canonical PR integration remain pending; this ticket remains reviewing.
+PR #464 integration remain pending; this ticket remains reviewing.

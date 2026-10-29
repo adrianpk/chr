@@ -5,7 +5,7 @@ Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-10-tui-board-workflows`
-PR: pending
+PR: [#464](https://forge.adrianpk.com/adrianpk/chr/pulls/464)
 
 ## Purpose
 
@@ -38,6 +38,8 @@ T10.1: `2e6f89388d5dd615c22765c6c1d76ca7fd61489d`.
 T10.2: `8d348e4d15ab9beef1ec9581df53753b188057c8`.
 T10.3: `6745653689130740a1238a5b4ba9b176f9dcb182`.
 T10.4: `6f391411c3390b3392ebf3b640a53f67895c0c09`.
+
+T10.5 report introduction: `600fe4b12c7ec8ae02b38b7724d7456fa1f55b94`.
 
 Responsive Board reuses canonical columns, Attention classification and existing
 card/detail renderers. The retained browser keeps its own list/member offsets;

@@ -184,7 +184,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-9-tickets.md`
 
 Ticket: `TKT-20261029101145` — `ops/default/ticket/reviewing/20261029101145-web-tui-parity-board-workflows.md`
 State: reviewing
-PR: pending
+PR: [#464](https://forge.adrianpk.com/adrianpk/chr/pulls/464)
 Report: `ops/default/report/slices/web-tui-parity/slice-10-board-workflows.md`
 
 | Task | Work | State | Commits | Validation |
@@ -193,7 +193,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-10-board-workflows.md`
 | T10.2 | Add a retained workflow list/detail surface within Dash with pagination, members, evidence and current eligible actions. | done | 8d348e4d | Real empty/17-run paging, retained members and late refresh checks passed. |
 | T10.3 | Expose bounded work preview for ticket, slice, set, case and loose scope with canonical filters and ordering. | done | 67456536 | Real bounded scope form/preview cancellation and canonical stale anchor checks passed. |
 | T10.4 | Expose allowed lifecycle controls, allowance extension and integration-decision answers, plus visible case/ticket links. | done | 6f391411 | Real grant/decision/native approval guards, retained drafts/links and production PTY stop controls passed. |
-| T10.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Focused task checks passed; report and canonical PR preparation in progress. Final clean-HEAD controller validation and integration pending. |
+| T10.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 600fe4b1 | PR #464 opened; focused task checks passed. Final PR-reference HEAD controller validation and integration pending. |
 
 
 ### Slice 11: Wizard entry and Dump in shared tabs
