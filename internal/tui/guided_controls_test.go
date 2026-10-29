@@ -16,9 +16,9 @@ func TestGuidedUseCaseTUIControls(t *testing.T) {
 	m.guided.View.NativeRevision = 17
 	m.guided.View.Controls = []string{"pause", "cancel"}
 	m.editGuidedInput("answer")
-	m.textForm.Fields[0].Input.SetValue("Unsent original answer.")
+	m.quizAnswer.Input.SetValue("Unsent original answer.")
 
-	m.textForm.Active = false
+	m.quizAnswer.Active = false
 
 	var request GuidedRequest
 
@@ -36,7 +36,7 @@ func TestGuidedUseCaseTUIControls(t *testing.T) {
 
 	m.completeGuided(guidedTestFinished(t, command()))
 
-	if request.Command.NativeRevision != 17 || request.Command.Action != "pause" || m.textForm.Fields[0].value() != "Unsent original answer." {
+	if request.Command.NativeRevision != 17 || request.Command.Action != "pause" || m.quizAnswer.Input.Value() != "Unsent original answer." {
 		t.Fatal("control replaced its native binding or unsent draft")
 	}
 

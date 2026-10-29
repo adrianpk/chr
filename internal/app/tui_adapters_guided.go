@@ -99,6 +99,7 @@ func tuiGuidedView(observed GuidedUseCaseInspection) tui.GuidedView {
 	}
 
 	view.Originals = tuiWizardOriginals(observed)
+	view.Quiz = tuiGuidedQuiz(observed)
 	state := observed.Session.Guided
 	projectTUIGuidedStatus(&view, observed)
 

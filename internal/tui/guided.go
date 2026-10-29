@@ -14,6 +14,7 @@ type GuidedExecutor interface {
 // GuidedRequest freezes a selected run, input revision and operation before IO.
 type GuidedRequest struct {
 	Action, Document, CaseSlug string
+	QuizAction                 QuizActionID
 	Command                    authoringcore.GuidedUseCaseCommand
 }
 
@@ -31,6 +32,7 @@ type GuidedView struct {
 	Retry                                   *GuidedRequest
 	Native                                  *WorkflowView
 	CanRetainIdea, CanApprove               bool
+	Quiz                                    *QuizView
 	Session                                 *authoringcore.Session
 	Runs                                    []authoringcore.Session
 	Cases                                   []authoringcore.CaseMetadata

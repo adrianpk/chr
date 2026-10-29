@@ -111,7 +111,13 @@ func enterGuidedTUIInput(t *testing.T, model *tui.Model, text string) {
 
 	runGuidedTUIKey(t, model, "e", false)
 	runGuidedTUIKey(t, model, text, false)
-	runGuidedTUIKey(t, model, "ctrl+s", true)
+
+	submit := "ctrl+s"
+	if strings.Contains(model.View(), "alt+x cancels quiz") {
+		submit = "enter"
+	}
+
+	runGuidedTUIKey(t, model, submit, true)
 }
 
 func runGuidedTUIKey(t *testing.T, model *tui.Model, key string, execute bool) {

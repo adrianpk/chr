@@ -155,6 +155,14 @@ func quizHumanStatus(quiz QuizView) string {
 }
 
 func (m *Model) quizActionHint(quiz QuizView) string {
+	if m.wizardQuizVisible() {
+		return m.wizardQuizHint(quiz)
+	}
+
+	return m.manualQuizActionHint(quiz)
+}
+
+func (m *Model) manualQuizActionHint(quiz QuizView) string {
 	if m.quizBusy {
 		return "Working"
 	}
@@ -179,6 +187,10 @@ func (m *Model) quizActionHint(quiz QuizView) string {
 }
 
 func (m *Model) selectedQuizView() (QuizView, bool) {
+	if m.wizardQuizVisible() {
+		return *m.guided.View.Quiz, true
+	}
+
 	for _, quiz := range m.visibleQuizzes() {
 		if quiz.Index == m.selectedQuiz {
 			return quiz, true
@@ -308,6 +320,7 @@ func (m *Model) newQuizActionState(action QuizActionID) QuizActionState {
 		Pending: true,
 		Request: QuizActionRequest{
 			Binding: binding,
+			Guided:  m.capturedWizardQuiz(),
 			Action:  action,
 			Scope:   scope,
 			Mode:    mode,

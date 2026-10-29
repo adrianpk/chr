@@ -67,7 +67,7 @@ func (m *Model) bindDumpRecovery(request DumpActionRequest) {
 }
 
 func (m *Model) requestQuizControl(action QuizActionID) tea.Cmd {
-	request := QuizActionRequest{Action: action, Scope: m.quizAnswer.Scope, Binding: m.quizAnswer.Binding, Mode: quizActionMode(action)}
+	request := QuizActionRequest{Guided: m.quizAnswer.Guided, Action: action, Scope: m.quizAnswer.Scope, Binding: m.quizAnswer.Binding, Mode: quizActionMode(action)}
 
 	apply := func(m *Model) tea.Cmd { return m.startQuizAction(request) }
 	if action == QuizActionCancel {

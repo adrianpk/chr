@@ -8,7 +8,7 @@ import (
 )
 
 func (m *Model) updateGuidedOrHarnessKey(message tea.KeyMsg) updateOutcome {
-	if m.wizardBound() && !m.textForm.Active && !m.dumpEdit.Active {
+	if m.wizardBound() && !m.textForm.Active && !m.dumpEdit.Active && !m.quizAnswer.Active && !m.quizAction.Pending {
 		if command, handled := m.updateWizardKey(message); handled {
 			return updateOutcome{Command: command, Handled: true}
 		}
@@ -27,6 +27,10 @@ func (m *Model) updateWizardKey(message tea.KeyMsg) (tea.Cmd, bool) {
 	}
 
 	key := message.String()
+	if command, handled := m.updateWizardQuizKey(message); handled {
+		return command, true
+	}
+
 	if m.wizardCaseKey(key) {
 		return nil, false
 	}
@@ -41,9 +45,7 @@ func (m *Model) updateWizardKey(message tea.KeyMsg) (tea.Cmd, bool) {
 	case "r":
 		return m.startGuidedRequest(m.guidedRequest("inspect")), true
 	case "y":
-		if m.guided.Pending != nil {
-			return m.startGuidedRequest(*m.guided.Pending), true
-		}
+		return m.retryWizardRequest(), true
 	case "c":
 		if m.SelectedView() != m.wizardStageView() {
 			m.selectView(m.wizardStageView())
@@ -55,12 +57,16 @@ func (m *Model) updateWizardKey(message tea.KeyMsg) (tea.Cmd, bool) {
 	default:
 		return m.wizardActionKey(key)
 	}
-
-	return nil, true
 }
 
 func (m *Model) editGuidedInput(action string) tea.Cmd {
 	if action == "" || m.guided.View.Session == nil {
+		return nil
+	}
+
+	if action == "answer" {
+		m.startQuizAnswer()
+
 		return nil
 	}
 
@@ -145,4 +151,12 @@ func (m *Model) updateWizardActionKey(key string) (tea.Cmd, bool) {
 
 		return nil, true
 	}
+}
+
+func (m *Model) retryWizardRequest() tea.Cmd {
+	if m.guided.Pending == nil {
+		return nil
+	}
+
+	return m.startGuidedRequest(*m.guided.Pending)
 }

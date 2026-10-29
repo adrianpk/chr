@@ -39,6 +39,7 @@ type QuizActionBinding struct {
 
 // QuizActionRequest carries selected quiz action input.
 type QuizActionRequest struct {
+	Guided      *GuidedRequest
 	ReloadDraft bool
 	Binding     QuizActionBinding
 	Action      QuizActionID
@@ -66,6 +67,7 @@ type QuizActionState struct {
 
 // QuizAnswerState stores in-terminal quiz answer editing state.
 type QuizAnswerState struct {
+	Guided   *GuidedRequest
 	History  []QuizAnswerRecord
 	Question string
 	Binding  QuizActionBinding
@@ -112,6 +114,10 @@ func (m *Model) updateQuizActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) tea.Cmd {
+	if m.guided.Busy {
+		return nil
+	}
+
 	if command, handled := m.updateQuizAnswerControl(msg.String()); handled {
 		return command
 	}
@@ -208,6 +214,7 @@ func (m *Model) saveQuizAnswer() tea.Cmd {
 		Action:  QuizActionAnswer,
 		Binding: binding,
 		Scope:   scope,
+		Guided:  m.quizAnswer.Guided,
 		Answer:  answer,
 	})
 
@@ -234,6 +241,16 @@ func (m *Model) executeQuizActionCommand(request QuizActionRequest) tea.Cmd {
 }
 
 func (m *Model) startQuizAction(request QuizActionRequest) tea.Cmd {
+	if request.Guided != nil {
+		return m.startWizardQuizAction(request)
+	}
+
+	if m.wizardBound() {
+		m.explainWizardMode()
+
+		return nil
+	}
+
 	if m.quizExecutor == nil {
 		m.statusMessage = "Quiz action executor is unavailable."
 
@@ -306,7 +323,11 @@ func (m *Model) startQuizAnswer() {
 
 	input.ShowLineNumbers = false
 	input.Prompt = ""
+
 	input.CharLimit = 1 << 20
+	if m.wizardQuizCurrent() {
+		input.CharLimit = 65536
+	}
 
 	binding := quiz.Binding
 	if binding.ExpectedRevision != "" {
@@ -314,6 +335,7 @@ func (m *Model) startQuizAnswer() {
 	}
 
 	m.quizAnswer = QuizAnswerState{
+		Guided:   m.capturedWizardQuiz(),
 		History:  append([]QuizAnswerRecord(nil), quiz.History...),
 		Question: quiz.ActiveQuestionSummary,
 		Binding:  binding,

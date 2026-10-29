@@ -75,6 +75,8 @@ func (m *Model) wizardTabLines() []string {
 		lines = append(lines, "Read-only stage. c Continue to the current stage.")
 	}
 
+	lines = append(lines, m.wizardQuizLines()...)
+
 	lines = append(lines, view.Progress...)
 	for _, problem := range view.Problems {
 		lines = append(lines, "Prerequisite: "+problem)
@@ -101,6 +103,10 @@ func (m *Model) wizardTabLines() []string {
 }
 
 func (m *Model) completeWizardDraft(message guidedFinishedMsg) {
+	if message.Request.QuizAction != "" {
+		m.quizAnswer = QuizAnswerState{}
+	}
+
 	if draft := m.dumpEdit.Guided; draft != nil && message.Request.Action == "input" && message.Request.Command.OperationID == draft.Command.OperationID {
 		m.dumpEdit = DumpEditState{}
 	}

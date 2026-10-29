@@ -36,7 +36,9 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 	terminal.keys(t, "Preserve finite work and original inputs.")
 	terminal.keys(t, " EXACT_FINAL_CAPTURE\x13")
 	terminal.see(t, "What should the workflow preserve")
-	terminal.input(t, "Preserve the original agreed scope.")
+	terminal.keys(t, "e")
+	terminal.see(t, "alt+x cancels quiz")
+	terminal.keys(t, "Preserve the original agreed scope.\r")
 	terminal.see(t, "Wizard: 5/7 preparation")
 
 	before := onlyGuidedTUIRun(t, operations)
@@ -210,14 +212,6 @@ func (p *guidedTerminal) catalog(t *testing.T) {
 	p.keys(t, "\x1bOP")
 	p.keys(t, "o")
 	p.see(t, "Case: ")
-}
-
-func (p *guidedTerminal) input(t *testing.T, value string) {
-	t.Helper()
-
-	p.keys(t, "e")
-	p.see(t, "ctrl+s submit")
-	p.keys(t, value+"\x13")
 }
 
 func (p *guidedTerminal) see(t *testing.T, value string) {

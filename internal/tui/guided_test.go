@@ -19,8 +19,8 @@ func (execute guidedTestExecutor) ExecuteGuided(request GuidedRequest) (GuidedVi
 
 func guidedTerminalFixture() *Model {
 	m := NewModel(Options{ProjectID: "project", Cases: []authoringcore.CaseMetadata{{Slug: "bounded-audit", Name: "Bounded audit"}}})
-	session := &authoringcore.Session{ID: "guided-one", ProjectID: "project", Namespace: "default", Revision: 2, Topic: "Bounded audit", Guided: &authoringcore.GuidedUseCaseState{CaseSlug: "bounded-audit", CaseName: "Bounded audit", Stage: "quiz", Status: "waiting_input", Quiz: &authoringcore.GuidedQuizState{QuestionID: "first", InputDigest: "original"}}}
-	m.guided = guidedState{Active: true, View: GuidedView{Session: session, Project: "Example", Namespace: "default", InputAction: "answer", Prompt: "What should remain bounded?"}}
+	session := &authoringcore.Session{ID: "guided-one", ProjectID: "project", Namespace: "default", Revision: 2, Topic: "Bounded audit", Guided: &authoringcore.GuidedUseCaseState{CaseSlug: "bounded-audit", CaseName: "Bounded audit", Stage: "quiz", Status: "waiting_input", ProgressionIntent: true, Quiz: &authoringcore.GuidedQuizState{QuestionID: "first", InputDigest: "original"}}}
+	m.guided = guidedState{Active: true, View: GuidedView{Session: session, Project: "Example", Namespace: "default", InputAction: "answer", Prompt: "What should remain bounded?", Quiz: &QuizView{Title: "Bounded audit", Scope: QuizScope{CaseSlug: "bounded-audit"}, Status: "active", Mode: "deep", ActiveQuestionSummary: "What should remain bounded?", Binding: QuizActionBinding{QuestionID: "first", ExpectedRevision: "native-before"}}}}
 
 	m.bindCaseContext("bounded-audit", session.ID)
 	m.selectView(ViewQuizzes)
@@ -49,7 +49,7 @@ func TestGuidedUseCaseTUIStaleInput(t *testing.T) {
 	newer.Revision++
 	m.completeGuided(guidedFinishedMsg{Sequence: m.guided.Sequence, Request: GuidedRequest{Action: "inspect"}, View: GuidedView{Session: &newer, Namespace: "default", InputAction: "answer"}})
 
-	updated, command := m.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
+	updated, command := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
 	m = guidedTestModel(t, updated)
 	if command == nil || !m.guided.Busy {
@@ -63,7 +63,7 @@ func TestGuidedUseCaseTUIStaleInput(t *testing.T) {
 		t.Fatal("refresh rebound the unsent draft", submitted)
 	}
 
-	if !m.textForm.Active || m.textForm.Fields[0].value() != submitted.Command.Content || m.guided.Pending == nil {
+	if !m.quizAnswer.Active || m.quizAnswer.Input.Value() != submitted.Command.Content || m.guided.Pending == nil {
 		t.Fatal("failed input discarded its draft or original operation")
 	}
 }
