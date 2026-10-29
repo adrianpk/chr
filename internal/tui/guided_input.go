@@ -60,6 +60,12 @@ func (m *Model) editGuidedInput(action string) tea.Cmd {
 		return nil
 	}
 
+	if action == "append" {
+		m.openWizardDump()
+
+		return nil
+	}
+
 	if m.textForm.GuidedRequest != nil && m.textForm.GuidedRequest.Command.RunID == m.guided.View.Session.ID && m.textForm.GuidedRequest.Command.Action == action {
 		m.textForm.Active = true
 

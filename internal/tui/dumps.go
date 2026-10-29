@@ -159,6 +159,10 @@ func (m *Model) renderDumps() string {
 }
 
 func (m *Model) dumpActionHint() string {
+	if m.dumpEdit.Guided != nil {
+		return "ctrl+s Continue to quiz  esc leave draft  alt+e external"
+	}
+
 	if m.dumpEdit.Active {
 		return "ctrl+s save  esc cancel  alt+e external"
 	}

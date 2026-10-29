@@ -37,7 +37,6 @@ func TestGuidedUseCaseTUIJourney(t *testing.T) {
 	_, create := model.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
 	model.Update(create())
 	enterGuidedTUIInput(t, model, "Retain complete evidence and finite limits.")
-	runGuidedTUIKey(t, model, "f", true)
 
 	if !strings.Contains(model.View(), "What should the workflow preserve") {
 		t.Fatal("current clarification missing", model.View())

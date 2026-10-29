@@ -63,6 +63,7 @@ type DumpActionState struct {
 
 // DumpEditState stores in-terminal dump editing state.
 type DumpEditState struct {
+	Guided                *GuidedRequest
 	Original              string
 	OperationID, Revision string
 	Active                bool
@@ -114,6 +115,10 @@ func (m *Model) updateDumpEditKey(msg tea.KeyMsg) tea.Cmd {
 		return discardDumpDraft(m)
 
 	case tea.KeyCtrlS:
+		if m.dumpEdit.Guided != nil {
+			return m.submitWizardDump()
+		}
+
 		m.saveDumpEdit()
 
 		return nil

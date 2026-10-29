@@ -187,6 +187,7 @@ func (m *Model) activeInteractionKeys() (string, bool) {
 		{Active: m.textForm.Active, Text: "Keys: tab next field  shift+tab previous  ctrl+s submit  esc cancel"},
 		{Active: m.projectEdit.Active || m.caseEdit.Active, Text: "Keys: enter accepts field  esc cancels  Ctrl+C exits"},
 		{Active: m.caseFilterEditing, Text: "Keys: enter applies case filter  esc cancels  Ctrl+C exits"},
+		{Active: m.dumpEdit.Active && m.dumpEdit.Guided != nil, Text: "Keys: ctrl+s Continue to quiz  esc leave draft  alt+e external  Ctrl+C exit"},
 		{Active: m.dumpEdit.Active, Text: "Keys: ctrl+s saves dump  esc cancels  alt+e external  Ctrl+C exits"},
 		{Active: m.workBusy, Text: "Keys: waiting for work action  Ctrl+C exits"},
 		{Active: m.artifactAction.Pending, Text: "Keys: enter confirms action, esc cancels action"},

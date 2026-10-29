@@ -60,6 +60,10 @@ func (m *Model) wizardTabLines() []string {
 	view := m.guided.View
 
 	lines := []string{"Case: " + view.Session.Guided.CaseName, m.wizardStageLabel() + " · " + guidedCatalogStatus(view.Status)}
+	if m.SelectedView() == ViewDumps && m.dumpEdit.Guided != nil {
+		return m.renderSelectedDumpEditLines([]string{"Case: " + view.Session.Guided.CaseName, "Continue to quiz submits the current body once."}, max(m.width-4, 40), max(m.height-8, 12))
+	}
+
 	if m.SelectedView() == m.wizardStageView() {
 		lines = append(lines, view.Prompt, m.guidedControlHint(), "e Input · r Refresh · F1-F7 existing tabs")
 	} else {
@@ -92,6 +96,10 @@ func (m *Model) wizardTabLines() []string {
 }
 
 func (m *Model) completeWizardDraft(message guidedFinishedMsg) {
+	if draft := m.dumpEdit.Guided; draft != nil && message.Request.Action == "input" && message.Request.Command.OperationID == draft.Command.OperationID {
+		m.dumpEdit = DumpEditState{}
+	}
+
 	if message.Request.Action == "start" {
 		m.textForm = textFormState{}
 

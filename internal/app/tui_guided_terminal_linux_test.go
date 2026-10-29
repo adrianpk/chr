@@ -31,15 +31,16 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 	terminal.see(t, "Wizard")
 	terminal.keys(t, "Terminal process audit\x13")
 	terminal.see(t, "Add the known context")
-	terminal.input(t, "Preserve finite work and original inputs.")
-	terminal.see(t, "Finish capture")
-	terminal.keys(t, "f")
+	terminal.keys(t, "e")
+	terminal.see(t, "Continue to quiz")
+	terminal.keys(t, "Preserve finite work and original inputs.")
+	terminal.keys(t, " EXACT_FINAL_CAPTURE\x13")
 	terminal.see(t, "What should the workflow preserve")
 	terminal.input(t, "Preserve the original agreed scope.")
 	terminal.see(t, "Wizard: 5/7 preparation")
 
 	before := onlyGuidedTUIRun(t, operations)
-	if before.Guided.SpecApproval == nil || len(before.Guided.Checkpoints) != 3 {
+	if before.Guided.SpecApproval == nil || len(before.Guided.Checkpoints) != 3 || before.Guided.Capture != "Preserve finite work and original inputs. EXACT_FINAL_CAPTURE" {
 		t.Fatal("terminal process did not persist exact approved inputs")
 	}
 
