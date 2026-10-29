@@ -76,3 +76,28 @@ func TestDashRefreshQuery(t *testing.T) {
 		t.Fatal("old observation installed after query changed")
 	}
 }
+
+// A new query generation cannot accept an older read merely because repeated
+// filter/order changes return to identical request values.
+func TestDashQueryGeneration(t *testing.T) {
+	executor := &fakeAgentWorkRefreshExecutor{}
+	model := NewModel(Options{AgentWorkExecutor: executor, WorkObservation: &work.Observation{QueueNext: -1}})
+	model.selectView(ViewDash)
+	model.cycleAgentWorkOrder()
+
+	command := model.handleAgentWorkRefreshTick()
+	for range 5 {
+		model.cycleAgentWorkOrder()
+	}
+
+	reply, ok := command().(agentWorkRefreshFinishedMsg)
+	if !ok {
+		t.Fatal("wrong refresh message")
+	}
+
+	model.completeAgentWorkRefresh(reply)
+
+	if model.workObservation == nil {
+		t.Fatal("previous generation installed after returning to the same query")
+	}
+}

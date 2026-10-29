@@ -130,6 +130,7 @@ type workState struct {
 	workObservation         *work.Observation
 	queueRequest            work.Request
 	queuePending            bool
+	queueSequence           uint64
 	observability           ObservabilityView
 	workReadiness           WorkReadinessView
 	agentWorkPriorityFilter string

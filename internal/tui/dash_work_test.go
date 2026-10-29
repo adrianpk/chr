@@ -94,3 +94,26 @@ func TestDashWorkflowDetails(t *testing.T) {
 		}
 	}
 }
+
+// Returning to the same queue values still begins a new interaction. A preview
+// from the previous generation cannot reopen executable confirmation.
+func TestDashPreviewGeneration(t *testing.T) {
+	executor := &fakeWorkActionExecutor{result: WorkActionResult{Confirmation: &WorkActionState{Pending: true}}}
+	model := NewModel(Options{
+		Tickets: dashSelectionTickets("CHR-1"), WorkExecutor: executor,
+		Observability: ObservabilityView{Authority: workspaceconfig.WorkStateAuthorityTickets},
+	})
+	model.selectView(ViewDash)
+	model.cycleAgentWorkOrder()
+
+	command, _ := model.handleDashKey("v")
+	for range 5 {
+		model.cycleAgentWorkOrder()
+	}
+
+	model.Update(command())
+
+	if model.workAction.Pending {
+		t.Fatal("previous generation reopened confirmation after returning to the same order")
+	}
+}

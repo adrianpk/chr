@@ -35,9 +35,10 @@ type AgentWorkRefreshResult struct {
 type agentWorkRefreshTickMsg struct{}
 
 type agentWorkRefreshFinishedMsg struct {
-	request AgentWorkRefreshRequest
-	result  AgentWorkRefreshResult
-	err     error
+	queueSequence uint64
+	request       AgentWorkRefreshRequest
+	result        AgentWorkRefreshResult
+	err           error
 }
 
 func agentWorkRefreshTickCmd() tea.Cmd {
@@ -57,17 +58,18 @@ func (m *Model) startAgentWorkRefresh() tea.Cmd {
 	}
 
 	executor := m.agentWorkRefreshExecutor
+	queueSequence := m.queueSequence
 
 	return func() tea.Msg {
 		result, err := executor.RefreshAgentWork(request)
 
-		return agentWorkRefreshFinishedMsg{request: request, result: result, err: err}
+		return agentWorkRefreshFinishedMsg{queueSequence: queueSequence, request: request, result: result, err: err}
 	}
 }
 
 func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cmd {
 	m.agentWorkRefreshInFlight = false
-	if msg.request.Queue != m.queueRequest {
+	if msg.queueSequence != m.queueSequence || msg.request.Queue != m.queueRequest {
 		return m.requestDashRefresh()
 	}
 

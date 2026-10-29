@@ -7,6 +7,7 @@ import (
 )
 
 func (m *Model) changeDashQuery() {
+	m.queueSequence++
 	m.queueRequest.Priority, m.queueRequest.Order = m.agentWorkPriorityFilter, m.agentWorkOrder
 	m.queueRequest.Offset = 0
 	m.queuePending = m.workObservation != nil
@@ -23,13 +24,13 @@ func (m *Model) handleDashQueryKey(key string) (tea.Cmd, bool) {
 	case "o":
 		m.cycleAgentWorkOrder()
 	case "[":
-		m.queueRequest.Offset = max(0, m.queueRequest.Offset-workflowstate.PageLimit)
+		m.setDashQueueOffset(max(0, m.queueRequest.Offset-workflowstate.PageLimit))
 	case "]":
 		if m.workObservation == nil || m.workObservation.QueueNext < 0 || m.queuePending {
 			return nil, true
 		}
 
-		m.queueRequest.Offset = m.workObservation.QueueNext
+		m.setDashQueueOffset(m.workObservation.QueueNext)
 	default:
 		return nil, false
 	}
@@ -47,4 +48,9 @@ func (m *Model) requestDashRefresh() tea.Cmd {
 	m.agentWorkRefreshInFlight = true
 
 	return m.startAgentWorkRefresh()
+}
+
+func (m *Model) setDashQueueOffset(offset int) {
+	m.queueSequence++
+	m.queueRequest.Offset = offset
 }
