@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 11 — Wizard entry and Dump in shared tabs.
-Completed slices: 10/14
-Completed tasks: 54/70
+Active slice: Slice 12 — Wizard Quiz and preparation.
+Completed slices: 11/14
+Completed tasks: 55/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -198,8 +198,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-10-board-workflows.md`
 
 ### Slice 11: Wizard entry and Dump in shared tabs
 
-Ticket: `TKT-20261029101146` — `ops/default/ticket/reviewing/20261029101146-web-tui-parity-wizard-entry.md`
-State: reviewing
+Ticket: `TKT-20261029101146` — `ops/default/ticket/solved/20261029101146-web-tui-parity-wizard-entry.md`
+State: delivered
 PR: [#465](https://forge.adrianpk.com/adrianpk/chr/pulls/465)
 Report: `ops/default/report/slices/web-tui-parity/slice-11-wizard-entry.md`
 
@@ -209,13 +209,13 @@ Report: `ops/default/report/slices/web-tui-parity/slice-11-wizard-entry.md`
 | T11.2 | Replace the detached wizard presentation with case/run binding in the existing shell, stage indicator and shared forms. | done | a1ed8105 | Existing tab, progress, captured input/retry and committed-original inspection checks pass. |
 | T11.3 | Use the existing Dump form with a single Continue to quiz submission of the current content. | done | 7524663d | Shared Dump Continue seals exact current content once; real lost-ack replay and production PTY assertions pass. |
 | T11.4 | Keep non-current wizard tabs read-only with Continue to the current stage; isolate manual and wizard controls. | done | 06d019e5 | Non-current tabs and manual writers cannot mutate; navigation, provenance/byte identity and native parity checks pass. |
-| T11.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | f51e7e39 | PR #465 opened; focused checks passed. Final PR-reference HEAD controller validation and integration pending. |
+| T11.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | f51e7e39; 6ee42aac | PR #465 merged at 6ee42aac701f6b2e6f479cbd639601965b29602b; validation COHC2KP7RZY5ONJTIC4UAQFWZJ passed all four ordered checks. |
 
 
 ### Slice 12: Wizard Quiz and preparation
 
-Ticket: `TKT-20261029101147` — `ops/default/ticket/ready/20261029101147-web-tui-parity-wizard-authoring.md`
-State: ready
+Ticket: `TKT-20261029101147` — `ops/default/ticket/in_progress/20261029101147-web-tui-parity-wizard-authoring.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-12-wizard-authoring.md`
 

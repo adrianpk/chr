@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101146
 title: "Wizard entry and Dump in shared tabs"
-status: reviewing
+status: solved
 kind: task
 severity: medium
 priority: high
@@ -17,6 +17,8 @@ commits:
   - f51e7e3921876794d162350b36c22b16494d9188
 branch: feat/slice-11-tui-wizard-entry
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/465
+resolution: fixed
+closed_at: 2026-10-29T17:10:35Z
 reviewed_at: 2026-10-29T16:58:28Z
 started_at: 2026-10-29T16:27:19Z
 ready_at: 2026-10-29T10:11:46Z
@@ -65,5 +67,7 @@ T11.1–T11.4 implemented with named entry, case-bound re-entry, normal tabs,
 shared forms and Dump body editor, exact-content Continue/retry and read-only
 mode guards. Focused tests cover real persistence, committed original bytes,
 keyboard/palette boundaries and a production managed terminal journey. The report
-records successful commands. PR #465 final clean-HEAD validation and integration remain
-pending; this ticket remains reviewing.
+records successful commands. PR #465 merged at
+6ee42aac701f6b2e6f479cbd639601965b29602b after all four ordered checks
+passed in COHC2KP7RZY5ONJTIC4UAQFWZJ. Acta merge event:
+01M64A1TKMCZ7A560E0HWSJQGM.

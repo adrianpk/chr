@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101147
 title: "Wizard Quiz and preparation"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: high
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:47Z
 commits: []
+started_at: 2026-10-29T17:10:35Z
+branch: feat/slice-12-tui-wizard-authoring
 ready_at: 2026-10-29T10:11:47Z
 ---
 

@@ -1,6 +1,6 @@
 # Slice 11: Wizard entry and Dump in shared tabs
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
@@ -100,9 +100,16 @@ Implementation checks passed locally:
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/tui ./internal/app` — passed.
 - `git diff --check` — passed before task commits.
 
-Required `make verify`, focused race checks and final whitespace evidence will be
-recorded by the controller for the clean PR-reference HEAD. They are pending at
-report introduction. Integration and closure remain controller-owned.
+Final controller validation `COHC2KP7RZY5ONJTIC4UAQFWZJ` passed on clean
+HEAD `6ee42aac701f6b2e6f479cbd639601965b29602b` in this order:
+
+- `make verify`
+- `go test -race ./internal/tui -count=1`
+- `go test -race ./internal/app -run '^Test(TUIWizard.*|GuidedUseCaseTUI.*|GuidedUseCaseParityNative)$' -count=1 -timeout=3m`
+- `git diff --check`
+
+PR #465 merged into dev at that same commit. Acta merge event:
+`01M64A1TKMCZ7A560E0HWSJQGM`. No checks were repeated for documentation closure.
 
 ## Risks and Follow-ups
 
