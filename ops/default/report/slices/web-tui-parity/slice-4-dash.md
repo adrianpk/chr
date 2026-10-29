@@ -1,11 +1,12 @@
 # Slice 4: Shared queue observation and stable refresh
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-4-tui-dash`
 PR: [#458](https://forge.adrianpk.com/adrianpk/chr/pulls/458)
+Integration: Rebase + Fast-forward into dev at `c4451b766e3a5a92e3b9be4a4dfc1a952401b00e`.
 Base: `545d08312b8897b25fe56287d1cea51aa6f93674` on dev, after verified PR #457 integration and Slice 3 closure
 
 ## Purpose
@@ -122,9 +123,16 @@ and an older preview after cycling back to the same order. Both pass after
 binding reads and previews to the monotonic query generation. This earlier
 batch is not final-candidate evidence.
 
-Looper records the final clean HEAD and ordered required/focused commands after
-PR-reference follow-up commits. The canonical PR Validation section carries
-successful commands from that exact evidence. Integration remains controller-owned.
+Controller validation `MQWCF6KW2NQXNMRL3FEXHGLGIH` passed all four ordered checks
+on clean HEAD `c4451b766e3a5a92e3b9be4a4dfc1a952401b00e`:
+
+- `make verify`
+- `go test -race ./internal/tui -run '^Test(Dash.*|Model(RefreshesDash.*|SkipsDash.*|Workflow.*|Ownership|AsyncRefresh)|Operation.*|BusyQuit)$' -count=1`
+- `go test -race ./internal/app -run '^Test(TUIDash.*|TUIWorkflow(Preview|Stale|Controls|Start|Approval|Refresh)|WorkObservation.*|WebDash(Observation|Revision|QueuePages)|TUINavigationTerminal|TUIOperation.*)$' -count=1 -timeout=3m`
+- `git diff --check`
+
+Canonical Forgejo and Acta event `01M63TY93EHS3XRP9YDP8AYNPG` confirm
+PR #458 integrated at the validated commit. No checks were repeated for closure.
 
 ## Risks and Follow-ups
 

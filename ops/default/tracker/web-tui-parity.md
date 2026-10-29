@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 4 — Shared queue observation and stable refresh.
-Completed slices: 3/14
-Completed tasks: 19/70
+Active slice: Slice 5 — Case and Dump forms.
+Completed slices: 4/14
+Completed tasks: 20/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -89,8 +89,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-3-feedback.md`
 
 ### Slice 4: Shared queue observation and stable refresh
 
-Ticket: `TKT-20261029101139` — `ops/default/ticket/reviewing/20261029101139-web-tui-parity-dash.md`
-State: reviewing
+Ticket: `TKT-20261029101139` — `ops/default/ticket/solved/20261029101139-web-tui-parity-dash.md`
+State: delivered
 PR: [#458](https://forge.adrianpk.com/adrianpk/chr/pulls/458)
 Report: `ops/default/report/slices/web-tui-parity/slice-4-dash.md`
 
@@ -100,13 +100,13 @@ Report: `ops/default/report/slices/web-tui-parity/slice-4-dash.md`
 | T4.2 | Keep Dash queue selection and Board selection separately by key across refresh, sorting and removal. | done | 863d09bd; 63f66c32; e242a9a6 | Reorder/removal, stale-query and full 130-ticket Board catalog regressions pass; selection remains independent and never starts work. |
 | T4.3 | Render current work, recent activity and results in Dash; preserve filter, order, Run all ready and running-work details. | done | fed68882 | Bounded context/event/result rendering and actual production-loader PTY/SQLite observation pass without canonical writes. |
 | T4.4 | Expose Preview Work and Workflow details with exact scope/policy confirmation and cancellation. | done | f265da0e; e242a9a6 | Read-only Preview/Workflow PTY, cancellation, late replies, exact scope/policy conflicts and guarded host-checkpoint regressions pass. |
-| T4.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 65032c6b; 78f08a32 | PR #458 prepared with the immutable report; ordered exact-HEAD checks are retained by Looper before controller-owned integration. |
+| T4.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | 65032c6b; 78f08a32; c4451b76 | PR #458 integrated at c4451b766e3a5a92e3b9be4a4dfc1a952401b00e; all four ordered checks passed in MQWCF6KW2NQXNMRL3FEXHGLGIH. |
 
 
 ### Slice 5: Case and Dump forms
 
-Ticket: `TKT-20261029101140` — `ops/default/ticket/ready/20261029101140-web-tui-parity-case-dump.md`
-State: ready
+Ticket: `TKT-20261029101140` — `ops/default/ticket/in_progress/20261029101140-web-tui-parity-case-dump.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-5-case-dump.md`
 

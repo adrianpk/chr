@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101140
 title: "Case and Dump forms"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:40Z
 commits: []
+branch: feat/slice-5-tui-case-dump
+started_at: 2026-10-29T12:44:00Z
 ready_at: 2026-10-29T10:11:40Z
 ---
 

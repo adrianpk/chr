@@ -7,7 +7,7 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 4 — Shared queue observation and stable refresh.
+Active slice: Slice 5 — Case and Dump forms.
 
 Spec: [Requirements](../spec/web-tui-parity.md)
 Tracker: [Tasks and evidence](../tracker/web-tui-parity.md)
@@ -122,7 +122,7 @@ Prerequisite: Slice 2 integrated into dev.
 
 ### Slice 4: Shared queue observation and stable refresh
 
-Ticket: `TKT-20261029101139` — `ops/default/ticket/reviewing/20261029101139-web-tui-parity-dash.md`
+Ticket: `TKT-20261029101139` — `ops/default/ticket/solved/20261029101139-web-tui-parity-dash.md`
 Findings: G-032, G-035, G-036, G-037.
 Prerequisite: Slice 3 integrated into dev.
 
@@ -138,7 +138,7 @@ Prerequisite: Slice 3 integrated into dev.
 
 ### Slice 5: Case and Dump forms
 
-Ticket: `TKT-20261029101140` — `ops/default/ticket/ready/20261029101140-web-tui-parity-case-dump.md`
+Ticket: `TKT-20261029101140` — `ops/default/ticket/in_progress/20261029101140-web-tui-parity-case-dump.md`
 Findings: G-015, G-017, G-018, G-019.
 Prerequisite: Slice 4 integrated into dev.
 
