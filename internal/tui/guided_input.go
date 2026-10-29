@@ -22,7 +22,7 @@ func (m *Model) updateGuidedOrHarnessKey(message tea.KeyMsg) updateOutcome {
 }
 
 func (m *Model) updateWizardKey(message tea.KeyMsg) (tea.Cmd, bool) {
-	if m.guided.Busy {
+	if m.wizardWriteBusy() {
 		return nil, true
 	}
 

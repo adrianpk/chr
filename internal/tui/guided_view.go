@@ -60,8 +60,10 @@ func (m *Model) wizardTabLines() []string {
 	view := m.guided.View
 
 	lines := []string{"Case: " + view.Session.Guided.CaseName, m.wizardStageLabel() + " · " + guidedCatalogStatus(view.Status)}
+
+	lines = append(lines, m.wizardInputNotice())
 	if m.SelectedView() == ViewDumps && m.dumpEdit.Guided != nil {
-		return m.renderSelectedDumpEditLines([]string{"Case: " + view.Session.Guided.CaseName, "Continue to quiz submits the current body once."}, max(m.width-4, 40), max(m.height-8, 12))
+		return m.renderSelectedDumpEditLines([]string{"Case: " + view.Session.Guided.CaseName, "Continue to quiz submits the current body once.", m.wizardInputNotice()}, max(m.width-4, 40), max(m.height-8, 12))
 	}
 
 	if m.SelectedView() == m.wizardStageView() {

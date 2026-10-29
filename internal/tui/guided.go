@@ -17,6 +17,7 @@ type GuidedRequest struct {
 	Action, Document, CaseSlug string
 	QuizAction                 QuizActionID
 	ReloadQuiz                 bool
+	Passive                    bool
 	Command                    authoringcore.GuidedUseCaseCommand
 }
 
@@ -47,6 +48,7 @@ type GuidedView struct {
 
 type guidedState struct {
 	Active, Busy bool
+	Polling      bool
 	Sequence     uint64
 	View         GuidedView
 	Pending      *GuidedRequest
@@ -72,13 +74,15 @@ func (m *Model) openGuided() tea.Cmd {
 }
 
 func (m *Model) startGuidedRequest(request GuidedRequest) tea.Cmd {
-	if m.guided.Busy || m.guidedExecutor == nil || !m.wizardRequestCurrent(request) {
+	if m.guidedRequestBlocked(request) || m.guidedExecutor == nil || !m.wizardRequestCurrent(request) {
 		return nil
 	}
 
 	m.guidedSequence++
 
 	m.guided.Sequence, m.guided.Busy = m.guidedSequence, true
+
+	m.guided.Polling = request.Passive
 	if request.Action == "input" || request.Action == "start" {
 		m.guided.Pending = &request
 		m.guided.Problem = ""
@@ -98,7 +102,7 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 		return
 	}
 
-	m.guided.Busy = false
+	m.guided.Busy, m.guided.Polling = false, false
 	if !m.guidedReplyCurrent(message) {
 		return
 	}
@@ -126,12 +130,7 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 
 func (m *Model) observeGuidedCase(view GuidedView) {
 	if view.Cases != nil && !m.caseDirty && !m.caseEdit.Active {
-		m.cases = append([]authoringcore.CaseMetadata(nil), view.Cases...)
-		if caseSliceContainsSlug(m.cases, m.caseContext.CaseSlug) {
-			m.selectedCase = m.caseIndexForSlug(m.caseContext.CaseSlug)
-		} else {
-			m.clampSelectedCase()
-		}
+		m.applyGuidedCases(view.Cases)
 	}
 
 	if session := view.Session; session != nil && session.Guided != nil {
@@ -162,11 +161,14 @@ func (m *Model) guidedRequest(action string) GuidedRequest {
 }
 
 func (m *Model) refreshGuided() tea.Cmd {
-	if m.guided.Busy || m.guided.Problem != "" {
+	if m.guided.Busy || m.guided.Problem != "" || m.draftConfirmation.Active || m.workAction.Pending {
 		return nil
 	}
 
-	return m.startGuidedRequest(m.guidedRequest("inspect"))
+	request := m.guidedRequest("inspect")
+	request.Passive = true
+
+	return m.startGuidedRequest(request)
 }
 
 func (m *Model) navigateGuidedReply(request GuidedRequest) {

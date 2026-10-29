@@ -30,7 +30,7 @@ func (m *Model) shellShortcutBlocked() bool {
 		m.projectEdit.Active, m.caseEdit.Active, m.caseFilterEditing,
 		m.dumpEdit.Active, m.quizAnswer.Active, m.filterEntryMode,
 		m.commandPalette.Open, m.harnessSelection.Active,
-		m.guided.Busy, m.specBusy, m.planBusy, m.quizBusy, m.workBusy,
+		m.wizardWriteBusy(), m.specBusy, m.planBusy, m.quizBusy, m.workBusy,
 		m.artifactAction.Pending, m.dumpAction.Pending, m.ticketAction.Pending,
 		m.specAction.Pending, m.planAction.Pending, m.quizAction.Pending, m.workAction.Pending,
 	} {

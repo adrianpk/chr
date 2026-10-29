@@ -12,6 +12,10 @@ func (m *Model) guidedReplyCurrent(message guidedFinishedMsg) bool {
 		return true
 	}
 
+	if !m.guidedNativeReplyCurrent(message.View) {
+		return false
+	}
+
 	if !sameGuidedTerminalRun(m.guided.View, message.View) || after.Revision < before.Revision {
 		m.guided.Problem = "A newer or different run is already displayed. Refresh its current state; the captured draft remains unchanged."
 
@@ -80,4 +84,12 @@ func (m *Model) wizardStagePrompt() string {
 	}
 
 	return m.guided.View.Prompt
+}
+
+func (m *Model) guidedNativeReplyCurrent(view GuidedView) bool {
+	if view.Native == nil || view.Native.ID != m.workflow.ID {
+		return true
+	}
+
+	return view.Native.Revision >= m.workflow.Revision
 }

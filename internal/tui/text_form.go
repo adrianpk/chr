@@ -164,7 +164,12 @@ func (m *Model) textFormBinding() string {
 
 func (m *Model) textFormLines(width, height int) []string {
 	lines := []string{"Tab / Shift+Tab choose a field; Ctrl+S submits.", ""}
+
 	lines = append(lines, m.textForm.Details...)
+	if m.textForm.GuidedRequest != nil {
+		lines = append(lines, m.wizardInputNotice())
+	}
+
 	focusStart, focusEnd := 0, 0
 
 	for index, field := range m.textForm.Fields {

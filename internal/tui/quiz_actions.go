@@ -115,7 +115,7 @@ func (m *Model) updateQuizActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) tea.Cmd {
-	if m.guided.Busy {
+	if m.wizardWriteBusy() {
 		return nil
 	}
 
