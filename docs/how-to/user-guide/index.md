@@ -433,45 +433,46 @@ Unbound titles and other permitted metadata remain editable.
 
 ## Develop a Guided Use Case in the TUI
 
-Open `chr` in the intended project. Press `F1`, then `g`, or choose **Guided use
-cases** from the `:` command palette. Check the displayed project, namespace,
-target, policy and limits. Resolve any reported prerequisite before expecting
-execution to start.
+Open `chr` in the intended project. In Cases (`F1`), press `w` for **Wizard**
+(`g` is an alias), enter the Name and choose **Create** with Ctrl+S or the button.
+This creates the named case and its retained run in one action. There is no
+second name step or namespace/ID entry. To re-enter, select the case and press
+`o` for **Open workflow**, or use that command in the palette. Re-entry reads the
+retained stage without starting another run.
 
-1. Press `n` to develop a new use case. This requests automatic development under
-   project policy. Press `e`, enter its name and press Enter. Use `e` again to
-   add known context; repeat as needed, then press `f` to finish capture.
-2. Answer each displayed clarification with `e` and Enter. Ctrl+J inserts a line
-   inside the editor. Once the answers are sufficient, chr approves the exact
-   generated specification, prepares its work and starts the admitted scope.
-3. Read the current stage, required action and native progress. If native review
-   requires approval, press `a` to open the existing native inspection flow.
-   Press Enter to load its read-only details, inspect the exact candidate, then
-   confirm only that displayed approval. Esc cancels that confirmation.
-4. Use available `p`, `u` and `x` controls to pause, resume or cancel. Pausing
-   stops further dispatch and requests the native stop; a pending stop does not
-   itself confirm worker quiescence. Resume retains the original attempts and
-   scope. Cancel keeps saved artifacts and already delivered changes.
-5. Press `v` to inspect the complete result export. Confirmed results identify
-   the repository, target, commit and PR with validation and closing evidence.
-   Waiting for review, a passing worker or an open PR alone remains unconfirmed.
+The wizard keeps the normal F1–F7 tabs. Its header shows the case and stage:
+Cases for naming, Dumps for capture, Quizzes for clarification, Specs for the
+specification, Plans for preparation and Board for execution/results. Browsing a
+different stage never submits work. Earlier committed originals are read-only;
+press `c` to return to the current stage. If background progression advances the
+stage while you are reading, use `c` before its next control.
 
-Use `1` through `5` to inspect the original committed dump, quiz, specification,
-plan and tracker. Scroll with arrows or Page Up/Page Down. These reads retain
-the agreed input even after later working-copy edits. Press `i` to save a later
-idea separately for review after this run; it does not extend or pause the work.
+1. In Dumps, press `e` to open the shared body editor. Enter or revise the full
+   capture, including unsent additions, then press Ctrl+S for **Continue to quiz**.
+   This submits the current body once through the retained finish operation.
+   There is no separate manual Save Dump or append/finish ceremony. Alt+E edits
+   the unsent body in the external editor. Failed submissions keep the body and
+   original binding; repeating unchanged Continue reconciles that operation.
+2. Answer the current clarification with `e` and Ctrl+S. Enter adds a newline in
+   the form. Sufficient answers proceed through the existing specification
+   approval and preparation owners under project policy.
+3. Use only controls offered at the current stage. Available `p`, `u` and `x`
+   pause, resume or cancel without resetting retained scope or attempt limits.
+   When native approval is required, `a` opens its existing exact-candidate
+   inspection and confirmation. Review waits and an open PR do not prove delivery.
+4. Use `1`–`5` to inspect complete committed dump, quiz, specification, plan and
+   tracker originals, or `v` for retained results. Scroll with arrows or Page
+   Up/Page Down. A working-copy replacement does not change the committed image.
+   `i` records a later idea separately when offered.
 
-Press `b` to return to the named run list and Enter to reopen the selected run.
-Another interface can continue that same run. If its revision changes while you
-edit, a rejected save keeps your full draft. Esc leaves the editor; `r` reads
-current state, `d` discards the local draft, and `e` binds a fresh input. Use `y`
-only to retry the original failed request, or `c` when the screen offers recovery
-of an already retained operation.
-
-Esc leaves the guided screen while the local host remains available. Ctrl+C
-quits the TUI and joins its owned host. Reopening restores the retained run;
-process shutdown does not request canonical cancellation or reset work limits.
-See the [TUI reference](../../reference/tui.md#guided-use-cases) for key details.
+Manual save/generate commands are blocked while this case is bound to its wizard.
+Clear case context explicitly to return to manual work, or select a different
+case. Esc leaves an editor after confirming unsent changes. Ctrl+C quits and
+joins the owned host; it does not cancel the canonical run. Paused runs remain
+paused when reopened. `r` reads current state; `y` retries the exact failed
+request after leaving its input, and current-stage `c` can reconcile a displayed
+retained operation. Refresh cannot replace an unsent draft's captured revision
+or question binding. See the [TUI reference](../../reference/tui.md#guided-use-cases).
 
 ## Navigate the TUI
 

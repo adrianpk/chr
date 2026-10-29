@@ -234,7 +234,7 @@ Prerequisite: Slice 9 integrated into dev.
 
 ### Slice 11: Wizard entry and Dump in shared tabs
 
-Ticket: `TKT-20261029101146` — `ops/default/ticket/in_progress/20261029101146-web-tui-parity-wizard-entry.md`
+Ticket: `TKT-20261029101146` — `ops/default/ticket/reviewing/20261029101146-web-tui-parity-wizard-entry.md`
 Findings: G-005, G-006, G-007, G-008.
 Prerequisite: Slice 10 integrated into dev.
 

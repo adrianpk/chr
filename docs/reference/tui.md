@@ -76,50 +76,49 @@ their original scope until confirmation succeeds.
 
 ## Guided Use Cases
 
-From Cases (`F1`), `g` opens the guided catalog. The **Guided use cases** command
-palette entry opens the same modal screen. The selected project and resolved
-namespace stay bound to all requests. Catalog entries use recognizable names;
-Enter inspects the selected retained run without starting or advancing it.
+Cases (`F1`) exposes `w` **Wizard** (`g` alias) and `o` **Open workflow**. Wizard
+collects one Name/Create action through the named guided owner. Open workflow
+uses the selected case, prefers its already bound run and otherwise selects the
+latest retained run with a stable identity tie-break. A case must be selected
+when multiple runs are present. The palette also offers Open workflow. No run ID
+or namespace is requested from the user.
 
-| Key | Guided behavior |
+The existing shell shows the bound case and stage progress. Stages use Cases,
+Dumps, Quizzes, Specs, Plans and Board; F1–F7 remain the navigation menu. Earlier
+and future stages are read-only. `c` returns to the current stage without
+resubmitting its input. Passive refresh can update the stage while preserving
+the tab being read. Manual keyboard, palette and source-edit commands cannot
+write through a wizard-bound tab; clear case context explicitly for manual work.
+
+| Key | Wizard behavior |
 | --- | --- |
-| `n` | Start a new retained development request under the displayed project policy. |
-| `e` / `enter` | Edit the current required input; Enter in the editor saves its complete text. |
-| `ctrl+j` | Insert a newline while editing. |
-| `f` | Explicitly finish nonempty capture when offered. |
-| `p` / `u` / `x` | Apply an available pause, resume or cancel through shared/native control owners. |
-| `a` | Inspect required native approval through the existing preview/confirmation flow. |
-| `i` | Edit a separately retained later idea after an input checkpoint exists. |
-| `1` / `2` / `3` / `4` / `5` | Read the complete committed dump, quiz, specification, plan or tracker. |
-| `v` | Read the current verified result export, including deferred ideas. |
-| arrows / `pgup` / `pgdown` | Select catalog rows or scroll complete run/document content. |
-| `r` | Read current canonical state without advancing the workflow. |
-| `y` | Retry the exact original failed request after leaving the editor. |
-| `c` | Reconcile the displayed retained operation when available. |
-| `d` | Discard the local draft and its old binding; canonical input stays saved. |
-| `b` | Return to the named run catalog. |
-| `esc` | Leave the editor or guided screen. |
-| `ctrl+c` | Quit the TUI and join its owned managed host. |
+| `e` / `enter` at the current stage | Open its eligible input in a shared form/editor. |
+| `ctrl+s` in Dump | Continue to quiz using the complete current body in one retained finish operation. |
+| `enter` in an editor | Insert a newline; use Ctrl+S or its submit button for progression. |
+| `alt+e` while editing Dump | Edit the unsent body through the existing owned draft editor. |
+| `p` / `u` / `x` at the current stage | Apply an available pause, resume or cancel through shared owners. |
+| `a` | Inspect an available native approval through the existing exact confirmation. |
+| `i` | Enter a later idea separately when an input checkpoint exists. |
+| `1`–`5` / `v` | Read committed originals or the retained result export. |
+| arrows / `pgup` / `pgdown` | Scroll the complete stage/document. |
+| `r` | Read canonical state without advancing it. |
+| `y` outside an editor | Retry the exact original failed request. |
+| `c` | Return to the current tab, or reconcile an offered retained operation when already there. |
+| `esc` in an editor | Leave after confirming unsent changes; the case/run binding remains. |
+| `ctrl+c` | Quit and join the owned managed host. |
 
-The editor retains its original run revision, question/input binding and operation
-through asynchronous refresh. Rejected saves preserve the full draft. Read the
-current state and explicitly open a new editor before submitting a revised
-answer; a newer observation cannot silently rebind an old answer. Obsolete
-responses from a previously closed screen cannot replace a reopened screen.
+The Dump stage uses the same body editor and draft/external-editor path as
+manual Dump editing. Canonical wizard submissions are limited to 65,536 bytes. Its
+progression action replaces manual Save; editing does not dispatch a separate
+append. Repeating unchanged Continue after a lost acknowledgement reuses the
+same operation, revision and content. Invalid or stale input retains the draft.
+Generic input forms also freeze run, question and revision through refresh.
 
-Startup attaches the shared bounded recovery/execution host. Inspection, rendering
-and periodic refresh remain read-only. Leaving the modal does not cancel its run;
-process exit stops owned jobs, preserving the canonical stage and original limits
-for later recovery. A paused run stays paused after reopening.
-
-Progress distinguishes native validation, confirmed delivery, remaining work,
-review waits, blockers and pending native stop acknowledgement. Result completion
-requires verified delivery and closing evidence for all admitted work. The export
-contains curated delivery/validation/closing receipts and later ideas; raw native
-state cannot substitute for those proofs. Committed documents carry their full
-commit and repository-relative source, and remain stable through refresh. The
-current result export is refreshed from canonical evidence rather than retained
-as an immutable stage input.
+Inspection reads committed bytes with their actual reference/commit binding,
+independent of later working-copy replacements. Controls remain guarded by the
+guided/native owners. Pauses and process exit retain consumed work and original
+limits. Validated tasks, review waits, confirmed delivery and closing evidence
+remain distinct; a worker exit or an open PR cannot establish completion.
 
 ## Command Palette
 

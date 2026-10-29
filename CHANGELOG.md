@@ -12,6 +12,12 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Start a named TUI wizard from Cases with one Name/Create action and reopen its
+  retained workflow by case. Follow progress in the normal tabs, edit capture in
+  the shared Dump editor and Continue to quiz with all current text in one step.
+  Retries retain that exact input; earlier originals stay read-only, and manual
+  saves cannot accidentally change wizard progression.
+
 - See all six TUI Board columns and Attention together on wide terminals while
   keeping ticket selection through resize. Browse retained workflows, members and
   evidence in Dash; preview ticket, slice, set, case or filtered loose work before

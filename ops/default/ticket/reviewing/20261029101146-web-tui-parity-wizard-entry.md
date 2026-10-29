@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101146
 title: "Wizard entry and Dump in shared tabs"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: high
@@ -9,7 +9,13 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:46Z
-commits: []
+commits:
+  - d0516dc70ac86ac9491a1ff5076650d40d7c9297
+  - a1ed8105573e40b269362b2559e902cf895e465e
+  - 7524663d82fafeb04658281cc8e14319e977f977
+  - 06d019e5d3117982539da0c14977ddd0c10d3e1c
+branch: feat/slice-11-tui-wizard-entry
+reviewed_at: 2026-10-29T16:58:28Z
 started_at: 2026-10-29T16:27:19Z
 ready_at: 2026-10-29T10:11:46Z
 ---
@@ -53,4 +59,9 @@ One branch and one PR to `dev`; tasks T11.1-T11.5 are the canonical work units. 
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+T11.1–T11.4 implemented with named entry, case-bound re-entry, normal tabs,
+shared forms and Dump body editor, exact-content Continue/retry and read-only
+mode guards. Focused tests cover real persistence, committed original bytes,
+keyboard/palette boundaries and a production managed terminal journey. The report
+records successful commands. Final clean-HEAD validation and integration remain
+pending; this ticket remains reviewing.

@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 11 — Wizard entry and Dump in shared tabs.
 Completed slices: 10/14
-Completed tasks: 50/70
+Completed tasks: 54/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -198,18 +198,19 @@ Report: `ops/default/report/slices/web-tui-parity/slice-10-board-workflows.md`
 
 ### Slice 11: Wizard entry and Dump in shared tabs
 
-Ticket: `TKT-20261029101146` — `ops/default/ticket/in_progress/20261029101146-web-tui-parity-wizard-entry.md`
-State: in_progress
+Ticket: `TKT-20261029101146` — `ops/default/ticket/reviewing/20261029101146-web-tui-parity-wizard-entry.md`
+State: reviewing
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-11-wizard-entry.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T11.1 | Expose Wizard and Open workflow in Cases and start with one Name/Create through StartNamedGuidedUseCase. | pending | — | Planned: No random-ID input ceremony or second name step; existing case/run re-entry is deterministic. |
-| T11.2 | Replace the detached wizard presentation with case/run binding in the existing shell, stage indicator and shared forms. | pending | — | Planned: Stages map to existing tabs; no parallel menu, duplicated editor or raw namespace/UUID prompt. |
-| T11.3 | Use the existing Dump form with a single Continue to quiz submission of the current content. | pending | — | Planned: Runtime G-008 evidence proves one exact retained input and retry reconciliation without duplicates. |
-| T11.4 | Keep non-current wizard tabs read-only with Continue to the current stage; isolate manual and wizard controls. | pending | — | Planned: Manual save cannot accidentally break wizard progression; viewing another tab never submits work. |
-| T11.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T11.1 | Expose Wizard and Open workflow in Cases and start with one Name/Create through StartNamedGuidedUseCase. | done | d0516dc7 | Named Create, replay and case-bound re-entry pass through the real owner and production terminal. |
+| T11.2 | Replace the detached wizard presentation with case/run binding in the existing shell, stage indicator and shared forms. | done | a1ed8105 | Existing tab, progress, captured input/retry and committed-original inspection checks pass. |
+| T11.3 | Use the existing Dump form with a single Continue to quiz submission of the current content. | done | 7524663d | Shared Dump Continue seals exact current content once; real lost-ack replay and production PTY assertions pass. |
+| T11.4 | Keep non-current wizard tabs read-only with Continue to the current stage; isolate manual and wizard controls. | done | 06d019e5 | Non-current tabs and manual writers cannot mutate; navigation, provenance/byte identity and native parity checks pass. |
+| T11.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Focused checks passed; report and canonical PR preparation in progress. Final clean-HEAD controller validation and integration pending. |
+
 
 ### Slice 12: Wizard Quiz and preparation
 
