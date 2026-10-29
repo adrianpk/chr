@@ -111,6 +111,10 @@ func (e tuiPlanActionExecutor) executePlanAction(request tui.PlanActionRequest) 
 		}
 	}()
 
+	if request.Action != tui.PlanActionRefresh && (request.OperationID == "" || request.Revision == "") {
+		return result, errors.New("refresh Plans before submitting a captured plan operation")
+	}
+
 	result, err = e.runPlanAction(request)
 	if err != nil {
 		return tui.PlanActionResult{}, err
@@ -139,11 +143,9 @@ func (e tuiPlanActionExecutor) executePlanAction(request tui.PlanActionRequest) 
 func (e tuiPlanActionExecutor) runPlanAction(request tui.PlanActionRequest) (tui.PlanActionResult, error) {
 	switch request.Action {
 	case tui.PlanActionGenerate:
-		result, err := e.operations.GeneratePlan(e.operations.ctx, PlanGenerateRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}})
-
-		return tui.PlanActionResult{Message: result.Message, Outcome: operation.Result{ChangedFiles: compactChangedFiles(result.Plan.RelativePath)}}, err
+		return e.generatePlanDelivery(request)
 	case tui.PlanActionRegenerate:
-		result, err := e.operations.RegeneratePlan(e.operations.ctx, PlanRegenerateRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}})
+		result, err := e.operations.RegeneratePlan(e.operations.ctx, PlanRegenerateRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}, OperationID: request.OperationID, ExpectedRevision: request.Revision})
 
 		return tui.PlanActionResult{Message: result.Message, Outcome: operation.Result{ChangedFiles: compactChangedFiles(result.Plan.RelativePath)}}, err
 	case tui.PlanActionMaterializeTracking:

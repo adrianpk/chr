@@ -108,7 +108,7 @@ func loadTUIPlans(operations service) ([]tui.PlanView, error) {
 	plans := make([]tui.PlanView, 0, len(result.Plans))
 	for index, plan := range result.Plans {
 		plans = append(plans, tui.PlanView{
-			Index:        index,
+			Index: index, Revision: plan.Revision,
 			UseCaseTitle: plan.UseCaseTitle,
 			Title:        plan.Title,
 			Status:       plan.Status,

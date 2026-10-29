@@ -8,11 +8,13 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // PlanView is the TUI-facing projection of a generated plan document.
 type PlanView struct {
+	Revision     string
 	Index        int
 	UseCaseTitle string
 	Title        string
@@ -42,7 +44,14 @@ func (s service) ListPlans() (PlanListResult, error) {
 
 	plans := make([]PlanView, 0, len(scopes))
 	for _, scope := range scopes {
-		plans = append(plans, s.planViewFromScope(scope, index))
+		view := s.planViewFromScope(scope, index)
+
+		view.Revision, err = authoringcore.PlanTargetRevision(s.ctx, s.projectContext.ProjectDir, scope.scope)
+		if err != nil {
+			return PlanListResult{}, err
+		}
+
+		plans = append(plans, view)
 	}
 
 	for index := range plans {

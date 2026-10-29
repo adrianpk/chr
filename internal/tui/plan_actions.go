@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"crypto/rand"
 	"fmt"
 	"strings"
 
@@ -28,8 +29,9 @@ type PlanActionExecutor interface {
 
 // PlanActionRequest carries selected plan action input.
 type PlanActionRequest struct {
-	Action PlanActionID
-	Scope  QuizScope
+	OperationID, Revision string
+	Action                PlanActionID
+	Scope                 QuizScope
 }
 
 // PlanActionResult contains refreshed plan state after an action.
@@ -86,10 +88,7 @@ func (m *Model) renderPlanAction() string {
 func (m *Model) updatePlansKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "g":
-		cmd := m.startPlanAction(PlanActionRequest{
-			Action: PlanActionGenerate,
-			Scope:  m.selectedPlanScope(),
-		})
+		cmd := m.startPlanAction(m.newPlanActionState(PlanActionGenerate).Request)
 
 		return cmd
 	case "G":
@@ -154,12 +153,14 @@ func (m *Model) planPlanAction(action PlanActionID) {
 
 func (m *Model) newPlanActionState(action PlanActionID) PlanActionState {
 	scope := m.selectedPlanScope()
+	plan, _ := m.selectedPlanView()
 
 	return PlanActionState{
 		Pending: true,
 		Request: PlanActionRequest{
-			Action: action,
-			Scope:  scope,
+			Action:      action,
+			Scope:       scope,
+			OperationID: rand.Text(), Revision: plan.Revision,
 		},
 		Title: planActionTitle(action),
 		Details: []string{
