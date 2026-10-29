@@ -55,6 +55,10 @@ func checkServiceWorkflowOwnerStarts(t *testing.T, operations service, key strin
 	t.Helper()
 
 	executor := newTUIWorkActionExecutor(operations)
+	document, err := operations.ReadTicketDocument(key)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	cases := []struct {
 		name       string
@@ -70,7 +74,7 @@ func checkServiceWorkflowOwnerStarts(t *testing.T, operations service, key strin
 			return err
 		}, false},
 		{"TUI ticket", func() error {
-			_, err := executor.ExecuteWorkAction(tui.WorkActionRequest{Action: tui.WorkActionStartTicket, TicketKey: key})
+			_, err := executor.ExecuteWorkAction(tui.WorkActionRequest{Action: tui.WorkActionStartTicket, TicketKey: key, TicketRevision: document.Revision})
 
 			return err
 		}, false},

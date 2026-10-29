@@ -176,6 +176,7 @@ func (m *Model) applyArtifactActionResult(result ArtifactActionResult) {
 	if result.Tickets != nil {
 		m.tickets = NewTicketViews(result.Tickets)
 		m.selectFirstFilteredTicket()
+		m.reconcileDashSelection()
 	}
 
 	if result.Documents != nil {

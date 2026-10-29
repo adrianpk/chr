@@ -163,7 +163,7 @@ func NewModel(opts Options) *Model {
 	tickets := NewTicketViews(opts.Tickets)
 	boardColumn := defaultBoardColumn(tickets)
 
-	return &Model{
+	model := &Model{
 		projectState: projectState{
 			projectDir:      opts.ProjectDir,
 			projectID:       opts.ProjectID,
@@ -237,6 +237,9 @@ func NewModel(opts Options) *Model {
 			guidedExecutor: opts.GuidedExecutor,
 		},
 	}
+	model.reconcileDashSelection()
+
+	return model
 }
 
 // Run starts the terminal UI event loop.

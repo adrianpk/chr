@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -41,6 +42,10 @@ func (e tuiWorkActionExecutor) nativeWorkExtentResult(request tui.WorkActionRequ
 			return tui.WorkActionResult{}, err
 		}
 
+		if !tuiWorkObservationMatches(request, bound) {
+			return tui.WorkActionResult{}, fmt.Errorf("reload the selected ticket before previewing: %w", workflowstate.ErrConflict)
+		}
+
 		native.Selection, native.Selected, native.Preview = bound.Request, bound.Selected, false
 		confirmation := tui.WorkActionState{Pending: true, Request: request, Title: "Confirm native workflow extent", Details: nativeWorkPreviewLines(bound)}
 
@@ -60,6 +65,20 @@ func (e tuiWorkActionExecutor) nativeWorkExtentResult(request tui.WorkActionRequ
 	view.Tickets, view.Message = result.Tickets, result.Message
 
 	return view, errors.Join(err, readErr)
+}
+
+func tuiWorkObservationMatches(request tui.WorkActionRequest, bound WorkflowBoundPreview) bool {
+	if request.TicketKey == "" {
+		return true
+	}
+
+	for _, member := range bound.View.Preview.Members {
+		if member.Key == request.TicketKey {
+			return request.TicketRevision != "" && member.SourceHash == request.TicketRevision
+		}
+	}
+
+	return false
 }
 
 func (e tuiWorkActionExecutor) nativeWorkStatusResult(request tui.WorkActionRequest) (tui.WorkActionResult, error) {

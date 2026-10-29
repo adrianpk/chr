@@ -1,6 +1,6 @@
 # Web and TUI parity tracker
 
-Status: Ready
+Status: In progress
 Date: 2026-10-29
 Delivery set: web-tui-parity
 Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity material to specification, slices, tickets and Looper execution within the recorded scope.
@@ -42,8 +42,8 @@ The map must remain identical to the plan. Tasks below are canonical. Record act
 
 ### Slice 1: Safe queue selection and canonical moves
 
-Ticket: `TKT-20261029101136` — `ops/default/ticket/ready/20261029101136-web-tui-parity-safe-actions.md`
-State: ready
+Ticket: `TKT-20261029101136` — `ops/default/ticket/in_progress/20261029101136-web-tui-parity-safe-actions.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-1-safe-actions.md`
 

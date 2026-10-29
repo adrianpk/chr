@@ -8,6 +8,10 @@ import (
 )
 
 func (m *Model) selectedTicketView() (TicketView, bool) {
+	if m.SelectedView() == ViewDash {
+		return m.selectedDashTicketView()
+	}
+
 	if len(m.tickets) == 0 {
 		return TicketView{}, false
 	}
@@ -77,6 +81,7 @@ func (m *Model) selectedTicketPosition(tickets []TicketView) int {
 
 // TicketView is the terminal projection of an indexed ticket.
 type TicketView struct {
+	Revision          string
 	Index             int
 	Key               string
 	Title             string
@@ -116,6 +121,7 @@ func NewTicketViews(tickets []ticketcore.Indexed) []TicketView {
 		}
 
 		view := TicketView{
+			Revision:          ticket.ContentHash,
 			Index:             index,
 			Key:               ticket.Key,
 			Title:             ticket.Title,

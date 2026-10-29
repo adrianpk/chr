@@ -149,6 +149,7 @@ func (m *Model) planNativeWorkExtent(request *WorkActionRequest, extent string) 
 	}
 
 	request.TicketKey = ticket.Key
+	request.TicketRevision = ticket.Revision
 
 	return true
 }
@@ -244,6 +245,7 @@ func (m *Model) completeNativeWorkAction(message workActionFinishedMsg) {
 	if message.Result.Tickets != nil {
 		m.tickets = NewTicketViews(message.Result.Tickets)
 		m.selectFirstFilteredTicket()
+		m.reconcileDashSelection()
 	}
 
 	if message.Result.WorkflowPage != nil {

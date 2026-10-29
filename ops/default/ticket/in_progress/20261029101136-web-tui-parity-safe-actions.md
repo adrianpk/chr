@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101136
 title: "Safe queue selection and canonical moves"
-status: ready
+status: in_progress
 kind: bug
 severity: high
 priority: high
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:36Z
 commits: []
+branch: fix/slice-1-tui-safe-actions
+started_at: 2026-10-29T10:17:58Z
 ready_at: 2026-10-29T10:11:36Z
 ---
 

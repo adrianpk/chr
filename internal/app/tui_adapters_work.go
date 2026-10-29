@@ -2,9 +2,11 @@ package app
 
 import (
 	"errors"
+	"fmt"
 
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -44,6 +46,15 @@ func (e tuiWorkActionExecutor) ExecuteWorkAction(
 }
 
 func (e tuiWorkActionExecutor) startSelectedTicketResult(request tui.WorkActionRequest) (tui.WorkActionResult, error) {
+	document, err := e.operations.ReadTicketDocument(request.TicketKey)
+	if err != nil {
+		return tui.WorkActionResult{}, err
+	}
+
+	if request.TicketRevision == "" || document.Revision != request.TicketRevision {
+		return tui.WorkActionResult{}, fmt.Errorf("reload the selected ticket before starting: %w", workflowstate.ErrConflict)
+	}
+
 	result, err := e.operations.StartSelectedTicket(request.TicketKey)
 	if err != nil {
 		return tui.WorkActionResult{}, err

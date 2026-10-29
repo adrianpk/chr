@@ -173,6 +173,7 @@ func (m *Model) confirmTicketAction() {
 	if result.Tickets != nil {
 		m.tickets = NewTicketViews(result.Tickets)
 		m.selectFirstFilteredTicket()
+		m.reconcileDashSelection()
 	}
 
 	m.statusMessage = result.Message

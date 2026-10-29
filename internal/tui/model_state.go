@@ -115,6 +115,7 @@ type interactionState struct {
 }
 
 type workState struct {
+	dashTicketKey           string
 	observability           ObservabilityView
 	workReadiness           WorkReadinessView
 	agentWorkPriorityFilter string

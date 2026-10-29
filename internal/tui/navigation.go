@@ -202,6 +202,8 @@ func (m *Model) selectPreviousRecord() {
 
 	selectedPath := m.selectedSourcePath()
 	switch m.SelectedView() {
+	case ViewDash:
+		m.moveDashSelection(-1)
 	case ViewBoard, ViewTickets:
 		m.selectPreviousTicket()
 	case ViewDumps:
@@ -232,6 +234,8 @@ func (m *Model) selectNextRecord() {
 
 	selectedPath := m.selectedSourcePath()
 	switch m.SelectedView() {
+	case ViewDash:
+		m.moveDashSelection(1)
 	case ViewBoard, ViewTickets:
 		m.selectNextTicket()
 	case ViewDumps:

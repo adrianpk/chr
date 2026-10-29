@@ -277,17 +277,20 @@ func (m *Model) renderAgentWorkQueueLines(limit int) []string {
 		return []string{"No ready tickets queued."}
 	}
 
-	lines := []string{}
-
+	selected, _ := m.selectedDashTicketView()
+	start := 0
 	for index, ticket := range queue {
-		if index >= limit {
-			lines = append(lines, fmt.Sprintf("+%d more", len(queue)-index))
-
+		if ticket.Key == selected.Key {
+			start = max(0, index-max(1, limit)+1)
 			break
 		}
+	}
+
+	lines := []string{}
+	for _, ticket := range queue[start:min(len(queue), start+max(1, limit))] {
 
 		prefix := " "
-		if ticket.Index == m.selectedTicket {
+		if ticket.Key == selected.Key {
 			prefix = ">"
 		}
 
@@ -300,6 +303,7 @@ func (m *Model) renderAgentWorkQueueLines(limit int) []string {
 func (m *Model) cycleAgentWorkPriorityFilter() {
 	filters := []string{"", "critical", "high", "normal", "low"}
 	m.agentWorkPriorityFilter = nextStringValue(filters, m.agentWorkPriorityFilter)
+	m.reconcileDashSelection()
 }
 
 func (m *Model) cycleAgentWorkOrder() {
@@ -311,6 +315,7 @@ func (m *Model) cycleAgentWorkOrder() {
 		workflowstate.TicketOrderKey,
 	}
 	m.agentWorkOrder = nextTicketLoopOrder(orders, m.agentWorkOrder)
+	m.reconcileDashSelection()
 }
 
 func sortReadyAgentWorkTickets(tickets []TicketView, order workflowstate.TicketOrder) {

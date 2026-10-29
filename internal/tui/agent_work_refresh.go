@@ -73,6 +73,7 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 	if msg.result.Tickets != nil {
 		m.tickets = NewTicketViews(msg.result.Tickets)
 		m.selectFirstFilteredTicket()
+		m.reconcileDashSelection()
 	}
 
 	m.applyWorkflowPage(msg.result.Observability.WorkflowPage)

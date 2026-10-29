@@ -33,6 +33,7 @@ type WorkActionRequest struct {
 	Workflow       *WorkflowActionRequest
 	Action         WorkActionID
 	TicketKey      string
+	TicketRevision string
 	PriorityFilter string
 	Order          workflowstate.TicketOrder
 }
@@ -101,8 +102,9 @@ func newStartTicketWorkActionState(ticket TicketView) WorkActionState {
 	return WorkActionState{
 		Pending: true,
 		Request: WorkActionRequest{
-			Action:    WorkActionStartTicket,
-			TicketKey: ticket.Key,
+			Action:         WorkActionStartTicket,
+			TicketKey:      ticket.Key,
+			TicketRevision: ticket.Revision,
 		},
 		Title: "Start selected ticket",
 		Details: []string{
@@ -431,6 +433,7 @@ func (m *Model) applyWorkActionResult(result WorkActionResult) {
 	if result.Tickets != nil {
 		m.tickets = NewTicketViews(result.Tickets)
 		m.selectFirstFilteredTicket()
+		m.reconcileDashSelection()
 	}
 
 	m.observability = result.Observability
