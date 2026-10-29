@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 13 — Wizard execution, results and recovery.
-Completed slices: 12/14
-Completed tasks: 64/70
+Active slice: Slice 14 — Parity acceptance and capability inventory.
+Completed slices: 13/14
+Completed tasks: 65/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -229,8 +229,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-12-wizard-authoring.md`
 
 ### Slice 13: Wizard execution, results and recovery
 
-Ticket: `TKT-20261029101148` — `ops/default/ticket/reviewing/20261029101148-web-tui-parity-wizard-results.md`
-State: reviewing
+Ticket: `TKT-20261029101148` — `ops/default/ticket/solved/20261029101148-web-tui-parity-wizard-results.md`
+State: delivered
 PR: [#467](https://forge.adrianpk.com/adrianpk/chr/pulls/467)
 Report: `ops/default/report/slices/web-tui-parity/slice-13-wizard-results.md`
 
@@ -240,12 +240,12 @@ Report: `ops/default/report/slices/web-tui-parity/slice-13-wizard-results.md`
 | T13.2 | Render structured terminal results with summary, branch/PR, delivery evidence and validation commands/exit codes. | done | 8972f55d | Real open-PR versus verified delivery/closing checks pass; exact receipt hashes, refs, validation commands/exit codes and JSON toggle are asserted. |
 | T13.3 | Confirm cancellation with the same saved-document/completed-change warning and show Pause only where domain policy permits it. | done | 66d738e1 | Production PTY proves visible execution Pause, cancelled confirmation writes nothing, confirmed cancellation retains exact originals/checkpoints and worker commit; domain limits unchanged. |
 | T13.4 | Keep polling read-only, preserve unsent drafts and navigation, and retain later ideas/originals as existing secondary capabilities. | done | 24112fcb | Production PTY observes two canonical peer ideas through polling; complete draft, typing and earlier Dumps navigation survive, with zero submitted answers or passive writes. |
-| T13.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | reviewing | 034ffe4d | Report introduced; PR #467 opened. Final exact-HEAD checks are recorded in the controller ledger and Acta after the PR-reference commit; dev integration pending. |
+| T13.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | 034ffe4d; 91df4d01 | PR #467 merged into dev at 91df4d01d2838180430f9259eeab1569ed6618e5; all four ordered checks passed in validation BV6G4MNWIBE7TQXVHIDFMORIVQ. |
 
 ### Slice 14: Parity acceptance and capability inventory
 
-Ticket: `TKT-20261029101149` — `ops/default/ticket/ready/20261029101149-web-tui-parity-acceptance.md`
-State: ready
+Ticket: `TKT-20261029101149` — `ops/default/ticket/in_progress/20261029101149-web-tui-parity-acceptance.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-14-acceptance.md`
 

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101149
 title: "Parity acceptance and capability inventory"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:49Z
 commits: []
+started_at: 2026-10-29T18:12:24Z
+branch: test/slice-14-tui-acceptance
 ready_at: 2026-10-29T10:11:49Z
 ---
 

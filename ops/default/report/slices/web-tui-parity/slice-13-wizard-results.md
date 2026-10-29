@@ -1,6 +1,6 @@
 # Slice 13: Wizard execution, results and recovery
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
@@ -100,16 +100,16 @@ Implementation checks passed locally:
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/tui ./internal/app` — passed with zero issues.
 - `git diff --check` — passed before task commits.
 
-Final clean-HEAD controller validation is recorded after the PR-reference
-follow-up commit using this ordered command list:
+Final controller validation `BV6G4MNWIBE7TQXVHIDFMORIVQ` passed on clean
+HEAD `91df4d01d2838180430f9259eeab1569ed6618e5` in this order:
 
 - `make verify`
 - `go test -race ./internal/tui -count=1`
 - `go test -race ./internal/app -run '^Test(TUIWizard.*|GuidedUseCaseTUI.*|GuidedUseCaseParityNative|GuidedUseCaseSharedQuizWeb)$' -count=1 -timeout=3m`
 - `git diff --check`
 
-The controller ledger and Acta record the exact candidate and validation
-identity. PR #467 targets dev; integration and slice closure remain pending.
+PR #467 merged into dev at that same commit. Acta merge event:
+`01M64DPQMB4K5FCCCT1BTDBER6`. No checks were repeated for documentation closure.
 
 ## Risks and Follow-ups
 

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101148
 title: "Wizard execution, results and recovery"
-status: reviewing
+status: solved
 kind: task
 severity: medium
 priority: high
@@ -15,6 +15,8 @@ commits:
   - 66d738e145954fec713ace69f28beb17907b3b74
   - 24112fcb7cc1f4688bc1846ce2a60925214e6730
   - 034ffe4db3a18d410b16337d15457e77616784e8
+resolution: fixed
+closed_at: 2026-10-29T18:12:24Z
 reviewed_at: 2026-10-29T18:03:11Z
 started_at: 2026-10-29T17:38:33Z
 branch: feat/slice-13-tui-wizard-results
@@ -66,7 +68,6 @@ results, guarded cancellation and stable passive reads. Real Git/filesystem/SQLi
 and production terminal checks pass. Cancellation retains exact committed
 originals, checkpoints and completed worker changes; polling preserves a complete
 unsent answer and earlier document navigation without submitting or advancing.
-Task commands and evidence are recorded in the Slice 13 report. PR #467 targets
-dev. Final ordered exact-HEAD validation is recorded in the controller ledger
-and Acta after the PR-reference commit; controller-owned integration remains
-pending.
+PR #467 merged into dev at 91df4d01d2838180430f9259eeab1569ed6618e5 after all four
+ordered checks passed in BV6G4MNWIBE7TQXVHIDFMORIVQ. Acta merge event:
+01M64DPQMB4K5FCCCT1BTDBER6.

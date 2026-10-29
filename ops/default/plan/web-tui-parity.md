@@ -7,7 +7,7 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 13 — Wizard execution, results and recovery.
+Active slice: Slice 14 — Parity acceptance and capability inventory.
 
 Spec: [Requirements](../spec/web-tui-parity.md)
 Tracker: [Tasks and evidence](../tracker/web-tui-parity.md)
@@ -266,7 +266,7 @@ Prerequisite: Slice 11 integrated into dev.
 
 ### Slice 13: Wizard execution, results and recovery
 
-Ticket: `TKT-20261029101148` — `ops/default/ticket/reviewing/20261029101148-web-tui-parity-wizard-results.md`
+Ticket: `TKT-20261029101148` — `ops/default/ticket/solved/20261029101148-web-tui-parity-wizard-results.md`
 Findings: G-011, G-012, G-013, G-014.
 Prerequisite: Slice 12 integrated into dev.
 
@@ -282,7 +282,7 @@ Prerequisite: Slice 12 integrated into dev.
 
 ### Slice 14: Parity acceptance and capability inventory
 
-Ticket: `TKT-20261029101149` — `ops/default/ticket/ready/20261029101149-web-tui-parity-acceptance.md`
+Ticket: `TKT-20261029101149` — `ops/default/ticket/in_progress/20261029101149-web-tui-parity-acceptance.md`
 Findings: I-003.
 Prerequisite: Slice 13 integrated into dev.
 
