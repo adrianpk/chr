@@ -216,7 +216,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-11-wizard-entry.md`
 
 Ticket: `TKT-20261029101147` — `ops/default/ticket/reviewing/20261029101147-web-tui-parity-wizard-authoring.md`
 State: reviewing
-PR: pending
+PR: [#466](https://forge.adrianpk.com/adrianpk/chr/pulls/466)
 Report: `ops/default/report/slices/web-tui-parity/slice-12-wizard-authoring.md`
 
 | Task | Work | State | Commits | Validation |
@@ -225,7 +225,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-12-wizard-authoring.md`
 | T12.2 | Render specification and preparation stages in their existing tabs from the shared guided operation. | done | fc3e0563 | Shared Specs/Plans rendering reads exact committed originals; working-copy replacement and navigation preserve bytes, bindings and one native materialization. |
 | T12.3 | Show stage-specific processing, suspended, pending-operation and blocker feedback with eligible actions. | done | d21a31eb | Real partial preparation, suspended state and lost acknowledgement show retained inputs, blockers and only owner-provided retry/control actions. |
 | T12.4 | Retry the retained operation and handle stale/newer revisions without UI-owned orchestration or duplicate preparation. | done | bfc05ca3 | Contract failure, deadline and plan/materialization acknowledgement faults restart with the same command, one plan and one ticket set; delayed stale answers write nothing and confirmed reload preserves cancellation. |
-| T12.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | report introduction pending | Focused tests and strict lint passed; canonical PR, final clean-HEAD controller validation and integration pending. |
+| T12.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 517571b3 | Focused tests and strict lint passed; PR #466 opened; final PR-reference HEAD controller validation and integration pending. |
 
 ### Slice 13: Wizard execution, results and recovery
 

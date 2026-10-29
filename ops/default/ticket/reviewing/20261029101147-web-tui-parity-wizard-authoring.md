@@ -14,9 +14,11 @@ commits:
   - fc3e0563baf91c4fcb98bd6253d3473cff7e16ff
   - d21a31eb2820f2ae2030039cef8679fcdda13c1e
   - bfc05ca37ce59466d85010e7b274fde92c0a89d0
+  - 517571b3e4556afa37c502a260435cdb268d95cc
 reviewed_at: 2026-10-29T17:32:11Z
 started_at: 2026-10-29T17:10:35Z
 branch: feat/slice-12-tui-wizard-authoring
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/466
 ready_at: 2026-10-29T10:11:47Z
 ---
 
@@ -63,5 +65,5 @@ T12.1–T12.4 implemented with shared Quiz editing/controls/history, committed
 Specs/Plans rendering, stage-specific feedback and exact retained retry/reload.
 Real Git/filesystem/SQLite and production terminal checks pass, including
 partial preparation, deadline/lost-ack restart, duplicate prevention and stale
-answer rejection. Canonical PR, final controller checks and integration remain
-pending; this ticket remains reviewing.
+answer rejection. PR #466 is open. Final controller checks on the PR-reference
+HEAD and integration remain pending; this ticket remains reviewing.

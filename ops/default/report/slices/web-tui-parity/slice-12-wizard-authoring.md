@@ -5,7 +5,7 @@ Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-12-tui-wizard-authoring`
-PR: pending
+PR: [#466](https://forge.adrianpk.com/adrianpk/chr/pulls/466)
 
 ## Purpose
 
@@ -43,6 +43,7 @@ T12.1: `6d43124624539535e1c5a1cf3736e21e25488b01`.
 T12.2: `fc3e0563baf91c4fcb98bd6253d3473cff7e16ff`.
 T12.3: `d21a31eb2820f2ae2030039cef8679fcdda13c1e`.
 T12.4: `bfc05ca37ce59466d85010e7b274fde92c0a89d0`.
+T12.5 report introduction: `517571b3e4556afa37c502a260435cdb268d95cc`.
 
 Quiz transport mapping reads the neutral native observation and shared answer
 history projection. UI requests capture a guided command and use the existing
