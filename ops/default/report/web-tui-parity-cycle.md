@@ -2,6 +2,7 @@
 
 Status: reviewing
 Delivery set: web-tui-parity
+PR: [#468](https://forge.adrianpk.com/adrianpk/chr/pulls/468)
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../tracker/web-tui-parity.md)
 Coverage: [All source IDs](../plan/web-tui-parity-coverage.csv)
@@ -35,7 +36,7 @@ confirmation; no new writer is introduced.
 ## Integration evidence
 
 Thirteen slices are integrated and closed. Slice 14 has implementation and owned
-task evidence in its report; its PR, final exact-HEAD checks and integration are
+task evidence in its report; PR #468 targets dev. Final exact-HEAD checks and integration are
 recorded during the remaining handoff. This report does not claim cycle closure.
 
 | Slice | Canonical PR | Integrated commit | Report | Successful validation |
@@ -53,7 +54,7 @@ recorded during the remaining handoff. This report does not claim cycle closure.
 | 11 | [#465](https://forge.adrianpk.com/adrianpk/chr/pulls/465) | `6ee42aac701f6b2e6f479cbd639601965b29602b` | [Slice 11 report](slices/web-tui-parity/slice-11-wizard-entry.md) | `COHC2KP7RZY5ONJTIC4UAQFWZJ` |
 | 12 | [#466](https://forge.adrianpk.com/adrianpk/chr/pulls/466) | `a0e8ec258860a56fcc6d9d1c5e5fefee9eb39e8f` | [Slice 12 report](slices/web-tui-parity/slice-12-wizard-authoring.md) | `TKFQDKEODV6WVKUYFMQMOX3ZWP` |
 | 13 | [#467](https://forge.adrianpk.com/adrianpk/chr/pulls/467) | `91df4d01d2838180430f9259eeab1569ed6618e5` | [Slice 13 report](slices/web-tui-parity/slice-13-wizard-results.md) | `BV6G4MNWIBE7TQXVHIDFMORIVQ` |
-| 14 | pending | Integration pending | [Slice 14 report](slices/web-tui-parity/slice-14-acceptance.md) | Final PR-reference validation recorded by controller |
+| 14 | [#468](https://forge.adrianpk.com/adrianpk/chr/pulls/468) | Integration pending | [Slice 14 report](slices/web-tui-parity/slice-14-acceptance.md) | Final PR-reference validation recorded by controller |
 
 ## Source coverage
 

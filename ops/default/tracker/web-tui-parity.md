@@ -246,7 +246,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-13-wizard-results.md`
 
 Ticket: `TKT-20261029101149` — `ops/default/ticket/reviewing/20261029101149-web-tui-parity-acceptance.md`
 State: reviewing
-PR: pending
+PR: [#468](https://forge.adrianpk.com/adrianpk/chr/pulls/468)
 Report: `ops/default/report/slices/web-tui-parity/slice-14-acceptance.md`
 
 | Task | Work | State | Commits | Validation |
@@ -255,7 +255,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-14-acceptance.md`
 | T14.2 | Reconcile the palette and legacy capability inventory; gate unsupported safe checklist writers before confirmation without inventing a new domain or filesystem writer. | done | 80b1dcdc | Reproduced checklist confirmation before unconditional failure. Selected/empty palette cases and production PTY now return blocked feedback before confirmation with zero writes; legacy access and strict lint pass. |
 | T14.3 | Extend owned production PTY and Web reference fixtures to exercise manual forms and the complete guided journey, including focus, resize, cancel and restart. | done | e941712f | Named 14-scenario family added; focused manual resize/focus and fresh full production PTY delivery/restart pass. Chromium real polling/resize/declined-cancel draft test passes; original assertions and 40/45-second terminal limits retained. |
 | T14.4 | Update the User Guide and consolidate the delivered user-visible changelog outcomes; run final focused acceptance and publish the cycle report. | reviewing | c2a07937 | User Guide/reference, consolidated changelog and cycle report prepared. Final named acceptance is recorded by the controller on the final PR-reference HEAD; integration and final delivery-set gate pending. |
-| T14.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | reviewing | — | Canonical report introduced at c2a07937d9c2a9ac23b2de155989df450a072b8c; PR and exact-HEAD controller handoff follow. Dev integration pending. |
+| T14.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | reviewing | c2a07937; 45ef4cb4 | Canonical PR #468 opened with immutable report introduction. Final exact-HEAD controller evidence follows the PR-reference commit; dev integration pending. |
 
 ## Blockers and decisions
 

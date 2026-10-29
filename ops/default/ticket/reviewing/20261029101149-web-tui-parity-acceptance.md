@@ -14,9 +14,11 @@ commits:
   - 80b1dcdcf47c65a58e53747a1561f6d30ac04816
   - e941712f0c977722a961ff4f68991927a371dff5
   - c2a07937d9c2a9ac23b2de155989df450a072b8c
+  - 45ef4cb4f8156d67c59f67c3f1b948488450705d
 reviewed_at: 2026-10-29T18:37:55Z
 started_at: 2026-10-29T18:12:24Z
 branch: test/slice-14-tui-acceptance
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/468
 ready_at: 2026-10-29T10:11:49Z
 ---
 
@@ -64,4 +66,6 @@ writers stop before confirmation. The named acceptance family reuses owned
 production boundaries; focused fresh full wizard PTY, manual resize/input and
 Chromium polling/resize/cancellation checks pass. Exact commands, runtime
 uncertainties and retained capabilities are recorded in the Slice 14 report.
-Final clean PR-head validation and controller-owned integration remain pending.
+PR #468 targets dev. Final ordered exact-HEAD validation is recorded in the
+controller ledger and Acta after the PR-reference commit; controller-owned
+integration remains pending.

@@ -5,7 +5,7 @@ Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `test/slice-14-tui-acceptance`
-PR: pending
+PR: [#468](https://forge.adrianpk.com/adrianpk/chr/pulls/468)
 
 ## Purpose
 
@@ -42,6 +42,7 @@ T14.1: `6c7920ddce29df8a6ede341c84cc81e7294d3d74`.
 T14.2: `80b1dcdcf47c65a58e53747a1561f6d30ac04816`.
 T14.3: `e941712f0c977722a961ff4f68991927a371dff5`.
 T14.4 report introduction: `c2a07937d9c2a9ac23b2de155989df450a072b8c`.
+T14.5 delivery metadata: `45ef4cb4f8156d67c59f67c3f1b948488450705d`.
 
 The new family composes existing production fixtures rather than substituting
 reducers for persistence or terminal IO. The fresh wizard child uses the root
