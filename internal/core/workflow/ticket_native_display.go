@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -14,6 +15,7 @@ func workflowPlainTicketDisplay(record workflowstate.Record) (ticketcore.Indexed
 	}
 
 	var display struct {
+		ReviewRefs  []ticketmetadata.ReviewRef `json:"review_refs"`
 		Title       string
 		Assignee    string
 		Synopsis    string
@@ -31,6 +33,7 @@ func workflowPlainTicketDisplay(record workflowstate.Record) (ticketcore.Indexed
 	}
 
 	return ticketcore.Indexed{
+		IndexedReview: ticketcore.IndexedReview{ReviewRefs: display.ReviewRefs},
 		IndexedSummary: ticketcore.IndexedSummary{
 			Title: display.Title, Synopsis: display.Synopsis,
 			Assignee: display.Assignee,

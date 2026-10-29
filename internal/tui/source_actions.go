@@ -162,7 +162,7 @@ func ticketDisplayPath(relativePath string) string {
 		return ""
 	}
 
-	if strings.HasPrefix(relativePath, ".chr/") || strings.HasPrefix(relativePath, ".prj/") {
+	if strings.HasPrefix(relativePath, ".chr/") || strings.HasPrefix(relativePath, ".prj/") || strings.HasPrefix(relativePath, "ops/") {
 		return relativePath
 	}
 

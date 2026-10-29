@@ -34,6 +34,8 @@ func ReadBoardDocument(projectDir, path string) (Indexed, error) {
 	}
 
 	ticket = boardTicketMetadata(ticket, front.Metadata)
+
+	ticket.ReviewRefs = front.ReviewRefs
 	if ticket.Synopsis == "" {
 		ticket.Synopsis = BoardDescription(data)
 	}

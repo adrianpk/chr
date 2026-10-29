@@ -23,20 +23,12 @@ func (e tuiTicketActionExecutor) executeTicketEditor(request tui.TicketActionReq
 		return e.readTicketEditor(request)
 	}
 
-	if request.OperationID == "" {
-		return tui.TicketActionResult{}, fmt.Errorf("ticket operation identity is required")
+	mutation, err := ticketEditorMutation(request)
+	if err != nil {
+		return tui.TicketActionResult{}, err
 	}
 
-	if request.Action == tui.TicketActionAddComment && strings.TrimSpace(request.Comment) == "" {
-		return tui.TicketActionResult{}, fmt.Errorf("enter a non-empty comment")
-	}
-
-	mutation := workflowcore.TicketEditRequest{Key: request.Key, Revision: request.Revision, Fields: request.Fields, Body: request.Body, Comment: request.Comment, Binding: workflowstate.MutationBinding{RequestID: request.OperationID, Operator: "tui"}}
-
-	var (
-		document workflowcore.TicketDocument
-		err      error
-	)
+	var document workflowcore.TicketDocument
 	if request.Action == tui.TicketActionCreate {
 		document, err = e.operations.CreateBoardTicket(mutation)
 	} else {
@@ -88,7 +80,7 @@ func (e tuiTicketActionExecutor) savedTicketResult(document workflowcore.TicketD
 
 func tuiTicketEditor(editor ticketEditor) tui.TicketEditorView {
 	document := editor.Document
-	view := tui.TicketEditorView{New: editor.New, Key: editor.Key, Revision: document.Revision, CaseSlug: editor.Fields["use_case"], Description: document.Description, Discussion: document.Discussion, Phase: document.Phase, Slice: document.Ticket.Slice, ReadOnlyReason: document.ReadOnlyReason}
+	view := tui.TicketEditorView{New: editor.New, Key: editor.Key, Revision: document.Revision, CaseSlug: editor.Fields["use_case"], Description: document.Description, Discussion: document.Discussion, Phase: document.Phase, Slice: document.Ticket.Slice, ReadOnlyReason: document.ReadOnlyReason, ReviewReadOnly: document.ReadOnly["review_refs"]}
 
 	view.Fields = []tui.TicketEditorField{
 		{Name: "title", Label: "Title", Value: editor.Fields["title"], ReadOnly: editor.ReadOnly["title"]},
@@ -118,4 +110,28 @@ func includeSavedTicket(tickets []ticketcore.Indexed, saved ticketcore.Indexed) 
 	}
 
 	return tickets
+}
+
+func ticketEditorMutation(request tui.TicketActionRequest) (workflowcore.TicketEditRequest, error) {
+	if request.OperationID == "" {
+		return workflowcore.TicketEditRequest{}, fmt.Errorf("ticket operation identity is required")
+	}
+
+	if request.Action == tui.TicketActionAddComment && strings.TrimSpace(request.Comment) == "" {
+		return workflowcore.TicketEditRequest{}, fmt.Errorf("enter a non-empty comment")
+	}
+
+	mutation := workflowcore.TicketEditRequest{Key: request.Key, Revision: request.Revision, Fields: request.Fields, Body: request.Body, Comment: request.Comment, ReviewRef: request.ReviewRef, Binding: workflowstate.MutationBinding{RequestID: request.OperationID, Operator: "tui"}}
+
+	if request.Action == tui.TicketActionAttachReviewRef {
+		if request.ReviewRef == nil {
+			return workflowcore.TicketEditRequest{}, fmt.Errorf("enter a review reference")
+		}
+
+		if request.Branch != "" {
+			mutation.Fields = map[string]string{"branch": request.Branch}
+		}
+	}
+
+	return mutation, nil
 }

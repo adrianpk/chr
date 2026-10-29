@@ -135,7 +135,7 @@ func (m *Model) updateTextFormInput(message tea.KeyMsg) tea.Cmd {
 
 func (m *Model) textFormHasInput() bool {
 	for _, field := range m.textForm.Fields {
-		if field.Input.Value() != "" {
+		if field.ReadOnly == "" && field.Input.Value() != "" {
 			return true
 		}
 	}

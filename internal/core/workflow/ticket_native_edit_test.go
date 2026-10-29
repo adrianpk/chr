@@ -191,6 +191,10 @@ func TestTicketDocumentCreation(t *testing.T) {
 func checkNewTicketDocument(t *testing.T, opts TicketBoardReadOptions, created TicketDocument, body string) {
 	t.Helper()
 
+	if created.CommittedRevision == "" || created.CommittedRevision != created.Revision {
+		t.Fatal("creation did not identify its committed source image")
+	}
+
 	if created.Description != body || created.Fields["owner"] != "Maintainer" || created.Fields["assignee"] != "Developer" || created.Ticket.NativeWorkflow != opts.NativeWorkflow {
 		t.Fatal("creation lost its retained fields or authority", created.Fields)
 	}

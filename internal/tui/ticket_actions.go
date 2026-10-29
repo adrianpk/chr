@@ -147,7 +147,7 @@ func (m *Model) planTicketAction(action TicketActionID, status string) {
 		return
 	}
 
-	if action == TicketActionAddComment {
+	if action == TicketActionAddComment || action == TicketActionAttachReviewRef {
 		m.openSelectedTicketForm(action)
 
 		return

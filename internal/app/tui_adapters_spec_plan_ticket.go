@@ -172,21 +172,10 @@ func newTUITicketActionExecutor(
 
 func (e tuiTicketActionExecutor) executeTicketAction(request tui.TicketActionRequest) (tui.TicketActionResult, error) {
 	switch request.Action {
-	case tui.TicketActionRead, tui.TicketActionCreate, tui.TicketActionSave, tui.TicketActionAddComment, tui.TicketActionRefresh:
+	case tui.TicketActionRead, tui.TicketActionCreate, tui.TicketActionSave, tui.TicketActionAddComment, tui.TicketActionAttachReviewRef, tui.TicketActionRefresh:
 		return e.executeTicketEditor(request)
 	case tui.TicketActionMoveStatus:
 		return e.moveTicketStatus(request)
-	case tui.TicketActionAttachReviewRef:
-		result, err := e.operations.AttachTicketReviewReference(TicketReviewReferenceRequest{
-			Key:    request.Key,
-			Branch: request.Branch,
-			Ref:    request.ReviewRef,
-		})
-		if err != nil {
-			return tui.TicketActionResult{}, err
-		}
-
-		return ticketActionResult(result), nil
 	case tui.TicketActionToggleChecklist:
 		return tui.TicketActionResult{}, errors.New(
 			"checklist toggle requires a safe checklist item writer and is not available from this TUI action yet",
@@ -216,11 +205,4 @@ func (e tuiTicketActionExecutor) moveTicketStatus(request tui.TicketActionReques
 	board, err := e.operations.ReadTicketBoard(0)
 
 	return tui.TicketActionResult{Message: "Ticket status saved.", Tickets: board.Tickets}, err
-}
-
-func ticketActionResult(result TicketOperationResult) tui.TicketActionResult {
-	return tui.TicketActionResult{
-		Message: result.Message,
-		Tickets: result.Tickets,
-	}
 }

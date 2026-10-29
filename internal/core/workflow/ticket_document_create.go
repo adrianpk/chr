@@ -37,7 +37,7 @@ func CreateTicketDocument(ctx context.Context, opts TicketBoardReadOptions, key 
 		return TicketDocument{}, err
 	}
 
-	return ReadTicketDocument(ctx, opts, key)
+	return readCreatedTicketDocument(ctx, opts, key, contenthash.Sum([]byte(content)))
 }
 
 func prepareTicketCreation(opts TicketBoardReadOptions, key string, request TicketEditRequest) (string, error) {
@@ -93,12 +93,12 @@ func createNativeTicketDocument(ctx context.Context, opts TicketBoardReadOptions
 		UseCase: request.Fields["use_case"], ContractHash: contenthash.Sum([]byte(key + "\x00" + content)),
 	}}
 
-	_, err = NewWorkflowStore(opts.Layout, opts.ProjectID).ApplyRecordMutation(ctx, MutationRequest{Binding: request.Binding, Title: request.Fields["title"], Record: record})
+	created, err := NewWorkflowStore(opts.Layout, opts.ProjectID).ApplyRecordMutation(ctx, MutationRequest{Binding: request.Binding, Title: request.Fields["title"], Record: record})
 	if err != nil {
 		return TicketDocument{}, err
 	}
 
-	return ReadTicketDocument(ctx, opts, key)
+	return readCreatedTicketDocument(ctx, opts, key, created.Record.SourceHash)
 }
 
 func validateNewTicketStatus(request TicketEditRequest) error {
@@ -107,4 +107,11 @@ func validateNewTicketStatus(request TicketEditRequest) error {
 	}
 
 	return nil
+}
+
+func readCreatedTicketDocument(ctx context.Context, opts TicketBoardReadOptions, key, revision string) (TicketDocument, error) {
+	document, err := ReadTicketDocument(ctx, opts, key)
+	document.CommittedRevision = revision
+
+	return document, err
 }

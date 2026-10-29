@@ -14,6 +14,6 @@ type TicketEditorField struct {
 type TicketEditorView struct {
 	New                                                            bool
 	Key, Revision, CaseSlug, Description, Discussion, Phase, Slice string
-	ReadOnlyReason                                                 string
+	ReadOnlyReason, ReviewReadOnly                                 string
 	Fields                                                         []TicketEditorField
 }

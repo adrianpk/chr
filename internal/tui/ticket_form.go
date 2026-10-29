@@ -16,6 +16,8 @@ func (m *Model) updateTicketKey(message tea.KeyMsg) tea.Cmd {
 		}
 
 		m.openTicketEditForm()
+	case "v":
+		m.openSelectedTicketForm(TicketActionAttachReviewRef)
 	case "a":
 		m.openSelectedTicketForm(TicketActionAddComment)
 	case "r":
@@ -191,6 +193,12 @@ func (m *Model) refreshTicketFormSource() {
 }
 
 func (m *Model) openTicketInput(editor TicketEditorView, action TicketActionID) {
+	if action == TicketActionAttachReviewRef {
+		m.openTicketReviewForm(editor)
+
+		return
+	}
+
 	if action == TicketActionAddComment {
 		m.openTicketCommentForm(editor)
 

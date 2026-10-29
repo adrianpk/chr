@@ -211,6 +211,18 @@ func applyNativeTicketFields(document *TicketDocument, record workflowstate.Reco
 		}
 	}
 
+	applyNativeTicketReferences(document, record)
+}
+
+func applyNativeTicketReferences(document *TicketDocument, record workflowstate.Record) {
+	for _, ref := range document.Ticket.ReviewRefs {
+		if ref.Type == "pull_request" && document.Fields["pr"] == "" {
+			document.Fields["pr"] = ref.URL
+
+			break
+		}
+	}
+
 	var commits []string
 	if _, present := document.Fields["commits"]; !present && json.Unmarshal(record.Metadata["commits"], &commits) == nil && len(commits) > 0 {
 		document.Fields["commits"] = strings.Join(commits, "\n")
@@ -237,7 +249,7 @@ func nativeTicketReadOnly(document *TicketDocument, record workflowstate.Record)
 	if record.Task.Delivery != nil {
 		document.Fields["branch"], document.Fields["pr"], document.Fields["commits"] = record.Task.Delivery.Branch, record.Task.Delivery.PullRequest, record.Task.Delivery.ResultCommit
 
-		for _, name := range []string{"branch", "pr", "commits"} {
+		for _, name := range []string{"branch", "pr", "commits", "review_refs"} {
 			document.ReadOnly[name] = "The verified delivery receipt owns this value."
 		}
 	}

@@ -17,12 +17,13 @@ import (
 // TicketEditRequest patches supported fields against one observed source image.
 // A comment is an independent operation and never includes form edits.
 type TicketEditRequest struct {
-	Key      string
-	Revision string
-	Fields   map[string]string
-	Body     *string
-	Comment  string
-	Binding  workflowstate.MutationBinding
+	ReviewRef *ticketmetadata.ReviewRef
+	Key       string
+	Revision  string
+	Fields    map[string]string
+	Body      *string
+	Comment   string
+	Binding   workflowstate.MutationBinding
 }
 
 // UpdateTicketDocument keeps document edits behind existing persistence owners.
@@ -77,7 +78,7 @@ func validateTicketEditRequest(request TicketEditRequest) error {
 		return err
 	}
 
-	if len(request.Fields) == 0 && request.Body == nil && request.Comment == "" {
+	if len(request.Fields) == 0 && request.Body == nil && request.Comment == "" && request.ReviewRef == nil {
 		return fmt.Errorf("ticket changes or a comment are required")
 	}
 
@@ -113,20 +114,11 @@ func prepareTicketEdit(document TicketDocument, request TicketEditRequest, now t
 		}
 	}
 
-	content, err = ticketEditDelivery(content, document, request.Fields)
-	if err != nil {
-		return "", err
-	}
-
-	if err := validatePreparedTicketStatus(content, document, request); err != nil {
-		return "", err
-	}
-
-	return content, nil
+	return prepareTicketDelivery(content, document, request)
 }
 
 func prepareTicketComment(content string, request TicketEditRequest, now time.Time) (string, error) {
-	if len(request.Fields) != 0 || request.Body != nil || len(request.Comment) > 64*1024 {
+	if len(request.Fields) != 0 || request.Body != nil || request.ReviewRef != nil || len(request.Comment) > 64*1024 {
 		return "", fmt.Errorf("comments require a separate bounded operation")
 	}
 
@@ -163,7 +155,7 @@ func editableTicketContent(document TicketDocument) (string, error) {
 		Status: ticketcore.Status(record.Task.Status), UseCase: record.Task.UseCase,
 		Priority: document.Ticket.Priority, Severity: document.Ticket.Severity, Type: document.Ticket.Type,
 		ProjectArea: document.Ticket.ProjectArea, SourceKind: document.Ticket.SourceKind, Branch: document.Ticket.Branch,
-		Body: string(record.Body), CreatedAt: record.CreatedAt, UpdatedAt: record.UpdatedAt,
+		ReviewRefs: document.Ticket.ReviewRefs, Body: string(record.Body), CreatedAt: record.CreatedAt, UpdatedAt: record.UpdatedAt,
 	})
 }
 
@@ -311,6 +303,10 @@ func setNativeTicketMetadata(record *workflowstate.Record, fields ticketmetadata
 		record.Metadata[name] = encoded
 	}
 
+	return setNativeTicketLists(record, fields)
+}
+
+func setNativeTicketLists(record *workflowstate.Record, fields ticketmetadata.Frontmatter) error {
 	if value, exists := fields.Metadata["commits"]; exists {
 		encoded, err := json.Marshal(opsmetadata.ParseList(value))
 		if err != nil {
@@ -320,5 +316,30 @@ func setNativeTicketMetadata(record *workflowstate.Record, fields ticketmetadata
 		record.Metadata["commits"] = encoded
 	}
 
+	encoded, err := json.Marshal(fields.ReviewRefs)
+	if err != nil {
+		return err
+	}
+
+	record.Metadata["review_refs"] = encoded
+
 	return nil
+}
+
+func prepareTicketDelivery(content string, document TicketDocument, request TicketEditRequest) (string, error) {
+	content, err := ticketEditDelivery(content, document, request.Fields)
+	if err != nil {
+		return "", err
+	}
+
+	content, err = prepareTicketReviewReference(content, document, request)
+	if err != nil {
+		return "", err
+	}
+
+	if err := validatePreparedTicketStatus(content, document, request); err != nil {
+		return "", err
+	}
+
+	return content, nil
 }
