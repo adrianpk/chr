@@ -84,27 +84,6 @@ func NewTicketActionState(action TicketActionID, ticket TicketView, status strin
 				"New status: " + status,
 			},
 		}
-	case TicketActionToggleChecklist:
-		return TicketActionState{
-			Pending: true,
-			Request: request,
-			Title:   "Toggle ticket checklist item",
-			Details: []string{
-				"Ticket: " + ticket.Key,
-				fmt.Sprintf("Checklist: %d done / %d total", ticket.ChecklistDone, ticket.ChecklistTotal),
-				"Requires a safe checklist item writer.",
-			},
-		}
-	case TicketActionAddChecklistItem:
-		return TicketActionState{
-			Pending: true,
-			Request: request,
-			Title:   "Add ticket checklist item",
-			Details: []string{
-				"Ticket: " + ticket.Key,
-				"Requires a safe checklist item writer.",
-			},
-		}
 	default:
 		return TicketActionState{}
 	}
@@ -141,6 +120,13 @@ func (m *Model) updateTicketActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) planTicketAction(action TicketActionID, status string) {
+	if action == TicketActionToggleChecklist || action == TicketActionAddChecklistItem {
+		m.ticketAction = TicketActionState{}
+		m.recordOperation(operation.Result{Status: operation.Blocked, Summary: "Checklist editing is unavailable in this TUI.", BlockedReason: "No safe checklist item writer is available. Checklist display remains available."})
+
+		return
+	}
+
 	if action == TicketActionCreate {
 		m.openTicketCreateForm()
 
