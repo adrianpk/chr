@@ -73,9 +73,9 @@ Report: `ops/default/report/slices/web-tui-parity/slice-2-navigation.md`
 
 ### Slice 3: Shared operation feedback and draft retention
 
-Ticket: `TKT-20261029101138` — `ops/default/ticket/in_progress/20261029101138-web-tui-parity-feedback.md`
-State: in_progress
-PR: pending
+Ticket: `TKT-20261029101138` — `ops/default/ticket/reviewing/20261029101138-web-tui-parity-feedback.md`
+State: reviewing
+PR: [#457](https://forge.adrianpk.com/adrianpk/chr/pulls/457)
 Report: `ops/default/report/slices/web-tui-parity/slice-3-feedback.md`
 
 | Task | Work | State | Commits | Validation |
@@ -84,7 +84,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-3-feedback.md`
 | T3.2 | Show summary, field findings, changed files and eligible reload/retry action with existing TUI styling. | done | 8046584d; bc8e124d | Action panel renders distinct outcomes, findings, changed sources and current eligible recovery; long findings scroll. |
 | T3.3 | Keep user input on validation/stale/error and require confirmation before destructive draft reload or discard. | done | 8046584d; bc8e124d | Sentinel and production IO/PTY regressions retain failed input; reload/discard require confirmation and canonical sources remain unchanged on cancellation. |
 | T3.4 | Bind pending results to captured operation, selection and revision; ignore late results for a newer interaction. | done | 8046584d; bc8e124d | Queued/reordered replies, editor generations, original retries and native revision regressions preserve current drafts and confirmations. |
-| T3.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Focused implementation checks passed; exact-HEAD validation, PR references and controller integration pending. |
+| T3.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | eb2a245a | PR #457 opened with the immutable report; exact-HEAD controller validation and integration pending. |
 
 
 ### Slice 4: Shared queue observation and stable refresh
