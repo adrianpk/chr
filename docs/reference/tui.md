@@ -187,8 +187,10 @@ Available command families:
 `Context-aware quiz (unavailable)` explains its separate contextual authoring CLI
 alternative before any confirmation or executor call. Use `chr author quiz new`
 for that authoring document, or F3 for supported project/case runtime questions.
-`Toggle ticket checklist item` and `Add ticket checklist item` remain capability
-checks for their safe writers.
+`Toggle ticket checklist item (unavailable)` and `Add ticket checklist item
+(unavailable)` return blocked feedback before confirmation because no safe
+checklist writer is available. Enter cannot dispatch a write; checklist display
+and other supported ticket controls remain available.
 
 Acceptance feature generation can return `needs_more_info`. In that case the
 TUI reports the feature-round note path. Interactive collection of those

@@ -567,6 +567,10 @@ operation; independent tracking remains available through the CLI.
 
 Palette commands use the same form or confirmation as their direct keys.
 Submit a form with Ctrl+S. Confirm a pending action with Enter or cancel with Esc.
+Entries marked **unavailable** explain their guard before confirmation. Checklist
+toggle and add have no safe writer in the TUI, so selecting either opens a blocked
+result and leaves the ticket unchanged. Checklist display remains available.
+The separate contextual-authoring Quiz entry explains its supported CLI route.
 
 ## Inspect TUI Operation Results
 

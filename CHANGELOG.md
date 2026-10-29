@@ -12,67 +12,43 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
-- Start a named TUI wizard from Cases with one Name/Create action and reopen its
-  retained workflow by case. Follow progress in the normal tabs, edit capture in
-  the shared Dump editor and Continue to quiz with all current text in one step.
-  Retries retain that exact input; earlier originals stay read-only, and manual
-  saves cannot accidentally change wizard progression. Wizard clarification uses
-  the same Deep/Fast controls, answer history and editor as manual quizzes.
-  Specs and Plans show committed inputs, partial results and actionable blockers;
-  retry after interruption reuses the saved operation and prepared tickets.
-  Execution uses the case-filtered Board; results show confirmed deliveries,
-  receipts and validation commands with exit codes. Cancellation confirms that
-  saved documents and completed changes remain. Background refresh preserves
-  typing and navigation; stale answers keep their text until a confirmed reload.
+- Start a named TUI wizard from Cases with one Name/Create action and reopen it
+  by case. Follow capture, clarification, preparation and execution in the normal
+  tabs with shared editors and Deep/Fast Quiz controls. Retained retries reuse
+  the saved input and prepared tickets. Board results show confirmed deliveries,
+  receipts and validation commands with exit codes. Earlier originals and JSON
+  exports remain available; cancellation keeps saved documents and completed
+  changes, and background reads preserve typing and navigation.
 
-- See all six TUI Board columns and Attention together on wide terminals while
-  keeping ticket selection through resize. Browse retained workflows, members and
-  evidence in Dash; preview ticket, slice, set, case or filtered loose work before
-  confirming. Pause, resume, cancel, continue, approve or reconcile the selected
-  invocation, extend an allowance, answer retained integration questions and open
-  linked tickets or cases. Controls explain unavailable actions and reject stale
-  confirmations while preserving entered form content.
+- Author project-wide or case-bound work through complete TUI forms. Create cases
+  with Name, Description and Context; capture titled dumps, append free text and
+  round-trip unsaved body edits through the external editor. Browse manual,
+  generated and project-wide specs, then create or revise their title, body and
+  Draft/Approved state. Quizzes show pending answers, mode and saved history.
+  Prepare a plan and its native tickets together without starting execution;
+  retry incomplete preparation without regenerating or duplicating work, and
+  open the resulting document or case Board directly.
 
 - Create and edit TUI tickets with your own title, description, case and metadata.
   Read-only fields explain their workflow owner. Enter comments, scroll retained
-  history and attach review references with their provider and URL. Stale saves
-  preserve every field until a confirmed reload; source editing and checklist
-  display remain available.
+  discussion and attach review references. Source editing and checklist display
+  remain available; unsupported checklist writes explain their unavailability
+  before any confirmation.
 
-- Prepare a case's TUI plan and native tickets with one action. Retry incomplete
-  preparation without regenerating the plan or duplicating tickets, then open
-  the saved document or case-filtered Board from the result. Spec generation
-  also offers Open document. Preparation leaves work ready without starting it.
+- Monitor the shared work queue and retained workflows in TUI Dash. Read readiness
+  reasons, exclusions, current work, recent activity and confirmed results while
+  keeping independent queue and Board selections through refresh. Preview the
+  exact ticket, slice, set, case or filtered loose scope before confirming.
+  Browse all six Board columns and Attention on wide terminals, or use the narrow
+  layout. Eligible controls cover pause, resume, cancellation, exact approval,
+  reconciliation, allowances and integration decisions.
 
-- Choose Deep/Fast before starting TUI quizzes, identify targets awaiting an
-  answer, and read saved question/answer history beside the current input.
-  Cancel and resume retain saved answers; failed or stale submissions preserve
-  the draft, and reloading newer questions requires confirmation. The separate
-  contextual-authoring entry explains availability before asking for an action.
-
-- Browse every manual, generated and project-wide specification in the TUI.
-  Create one with scope, title, body and Draft/Approved state, or edit an existing
-  document while keeping its case binding. Refresh preserves selection, failed
-  saves retain all fields, and reloading newer content requires confirmation.
-
-- Create TUI cases with Name, Description and Context in one form. Capture
-  project-wide or case-bound dumps with your own title and body, append free text,
-  and round-trip unsaved body edits through the external editor with `alt+e`.
-  Failed or stale submissions keep the draft; reload and discard require
-  confirmation. Dump body saves retain the stored title and scope.
-
-- TUI Dash shares the work queue, readiness reasons and policy exclusions with
-  Web. Browse filtered and ordered queue pages, inspect independent current work,
-  recent activity and retained results, and keep Board and Dash selections through
-  refresh. Preview native work with `v`, confirm its exact scope and policy, or
-  inspect retained Workflow details with `w` without continuing work.
-
-- The TUI opens on Cases with seven document and work tabs. The selected case
-  follows Dumps, Quizzes, Specs, Plans and Board, including an observed guided
-  run. Contextual Help opens with `?`, Project and Harness defaults with `alt+p`,
-  and the footer shows active-view actions. Runtime and workspace-index health
-  remain available in the command palette. Missing cases stay explicitly
-  unavailable until refreshed, replaced or cleared.
+- Navigate seven TUI tabs from Cases with functional case context, active-view
+  footer actions and `?` Help. Project and Harness defaults open with `alt+p`;
+  Runtime and workspace-index health remain in the palette. Forms keep unsent
+  input through failed or stale writes, focus changes and resize; reload and
+  discard require confirmation. Results distinguish success, validation failure,
+  stale state and blocked actions and offer only eligible recovery controls.
 
 - Develop a use case through one resumable Web, Telegram or TUI journey: name it, capture context
   and answer clarification questions, then let chr approve the generated

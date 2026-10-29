@@ -62,11 +62,11 @@ Use the existing `internal/app` production fixtures and `internal/tui` component
 Final Slice 14 explicitly selects and records the existing guided/native, real terminal, and owned browser entry points, extended for the delivered behavior:
 
 ```sh
-go test ./internal/app -run '^Test(GuidedUseCaseParityNative|GuidedUseCaseTUITerminal|TUIWebParity)$' -count=1 -timeout=5m
-CHR_WEB_BROWSER=/usr/bin/chromium go test ./internal/app -run '^Test(GuidedUseCaseWebBrowser|WebQuizBrowser|WebSpecBrowser|WebDumpEditorBrowser|WebBoardBrowser|WebDashBrowser)$' -count=1 -timeout=5m
+go test ./internal/app -run '^Test(GuidedUseCaseParityNative|GuidedUseCaseTUITerminal|TUIWebParity)$' -count=1 -timeout=5m -v
+CHR_WEB_BROWSER=/usr/bin/chromium go test ./internal/app -run '^Test(GuidedUseCaseWebBrowser|WebQuizBrowser|WebSpecBrowser|WebDumpEditorBrowser|WebBoardBrowser|WebDashBrowser)$' -count=1 -timeout=5m -v
 ```
 
-`TestTUIWebParity` is the planned named acceptance family, not a baseline test claimed to exist. Slice 14 must ensure the selected family and existing PTY entry point actually run and do not skip. The explicit Chromium binary is available at planning; verify fixture access before claiming browser acceptance. Keep tests scoped to these workflows, not an expanded certification suite. Adapt tests for the new UI interactions while preserving the old safety assertions.
+`TestTUIWebParity` is the planned named acceptance family, not a baseline test claimed to exist. Slice 14 must ensure the selected family and existing PTY entry point actually run and do not skip. Verbose output records each executed root and scenario; it does not change selection, assertions or deadlines. The explicit Chromium binary is available at planning; verify fixture access before claiming browser acceptance. Keep tests scoped to these workflows, not an expanded certification suite. Adapt tests for the new UI interactions while preserving the old safety assertions.
 
 Runtime uncertainties G-008, G-013, G-014, G-018 and G-024 are resolved in their owning slices and cross-checked in final acceptance. Record what was observed in Web and TUI, exact commands, pass/fail, revisions and fixture boundaries. A static finding or screenshot cannot be reported as runtime proof.
 
