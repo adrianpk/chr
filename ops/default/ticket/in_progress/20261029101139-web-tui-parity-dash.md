@@ -9,7 +9,7 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:39Z
-commits: []
+commits: [0910c75b747f267e3c13ba981c61fc5aad73601e, 863d09bdbf8c8d1ba9075d12d4afea33b1290e76, fed68882824878cb90735e3c381dd4203114f5ea, 63f66c326325c6e1cdd91939891bb1d09242fbda, f265da0e8acfc14bc67a5163d44dae9c318582a5]
 branch: feat/slice-4-tui-dash
 started_at: 2026-10-29T12:08:30Z
 ready_at: 2026-10-29T10:11:39Z
@@ -54,4 +54,4 @@ One branch and one PR to `dev`; tasks T4.1-T4.5 are the canonical work units. Lo
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+T4.1-T4.4 implement shared queue observation, independent key selection, bounded current/activity/results and exact scope/policy confirmation. Focused adapter, race and production-loader PTY checks passed. The Slice 4 report records commands and evidence. Required exact-HEAD checks and canonical integration are retained through Looper before closure.

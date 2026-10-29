@@ -12,6 +12,12 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- TUI Dash shares the work queue, readiness reasons and policy exclusions with
+  Web. Browse filtered and ordered queue pages, inspect independent current work,
+  recent activity and retained results, and keep Board and Dash selections through
+  refresh. Preview native work with `v`, confirm its exact scope and policy, or
+  inspect retained Workflow details with `w` without continuing work.
+
 - The TUI opens on Cases with seven document and work tabs. The selected case
   follows Dumps, Quizzes, Specs, Plans and Board, including an observed guided
   run. Contextual Help opens with `?`, Project and Harness defaults with `alt+p`,

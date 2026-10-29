@@ -973,27 +973,34 @@ chr daemon stop
 
 Open the Dash view with `F7`.
 
-Dash shows agent activity and runtime evidence loaded from local state. Use it
-before work to inspect readiness, during work to watch the event stream, and
-after work to inspect recent execution or loop outcomes.
-
-Dash shows:
-
-- work readiness and safe repair hints;
-- ready queue filters and ordering;
-- current loop or ticket execution state;
-- current or latest integration phase and event message;
-- recent human-readable agent events;
-- ticket, execution report, runtime log, and validation log paths when the
-  event stream includes them.
-- recent execution and loop outcomes.
+Dash shows the shared work queue, current work, activity and retained results.
+Eligible and total counts, policy exclusions and blocked reasons come from the
+same observation as Web. Native progress keeps host validation and confirmed
+delivery separate; a successful harness run does not mean delivery is confirmed.
 
 In the Queue pane, use `up` / `down` or `k` / `j` to select a ticket. The marked
-queue item is independent of Board selection and follows its key through refresh
-and ordering changes. Enter opens confirmation for that item; native work loads
-a read-only preview before execution confirmation. A changed ticket or snapshot
-requires a fresh observation and confirmation. An empty queue cannot start a
-previously selected ticket.
+item is independent of Board selection. Both follow their key through refresh
+and ordering changes. Removed items select a visible fallback; an empty page
+cannot start a previously selected ticket.
+
+Use `p` for priority and `o` for order. These apply before pagination and return
+to the first page. `[` and `]` move between queue pages of up to 128 items.
+The Board catalog remains available independently of the current Dash page.
+Use `a` or `R` for Run all ready with the selected priority and order. Native
+work previews the independent-ticket extent and exclusions before confirmation.
+
+For native tickets, `v` opens **Preview Work** with the exact scope, snapshot,
+target, policy and limits. Enter confirms one checkpoint; Esc cancels without
+starting work. A changed ticket, snapshot, scope or policy requires another
+preview. `w` opens retained **Workflow details** in the Current pane without
+continuing the workflow.
+
+Current and Recent panes show separate work contexts, activity and results,
+including work with no recent events. Focus a pane and scroll normally, or use
+`alt+m` to maximize it. The observation retains up to 128 current contexts,
+128 recent events and 16 results. Periodic refresh reads state without starting
+work, replacing an unsent draft or moving to another tab. Running-work details
+keep report and log paths when available.
 
 When readiness is blocked, Dash prevents ticket execution and run-all actions
 before the runtime worker starts. Press `x` to apply a safe repair when Dash

@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 4 — Shared queue observation and stable refresh.
 Completed slices: 3/14
-Completed tasks: 15/70
+Completed tasks: 19/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -96,11 +96,12 @@ Report: `ops/default/report/slices/web-tui-parity/slice-4-dash.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T4.1 | Project ObserveWork into a terminal-neutral queue, counts, readiness reasons, exclusions and pagination. | pending | — | Planned: Compare the same application observation across adapters, including ineligible and empty pages. |
-| T4.2 | Keep Dash queue selection and Board selection separately by key across refresh, sorting and removal. | pending | — | Planned: Selection follows the same key or a deterministic visible fallback without starting work. |
-| T4.3 | Render current work, recent activity and results in Dash; preserve filter, order, Run all ready and running-work details. | pending | — | Planned: Existing queue extras remain usable; large/empty event collections are bounded. |
-| T4.4 | Expose Preview Work and Workflow details with exact scope/policy confirmation and cancellation. | pending | — | Planned: Changed snapshot or scope invalidates confirmation; no execution from passive refresh. |
-| T4.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T4.1 | Project ObserveWork into a terminal-neutral queue, counts, readiness reasons, exclusions and pagination. | done | 0910c75b | Native/legacy adapter observations agree with Web on eligibility, reasons, exclusions and empty pages; priority/order precede bounded paging. |
+| T4.2 | Keep Dash queue selection and Board selection separately by key across refresh, sorting and removal. | done | 863d09bd; 63f66c32 | Reorder/removal, stale-query and full 130-ticket Board catalog regressions pass; selection remains independent and never starts work. |
+| T4.3 | Render current work, recent activity and results in Dash; preserve filter, order, Run all ready and running-work details. | done | fed68882 | Bounded context/event/result rendering and actual production-loader PTY/SQLite observation pass without canonical writes. |
+| T4.4 | Expose Preview Work and Workflow details with exact scope/policy confirmation and cancellation. | done | f265da0e | Read-only Preview/Workflow PTY, cancellation, late replies, exact scope/policy conflicts and guarded host-checkpoint regressions pass. |
+| T4.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Report and user documentation prepared; canonical PR and ordered exact-HEAD controller evidence precede controller-owned integration. |
+
 
 ### Slice 5: Case and Dump forms
 

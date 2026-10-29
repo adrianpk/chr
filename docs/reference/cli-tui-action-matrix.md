@@ -101,6 +101,9 @@ Status values:
 | Work | `work-start-ticket` | Start selected ticket execution. | `chr ticket start <key>` | shared `buildTicketStartPreflightForTicket` and `runTicketStartExecution` | `matched` | CLI owns preflight/output; TUI service wraps selected-ticket execution. |
 | Work | `work-start-ready-loop` | Start one ready-ticket loop. | `chr ticket loop --status ready_for_dev --max-iterations 1` | shared `runTicketLoopExecution` | `matched` | CLI supports configurable query/run options; TUI wraps one ready-ticket iteration. |
 | Work | `work-run-all-ready` | Run all visible ready tickets with Dash filters and order. | `chr work run-all [filters]` | `service.StartAgentWorkLoop` -> `runTicketLoopExecution` | `matched` | CLI and TUI use the configurable agent-work facade. |
+| Work | Dash queue observation and `[` / `]` | Observe eligibility, reasons, exclusions and bounded pages. | `chr work status` for retained work | `service.ObserveWorkPage` | `intentionally_interactive` | Web and TUI share the observation; filters and order apply before pagination. |
+| Work | Dash `v` Preview Work | Inspect selected native scope and policy before confirmation. | `chr work ticket <key> --preview` | `service.PreviewSelectedWork` -> `service.ExecuteConfirmedWorkExtent` | `matched` | Canonical admission checks the displayed snapshot, selected revision and policy before one checkpoint. |
+| Work | Dash `w` Workflow details | Read retained status without continuing work. | `chr work status <id>` | `service.WorkflowStatus` | `matched` | Opens the Current pane; empty retained state remains read-only. |
 | Work | `work-repair-readiness` | Apply safe work-readiness repair. | `chr work doctor --fix-safe` | `core.RepairWorkReadiness` | `matched` | TUI exposes the safe repair from Dash when readiness reports one is available. |
 | Work | `work-request-stop` | Request daemon stop. | `chr daemon stop` | shared `requestDaemonStopState` | `matched` | CLI owns output and dry-run; TUI reloads work state after the shared stop request. |
 
@@ -108,8 +111,9 @@ Command availability gates:
 
 - Spec commands are available only in the Specs view.
 - Plan commands are available only in the Plans view.
-- Dash refreshes agent-work observability from persisted execution and loop
-  records while selected.
+- Dash reads shared queue eligibility, readiness, current contexts, activity and
+  results while selected. Old queue-query replies cannot replace a newer page
+  or selection. Board selection remains independent and follows its key.
 - Dash refreshes work-readiness diagnostics while selected and blocks agent-work
   start actions when readiness is blocked.
 - `materialize-plan-tracking` is additionally available only when the selected

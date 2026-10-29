@@ -366,29 +366,42 @@ Use `chr work doctor --ticket <ticket-key>` for the detailed workspace paths,
 and inspect the execution report or worker context to find where the agent
 writes. See [Work readiness](work-readiness.md).
 
-Dash shows agent-work operations:
+Dash reads the same application observation as Web: eligible and total queue
+counts, readiness reasons, exclusions, current work, recent activity and retained
+results. A ticket's local status cannot override policy or workspace readiness.
+Native counters distinguish host-validated tasks from confirmed delivery;
+a successful harness run remains labelled as a harness result.
 
-- work readiness status and repair guidance;
-- ready queue;
-- current loop or execution state;
-- recent human-readable agent event messages;
-- ticket, execution report, runtime log, and validation log paths when event
-  refs are available;
-- recent execution and loop outcomes.
+Queue pages contain at most 128 rows. Priority and order apply before pagination.
+Board keeps its separate catalog and selection; paging Dash does not truncate
+Board. Both selections follow their key through refresh and reorder. A removed
+key falls back to the first visible row, and an empty page has no target.
 
-When Dash is selected, the TUI periodically reloads ticket and observability
-state from persisted execution, loop, daemon, runtime, and work-readiness
-records. Refresh does not start work or mutate ticket files.
+When Dash is selected, periodic observation reads retained state without starting
+or resuming work. It preserves document drafts and ignores responses for older
+queue queries. Current and Recent panes scroll with their normal pane controls;
+`alt+m` maximizes the focused pane. Current contexts and events are bounded at
+128 each, and results at 16. Running-work details retain available ticket,
+execution report, runtime log and validation log paths.
 
-Dash work actions use confirmation prompts:
+Dash actions:
 
-- `enter` starts the selected ticket;
-- `p` cycles the ready-queue priority filter;
-- `o` cycles the ready-queue order;
-- `a` or `R` runs all visible `ready_for_dev` tickets with the selected
-  priority and order;
-- `x` applies safe work-readiness repairs when Dash reports one is available;
-- `s` requests agent stop.
+- `enter` opens the selected eligible ticket's work confirmation;
+- `v` loads **Preview Work** for the selected native ticket without executing it;
+- `w` reads retained **Workflow details** and focuses the Current pane;
+- `[` and `]` load the previous and next queue pages;
+- `p` cycles the priority filter, and `o` cycles the order, returning to page one;
+- `a` or `R` runs all ready work with the selected priority and order; native
+  authority previews the independent-ticket extent and its exclusions first;
+- `x` confirms safe work-readiness repair when one is available;
+- `s` confirms an agent-stop request.
+
+Native preview shows the exact scope, snapshot, target, policy and frozen
+execution limits. Enter separately confirms at most one checkpoint; Esc cancels
+without admission. Changed scope, ticket revision, snapshot or policy requires
+a fresh preview. Preview Work and retained Workflow details require native
+ticket authority; existing legacy work actions remain available under their
+configured authority.
 
 When work readiness is blocked, Dash blocks ticket execution and run-all actions
 before starting agent work. If a safe repair is available, apply `x`, confirm
