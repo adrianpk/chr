@@ -68,7 +68,9 @@ func (s service) observeLegacyQueue(ctx context.Context, config workspaceconfig.
 
 	result.Excluded = map[string]int{"adopted_workflow": queue.Excluded, "selection_precedence": len(queue.Eligible) - len(preflight.SelectedTickets)}
 	for _, ticket := range preflight.SelectedTickets {
-		item := WorkQueueItem{Key: ticket.Key, Title: ticket.Title, Scope: ticket.UseCase, Readiness: "ready"}
+		item := observedQueueItem(ticket)
+
+		item.Readiness = "ready"
 		if !preflight.Allowed {
 			item.Readiness = "blocked"
 			item.Reason = preflight.BlockReasons[0].Detail

@@ -319,6 +319,10 @@ func (m *Model) updateWorkActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) planWorkAction(action WorkActionID) {
+	if m.dashActionBlocked(action) {
+		return
+	}
+
 	if m.planNativeWorkAction(action) {
 		return
 	}

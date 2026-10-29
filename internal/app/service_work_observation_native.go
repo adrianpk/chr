@@ -60,7 +60,9 @@ func projectNativeWork(result *WorkObservation, observation workflowcore.WorkObs
 	for _, member := range observation.Queue {
 		ticket := tickets[member.Key]
 
-		item := WorkQueueItem{Key: member.Key, Title: ticket.Title, Scope: ticket.UseCase, Readiness: member.Readiness}
+		item := observedQueueItem(ticket)
+
+		item.Readiness = member.Readiness
 		if member.Blocker != nil {
 			item.Reason = member.Blocker.Reason
 		}

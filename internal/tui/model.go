@@ -8,6 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"forge.adrianpk.com/chr/internal/app/work"
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
@@ -93,6 +94,7 @@ type Options struct {
 	AuthoringSessions    []authoringcore.Session
 	Observability        ObservabilityView
 	WorkReadiness        WorkReadinessView
+	WorkObservation      *work.Observation
 	WorkspaceGraph       core.WorkspaceGraph
 	WorkspaceIndex       core.WorkspaceIndex
 	SemanticDigestStates []core.WorkspaceSemanticDigestState
@@ -225,10 +227,11 @@ func NewModel(opts Options) *Model {
 			sourceExecutor: opts.SourceExecutor,
 		},
 		workState: workState{
-			observability:  opts.Observability,
-			workReadiness:  opts.WorkReadiness,
-			agentWorkOrder: workflowstate.TicketOrderCreatedAt,
-			workExecutor:   opts.WorkExecutor,
+			observability:   opts.Observability,
+			workObservation: opts.WorkObservation,
+			workReadiness:   opts.WorkReadiness,
+			agentWorkOrder:  workflowstate.TicketOrderCreatedAt,
+			workExecutor:    opts.WorkExecutor,
 		},
 		backgroundWorkState: backgroundWorkState{
 			agentWorkRefreshExecutor: opts.AgentWorkExecutor,

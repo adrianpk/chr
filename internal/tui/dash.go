@@ -33,6 +33,8 @@ func (m *Model) renderDash() string {
 	output.WriteString("\n")
 
 	queue := m.readyAgentWorkTickets()
+	output.WriteString(m.renderDashQueueSummary())
+
 	if len(queue) == 0 {
 		output.WriteString("  No ready tickets queued.\n")
 	} else {
@@ -72,13 +74,13 @@ func (m *Model) renderDash() string {
 }
 
 func (m *Model) renderDashWorkspace(width, height int) string {
-	queueLines := append([]string{
-		fmt.Sprintf("Ready queue: %d", len(m.readyAgentWorkTickets())),
+	queueLines := append(m.dashQueueSummary(), []string{
 		"Priority: " + displayDashPriorityFilter(m.agentWorkPriorityFilter),
 		"Order: " + displayDashAgentWorkOrder(m.agentWorkOrder),
 		"Action: a run all ready tickets",
 		"",
-	}, m.renderAgentWorkQueueLines(maxInt(height-5, 1))...)
+	}...)
+	queueLines = append(queueLines, m.renderAgentWorkQueueLines(maxInt(height-len(queueLines), 1))...)
 
 	currentLines := append(m.renderDashReadinessLines(maxInt(height/3, 3)), "")
 	currentLines = append(currentLines, m.nativeWorkflowLines()...)
@@ -251,6 +253,10 @@ func renderAppliedReadinessRepairLine(repair WorkReadinessAppliedRepairView) str
 }
 
 func (m *Model) readyAgentWorkTickets() []TicketView {
+	if m.workObservation != nil {
+		return m.observedDashTickets()
+	}
+
 	tickets := []TicketView{}
 	for _, ticket := range m.tickets {
 		if m.matchesReadyAgentWorkFilter(ticket) {
@@ -296,7 +302,15 @@ func (m *Model) renderAgentWorkQueueLines(limit int) []string {
 			prefix = ">"
 		}
 
-		lines = append(lines, fmt.Sprintf("%s %s  %s  %s", prefix, ticket.Key, ticket.Priority, ticket.Title))
+		line := fmt.Sprintf("%s %s  %s  %s", prefix, ticket.Key, ticket.Priority, ticket.Title)
+		if item, ok := m.observedQueueItem(ticket.Key); ok {
+			line += " [" + item.Readiness + "]"
+			if item.Reason != "" {
+				line += " " + item.Reason
+			}
+		}
+
+		lines = append(lines, line)
 	}
 
 	return lines

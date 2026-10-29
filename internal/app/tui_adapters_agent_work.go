@@ -13,7 +13,7 @@ func newTUIAgentWorkRefreshExecutor(operations service) tuiAgentWorkRefreshExecu
 }
 
 func (e tuiAgentWorkRefreshExecutor) RefreshAgentWork(request tui.AgentWorkRefreshRequest) (tui.AgentWorkRefreshResult, error) {
-	tickets, err := e.operations.listProjectTickets()
+	board, err := e.operations.ReadTicketBoard(0)
 	if err != nil {
 		return tui.AgentWorkRefreshResult{}, err
 	}
@@ -23,7 +23,7 @@ func (e tuiAgentWorkRefreshExecutor) RefreshAgentWork(request tui.AgentWorkRefre
 		return tui.AgentWorkRefreshResult{}, err
 	}
 
-	readiness, err := loadTUIWorkReadiness(e.operations.ctx, e.operations.projectContext)
+	observation, err := e.operations.ObserveWorkPage(e.operations.ctx, request.Queue)
 	if err != nil {
 		return tui.AgentWorkRefreshResult{}, err
 	}
@@ -35,9 +35,10 @@ func (e tuiAgentWorkRefreshExecutor) RefreshAgentWork(request tui.AgentWorkRefre
 
 	return tui.AgentWorkRefreshResult{
 		Workflow:      workflow,
-		Tickets:       tickets,
+		Tickets:       board.Tickets,
 		Observability: observability,
-		Readiness:     readiness,
+		Readiness:     tui.NewWorkReadinessView(observation.Readiness),
+		Observation:   &observation,
 	}, nil
 }
 

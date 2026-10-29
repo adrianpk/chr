@@ -10,6 +10,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
+	"forge.adrianpk.com/chr/internal/app/work"
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
@@ -225,7 +226,7 @@ func loadTUIMetadataData(data *tuiOptionsData) error {
 		return err
 	}
 
-	workReadiness, err := loadTUIWorkReadiness(data.ctx, data.projectContext)
+	observation, err := data.operations.ObserveWork(data.ctx, 0)
 	if err != nil {
 		return err
 	}
@@ -234,7 +235,8 @@ func loadTUIMetadataData(data *tuiOptionsData) error {
 	data.cases = cases
 	data.authoringSessions = authoringSessions
 	data.observability = observability
-	data.workReadiness = workReadiness
+	data.workReadiness = tui.NewWorkReadinessView(observation.Readiness)
+	data.workObservation = &observation
 
 	return nil
 }
@@ -293,6 +295,7 @@ type tuiOptionsData struct {
 	authoringSessions    []authoringcore.Session
 	observability        tui.ObservabilityView
 	workReadiness        tui.WorkReadinessView
+	workObservation      *work.Observation
 	workspaceGraph       core.WorkspaceGraph
 	workspaceIndex       core.WorkspaceIndex
 	semanticDigestStates []core.WorkspaceSemanticDigestState
@@ -316,6 +319,7 @@ func newTUIOptions(data tuiOptionsData) tui.Options {
 		AuthoringSessions:    data.authoringSessions,
 		Observability:        data.observability,
 		WorkReadiness:        data.workReadiness,
+		WorkObservation:      data.workObservation,
 		WorkspaceGraph:       data.workspaceGraph,
 		WorkspaceIndex:       data.workspaceIndex,
 		SemanticDigestStates: data.semanticDigestStates,
@@ -342,7 +346,7 @@ func loadTUITickets(
 	projectContext commandProjectContext,
 	assetsFS fs.FS,
 ) ([]ticketcore.Indexed, error) {
-	board, err := newService(ctx, env, projectContext, assetsFS).Board()
+	board, err := newService(ctx, env, projectContext, assetsFS).ReadTicketBoard(0)
 	if err != nil {
 		return nil, err
 	}

@@ -6,49 +6,39 @@ import (
 	"slices"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/app/work"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkQueueItem is a display observation, never an executable scheduler input.
-type WorkQueueItem struct {
-	Key, Title, Scope, Readiness, Reason string
-}
+type WorkQueueItem = work.QueueItem
 
-// WorkContext preserves one invocation/attempt/ticket association and separates
-// host validation from receipt-confirmed delivery.
-type WorkContext struct {
-	ID, Kind, InvocationID, AttemptID, TicketKey, Title, Scope, Status, Phase, Outcome, Message string
-	UpdatedAt, ActivityAt                                                                       time.Time
-	Eligible, Processed, Blocked, Failed                                                        int
-	Validated, Confirmed, Remaining                                                             int
-}
+// WorkContext keeps invocation and delivery evidence separate.
+type WorkContext = work.Context
 
-// WorkEvent has a stable identity within its original execution context.
-type WorkEvent struct {
-	ID, ContextID, TicketKey, Phase, Message string
-	Time                                     time.Time
-}
+// WorkEvent retains its original context identity.
+type WorkEvent = work.Event
 
-// WorkObservation is the adapter-neutral snapshot for live work inspection.
-type WorkObservation struct {
-	Warnings                        []string
-	Authority                       workspaceconfig.WorkStateAuthority
-	Readiness                       executioncore.WorkReadinessReport
-	Queue                           []WorkQueueItem
-	QueueTotal, Eligible, QueueNext int
-	Current, Results                []WorkContext
-	Events                          []WorkEvent
-	Excluded                        map[string]int
-	ObservedAt                      time.Time
-}
+// WorkObservation is the shared adapter-neutral work snapshot.
+type WorkObservation = work.Observation
 
 // ObserveWork never starts, claims, recovers or stops work. Bounds apply to the
 // source reads and to the queue page, current contexts and retained timeline.
-func (s service) ObserveWork(ctx context.Context, offset int) (result WorkObservation, err error) {
-	if offset < 0 || offset > workflowstate.RecordLimit {
-		return result, fmt.Errorf("work queue offset out of bounds")
+func (s service) ObserveWork(ctx context.Context, offset int) (WorkObservation, error) {
+	return s.ObserveWorkPage(ctx, work.Request{Offset: offset})
+}
+
+// ObserveWorkPage applies display filters and ordering before bounded pagination.
+// Neither a filter nor a queue row grants execution authority.
+func (s service) ObserveWorkPage(ctx context.Context, request work.Request) (result WorkObservation, err error) {
+	offset := request.Offset
+
+	order, err := validateWorkObservationRequest(request)
+	if err != nil {
+		return result, err
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
@@ -81,6 +71,7 @@ func (s service) ObserveWork(ctx context.Context, offset int) (result WorkObserv
 		return result, err
 	}
 
+	selectObservedQueue(&result, request.Priority, order)
 	finishWorkObservation(&result, offset)
 
 	return result, nil
@@ -136,4 +127,21 @@ func bindWorkQueueReadiness(result *WorkObservation, item *WorkQueueItem) {
 	}
 
 	result.Eligible++
+}
+
+func validateWorkObservationRequest(request work.Request) (workflowstate.TicketOrder, error) {
+	if request.Offset < 0 || request.Offset > workflowstate.RecordLimit {
+		return "", fmt.Errorf("work queue offset out of bounds")
+	}
+
+	order, err := ticketcore.NormalizeLoopOrder(request.Order)
+	if err != nil {
+		return "", err
+	}
+
+	if request.Priority != "" && !slices.Contains([]string{"critical", "high", "normal", "low"}, request.Priority) {
+		return "", fmt.Errorf("invalid work queue priority")
+	}
+
+	return order, nil
 }

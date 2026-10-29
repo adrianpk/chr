@@ -3,6 +3,7 @@ package tui
 import (
 	tea "github.com/charmbracelet/bubbletea"
 
+	"forge.adrianpk.com/chr/internal/app/work"
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -125,6 +126,8 @@ type interactionState struct {
 
 type workState struct {
 	dashTicketKey           string
+	workObservation         *work.Observation
+	queueRequest            work.Request
 	observability           ObservabilityView
 	workReadiness           WorkReadinessView
 	agentWorkPriorityFilter string

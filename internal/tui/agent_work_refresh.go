@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"forge.adrianpk.com/chr/internal/app/work"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
@@ -19,10 +20,12 @@ type AgentWorkRefreshExecutor interface {
 type AgentWorkRefreshRequest struct {
 	WorkflowID     string
 	WorkflowOffset int
+	Queue          work.Request
 }
 
 // AgentWorkRefreshResult contains refreshed agent work rows for the dashboard.
 type AgentWorkRefreshResult struct {
+	Observation   *work.Observation
 	Workflow      *WorkflowView
 	Tickets       []ticketcore.Indexed
 	Observability ObservabilityView
@@ -47,7 +50,7 @@ func (m *Model) startAgentWorkRefresh() tea.Cmd {
 		return nil
 	}
 
-	request := AgentWorkRefreshRequest{WorkflowID: m.workflow.ID, WorkflowOffset: m.workflowPage.Offset}
+	request := AgentWorkRefreshRequest{WorkflowID: m.workflow.ID, WorkflowOffset: m.workflowPage.Offset, Queue: m.queueRequest}
 	if request.WorkflowID == "" && len(m.observability.WorkflowPage.Items) > 0 {
 		request.WorkflowID = m.observability.WorkflowPage.Items[0].ID
 	}
@@ -81,6 +84,9 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 	if view := msg.result.Workflow; view != nil && view.ID == m.workflow.ID && view.Revision >= m.workflow.Revision {
 		m.workflow = *view
 	}
+
+	m.workObservation = msg.result.Observation
+	m.reconcileDashSelection()
 
 	m.observability = msg.result.Observability
 	m.workReadiness = msg.result.Readiness
