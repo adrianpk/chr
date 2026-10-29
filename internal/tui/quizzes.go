@@ -50,7 +50,7 @@ func (m *Model) renderQuizFocusList(limit int) []string {
 			prefix = ">"
 		}
 
-		lines = append(lines, fmt.Sprintf("%s %s", prefix, quiz.Title))
+		lines = append(lines, fmt.Sprintf("%s %s", prefix, quizListLabel(quiz)))
 		if len(lines) >= limit {
 			break
 		}
@@ -74,6 +74,7 @@ func (m *Model) renderSelectedQuizDetailLines(width int) []string {
 		"",
 		quiz.Title,
 		quizHumanStatus(quiz),
+		quizModeLine(quiz),
 	}
 
 	if strings.TrimSpace(quiz.ActiveQuestionSummary) != "" {
@@ -118,7 +119,7 @@ func (m *Model) renderQuizzes() string {
 		}
 
 		output.WriteString(prefix)
-		output.WriteString(quiz.Title)
+		output.WriteString(quizListLabel(quiz))
 		output.WriteString("  ")
 		output.WriteString(shellMutedStyle.Render(quizHumanStatus(quiz)))
 		output.WriteString("\n")
@@ -161,14 +162,14 @@ func (m *Model) quizActionHint(quiz QuizView) string {
 	}
 
 	if strings.TrimSpace(quiz.ActiveQuestionSummary) != "" {
-		return "enter answers  r refresh"
+		return "enter answers  m mode  r refresh"
 	}
 
 	if quiz.Status == "done" && strings.TrimSpace(quiz.CuratedPath) != "" {
-		return "s restart  r refresh"
+		return "s restart  m Deep/Fast  r refresh"
 	}
 
-	return "s start  r refresh"
+	return "s start  m Deep/Fast  r refresh"
 }
 
 func (m *Model) selectedQuizView() (QuizView, bool) {
@@ -245,9 +246,11 @@ func (m *Model) selectedQuizScope() QuizScope {
 func (m *Model) updateQuizzesKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "s":
-		cmd := m.startQuizAction(QuizActionRequest{Action: QuizActionStart, Scope: m.selectedQuizScope()})
+		cmd := m.startQuizAction(m.newQuizActionState(QuizActionStart).Request)
 
 		return cmd
+	case "m":
+		return m.cycleQuizMode()
 	case "enter":
 		m.planQuizAction(QuizActionAnswer)
 	case "r":
@@ -276,13 +279,20 @@ func (m *Model) newQuizActionState(action QuizActionID) QuizActionState {
 		binding.OperationID = rand.Text()
 	}
 
+	mode := quizActionMode(action)
+	if action == QuizActionStart {
+		if quiz, ok := m.selectedQuizView(); ok {
+			mode = quiz.Mode
+		}
+	}
+
 	return QuizActionState{
 		Pending: true,
 		Request: QuizActionRequest{
 			Binding: binding,
 			Action:  action,
 			Scope:   scope,
-			Mode:    quizActionMode(action),
+			Mode:    mode,
 		},
 		Title: title,
 		Details: []string{

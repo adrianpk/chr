@@ -143,6 +143,14 @@ func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) planQuizAction(action QuizActionID) {
+	if mode := quizActionMode(action); mode != "" {
+		if quiz, ok := m.selectedQuizView(); ok && quizCanStart(quiz) {
+			m.setQuizStartMode(quiz, mode)
+
+			return
+		}
+	}
+
 	if action == QuizActionAnswer {
 		m.startQuizAnswer()
 
@@ -245,7 +253,7 @@ func (m *Model) completeQuizAction(message quizActionFinishedMsg) {
 
 func (m *Model) applyQuizActionResult(result QuizActionResult) {
 	if result.Quizzes != nil {
-		m.quizzes = normalizeQuizViews(result.Quizzes)
+		m.quizzes = m.reconcileQuizModes(result.Quizzes)
 		m.selectQuizByScope(result.SelectedScope)
 	}
 

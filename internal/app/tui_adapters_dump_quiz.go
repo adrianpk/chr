@@ -84,7 +84,7 @@ func (e tuiQuizActionExecutor) executeQuizOperationStart(request tui.QuizActionR
 	result, err := e.operations.StartQuiz(QuizStartRequest{
 		Scope:   quizcore.Scope{CaseSlug: request.Scope.CaseSlug},
 		Binding: tuiQuizBinding(request.Binding),
-		Mode:    quizcore.ModeDeep,
+		Mode:    quizcore.Mode(request.Mode),
 	})
 	if err != nil {
 		return "", err

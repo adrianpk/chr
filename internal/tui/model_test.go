@@ -3942,7 +3942,6 @@ func TestModelHidesTechnicalQuizDetails(t *testing.T) {
 
 	view := model.View()
 	for _, unwanted := range []string{
-		"Mode:",
 		"Questions:",
 		"Candidates:",
 		"Return:",
