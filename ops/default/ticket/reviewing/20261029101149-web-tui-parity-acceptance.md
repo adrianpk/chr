@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101149
 title: "Parity acceptance and capability inventory"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -9,7 +9,12 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:49Z
-commits: []
+commits:
+  - 6c7920ddce29df8a6ede341c84cc81e7294d3d74
+  - 80b1dcdcf47c65a58e53747a1561f6d30ac04816
+  - e941712f0c977722a961ff4f68991927a371dff5
+  - c2a07937d9c2a9ac23b2de155989df450a072b8c
+reviewed_at: 2026-10-29T18:37:55Z
 started_at: 2026-10-29T18:12:24Z
 branch: test/slice-14-tui-acceptance
 ready_at: 2026-10-29T10:11:49Z
@@ -54,4 +59,9 @@ One branch and one PR to `dev`; tasks T14.1-T14.5 are the canonical work units. 
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+All 42 source IDs are reconciled without changing baseline assertions. Checklist
+writers stop before confirmation. The named acceptance family reuses owned
+production boundaries; focused fresh full wizard PTY, manual resize/input and
+Chromium polling/resize/cancellation checks pass. Exact commands, runtime
+uncertainties and retained capabilities are recorded in the Slice 14 report.
+Final clean PR-head validation and controller-owned integration remain pending.

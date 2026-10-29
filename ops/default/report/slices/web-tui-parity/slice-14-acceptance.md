@@ -41,6 +41,7 @@ gate unsupported palette writes, and verify the integrated terminal/Web journeys
 T14.1: `6c7920ddce29df8a6ede341c84cc81e7294d3d74`.
 T14.2: `80b1dcdcf47c65a58e53747a1561f6d30ac04816`.
 T14.3: `e941712f0c977722a961ff4f68991927a371dff5`.
+T14.4 report introduction: `c2a07937d9c2a9ac23b2de155989df450a072b8c`.
 
 The new family composes existing production fixtures rather than substituting
 reducers for persistence or terminal IO. The fresh wizard child uses the root

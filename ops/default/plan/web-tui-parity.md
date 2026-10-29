@@ -282,7 +282,7 @@ Prerequisite: Slice 12 integrated into dev.
 
 ### Slice 14: Parity acceptance and capability inventory
 
-Ticket: `TKT-20261029101149` — `ops/default/ticket/in_progress/20261029101149-web-tui-parity-acceptance.md`
+Ticket: `TKT-20261029101149` — `ops/default/ticket/reviewing/20261029101149-web-tui-parity-acceptance.md`
 Findings: I-003.
 Prerequisite: Slice 13 integrated into dev.
 

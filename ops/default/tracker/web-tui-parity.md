@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 14 — Parity acceptance and capability inventory.
 Completed slices: 13/14
-Completed tasks: 65/70
+Completed tasks: 68/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -244,18 +244,18 @@ Report: `ops/default/report/slices/web-tui-parity/slice-13-wizard-results.md`
 
 ### Slice 14: Parity acceptance and capability inventory
 
-Ticket: `TKT-20261029101149` — `ops/default/ticket/in_progress/20261029101149-web-tui-parity-acceptance.md`
-State: in_progress
+Ticket: `TKT-20261029101149` — `ops/default/ticket/reviewing/20261029101149-web-tui-parity-acceptance.md`
+State: reviewing
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-14-acceptance.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T14.1 | Reconcile all 38 gap rows and four incidental findings with exact tests and dispositions; close runtime uncertainties without changing source claims into assumed results. | pending | — | Planned: Every coverage row links a delivered slice/report and passing evidence or an explicit maintainer-approved exception. |
-| T14.2 | Reconcile the palette and legacy capability inventory; gate unsupported safe checklist writers before confirmation without inventing a new domain or filesystem writer. | pending | — | Planned: No advertised unconditional failure remains; useful baseline extras retain tested access. |
-| T14.3 | Extend owned production PTY and Web reference fixtures to exercise manual forms and the complete guided journey, including focus, resize, cancel and restart. | pending | — | Planned: Real Bubble Tea process plus real HTTP/Chromium, filesystem, Git and SQLite; deterministic model/provider responses only. |
-| T14.4 | Update the User Guide and consolidate the delivered user-visible changelog outcomes; run final focused acceptance and publish the cycle report. | pending | — | Planned: No claims based on screenshots or reducer-only tests; no broad suite, new dependency or unapproved live project mutation. |
-| T14.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T14.1 | Reconcile all 38 gap rows and four incidental findings with exact tests and dispositions; close runtime uncertainties without changing source claims into assumed results. | done | 6c7920dd | All 42 IDs and baseline claims retained; 41 delivered rows link immutable reports, canonical merges, successful ordered check ledgers and exact assertion families. I-003 is implemented/reviewing in this slice. |
+| T14.2 | Reconcile the palette and legacy capability inventory; gate unsupported safe checklist writers before confirmation without inventing a new domain or filesystem writer. | done | 80b1dcdc | Reproduced checklist confirmation before unconditional failure. Selected/empty palette cases and production PTY now return blocked feedback before confirmation with zero writes; legacy access and strict lint pass. |
+| T14.3 | Extend owned production PTY and Web reference fixtures to exercise manual forms and the complete guided journey, including focus, resize, cancel and restart. | done | e941712f | Named 14-scenario family added; focused manual resize/focus and fresh full production PTY delivery/restart pass. Chromium real polling/resize/declined-cancel draft test passes; original assertions and 40/45-second terminal limits retained. |
+| T14.4 | Update the User Guide and consolidate the delivered user-visible changelog outcomes; run final focused acceptance and publish the cycle report. | reviewing | c2a07937 | User Guide/reference, consolidated changelog and cycle report prepared. Final named acceptance is recorded by the controller on the final PR-reference HEAD; integration and final delivery-set gate pending. |
+| T14.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | reviewing | — | Canonical report introduced at c2a07937d9c2a9ac23b2de155989df450a072b8c; PR and exact-HEAD controller handoff follow. Dev integration pending. |
 
 ## Blockers and decisions
 
@@ -263,4 +263,4 @@ None recorded. Five source runtime uncertainties are assigned to explicit implem
 
 ## Final evidence
 
-Not run. No runtime implementation, integrated slice or passing acceptance is claimed at planning. Final controller gate: `make verify`. Focused acceptance selection and fixture boundaries are defined in the plan. Cycle report is created at actual closure.
+Thirteen slices are integrated with exact-head evidence in their delivered reports. Slice 14 task checks pass; final ordered PR-head acceptance is recorded after its reference follow-up commit. The separate final controller gate remains `make verify`; no cycle closure is claimed. See `ops/default/report/web-tui-parity-cycle.md`.
