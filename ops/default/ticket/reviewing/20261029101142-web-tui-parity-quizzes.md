@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101142
 title: "Complete Quiz interaction"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -17,6 +17,8 @@ commits:
   - 8466be11507a83418ca18b1d5b8bbefc7c9cbfc0
   - 8958f0200940db15a1e17b19d3a20591897fc788
 branch: feat/slice-7-tui-quizzes
+pr: 461
+reviewing_at: 2026-10-29T14:19:02Z
 started_at: 2026-10-29T13:50:00Z
 ready_at: 2026-10-29T10:11:42Z
 ---
@@ -60,4 +62,4 @@ One branch and one PR to `dev`; tasks T7.1-T7.5 are the canonical work units. Lo
 
 ## Evidence
 
-T7.1-T7.4 are implemented. Production adapter, owned canonical IO/HTTP references and real PTY checks prove visible modes, pending targets, retained answer history, exact captured question/revision, stale and duplicate submissions, confirmed reload, cancellation and resume. The separate contextual-authoring entry takes the approved pre-action unavailable path with no writes or failing confirmation. Task commands and correction evidence are in the Slice 7 report; final exact-HEAD controller validation and integration remain pending.
+T7.1-T7.4 are implemented. Production adapter, owned canonical IO/HTTP references and real PTY checks prove visible modes, pending targets, retained answer history, exact captured question/revision, stale and duplicate submissions, confirmed reload, cancellation and resume. The separate contextual-authoring entry takes the approved pre-action unavailable path with no writes or failing confirmation. Task commands and correction evidence are in the Slice 7 report. Canonical PR #461 is open; final exact-HEAD controller validation and integration remain pending.

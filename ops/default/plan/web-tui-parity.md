@@ -170,7 +170,7 @@ Prerequisite: Slice 5 integrated into dev.
 
 ### Slice 7: Complete Quiz interaction
 
-Ticket: `TKT-20261029101142` — `ops/default/ticket/in_progress/20261029101142-web-tui-parity-quizzes.md`
+Ticket: `TKT-20261029101142` — `ops/default/ticket/reviewing/20261029101142-web-tui-parity-quizzes.md`
 Findings: G-020, G-021, G-022.
 Prerequisite: Slice 6 integrated into dev.
 

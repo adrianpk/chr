@@ -135,9 +135,9 @@ Report: `ops/default/report/slices/web-tui-parity/slice-6-specs.md`
 
 ### Slice 7: Complete Quiz interaction
 
-Ticket: `TKT-20261029101142` — `ops/default/ticket/in_progress/20261029101142-web-tui-parity-quizzes.md`
-State: in_progress
-PR: pending
+Ticket: `TKT-20261029101142` — `ops/default/ticket/reviewing/20261029101142-web-tui-parity-quizzes.md`
+State: reviewing
+PR: [#461](https://forge.adrianpk.com/adrianpk/chr/pulls/461)
 Report: `ops/default/report/slices/web-tui-parity/slice-7-quizzes.md`
 
 | Task | Work | State | Commits | Validation |
@@ -146,7 +146,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-7-quizzes.md`
 | T7.2 | Show answer history alongside the current question and retain answer, skip, done, cancel and resume. | done | 552751e3; 4fa89c65; 8958f020 | Neutral history agrees with Web ordering; real saved IO, history paging/resize, Cancel, Resume, Skip and Done pass. Narrow final-page and target-offset corrections preserve complete answers. |
 | T7.3 | Bind each submission to its exact session, current question, revision and input digest; retain draft after errors. | done | 15fbe9b9 | Reproduced missing absent-session revision. Captured binding, queued stale answer, duplicate reconciliation, retained prompt/input, confirmed reload and actual concurrent-writer PTY pass. |
 | T7.4 | Replace the always-failing context-aware quiz entry with the existing supported operation and real scope input, or explicit pre-action unavailability if unsupported. | done | 8466be11 | The contextual-authoring entry is explicitly unavailable before confirmation/executor calls. Real palette PTY compares unchanged canonical files; supported scoped runtime questions remain available. |
-| T7.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Task checks passed; report and canonical PR preparation underway. Final exact-HEAD controller validation and integration pending. |
+| T7.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 3a6b0165 | Task checks passed; report introduced and PR #461 opened. Final exact-HEAD controller validation and integration pending. |
 
 ### Slice 8: Plan and ticket preparation
 
