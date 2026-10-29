@@ -34,6 +34,7 @@ type GuidedView struct {
 	Retry                                   *GuidedRequest
 	Native                                  *WorkflowView
 	CanRetainIdea, CanApprove               bool
+	Result                                  *GuidedResultView
 	Tickets                                 []ticketcore.Indexed
 	Quiz                                    *QuizView
 	Session                                 *authoringcore.Session

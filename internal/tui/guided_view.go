@@ -78,6 +78,8 @@ func (m *Model) wizardTabLines() []string {
 	lines = append(lines, m.wizardQuizLines()...)
 
 	lines = append(lines, view.Progress...)
+
+	lines = append(lines, m.guidedResultLines()...)
 	for _, problem := range view.Problems {
 		lines = append(lines, "Prerequisite: "+problem)
 	}

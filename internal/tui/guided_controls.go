@@ -22,6 +22,8 @@ func (m *Model) guidedExtraKey(key string) tea.Cmd {
 		m.textForm = textFormState{}
 	case "a":
 		m.inspectGuidedApproval()
+	case "v":
+		return m.toggleGuidedResult()
 	default:
 		return m.guidedDocumentKey(key)
 	}
@@ -55,4 +57,14 @@ func (m *Model) guidedControlHint() string {
 	}
 
 	return text + m.wizardBoardNativeHint()
+}
+
+func (m *Model) toggleGuidedResult() tea.Cmd {
+	if m.guided.View.Document != nil && m.guided.View.Document.Kind == "results export" {
+		m.guided.View.Document = nil
+
+		return nil
+	}
+
+	return m.guidedDocumentKey("v")
 }

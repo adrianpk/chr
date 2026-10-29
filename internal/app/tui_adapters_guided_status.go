@@ -9,6 +9,7 @@ import (
 
 func projectTUIGuidedStatus(view *tui.GuidedView, observed GuidedUseCaseInspection) {
 	view.Status = guidedVisibleStatus(observed)
+	view.Result = tuiGuidedResult(observed)
 	view.Controls = guidedControlChoices(observed)
 	view.CanRetainIdea = len(observed.Session.Guided.Checkpoints) != 0
 
@@ -47,6 +48,10 @@ func tuiGuidedWorkLines(observed GuidedUseCaseInspection) []string {
 	}
 
 	lines = append(lines, fmt.Sprintf("Work: %s. %d of %d validated; %d confirmed; %d remaining.", strings.ReplaceAll(work.Status, "_", " "), work.ValidatedTasks, work.Total, work.ConfirmedTickets, work.Remaining))
+
+	if work.PullRequest != nil {
+		lines = append(lines, "Review PR: "+work.PullRequest.URL, "Review branch: "+work.PullRequest.Request.HeadBranch+". Delivery requires a confirmed receipt.")
+	}
 
 	lines = append(lines, fmt.Sprintf("Retained limits: %d worker attempts; %d integration attempts.", work.FrozenPolicy.MaxWorkerAttempts, work.FrozenPolicy.MaxIntegrationAttempts))
 	if work.Blocker != nil {
