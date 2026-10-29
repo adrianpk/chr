@@ -87,6 +87,7 @@ func TestOperationReload(t *testing.T) {
 }
 
 type feedbackDumpExecutor struct {
+	readErr  error
 	reads    int
 	requests []DumpActionRequest
 	pending  bool
@@ -96,6 +97,10 @@ func (executor *feedbackDumpExecutor) ExecuteDumpAction(request DumpActionReques
 	executor.requests = append(executor.requests, request)
 	if request.Action == DumpActionEdit {
 		executor.reads++
+
+		if executor.readErr != nil {
+			return DumpActionResult{Outcome: operation.Result{Status: operation.Blocked, BlockedReason: executor.readErr.Error()}}, executor.readErr
+		}
 
 		return DumpActionResult{SelectedPath: request.Path, Content: "Canonical newer body", Revision: "new", Outcome: operation.Result{Status: operation.OK}}, nil
 	}
@@ -329,4 +334,38 @@ type feedbackWorkAction func(WorkActionRequest) (WorkActionResult, error)
 
 func (execute feedbackWorkAction) ExecuteWorkAction(request WorkActionRequest) (WorkActionResult, error) {
 	return execute(request)
+}
+
+// Confirmation authorizes replacement only after the captured read succeeds;
+// a failed read must leave the complete draft and its old revision available.
+func TestOperationReloadFailure(t *testing.T) {
+	executor := &feedbackDumpExecutor{readErr: errors.New("owned read failure")}
+	model := NewModel(Options{DumpExecutor: executor})
+	model.selectView(ViewDumps)
+	model.startDumpEdit("bound.md", "Original", "old")
+	model.dumpEdit.Input.SetValue("Unsent sentinel")
+	model.saveDumpEdit()
+	model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
+	model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	if executor.reads != 1 || model.feedback.Result.Status != operation.Blocked || !model.dumpEdit.Active || model.dumpEdit.Input.Value() != "Unsent sentinel" || model.dumpEdit.Revision != "old" {
+		t.Fatal("failed reload replaced the retained input")
+	}
+}
+
+// Queue and retained-work observations are independent of a pending document
+// generation. Their refresh must not invalidate a reply for an unchanged form.
+func TestOperationUnrelated(t *testing.T) {
+	model := NewModel(Options{})
+	model.selectView(ViewSpecs)
+
+	model.specExecutor = feedbackSpecExecutor("Generation completed")
+	command := model.executeSpecActionCommand(SpecActionRequest{Action: SpecActionGenerate})
+	model.dashTicketKey = "observed-queue-ticket"
+	model.workflow.ID = "observed-workflow"
+	model.Update(command())
+
+	if model.statusMessage != "Generation completed" {
+		t.Fatal("unrelated observations invalidated document completion", model.statusMessage)
+	}
 }

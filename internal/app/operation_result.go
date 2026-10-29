@@ -18,7 +18,7 @@ func operationResult(summary string, err error) operation.Result {
 	}
 
 	if errors.Is(err, authoringcore.ErrProjectDumpReconciliation) {
-		return operation.Result{Status: operation.Blocked, Summary: "The retained operation needs reconciliation.", BlockedReason: err.Error(), Retry: true}
+		return operation.Result{Status: operation.Blocked, Summary: "The operation needs reconciliation.", BlockedReason: err.Error(), Retry: true}
 	}
 
 	if errors.Is(err, workflowstate.ErrOwned) || errors.Is(err, workflowstate.ErrObservationRequired) || errors.Is(err, authoringcore.ErrAuthorityRequired) {

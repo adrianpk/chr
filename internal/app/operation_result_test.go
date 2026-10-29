@@ -21,7 +21,7 @@ func TestOperationOutcomes(t *testing.T) {
 		{"validation", errors.New("content is required"), operation.ValidationFailed, false, false},
 		{"stale", workflowstate.ErrConflict, operation.Stale, true, false},
 		{"owned", workflowstate.ErrOwned, operation.Blocked, true, false},
-		{"pending", authoringcore.ErrProjectDumpReconciliation, operation.Blocked, false, true},
+		{"reconciliation", authoringcore.ErrProjectDumpReconciliation, operation.Blocked, false, true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			outcome := operationResult("", tc.err)

@@ -14,6 +14,9 @@ func (e tuiDumpActionExecutor) ExecuteDumpAction(request tui.DumpActionRequest) 
 	outcome := operationResult(result.Message, err)
 
 	outcome.OperationID = request.OperationID
+	if request.OperationID == "" {
+		outcome.Retry = false
+	}
 	if result.Committed && result.ProjectionStale {
 		outcome.Reload = true
 	}

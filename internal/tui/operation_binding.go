@@ -3,13 +3,14 @@ package tui
 import (
 	"crypto/sha256"
 	"fmt"
+	"strings"
 )
 
 type interactionContext struct {
-	Generation                uint64
-	View                      View
-	Case, Source, Ticket, Run string
-	Draft                     [32]byte
+	Generation        uint64
+	View              View
+	Case, Source, Run string
+	Draft             [32]byte
 }
 
 type operationBinding struct {
@@ -21,13 +22,13 @@ type operationBinding struct {
 func (m *Model) currentInteraction() interactionContext {
 	draft := fmt.Sprintf("%#v", []any{m.projectEdit.Active, m.projectEdit.Field, m.projectEdit.Input.Value(), m.caseEdit.Active, m.caseEdit.Field, m.caseEdit.Input.Value(), m.dumpEdit.Active, m.dumpEdit.Path, m.dumpEdit.Input.Value(), m.quizAnswer.Active, m.quizAnswer.Binding, m.quizAnswer.Input.Value(), m.guided.Active, m.guided.Sequence, m.harnessSelection.Active, m.harnessSequence})
 
-	return interactionContext{Generation: m.draftSequence, View: m.SelectedView(), Case: m.caseContext.CaseSlug, Source: m.currentOperationTarget(), Ticket: m.dashTicketKey, Run: m.workflow.ID, Draft: sha256.Sum256([]byte(draft))}
+	return interactionContext{Generation: m.draftSequence, View: m.SelectedView(), Case: m.caseContext.CaseSlug, Source: m.currentOperationTarget(), Draft: sha256.Sum256([]byte(draft))}
 }
 
 func (m *Model) beginOperation(family string) operationBinding {
 	m.operationSequence++
 
-	binding := operationBinding{Sequence: m.operationSequence, Family: family, Context: m.currentInteraction()}
+	binding := operationBinding{Sequence: m.operationSequence, Family: family, Context: m.operationInteraction(family)}
 	if m.pendingOperations == nil {
 		m.pendingOperations = make(map[string]operationBinding)
 	}
@@ -45,15 +46,14 @@ func (m *Model) finishOperation(binding operationBinding) (bool, bool) {
 
 	delete(m.pendingOperations, binding.Family)
 
-	return true, binding.Context == m.currentInteraction()
+	return true, binding.Context == m.operationInteraction(binding.Family)
 }
 
 func (m *Model) currentOperationTarget() string {
 	switch m.SelectedView() {
-	case ViewBoard, ViewTickets:
-		if ticket, ok := m.selectedTicketView(); ok {
-			return ticket.Key + ":" + ticket.Revision
-		}
+	case ViewDash, ViewBoard, ViewTickets:
+		return m.currentTicketTarget()
+
 	case ViewQuizzes:
 		if quiz, ok := m.selectedQuizView(); ok {
 			return fmt.Sprintf("%s:%v", quiz.Scope.CaseSlug, quiz.Binding)
@@ -69,4 +69,26 @@ func (m *Model) currentOperationTarget() string {
 	}
 
 	return m.selectedSourcePath()
+}
+
+func (m *Model) operationInteraction(family string) interactionContext {
+	context := m.currentInteraction()
+	if strings.HasPrefix(family, "work:") {
+		context.Run = m.workflow.ID
+	}
+
+	return context
+}
+
+func (m *Model) currentTicketTarget() string {
+	ticket, ok := m.selectedTicketView()
+	if m.SelectedView() == ViewDash {
+		ticket, ok = m.selectedDashTicketView()
+	}
+
+	if ok {
+		return ticket.Key + ":" + ticket.Revision
+	}
+
+	return ""
 }
