@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -24,6 +25,7 @@ const (
 	CommandActionPlanTicket         CommandAction = "plan_ticket"
 	CommandActionPlanWork           CommandAction = "plan_work"
 	CommandActionGuided             CommandAction = "guided"
+	CommandActionClearCase          CommandAction = "clear_case"
 )
 
 // Command describes one command palette entry.
@@ -63,6 +65,7 @@ func NewCommandPaletteState(commands []Command) CommandPaletteState {
 func DefaultCommandRegistry() []Command {
 	commands := []Command{
 		{ID: "refresh", Title: "Refresh", Description: "Reload workspace files into the runtime graph.", Action: CommandActionRefresh},
+		{ID: "clear-case-context", Title: "Clear case context", Description: "Show all case scopes without changing documents.", Action: CommandActionClearCase},
 		{ID: "help", Title: "Help", Description: "Navigate to the Help view.", Action: CommandActionHelp, View: ViewHelp},
 		{ID: "open-source", Title: "Open selected source path", Description: "Show the selected source path for external opening.", Action: CommandActionOpenSelectedSource},
 		{ID: "create-ticket", Title: "Create ticket", Description: "Create a default task ticket after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateTicket},
@@ -106,7 +109,7 @@ func DefaultCommandRegistry() []Command {
 
 	commands = append(commands, nativeWorkflowCommands()...)
 
-	for _, view := range defaultViews {
+	for _, view := range append(slices.Clone(defaultViews), auxiliaryViews...) {
 		commands = append(commands, Command{
 			ID:          "view:" + strings.ToLower(string(view)),
 			Title:       "Go to " + string(view),
@@ -250,6 +253,13 @@ func (m *Model) executeSelectedCommand() tea.Cmd {
 //nolint:cyclop // Central command dispatch keeps palette behavior easy to audit.
 func (m *Model) executeCommand(command Command) tea.Cmd {
 	switch command.Action {
+	case CommandActionClearCase:
+		m.bindCaseContext("", "")
+
+		m.selectedCase = -1
+		m.statusMessage = "Case context cleared. All scopes are visible."
+
+		return nil
 	case CommandActionGuided:
 		return m.openGuided()
 	case CommandActionNavigate, CommandActionHelp:
@@ -280,16 +290,31 @@ func (m *Model) executeCommand(command Command) tea.Cmd {
 }
 
 func (m *Model) selectView(view View) {
-	for index, candidate := range m.views {
-		if candidate == view {
-			m.selected = index
-			m.selectPrimaryPane()
-
-			m.maximizedPane = -1
-
-			return
-		}
+	if m.SelectedView() == ViewCases && view != ViewCases {
+		m.captureCaseContext()
 	}
+
+	if view == ViewHelp && m.SelectedView() != ViewHelp {
+		m.helpReturnView, m.helpReturnPane = m.SelectedView(), m.selectedPane
+	}
+
+	index := slices.Index(m.views, view)
+	if index < 0 && !slices.Contains(auxiliaryViews, view) {
+		return
+	}
+
+	m.auxiliaryView = ""
+	if index < 0 {
+		m.auxiliaryView = view
+	} else {
+		m.selected = index
+	}
+
+	m.selectPrimaryPane()
+
+	m.maximizedPane = -1
+	m.reconcileCaseTicketSelection()
+	m.explainCaseContext()
 }
 
 //nolint:wsl_v5 // Filtering keeps predicate and append adjacent.

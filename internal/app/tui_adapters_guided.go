@@ -31,6 +31,14 @@ func (e tuiGuidedExecutor) ExecuteGuided(request tui.GuidedRequest) (tui.GuidedV
 	}
 
 	view := tuiGuidedView(observed)
+
+	cases, err := authoringcore.NewCaseMetadataService(e.operations.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.RecordLimit)
+	if err != nil {
+		return view, err
+	}
+
+	view.Cases = append([]authoringcore.CaseMetadata{}, cases...)
+
 	if request.Action == "document" && request.Document == "results" {
 		if observed.Session == nil {
 			return view, workflowstate.ErrConflict

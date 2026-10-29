@@ -24,7 +24,7 @@ func TestTUIBusyTerminal(t *testing.T) {
 	}
 
 	terminal := startTUITerminal(t, operations, "TestTUIBusyProcess")
-	terminal.keys(t, "\x1b[15~")
+	terminal.keys(t, "\x1bOS")
 	terminal.see(t, "No use case selected.")
 	terminal.keys(t, ":")
 	terminal.see(t, "Command Palette")

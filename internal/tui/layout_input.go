@@ -73,6 +73,10 @@ func (m *Model) updateMousePress(event tea.MouseEvent) tea.Cmd {
 		return nil
 	}
 
+	if m.shellShortcutBlocked() {
+		return nil
+	}
+
 	if button.View != "" {
 		m.selectView(button.View)
 

@@ -37,6 +37,7 @@ type GuidedView struct {
 	CanRetainIdea, CanApprove               bool
 	Session                                 *authoringcore.Session
 	Runs                                    []authoringcore.Session
+	Cases                                   []authoringcore.CaseMetadata
 	Policy, Problems, Progress              []string
 	Document                                *GuidedDocument
 }
@@ -100,6 +101,7 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 	}
 
 	m.guided.View = message.View
+	m.observeGuidedCase(message.View)
 
 	m.guided.Pending, m.guided.Problem = nil, ""
 	if message.Request.Command.OperationID == m.guided.Bound.Command.OperationID && message.Request.Action == "input" {
@@ -109,6 +111,21 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 
 	if message.Request.Action != "inspect" {
 		m.guided.Scroll = 0
+	}
+}
+
+func (m *Model) observeGuidedCase(view GuidedView) {
+	if view.Cases != nil && !m.caseDirty && !m.caseEdit.Active {
+		m.cases = append([]authoringcore.CaseMetadata(nil), view.Cases...)
+		if caseSliceContainsSlug(m.cases, m.caseContext.CaseSlug) {
+			m.selectedCase = m.caseIndexForSlug(m.caseContext.CaseSlug)
+		} else {
+			m.clampSelectedCase()
+		}
+	}
+
+	if session := view.Session; session != nil && session.Guided != nil {
+		m.bindCaseContext(session.Guided.CaseSlug, session.ID)
 	}
 }
 

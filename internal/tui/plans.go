@@ -39,51 +39,51 @@ func (m *Model) selectedPlanCanMaterializeTracking() bool {
 }
 
 func (m *Model) selectedPlanView() (PlanView, bool) {
-	for _, plan := range m.plans {
+	for _, plan := range m.visiblePlans() {
 		if plan.Index == m.selectedPlan {
 			return plan, true
 		}
 	}
 
-	if len(m.plans) > 0 {
-		return m.plans[0], true
+	if len(m.visiblePlans()) > 0 {
+		return m.visiblePlans()[0], true
 	}
 
 	return PlanView{}, false
 }
 
 func (m *Model) selectPreviousPlan() {
-	if len(m.plans) == 0 {
+	if len(m.visiblePlans()) == 0 {
 		return
 	}
 
 	position := m.selectedPlanPosition()
 	if position == 0 {
-		m.selectedPlan = m.plans[len(m.plans)-1].Index
+		m.selectedPlan = m.visiblePlans()[len(m.visiblePlans())-1].Index
 
 		return
 	}
 
-	m.selectedPlan = m.plans[position-1].Index
+	m.selectedPlan = m.visiblePlans()[position-1].Index
 }
 
 func (m *Model) selectNextPlan() {
-	if len(m.plans) == 0 {
+	if len(m.visiblePlans()) == 0 {
 		return
 	}
 
 	position := m.selectedPlanPosition()
-	if position >= len(m.plans)-1 {
-		m.selectedPlan = m.plans[0].Index
+	if position >= len(m.visiblePlans())-1 {
+		m.selectedPlan = m.visiblePlans()[0].Index
 
 		return
 	}
 
-	m.selectedPlan = m.plans[position+1].Index
+	m.selectedPlan = m.visiblePlans()[position+1].Index
 }
 
 func (m *Model) selectedPlanPosition() int {
-	for index, plan := range m.plans {
+	for index, plan := range m.visiblePlans() {
 		if plan.Index == m.selectedPlan {
 			return index
 		}
@@ -93,7 +93,7 @@ func (m *Model) selectedPlanPosition() int {
 }
 
 func (m *Model) selectPlanByScope(scope QuizScope) {
-	for _, plan := range m.plans {
+	for _, plan := range m.visiblePlans() {
 		if plan.Scope.CaseSlug == scope.CaseSlug {
 			m.selectedPlan = plan.Index
 
@@ -101,8 +101,8 @@ func (m *Model) selectPlanByScope(scope QuizScope) {
 		}
 	}
 
-	if len(m.plans) > 0 {
-		m.selectedPlan = m.plans[0].Index
+	if len(m.visiblePlans()) > 0 {
+		m.selectedPlan = m.visiblePlans()[0].Index
 
 		return
 	}
@@ -113,14 +113,14 @@ func (m *Model) selectPlanByScope(scope QuizScope) {
 func (m *Model) selectedPlanScope() QuizScope {
 	plan, ok := m.selectedPlanView()
 	if !ok {
-		return QuizScope{}
+		return QuizScope{CaseSlug: m.caseContext.CaseSlug}
 	}
 
 	return plan.Scope
 }
 
 func (m *Model) planExistsForScope(scope QuizScope) bool {
-	for _, plan := range m.plans {
+	for _, plan := range m.visiblePlans() {
 		if plan.Scope.CaseSlug != scope.CaseSlug {
 			continue
 		}

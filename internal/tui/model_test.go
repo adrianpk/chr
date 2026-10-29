@@ -33,7 +33,7 @@ func TestModelViewRendersProjectAndNavigation(t *testing.T) {
 		"Project",
 		"Name: project",
 		"/workspace/project",
-		"> Project",
+		"> Cases",
 		"Cases",
 		"Dash",
 		"Keys:",
@@ -54,8 +54,8 @@ func TestTabMovesPaneFocusWithoutChangingView(t *testing.T) {
 		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
-	if navigated.SelectedView() != ViewProject {
-		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewProject)
+	if navigated.SelectedView() != ViewCases {
+		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewCases)
 	}
 
 	if navigated.selectedPane != 1 {
@@ -69,8 +69,8 @@ func TestTabMovesPaneFocusWithoutChangingView(t *testing.T) {
 		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
-	if navigated.SelectedView() != ViewProject {
-		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewProject)
+	if navigated.SelectedView() != ViewCases {
+		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewCases)
 	}
 
 	if navigated.selectedPane != 0 {
@@ -99,7 +99,7 @@ func TestPanelSplitsDefaultToEqualAspectRatio(t *testing.T) {
 func TestMouseDragUpdatesPanelSplits(t *testing.T) {
 	model := NewModel(Options{})
 	model.width = 100
-	model.height = 30
+	model.height = 34
 
 	updated, _ := model.Update(tea.MouseMsg{
 		X:      49,
@@ -123,7 +123,7 @@ func TestMouseDragUpdatesPanelSplits(t *testing.T) {
 
 	updated, _ = dragged.Update(tea.MouseMsg{
 		X:      80,
-		Y:      14,
+		Y:      16,
 		Action: tea.MouseActionPress,
 		Button: tea.MouseButtonLeft,
 	})
@@ -131,7 +131,7 @@ func TestMouseDragUpdatesPanelSplits(t *testing.T) {
 
 	updated, _ = dragging.Update(tea.MouseMsg{
 		X:      80,
-		Y:      20,
+		Y:      22,
 		Action: tea.MouseActionMotion,
 		Button: tea.MouseButtonLeft,
 	})
@@ -171,15 +171,15 @@ func TestLeftAndRightDoNotChangeGlobalTabs(t *testing.T) {
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRight})
 	navigated := requireUpdatedModel(t, updated)
 
-	if navigated.SelectedView() != ViewProject {
-		t.Fatalf("right selected view = %q, want %q", navigated.SelectedView(), ViewProject)
+	if navigated.SelectedView() != ViewCases {
+		t.Fatalf("right selected view = %q, want %q", navigated.SelectedView(), ViewCases)
 	}
 
 	updated, _ = navigated.Update(tea.KeyMsg{Type: tea.KeyLeft})
 	navigated = requireUpdatedModel(t, updated)
 
-	if navigated.SelectedView() != ViewProject {
-		t.Fatalf("left selected view = %q, want %q", navigated.SelectedView(), ViewProject)
+	if navigated.SelectedView() != ViewCases {
+		t.Fatalf("left selected view = %q, want %q", navigated.SelectedView(), ViewCases)
 	}
 }
 
@@ -207,7 +207,8 @@ func TestMouseClickSelectsDumpTextPane(t *testing.T) {
 			{Title: "Project Context", RelativePath: ".chr/default/dumps/project-context.md", Preview: "# Project Context"},
 		},
 	})
-	model.selected = 2
+	model.selectView(ViewDumps)
+
 	model.width = 100
 	model.height = 30
 
@@ -229,8 +230,8 @@ func TestShellFooterAlignsKeysAndLabels(t *testing.T) {
 	footer := model.renderShellFooter(100)
 	lines := strings.Split(footer, "\n")
 
-	if len(lines) != 2 {
-		t.Fatalf("footer lines = %d, want 2:\n%s", len(lines), footer)
+	if len(lines) != 3 {
+		t.Fatalf("footer lines = %d, want 3:\n%s", len(lines), footer)
 	}
 
 	for index, line := range lines {
@@ -247,15 +248,13 @@ func TestModelNavigatesWithFunctionKeys(t *testing.T) {
 		key  tea.KeyType
 		want View
 	}{
-		{key: tea.KeyF1, want: ViewProject},
-		{key: tea.KeyF2, want: ViewCases},
-		{key: tea.KeyF3, want: ViewDumps},
-		{key: tea.KeyF4, want: ViewQuizzes},
-		{key: tea.KeyF5, want: ViewSpecs},
-		{key: tea.KeyF6, want: ViewPlans},
-		{key: tea.KeyF7, want: ViewBoard},
-		{key: tea.KeyF8, want: ViewDash},
-		{key: tea.KeyF9, want: ViewHelp},
+		{key: tea.KeyF1, want: ViewCases},
+		{key: tea.KeyF2, want: ViewDumps},
+		{key: tea.KeyF3, want: ViewQuizzes},
+		{key: tea.KeyF4, want: ViewSpecs},
+		{key: tea.KeyF5, want: ViewPlans},
+		{key: tea.KeyF6, want: ViewBoard},
+		{key: tea.KeyF7, want: ViewDash},
 	}
 
 	for _, testCase := range cases {
@@ -284,6 +283,8 @@ func TestModelEditsAndSavesProjectMetadata(t *testing.T) {
 		},
 		ProjectExecutor: executor,
 	})
+
+	model.selectView(ViewProject)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("e")})
 	editing, ok := updated.(*Model)
@@ -381,6 +382,8 @@ func TestModelProjectEditAcceptsSpaces(t *testing.T) {
 	model.projectEdit = newProjectEditState(projectFieldDescription, "New")
 	model.projectEdit.Input.CursorEnd()
 
+	model.selectView(ViewProject)
+
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeySpace})
 	editing, ok := updated.(*Model)
 
@@ -411,6 +414,8 @@ func TestModelProjectEditInsertsAtCursor(t *testing.T) {
 
 	model.projectEdit = newProjectEditState(projectFieldDescription, "New description")
 	model.projectEdit.Input.SetCursor(3)
+
+	model.selectView(ViewProject)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeySpace})
 	editing, ok := updated.(*Model)
@@ -457,7 +462,7 @@ func TestModelCreatesAndSavesCaseMetadata(t *testing.T) {
 		CaseExecutor: executor,
 	})
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyF2})
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyF1})
 	casesView := requireUpdatedModel(t, updated)
 
 	updated, _ = casesView.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("n")})
@@ -547,7 +552,7 @@ func TestModelFiltersCaseMetadata(t *testing.T) {
 		},
 	})
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyF2})
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyF1})
 	casesView := requireUpdatedModel(t, updated)
 
 	updated, _ = casesView.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("/")})
@@ -574,7 +579,7 @@ func TestCasesUseTabForPanesAndArrowsWithinFocusedPane(t *testing.T) {
 		},
 	})
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyF2})
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyF1})
 	casesView := requireUpdatedModel(t, updated)
 
 	updated, _ = casesView.Update(tea.KeyMsg{Type: tea.KeyDown})
@@ -644,6 +649,8 @@ func TestProjectRefreshKeyRebuildsWorkspaceGraph(t *testing.T) {
 		WorkspaceExecutor: executor,
 	})
 
+	model.selectView(ViewProject)
+
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
 	refreshed := requireUpdatedModel(t, updated)
 
@@ -672,7 +679,7 @@ func TestCasesRefreshKeyRebuildsWorkspaceGraph(t *testing.T) {
 		WorkspaceExecutor: executor,
 	})
 	model.cases = []authoringcore.CaseMetadata{{Slug: "blog", Name: "Blog"}}
-	model.selected = 1
+	model.selectView(ViewCases)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
 	refreshed := requireUpdatedModel(t, updated)
@@ -1021,7 +1028,8 @@ func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 			{Index: 0, Title: "Spec", RelativePath: ".chr/default/specs/tui.md"},
 		},
 	})
-	model.selected = 4
+	model.selectView(ViewSpecs)
+
 	model.commandPalette.Open = true
 	model.commandPalette.Filter = "source"
 
@@ -1097,14 +1105,15 @@ func TestDefaultCommandRegistryDoesNotExposeDraftCreation(t *testing.T) {
 
 func TestSpecGenerationCommandsOnlyAppearInSpecs(t *testing.T) {
 	model := NewModel(Options{})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
+
 	model.commandPalette.Filter = "generate"
 
 	if commands := model.filteredCommands(); len(commands) != 0 {
 		t.Fatalf("quiz commands include spec generation actions: %#v", commands)
 	}
 
-	model.selected = 4
+	model.selectView(ViewSpecs)
 
 	commands := model.filteredCommands()
 	if len(commands) != 2 {
@@ -1118,14 +1127,15 @@ func TestSpecGenerationCommandsOnlyAppearInSpecs(t *testing.T) {
 
 func TestPlanCommandsOnlyAppearInPlans(t *testing.T) {
 	model := NewModel(Options{})
-	model.selected = 4
+	model.selectView(ViewSpecs)
+
 	model.commandPalette.Filter = "regenerate-plan"
 
 	if commands := model.filteredCommands(); len(commands) != 0 {
 		t.Fatalf("spec commands include plan actions: %#v", commands)
 	}
 
-	model.selected = 5
+	model.selectView(ViewPlans)
 
 	commands := model.filteredCommands()
 	if len(commands) != 1 || commands[0].ID != "regenerate-plan" || commands[0].Plan != PlanActionRegenerate {
@@ -1188,7 +1198,7 @@ func TestModelRefreshesDumpsFromDumpsKey(t *testing.T) {
 			{Title: "Second", RelativePath: ".chr/default/dumps/second.md"},
 		},
 	})
-	model.selected = 2
+	model.selectView(ViewDumps)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
 	refreshed := requireUpdatedModel(t, updated)
@@ -1223,7 +1233,7 @@ func TestModelRefreshesEmptyDumpsFromDumpsKey(t *testing.T) {
 		},
 	}
 	model := NewModel(Options{DumpExecutor: executor})
-	model.selected = 2
+	model.selectView(ViewDumps)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
 	refreshed := requireUpdatedModel(t, updated)
@@ -1264,13 +1274,15 @@ func TestModelRendersDocumentRefreshHints(t *testing.T) {
 		t.Fatalf("planActionHint() = %q, want refresh hint", hint)
 	}
 
-	model.selected = 4
-	if keys := model.renderKeys(); !strings.Contains(keys, "r refreshes") {
+	model.selectView(ViewSpecs)
+
+	if keys := model.renderKeys(); !strings.Contains(keys, "r refresh") {
 		t.Fatalf("spec renderKeys() = %q, want refresh key", keys)
 	}
 
-	model.selected = 5
-	if keys := model.renderKeys(); !strings.Contains(keys, "r refreshes") {
+	model.selectView(ViewPlans)
+
+	if keys := model.renderKeys(); !strings.Contains(keys, "r refresh") {
 		t.Fatalf("plan renderKeys() = %q, want refresh key", keys)
 	}
 }
@@ -1292,7 +1304,8 @@ func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 		},
 	})
 	model.cases = []authoringcore.CaseMetadata{{Slug: "blog", Name: "Blog"}}
-	model.selected = 1
+	model.selectView(ViewCases)
+
 	model.commandPalette.Open = true
 	model.commandPalette.Filter = "create-dump"
 
@@ -1373,7 +1386,7 @@ func TestModelConfirmsDumpAction(t *testing.T) {
 
 func TestModelRendersEmptyDumpState(t *testing.T) {
 	model := NewModel(Options{})
-	model.selected = 2
+	model.selectView(ViewDumps)
 
 	view := model.View()
 	for _, want := range []string{
@@ -1393,7 +1406,8 @@ func TestModelPlansEditDumpCommand(t *testing.T) {
 			{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 		},
 	})
-	model.selected = 2
+	model.selectView(ViewDumps)
+
 	model.commandPalette.Open = true
 	model.commandPalette.Filter = "edit-dump"
 
@@ -1431,7 +1445,8 @@ func TestModelEditsSelectedDumpDirectlyWithEnter(t *testing.T) {
 			{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 		},
 	})
-	model.selected = 2
+	model.selectView(ViewDumps)
+
 	model.selectedPane = 1
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
@@ -1581,7 +1596,8 @@ func TestModelRendersDumpEditPanelWithMinimalHint(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 2
+	model.selectView(ViewDumps)
+
 	model.selectedPane = 1
 	model.width = 100
 	model.height = 24
@@ -1644,7 +1660,7 @@ func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 			{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 		},
 	})
-	model.selected = 2
+	model.selectView(ViewDumps)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}, Alt: true})
 
@@ -1686,7 +1702,7 @@ func TestModelAltEOpensSelectedTicketSource(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}, Alt: true})
 
@@ -1728,7 +1744,7 @@ func TestModelCtrlEOpensSelectedTicketSource(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyCtrlE})
 
@@ -1760,7 +1776,8 @@ func TestModelEOpensSelectedSourceWhenDetailPaneFocused(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
+
 	model.selectedPane = 1
 
 	_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}})
@@ -1786,7 +1803,8 @@ func TestModelPageDownScrollsTicketDetailWithoutFocus(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
+
 	model.height = 20
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyPgDown})
@@ -1813,7 +1831,8 @@ func TestModelPageDownChangesVisibleTicketDetail(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
+
 	model.width = 100
 	model.height = 18
 	model.tickets[0].BodyLines = []string{
@@ -1865,7 +1884,8 @@ func TestModelScrollsFocusedTicketDetail(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
+
 	model.selectedPane = 1
 	model.tickets[0].BodyLines = []string{
 		"Line 1",
@@ -2263,7 +2283,7 @@ func TestModelRendersDashAgentWorkPanel(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 7
+	model.selectView(ViewDash)
 
 	view := model.View()
 	for _, want := range []string{
@@ -2307,7 +2327,7 @@ func TestModelRendersDashWorkReadinessGuidance(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 7
+	model.selectView(ViewDash)
 
 	view := model.View()
 	for _, want := range []string{
@@ -2318,7 +2338,7 @@ func TestModelRendersDashWorkReadinessGuidance(t *testing.T) {
 		"wrong_branch: expected dev but found feature/current",
 		"Repair: x apply safe repair",
 		"x Apply safe readiness repair",
-		"x repairs readiness",
+		"x repair",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -2328,7 +2348,7 @@ func TestModelRendersDashWorkReadinessGuidance(t *testing.T) {
 
 func TestModelDashRunAllKeyPlansWorkAction(t *testing.T) {
 	model := NewModel(Options{})
-	model.selected = 7
+	model.selectView(ViewDash)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a")})
 
@@ -2373,7 +2393,7 @@ func TestModelDashRepairReadinessKeyPlansWorkAction(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 7
+	model.selectView(ViewDash)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("x")})
 	planned := requireUpdatedModel(t, updated)
@@ -2405,7 +2425,7 @@ func TestModelDashCyclesAgentWorkFilters(t *testing.T) {
 			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Ready critical"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready_for_dev", Priority: "critical", Severity: "critical"}},
 		},
 	})
-	model.selected = 7
+	model.selectView(ViewDash)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p")})
 
@@ -2432,7 +2452,7 @@ func TestModelDashCyclesAgentWorkFilters(t *testing.T) {
 
 func TestModelDashRunAllUsesAgentWorkFilters(t *testing.T) {
 	model := NewModel(Options{})
-	model.selected = 7
+	model.selectView(ViewDash)
 
 	priorityChanged, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p")})
 	orderChanged, _ := priorityChanged.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("o")})
@@ -2482,7 +2502,7 @@ func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Old ready"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready_for_dev"}},
 		},
 	})
-	model.selected = 7
+	model.selectView(ViewDash)
 
 	updated, cmd := model.Update(agentWorkRefreshTickMsg{})
 	refreshing := requireUpdatedModel(t, updated)
@@ -2522,7 +2542,8 @@ func TestModelRefreshesDashAgentWorkWhileWorkBusy(t *testing.T) {
 		},
 	}
 	model := NewModel(Options{AgentWorkExecutor: executor})
-	model.selected = 7
+	model.selectView(ViewDash)
+
 	model.workBusy = true
 	model.statusMessage = "Running all ready tickets..."
 
@@ -2556,7 +2577,7 @@ func TestModelRefreshesDashAgentWorkWhileWorkBusy(t *testing.T) {
 func TestModelSkipsDashAgentWorkRefreshWhenOneIsInFlight(t *testing.T) {
 	executor := &fakeAgentWorkRefreshExecutor{}
 	model := NewModel(Options{AgentWorkExecutor: executor})
-	model.selected = 7
+	model.selectView(ViewDash)
 
 	updated, cmd := model.Update(agentWorkRefreshTickMsg{})
 	refreshing := requireUpdatedModel(t, updated)
@@ -2624,7 +2645,7 @@ func TestModelRendersDashRunningFailedAndBlockedStates(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			model := NewModel(Options{Observability: testCase.observability})
-			model.selected = 7
+			model.selectView(ViewDash)
 
 			view := model.View()
 			for _, want := range testCase.want {
@@ -2718,7 +2739,7 @@ func TestModelBlocksWorkActionWhenReadinessBlocked(t *testing.T) {
 			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready_for_dev"}},
 		},
 	})
-	model.selected = 7
+	model.selectView(ViewDash)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a")})
 	planned := requireUpdatedModel(t, updated)
@@ -2759,7 +2780,7 @@ func TestModelRunsRepairReadinessAction(t *testing.T) {
 		WorkExecutor:  executor,
 		WorkReadiness: testBlockedWorkReadinessView(),
 	})
-	model.selected = 7
+	model.selectView(ViewDash)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("x")})
 	planned := requireUpdatedModel(t, updated)
@@ -2937,7 +2958,7 @@ func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: ticketBoardTestTickets(t, projectDir),
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	view := model.View()
 
@@ -2982,7 +3003,7 @@ func TestModelRendersTicketEvidenceDetail(t *testing.T) {
 			},
 		}},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	view := model.View()
 
@@ -3019,7 +3040,7 @@ func TestModelRendersFullTicketBodyWithoutPreviewSections(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	view := model.View()
 
@@ -3114,7 +3135,7 @@ func TestModelSelectsTickets(t *testing.T) {
 			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Second"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
 	navigated, ok := updated.(*Model)
@@ -3140,7 +3161,7 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Second"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRight})
 	navigated, ok := updated.(*Model)
@@ -3175,7 +3196,7 @@ func TestModelRendersActiveBoardColumnInCompactMasterPane(t *testing.T) {
 			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Second"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	updated, _ := model.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
 	resized := requireUpdatedModel(t, updated)
@@ -3211,7 +3232,7 @@ func TestModelRendersCompactTicketRowsWithoutRawStatusOrWrapping(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	lines := model.renderTicketFocusList(48, 8)
 	rendered := strings.Join(lines, "\n")
@@ -3253,7 +3274,7 @@ func TestModelTogglesBoardAttentionView(t *testing.T) {
 			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Blocked"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBlockedLegacy}},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a"), Alt: true})
 	attention := requireUpdatedModel(t, updated)
@@ -3297,7 +3318,7 @@ func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-6"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Done ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusDone}},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	updated, _ := model.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
 	resized := requireUpdatedModel(t, updated)
@@ -3373,7 +3394,7 @@ func TestModelRendersMaximizedBoardAttentionSeparately(t *testing.T) {
 			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Blocked ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBlockedLegacy}},
 		},
 	})
-	model.selected = 6
+	model.selectView(ViewBoard)
 
 	updated, _ := model.Update(tea.WindowSizeMsg{Width: 100, Height: 20})
 	resized := requireUpdatedModel(t, updated)
@@ -3437,7 +3458,7 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 4
+	model.selectView(ViewSpecs)
 
 	view := model.View()
 
@@ -3514,8 +3535,7 @@ func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
 			},
 		},
 	})
-	model.views = []View{ViewAuthoring}
-	model.selected = 0
+	model.selectView(ViewAuthoring)
 
 	view := model.View()
 
@@ -3566,8 +3586,7 @@ func TestModelRendersAgentObservability(t *testing.T) {
 			},
 		},
 	})
-	model.views = []View{ViewAgent}
-	model.selected = 0
+	model.selectView(ViewAgent)
 
 	view := model.View()
 
@@ -3601,8 +3620,7 @@ func TestModelRendersRuntimeObservability(t *testing.T) {
 			},
 		},
 	})
-	model.views = []View{ViewRuntime}
-	model.selected = 0
+	model.selectView(ViewRuntime)
 
 	view := model.View()
 
@@ -3704,7 +3722,7 @@ func TestModelSelectsDocuments(t *testing.T) {
 			{Index: 1, UseCaseTitle: "Second", Title: "Second Spec"},
 		},
 	})
-	model.selected = 4
+	model.selectView(ViewSpecs)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
 	navigated, ok := updated.(*Model)
@@ -3748,7 +3766,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 2
+	model.selectView(ViewDumps)
 
 	view := model.View()
 	for _, want := range []string{
@@ -3788,7 +3806,7 @@ func TestModelDumpListUsesUseCaseTitle(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 2
+	model.selectView(ViewDumps)
 
 	view := model.View()
 	if !strings.Contains(view, "> Blog Publishing") {
@@ -3810,7 +3828,7 @@ func TestModelRendersDumpContentWithMarkdownLineBreaks(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 2
+	model.selectView(ViewDumps)
 
 	view := model.View()
 
@@ -3833,7 +3851,7 @@ func TestModelSelectsDumpsIndependentlyFromDocuments(t *testing.T) {
 			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chr/default/specs/spec.md"},
 		},
 	})
-	model.selected = 2
+	model.selectView(ViewDumps)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
 
@@ -3890,7 +3908,8 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
+
 	model.selectedQuiz = 1
 
 	view := model.View()
@@ -3928,7 +3947,7 @@ func TestModelHidesTechnicalQuizDetails(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
 
 	view := model.View()
 	for _, unwanted := range []string{
@@ -3962,7 +3981,7 @@ func TestModelRendersCuratedQuizBodyWithoutActiveQuestion(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
 
 	view := model.View()
 	for _, want := range []string{
@@ -3987,7 +4006,7 @@ func TestModelSelectsQuizzesIndependentlyFromDocuments(t *testing.T) {
 			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chr/default/specs/spec.md"},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
 
@@ -4028,7 +4047,8 @@ func TestModelConfirmsQuizStartThroughExecutor(t *testing.T) {
 			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "not_started"},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
+
 	model.selectedQuiz = 1
 	model.planQuizAction(QuizActionStart)
 
@@ -4080,7 +4100,7 @@ func TestModelStartsQuizFromQuizzesKey(t *testing.T) {
 			{Title: "Project", Scope: QuizScope{}, Status: "not_started"},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
 	busy := requireUpdatedModel(t, updated)
@@ -4140,7 +4160,8 @@ func TestModelGeneratesSpecFromSpecsKey(t *testing.T) {
 			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "done"},
 		},
 	})
-	model.selected = 4
+	model.selectView(ViewSpecs)
+
 	model.selectedSpec = 1
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
@@ -4193,7 +4214,7 @@ func TestModelGeneratesAcceptanceFeatureFromSpecsKey(t *testing.T) {
 			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "draft"},
 		},
 	})
-	model.selected = 4
+	model.selectView(ViewSpecs)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("f")})
 	busy := requireUpdatedModel(t, updated)
@@ -4233,7 +4254,7 @@ func TestModelReportsSpecGenerationFailureShowsLastSavedSpec(t *testing.T) {
 			{Title: "Blog Spec", Scope: QuizScope{CaseSlug: "blog"}, Status: "draft", Content: "# Blog Spec"},
 		},
 	})
-	model.selected = 4
+	model.selectView(ViewSpecs)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
 	busy := requireUpdatedModel(t, updated)
@@ -4254,7 +4275,7 @@ func TestModelReportsAcceptanceFeatureGenerationFailureWithFeatureLabel(t *testi
 			{Title: "Blog Spec", Scope: QuizScope{CaseSlug: "blog"}, Status: "draft", Content: "# Blog Spec"},
 		},
 	})
-	model.selected = 4
+	model.selectView(ViewSpecs)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("f")})
 	busy := requireUpdatedModel(t, updated)
@@ -4289,7 +4310,8 @@ func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
 			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "missing"},
 		},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
+
 	model.selectedPlan = 1
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
@@ -4354,7 +4376,7 @@ func TestModelReportsPlanGenerationFailureShowsLastSavedPlan(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("G")})
 	pending := requireUpdatedModel(t, updated)
@@ -4384,7 +4406,7 @@ func TestModelRefusesGeneratePlanWhenPlanExists(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
 	confirmed := requireUpdatedModel(t, updated)
@@ -4434,7 +4456,7 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("G")})
 	pending := requireUpdatedModel(t, updated)
@@ -4517,7 +4539,7 @@ func TestModelShowsPlanTrackingOnlyWhenPlanExists(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
 
 	if strings.Contains(model.planActionHint(), "alt+t tracking") {
 		t.Fatalf("planActionHint() = %q, want no tracking hint for missing plan", model.planActionHint())
@@ -4552,7 +4574,7 @@ func TestModelPlansPlanTrackingWithAltT(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("t"), Alt: true})
 	pending := requireUpdatedModel(t, updated)
@@ -4605,7 +4627,8 @@ func TestModelBlocksPlanTrackingWhileBusy(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
+
 	model.planBusy = true
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("t"), Alt: true})
@@ -4636,7 +4659,8 @@ func TestModelBlocksRegenerateWhileBusy(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
+
 	model.planBusy = true
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("G")})
@@ -4665,7 +4689,7 @@ func TestModelBlocksPlanTrackingWhenPlanIsMissing(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("t"), Alt: true})
 	blocked := requireUpdatedModel(t, updated)
@@ -4687,7 +4711,8 @@ func TestPlanTrackingCommandOnlyAppearsWhenPlanExists(t *testing.T) {
 	model := NewModel(Options{
 		Plans: []PlanView{{Title: "Missing Plan", Status: "missing"}},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
+
 	model.commandPalette.Filter = "materialize-plan-tracking"
 
 	if commands := model.filteredCommands(); len(commands) != 0 {
@@ -4717,7 +4742,8 @@ func TestModelBlocksDuplicatePlanActionWhileBusy(t *testing.T) {
 			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "missing"},
 		},
 	})
-	model.selected = 5
+	model.selectView(ViewPlans)
+
 	model.planBusy = true
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
@@ -4744,7 +4770,7 @@ func TestModelSpecListUsesUseCaseTitleWhenSpecExists(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 4
+	model.selectView(ViewSpecs)
 
 	view := model.View()
 	if !strings.Contains(view, "> Blog Publishing") {
@@ -4790,7 +4816,7 @@ func TestModelSubmitsQuizAnswerWithEnterThroughExecutor(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
 	model.startQuizAnswer()
 	model.quizAnswer.Input.SetValue("Clarify editorial ownership.")
 
@@ -4836,7 +4862,7 @@ func TestModelInsertsQuizAnswerLineWithShiftEnter(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
 	model.startQuizAnswer()
 	model.quizAnswer.Input.SetValue("First line")
 
@@ -4869,7 +4895,7 @@ func TestModelSkipsQuizAnswerWithAltS(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
 	model.startQuizAnswer()
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s"), Alt: true})
@@ -4912,7 +4938,7 @@ func TestModelCompletesQuizAnswerWithAltD(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
 	model.startQuizAnswer()
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("d"), Alt: true})
@@ -4950,7 +4976,7 @@ func TestModelConfirmsQuizFastModeThroughExecutor(t *testing.T) {
 			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "active", Mode: "deep"},
 		},
 	})
-	model.selected = 3
+	model.selectView(ViewQuizzes)
 	model.planQuizAction(QuizActionFastMode)
 
 	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})

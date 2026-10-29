@@ -32,6 +32,8 @@ func (f *harnessSelectionFixture) SaveHarnessSelections(request HarnessSelection
 func TestTUIHarnessSelectionRead(t *testing.T) {
 	executor := &harnessSelectionFixture{view: HarnessSelectionView{Snapshot: harnesscore.SelectionSnapshot{Revision: strings.Repeat("a", 64)}}}
 	model := NewModel(Options{HarnessExecutor: executor})
+	model.selectView(ViewProject)
+
 	updated, first := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("h")})
 
 	model = requireUpdatedModel(t, updated)
@@ -63,6 +65,8 @@ func TestTUIHarnessSelectionRead(t *testing.T) {
 func TestTUIHarnessSelectionFailure(t *testing.T) {
 	executor := &harnessSelectionFixture{err: errors.New("private credential path")}
 	model := NewModel(Options{HarnessExecutor: executor})
+	model.selectView(ViewProject)
+
 	model.harnessSelection = harnessSelectionState{Active: true, Worker: "attempted"}
 	command := model.reloadHarnessPicker()
 	updated, _ := model.Update(command())

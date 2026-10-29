@@ -24,51 +24,51 @@ func (m *Model) specActionHint() string {
 }
 
 func (m *Model) selectedSpecView() (SpecView, bool) {
-	for _, spec := range m.specs {
+	for _, spec := range m.visibleSpecs() {
 		if spec.Index == m.selectedSpec {
 			return spec, true
 		}
 	}
 
-	if len(m.specs) > 0 {
-		return m.specs[0], true
+	if len(m.visibleSpecs()) > 0 {
+		return m.visibleSpecs()[0], true
 	}
 
 	return SpecView{}, false
 }
 
 func (m *Model) selectPreviousSpec() {
-	if len(m.specs) == 0 {
+	if len(m.visibleSpecs()) == 0 {
 		return
 	}
 
 	position := m.selectedSpecPosition()
 	if position == 0 {
-		m.selectedSpec = m.specs[len(m.specs)-1].Index
+		m.selectedSpec = m.visibleSpecs()[len(m.visibleSpecs())-1].Index
 
 		return
 	}
 
-	m.selectedSpec = m.specs[position-1].Index
+	m.selectedSpec = m.visibleSpecs()[position-1].Index
 }
 
 func (m *Model) selectNextSpec() {
-	if len(m.specs) == 0 {
+	if len(m.visibleSpecs()) == 0 {
 		return
 	}
 
 	position := m.selectedSpecPosition()
-	if position >= len(m.specs)-1 {
-		m.selectedSpec = m.specs[0].Index
+	if position >= len(m.visibleSpecs())-1 {
+		m.selectedSpec = m.visibleSpecs()[0].Index
 
 		return
 	}
 
-	m.selectedSpec = m.specs[position+1].Index
+	m.selectedSpec = m.visibleSpecs()[position+1].Index
 }
 
 func (m *Model) selectedSpecPosition() int {
-	for index, spec := range m.specs {
+	for index, spec := range m.visibleSpecs() {
 		if spec.Index == m.selectedSpec {
 			return index
 		}
@@ -78,7 +78,7 @@ func (m *Model) selectedSpecPosition() int {
 }
 
 func (m *Model) selectSpecByScope(scope QuizScope) {
-	for _, spec := range m.specs {
+	for _, spec := range m.visibleSpecs() {
 		if spec.Scope.CaseSlug == scope.CaseSlug {
 			m.selectedSpec = spec.Index
 
@@ -86,8 +86,8 @@ func (m *Model) selectSpecByScope(scope QuizScope) {
 		}
 	}
 
-	if len(m.specs) > 0 {
-		m.selectedSpec = m.specs[0].Index
+	if len(m.visibleSpecs()) > 0 {
+		m.selectedSpec = m.visibleSpecs()[0].Index
 
 		return
 	}
@@ -98,7 +98,7 @@ func (m *Model) selectSpecByScope(scope QuizScope) {
 func (m *Model) selectedSpecScope() QuizScope {
 	spec, ok := m.selectedSpecView()
 	if !ok {
-		return QuizScope{}
+		return QuizScope{CaseSlug: m.caseContext.CaseSlug}
 	}
 
 	return spec.Scope

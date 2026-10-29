@@ -109,6 +109,10 @@ func (m *Model) renderProductSelectedView(selectedView View) (string, bool) {
 }
 
 func (m *Model) renderLegacySelectedView(selectedView View) string {
+	if selectedView == ViewHelp {
+		return m.renderHelp()
+	}
+
 	if selectedView == ViewBoard {
 		return m.renderTicketBoard()
 	}
@@ -147,14 +151,18 @@ func (m *Model) renderKeys() string {
 	}
 
 	if keys, ok := viewKeyHints[m.SelectedView()]; ok {
-		return keys
+		return keys + " | F1-F7 tabs  ? Help  alt+p Project  : palette  Ctrl+C exit"
 	}
 
-	return "Keys: F1-F9 or click changes tab, tab changes pane, q quits"
+	return "Keys: F1-F7 tabs  ? Help  alt+p Project  : palette  Ctrl+C exit"
 }
 
 func (m *Model) activeInteractionKeys() (string, bool) {
 	hints := []interactionKeyHint{
+		{Active: m.projectEdit.Active || m.caseEdit.Active, Text: "Keys: enter accepts field  esc cancels  Ctrl+C exits"},
+		{Active: m.caseFilterEditing, Text: "Keys: enter applies case filter  esc cancels  Ctrl+C exits"},
+		{Active: m.dumpEdit.Active, Text: "Keys: ctrl+s saves dump  esc cancels  alt+e external  Ctrl+C exits"},
+		{Active: m.workBusy, Text: "Keys: waiting for work action  Ctrl+C exits"},
 		{Active: m.artifactAction.Pending, Text: "Keys: enter confirms action, esc cancels action"},
 		{Active: m.dumpAction.Pending, Text: "Keys: enter confirms dump action, esc cancels dump action"},
 		{Active: m.ticketAction.Pending, Text: "Keys: enter confirms ticket action, esc cancels ticket action"},

@@ -1,11 +1,17 @@
 package tui
 
 import (
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 // SelectedView returns the active TUI view.
 func (m *Model) SelectedView() View {
+	if m.auxiliaryView != "" {
+		return m.auxiliaryView
+	}
+
 	return m.views[m.selected]
 }
 
@@ -123,6 +129,13 @@ func (m *Model) handleDashRepairReadinessKey() {
 
 func (m *Model) handleNavigationCommandKey(key string) (tea.Cmd, bool) {
 	switch {
+	case key == "esc" && m.SelectedView() == ViewHelp:
+		view, pane := m.helpReturnView, m.helpReturnPane
+		m.selectView(view)
+
+		m.selectedPane = pane
+
+		return nil, true
 	case isQuitKey(key):
 		return tea.Quit, true
 	case key == "alt+m":
@@ -160,37 +173,13 @@ func isQuitKey(key string) bool {
 }
 
 func functionKeyView(msg tea.KeyMsg) (View, bool) {
-	viewsByType := map[tea.KeyType]View{
-		tea.KeyF1: ViewProject,
-		tea.KeyF2: ViewCases,
-		tea.KeyF3: ViewDumps,
-		tea.KeyF4: ViewQuizzes,
-		tea.KeyF5: ViewSpecs,
-		tea.KeyF6: ViewPlans,
-		tea.KeyF7: ViewBoard,
-		tea.KeyF8: ViewDash,
-		tea.KeyF9: ViewHelp,
+	for _, button := range shellFooterButtons() {
+		if button.View != "" && strings.EqualFold(button.Key, msg.String()) {
+			return button.View, true
+		}
 	}
 
-	if view, ok := viewsByType[msg.Type]; ok {
-		return view, true
-	}
-
-	viewsByString := map[string]View{
-		"f1": ViewProject,
-		"f2": ViewCases,
-		"f3": ViewDumps,
-		"f4": ViewQuizzes,
-		"f5": ViewSpecs,
-		"f6": ViewPlans,
-		"f7": ViewBoard,
-		"f8": ViewDash,
-		"f9": ViewHelp,
-	}
-
-	view, ok := viewsByString[msg.String()]
-
-	return view, ok
+	return "", false
 }
 
 func (m *Model) selectPreviousRecord() {
@@ -202,27 +191,34 @@ func (m *Model) selectPreviousRecord() {
 
 	selectedPath := m.selectedSourcePath()
 	switch m.SelectedView() {
+	case ViewHelp:
+		m.scrollDetail(-1)
 	case ViewDash:
 		m.moveDashSelection(-1)
 	case ViewBoard, ViewTickets:
 		m.selectPreviousTicket()
+	default:
+		m.selectPreviousArtifact()
+	}
+
+	m.resetDetailScrollIfSourceChanged(selectedPath)
+}
+
+func (m *Model) selectPreviousArtifact() {
+	switch m.SelectedView() {
 	case ViewDumps:
 		m.selectPreviousDump()
 	case ViewQuizzes:
 		m.selectPreviousQuiz()
-	case ViewSpecs, ViewPlans, ViewDocuments:
-		if m.SelectedView() == ViewSpecs {
-			m.selectPreviousSpec()
-		} else if m.SelectedView() == ViewPlans {
-			m.selectPreviousPlan()
-		} else {
-			m.selectPreviousDocument()
-		}
+	case ViewSpecs:
+		m.selectPreviousSpec()
+	case ViewPlans:
+		m.selectPreviousPlan()
+	case ViewDocuments:
+		m.selectPreviousDocument()
 	case ViewAuthoring:
 		m.selectPreviousAuthoringSession()
 	}
-
-	m.resetDetailScrollIfSourceChanged(selectedPath)
 }
 
 func (m *Model) selectNextRecord() {
@@ -234,27 +230,34 @@ func (m *Model) selectNextRecord() {
 
 	selectedPath := m.selectedSourcePath()
 	switch m.SelectedView() {
+	case ViewHelp:
+		m.scrollDetail(1)
 	case ViewDash:
 		m.moveDashSelection(1)
 	case ViewBoard, ViewTickets:
 		m.selectNextTicket()
+	default:
+		m.selectNextArtifact()
+	}
+
+	m.resetDetailScrollIfSourceChanged(selectedPath)
+}
+
+func (m *Model) selectNextArtifact() {
+	switch m.SelectedView() {
 	case ViewDumps:
 		m.selectNextDump()
 	case ViewQuizzes:
 		m.selectNextQuiz()
-	case ViewSpecs, ViewPlans, ViewDocuments:
-		if m.SelectedView() == ViewSpecs {
-			m.selectNextSpec()
-		} else if m.SelectedView() == ViewPlans {
-			m.selectNextPlan()
-		} else {
-			m.selectNextDocument()
-		}
+	case ViewSpecs:
+		m.selectNextSpec()
+	case ViewPlans:
+		m.selectNextPlan()
+	case ViewDocuments:
+		m.selectNextDocument()
 	case ViewAuthoring:
 		m.selectNextAuthoringSession()
 	}
-
-	m.resetDetailScrollIfSourceChanged(selectedPath)
 }
 
 func lastRune(value string) string {

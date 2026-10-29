@@ -50,20 +50,18 @@ func (m *Model) renderShellFooter(width int) string {
 		return strings.Join(wrapPlainText(m.guidedHint(), width), "\n")
 	}
 
-	return m.renderShellButtons(shellFooterButtons(), width)
+	return fitPlainLine(m.renderKeys(), width) + "\n" + m.renderShellButtons(shellFooterButtons(), width)
 }
 
 func shellFooterButtons() []shellButton {
 	return []shellButton{
-		{Key: "F1", Label: "Project", View: ViewProject},
-		{Key: "F2", Label: "Cases", View: ViewCases},
-		{Key: "F3", Label: "Dumps", View: ViewDumps},
-		{Key: "F4", Label: "Quizzes", View: ViewQuizzes},
-		{Key: "F5", Label: "Specs", View: ViewSpecs},
-		{Key: "F6", Label: "Plans", View: ViewPlans},
-		{Key: "F7", Label: "Board", View: ViewBoard},
-		{Key: "F8", Label: "Dash", View: ViewDash},
-		{Key: "F9", Label: "Help", View: ViewHelp},
+		{Key: "F1", Label: "Cases", View: ViewCases},
+		{Key: "F2", Label: "Dumps", View: ViewDumps},
+		{Key: "F3", Label: "Quizzes", View: ViewQuizzes},
+		{Key: "F4", Label: "Specs", View: ViewSpecs},
+		{Key: "F5", Label: "Plans", View: ViewPlans},
+		{Key: "F6", Label: "Board", View: ViewBoard},
+		{Key: "F7", Label: "Dash", View: ViewDash},
 		{Key: "F10", Label: "Exit"},
 	}
 }

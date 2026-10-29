@@ -206,7 +206,7 @@ func (p *guidedTerminal) keys(t *testing.T, value string) {
 func (p *guidedTerminal) catalog(t *testing.T) {
 	t.Helper()
 
-	p.keys(t, "\x1bOQ")
+	p.keys(t, "\x1bOP")
 	p.keys(t, "g")
 	p.see(t, "Develop a new use case")
 	p.see(t, "Execution target:")

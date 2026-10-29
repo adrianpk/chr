@@ -20,16 +20,16 @@ type documentCatalogView struct {
 
 func (m *Model) documentCatalog(kind View) documentCatalogView {
 	if kind == ViewPlans {
-		items := make([]documentCatalogItem, len(m.plans))
-		for i, plan := range m.plans {
+		items := make([]documentCatalogItem, len(m.visiblePlans()))
+		for i, plan := range m.visiblePlans() {
 			items[i] = documentCatalogItem{Index: plan.Index, UseCaseTitle: planUseCaseTitle(plan), Title: plan.Title, Status: plan.Status, ScopeStatus: planScopeStatus(plan), Content: plan.Content}
 		}
 
 		return documentCatalogView{kind: "plan", title: "Plans", hint: m.planActionHint(), message: m.statusMessage, items: items, selected: m.selectedPlan, busy: m.planBusy}
 	}
 
-	items := make([]documentCatalogItem, len(m.specs))
-	for i, spec := range m.specs {
+	items := make([]documentCatalogItem, len(m.visibleSpecs()))
+	for i, spec := range m.visibleSpecs() {
 		items[i] = documentCatalogItem{Index: spec.Index, UseCaseTitle: specUseCaseTitle(spec), Title: spec.Title, Status: spec.Status, ScopeStatus: specScopeStatus(spec), Content: spec.Content}
 	}
 

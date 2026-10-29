@@ -85,7 +85,7 @@ func onlyGuidedTUIRun(t *testing.T, operations service) authoringcore.Session {
 func openGuidedTUI(t *testing.T, model *tui.Model) {
 	t.Helper()
 
-	runGuidedTUIKey(t, model, "f2", false)
+	runGuidedTUIKey(t, model, "f1", false)
 	runGuidedTUIKey(t, model, "g", true)
 }
 
@@ -101,7 +101,7 @@ func runGuidedTUIKey(t *testing.T, model *tui.Model, key string, execute bool) {
 	t.Helper()
 
 	message := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(key)}
-	if kind, ok := map[string]tea.KeyType{"f2": tea.KeyF2, "enter": tea.KeyEnter, "esc": tea.KeyEsc, "pgdown": tea.KeyPgDown}[key]; ok {
+	if kind, ok := map[string]tea.KeyType{"f1": tea.KeyF1, "enter": tea.KeyEnter, "esc": tea.KeyEsc, "pgdown": tea.KeyPgDown}[key]; ok {
 		message = tea.KeyMsg{Type: kind}
 	}
 

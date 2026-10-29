@@ -287,7 +287,7 @@ func externalEditorErrorMessage(msg dumpEditorFinishedMsg) string {
 
 func (m *Model) defaultDumpScope() DumpScope {
 	if m.SelectedView() != ViewCases {
-		return DumpScope{}
+		return DumpScope{CaseSlug: m.caseContext.CaseSlug}
 	}
 
 	selectedCase, ok := m.selectedCaseMetadata()

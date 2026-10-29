@@ -43,7 +43,6 @@ const (
 )
 
 var defaultViews = []View{
-	ViewProject,
 	ViewCases,
 	ViewDumps,
 	ViewQuizzes,
@@ -51,7 +50,11 @@ var defaultViews = []View{
 	ViewPlans,
 	ViewBoard,
 	ViewDash,
-	ViewHelp,
+}
+
+var auxiliaryViews = []View{
+	ViewProject, ViewHelp, ViewDashboard, ViewTickets, ViewDocuments,
+	ViewAuthoring, ViewAgent, ViewRuntime,
 }
 
 var viewPlaceholders = map[View]string{

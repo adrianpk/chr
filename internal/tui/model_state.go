@@ -30,10 +30,14 @@ type caseState struct {
 }
 
 type navigationState struct {
-	views        []View
-	selected     int
-	selectedPane int
-	detailScroll int
+	caseContext    caseNavigationContext
+	helpReturnView View
+	helpReturnPane int
+	auxiliaryView  View
+	views          []View
+	selected       int
+	selectedPane   int
+	detailScroll   int
 }
 
 type layoutState struct {

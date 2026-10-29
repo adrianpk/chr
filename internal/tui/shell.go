@@ -72,7 +72,11 @@ func (m *Model) renderShell() string {
 
 func (m *Model) renderShellTopbar(width int) string {
 	project := m.projectDisplayName()
-	left := fmt.Sprintf(" %s ", project)
+
+	left := fmt.Sprintf(" %s [alt+p Project] ", project)
+	if context := m.caseContextLabel(); context != "" {
+		left += context + " "
+	}
 
 	right := fmt.Sprintf(" %s ", string(m.SelectedView()))
 	if m.guided.Active {
@@ -130,6 +134,8 @@ func (m *Model) renderProductWorkspace(width, height int) (string, bool) {
 
 func (m *Model) renderLegacyWorkspace(width, height int) string {
 	switch m.SelectedView() {
+	case ViewHelp:
+		return m.renderHelpWorkspace(width, height)
 	case ViewDocuments:
 		return m.renderDocumentWorkspace(width, height, "Documents", m.documents)
 	case ViewAuthoring:

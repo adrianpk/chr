@@ -28,13 +28,13 @@ type DumpView struct {
 }
 
 func (m *Model) renderDumpFocusList(limit int) []string {
-	if len(m.dumps) == 0 {
+	if len(m.visibleDumps()) == 0 {
 		return []string{"No dumps found."}
 	}
 
 	lines := []string{shellMutedStyle.Render("Use Case")}
 
-	for _, dump := range m.dumps {
+	for _, dump := range m.visibleDumps() {
 		prefix := " "
 		if dump.Index == m.selectedDump {
 			prefix = ">"
@@ -132,7 +132,7 @@ func (m *Model) renderDumpEditInput(width, height int) string {
 }
 
 func (m *Model) renderDumps() string {
-	if len(m.dumps) == 0 {
+	if len(m.visibleDumps()) == 0 {
 		return "Dumps\n  No dumps found.\n\n  " + m.dumpActionHint()
 	}
 
@@ -140,7 +140,7 @@ func (m *Model) renderDumps() string {
 
 	output.WriteString("Dumps\n")
 
-	for _, dump := range m.dumps {
+	for _, dump := range m.visibleDumps() {
 		prefix := "  "
 		if dump.Index == m.selectedDump {
 			prefix = "> "
@@ -162,7 +162,7 @@ func (m *Model) dumpActionHint() string {
 		return "ctrl+s save  esc cancel  alt+e external"
 	}
 
-	if len(m.dumps) == 0 {
+	if len(m.visibleDumps()) == 0 {
 		return "c create  r refresh"
 	}
 
@@ -191,51 +191,51 @@ func (m *Model) updateDumpsKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) selectedDumpView() (DumpView, bool) {
-	for _, dump := range m.dumps {
+	for _, dump := range m.visibleDumps() {
 		if dump.Index == m.selectedDump {
 			return dump, true
 		}
 	}
 
-	if len(m.dumps) > 0 {
-		return m.dumps[0], true
+	if len(m.visibleDumps()) > 0 {
+		return m.visibleDumps()[0], true
 	}
 
 	return DumpView{}, false
 }
 
 func (m *Model) selectPreviousDump() {
-	if len(m.dumps) == 0 {
+	if len(m.visibleDumps()) == 0 {
 		return
 	}
 
 	position := m.selectedDumpPosition()
 	if position == 0 {
-		m.selectedDump = m.dumps[len(m.dumps)-1].Index
+		m.selectedDump = m.visibleDumps()[len(m.visibleDumps())-1].Index
 
 		return
 	}
 
-	m.selectedDump = m.dumps[position-1].Index
+	m.selectedDump = m.visibleDumps()[position-1].Index
 }
 
 func (m *Model) selectNextDump() {
-	if len(m.dumps) == 0 {
+	if len(m.visibleDumps()) == 0 {
 		return
 	}
 
 	position := m.selectedDumpPosition()
-	if position >= len(m.dumps)-1 {
-		m.selectedDump = m.dumps[0].Index
+	if position >= len(m.visibleDumps())-1 {
+		m.selectedDump = m.visibleDumps()[0].Index
 
 		return
 	}
 
-	m.selectedDump = m.dumps[position+1].Index
+	m.selectedDump = m.visibleDumps()[position+1].Index
 }
 
 func (m *Model) selectedDumpPosition() int {
-	for index, dump := range m.dumps {
+	for index, dump := range m.visibleDumps() {
 		if dump.Index == m.selectedDump {
 			return index
 		}
@@ -247,7 +247,7 @@ func (m *Model) selectedDumpPosition() int {
 func (m *Model) selectDumpByPath(path string) {
 	path = strings.TrimSpace(path)
 	if path != "" {
-		for _, dump := range m.dumps {
+		for _, dump := range m.visibleDumps() {
 			if dump.RelativePath == path {
 				m.selectedDump = dump.Index
 
@@ -256,8 +256,8 @@ func (m *Model) selectDumpByPath(path string) {
 		}
 	}
 
-	if len(m.dumps) > 0 {
-		m.selectedDump = m.dumps[0].Index
+	if len(m.visibleDumps()) > 0 {
+		m.selectedDump = m.visibleDumps()[0].Index
 
 		return
 	}

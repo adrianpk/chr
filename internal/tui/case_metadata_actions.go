@@ -113,6 +113,8 @@ func (m *Model) handleCaseActionKey(msg tea.KeyMsg) bool {
 func (m *Model) handleCaseEnterKey() bool {
 	switch m.selectedPane {
 	case 0:
+		m.captureCaseContext()
+
 		m.selectedPane = 1
 	case 1:
 		m.startCaseFieldEdit()
@@ -238,6 +240,13 @@ func (m *Model) caseIndexForSlug(slug string) int {
 }
 
 func (m *Model) clampSelectedCase() {
+	if !m.caseContextAvailable() {
+		m.selectedCase = -1
+		m.explainCaseContext()
+
+		return
+	}
+
 	cases := m.filteredCases()
 	if len(cases) == 0 {
 		m.selectedCase = 0

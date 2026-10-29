@@ -88,7 +88,7 @@ func TestModelWorkflowStopAvailable(t *testing.T) {
 // TestModelWorkflowSelection keeps legacy selection behavior and routes native
 // ticket and case choices through read-only preview before execution.
 func TestModelWorkflowSelection(t *testing.T) {
-	model := NewModel(Options{Observability: ObservabilityView{Authority: workspaceconfig.WorkStateAuthorityTickets}, Tickets: []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}}, Cases: []authoringcore.CaseMetadata{{Slug: "delivery"}}})
+	model := NewModel(Options{Observability: ObservabilityView{Authority: workspaceconfig.WorkStateAuthorityTickets}, Tickets: []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev, UseCase: "delivery"}}}, Cases: []authoringcore.CaseMetadata{{Slug: "delivery"}}})
 	model.selectView(ViewTickets)
 	model.planWorkAction(WorkActionStartTicket)
 

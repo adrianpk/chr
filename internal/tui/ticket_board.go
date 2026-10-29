@@ -9,7 +9,7 @@ import (
 )
 
 func (m *Model) filteredTickets() []TicketView {
-	tickets := m.tickets
+	tickets := m.caseTickets()
 	if m.SelectedView() == ViewBoard {
 		if m.boardAttentionActive() {
 			tickets = m.attentionTickets()
@@ -92,7 +92,7 @@ func (m *Model) activeBoardColumnTickets() []TicketView {
 func (m *Model) ticketsForBoardColumn(column string) []TicketView {
 	tickets := []TicketView{}
 
-	for _, ticket := range m.tickets {
+	for _, ticket := range m.caseTickets() {
 		if ticket.BoardColumn == column {
 			tickets = append(tickets, ticket)
 		}
@@ -104,7 +104,7 @@ func (m *Model) ticketsForBoardColumn(column string) []TicketView {
 func (m *Model) attentionTickets() []TicketView {
 	tickets := []TicketView{}
 
-	for _, ticket := range m.tickets {
+	for _, ticket := range m.caseTickets() {
 		if len(ticket.AttentionReasons) > 0 {
 			tickets = append(tickets, ticket)
 		}

@@ -38,13 +38,13 @@ type QuizView struct {
 }
 
 func (m *Model) renderQuizFocusList(limit int) []string {
-	if len(m.quizzes) == 0 {
+	if len(m.visibleQuizzes()) == 0 {
 		return []string{"No quiz use cases found."}
 	}
 
 	lines := []string{shellMutedStyle.Render("Use Case")}
 
-	for _, quiz := range m.quizzes {
+	for _, quiz := range m.visibleQuizzes() {
 		prefix := " "
 		if quiz.Index == m.selectedQuiz {
 			prefix = ">"
@@ -103,7 +103,7 @@ func (m *Model) renderSelectedQuizAnswerLines(quiz QuizView, width int) []string
 }
 
 func (m *Model) renderQuizzes() string {
-	if len(m.quizzes) == 0 {
+	if len(m.visibleQuizzes()) == 0 {
 		return "Quizzes\n  No quiz use cases found."
 	}
 
@@ -111,7 +111,7 @@ func (m *Model) renderQuizzes() string {
 
 	output.WriteString("Quizzes\n")
 
-	for _, quiz := range m.quizzes {
+	for _, quiz := range m.visibleQuizzes() {
 		prefix := "  "
 		if quiz.Index == m.selectedQuiz {
 			prefix = "> "
@@ -172,51 +172,51 @@ func (m *Model) quizActionHint(quiz QuizView) string {
 }
 
 func (m *Model) selectedQuizView() (QuizView, bool) {
-	for _, quiz := range m.quizzes {
+	for _, quiz := range m.visibleQuizzes() {
 		if quiz.Index == m.selectedQuiz {
 			return quiz, true
 		}
 	}
 
-	if len(m.quizzes) > 0 {
-		return m.quizzes[0], true
+	if len(m.visibleQuizzes()) > 0 {
+		return m.visibleQuizzes()[0], true
 	}
 
 	return QuizView{}, false
 }
 
 func (m *Model) selectPreviousQuiz() {
-	if len(m.quizzes) == 0 {
+	if len(m.visibleQuizzes()) == 0 {
 		return
 	}
 
 	position := m.selectedQuizPosition()
 	if position == 0 {
-		m.selectedQuiz = m.quizzes[len(m.quizzes)-1].Index
+		m.selectedQuiz = m.visibleQuizzes()[len(m.visibleQuizzes())-1].Index
 
 		return
 	}
 
-	m.selectedQuiz = m.quizzes[position-1].Index
+	m.selectedQuiz = m.visibleQuizzes()[position-1].Index
 }
 
 func (m *Model) selectNextQuiz() {
-	if len(m.quizzes) == 0 {
+	if len(m.visibleQuizzes()) == 0 {
 		return
 	}
 
 	position := m.selectedQuizPosition()
-	if position >= len(m.quizzes)-1 {
-		m.selectedQuiz = m.quizzes[0].Index
+	if position >= len(m.visibleQuizzes())-1 {
+		m.selectedQuiz = m.visibleQuizzes()[0].Index
 
 		return
 	}
 
-	m.selectedQuiz = m.quizzes[position+1].Index
+	m.selectedQuiz = m.visibleQuizzes()[position+1].Index
 }
 
 func (m *Model) selectQuizByScope(scope QuizScope) {
-	for _, quiz := range m.quizzes {
+	for _, quiz := range m.visibleQuizzes() {
 		if quiz.Scope.CaseSlug == scope.CaseSlug {
 			m.selectedQuiz = quiz.Index
 
@@ -224,8 +224,8 @@ func (m *Model) selectQuizByScope(scope QuizScope) {
 		}
 	}
 
-	if len(m.quizzes) > 0 {
-		m.selectedQuiz = m.quizzes[0].Index
+	if len(m.visibleQuizzes()) > 0 {
+		m.selectedQuiz = m.visibleQuizzes()[0].Index
 
 		return
 	}
@@ -236,7 +236,7 @@ func (m *Model) selectQuizByScope(scope QuizScope) {
 func (m *Model) selectedQuizScope() QuizScope {
 	quiz, ok := m.selectedQuizView()
 	if !ok {
-		return QuizScope{}
+		return QuizScope{CaseSlug: m.caseContext.CaseSlug}
 	}
 
 	return quiz.Scope
@@ -292,7 +292,7 @@ func (m *Model) newQuizActionState(action QuizActionID) QuizActionState {
 }
 
 func (m *Model) selectedQuizPosition() int {
-	for index, quiz := range m.quizzes {
+	for index, quiz := range m.visibleQuizzes() {
 		if quiz.Index == m.selectedQuiz {
 			return index
 		}

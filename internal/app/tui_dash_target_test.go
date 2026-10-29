@@ -36,7 +36,7 @@ func TestTUIDashTarget(t *testing.T) {
 	}
 
 	model := tui.NewModel(tui.Options{Tickets: tickets, Observability: tui.ObservabilityView{Authority: workspaceconfig.WorkStateAuthorityTickets}, WorkExecutor: newTUIWorkActionExecutor(operations)})
-	runGuidedTUIKey(t, model, "f8", false)
+	runGuidedTUIKey(t, model, "f7", false)
 	runGuidedTUIKey(t, model, "down", false)
 	runGuidedTUIKey(t, model, "enter", false)
 	runGuidedTUIKey(t, model, "enter", true)
