@@ -51,9 +51,11 @@ Status values:
 | Quizzes | Skip active question | answer editor `alt+s` | `chr quiz skip [--use-case ...]` | `service.SkipQuiz` | `matched` | Same runtime quiz service. |
 | Quizzes | Complete selected quiz | answer editor `alt+d` | `chr quiz complete [--use-case ...]` | `service.CompleteQuiz` | `matched` | Same runtime quiz service. |
 | Quizzes | Refresh quizzes | `F3`, `r` | `chr quiz list` | `service.ListQuizzes` | `matched` | Same runtime quiz list service. |
+| Specs | Create manual spec | `F4`, `c`, Scope/Title/Body/State, Create | none | `service.CreateSpec` | `missing_cli` | Canonical creation needs no generation prerequisite. |
+| Specs | Edit exact spec | `F4`, `e`, Save | none | `ReadSpecDocument`, `service.SaveSpec` | `missing_cli` | Retained case binding, observed revision and confirmed reload. |
 | Specs | Generate spec | `F4`, `g` | `chr spec generate [--use-case ...]` | `service.GenerateSpec` through `tuiSpecActionExecutor` and CLI command | `matched` | Same spec generation service. |
 | Specs | Generate Gherkin acceptance feature | `F4`, `f` | `chr acceptance feature generate [--use-case ...]` | `service.GenerateAcceptanceFeature` through `tuiSpecActionExecutor` and CLI command | `partial` | Same generation service. If more information is needed, both surfaces report the feature-round note path; interactive answer collection is not implemented yet. |
-| Specs | Refresh specs | `F4`, `r` | `chr spec list` | `service.ListSpecs` | `matched` | Same spec list service. |
+| Specs | Refresh all spec documents | `F4`, `r` | `chr spec list` | `service.ListSpecDocuments` (TUI/Web), `service.ListSpecs` (CLI) | `partial` | TUI/Web enumerate concrete documents; CLI retains its latest-in-scope inventory. |
 | Plans | Generate missing plan | `F5`, `g` | `chr plan generate [--use-case ...]` | `service.GeneratePlan` through `tuiPlanActionExecutor` and CLI command | `matched` | Same plan generation service. |
 | Plans | Regenerate plan | `F5`, `G`, confirm | `chr plan regenerate [--use-case ...]` | `service.RegeneratePlan` | `matched` | Same plan regeneration service. |
 | Plans | Create plan tracking and tickets | `F5`, `alt+t`, confirm | `chr plan tracking create [--use-case ...]` | `service.MaterializePlanTracking` | `matched` | Same plan tracking materialization service. |
@@ -85,9 +87,11 @@ Status values:
 | Quiz | `quiz-refresh` | Reload runtime quiz state. | `chr quiz list` | `service.ListQuizzes` | `matched` | Same service path. |
 | Quiz | `quiz-mode-deep` | Switch selected runtime quiz to deep mode. | `chr quiz mode deep ...` | `service.SwitchQuizMode` | `matched` | Same service path. |
 | Quiz | `quiz-mode-fast` | Switch selected runtime quiz to fast mode. | `chr quiz mode fast ...` | `service.SwitchQuizMode` | `matched` | Same service path. |
+| Spec | `create-spec` | Open complete manual form. | none | `service.CreateSpec` | `missing_cli` | Same form as direct c. |
+| Spec | `edit-spec` | Edit the selected concrete document. | none | `ReadSpecDocument`, `service.SaveSpec` | `missing_cli` | Same form as direct e. |
 | Spec | `generate-spec` | Generate selected spec. | `chr spec generate ...` | `service.GenerateSpec` | `matched` | Command is gated to Specs view. |
 | Acceptance | `generate-acceptance-feature` | Generate selected Gherkin acceptance feature. | `chr acceptance feature generate ...` | `service.GenerateAcceptanceFeature` | `partial` | Command is gated to Specs view. Missing scenario detail is persisted as feature-round notes; TUI answer collection is not implemented yet. |
-| Spec | `refresh-specs` | Reload spec views. | `chr spec list` | `service.ListSpecs` | `matched` | Command is gated to Specs view. |
+| Spec | `refresh-specs` | Reload canonical spec documents. | `chr spec list` | `service.ListSpecDocuments` | `partial` | CLI listing retains latest-in-scope inventory. |
 | Plan | `generate-plan` | Generate missing selected plan. | `chr plan generate ...` | `service.GeneratePlan` | `matched` | Command is gated to Plans view. |
 | Plan | `regenerate-plan` | Regenerate selected plan. | `chr plan regenerate ...` | `service.RegeneratePlan` | `matched` | Command is gated to Plans view. |
 | Plan | `materialize-plan-tracking` | Create plan tracking and tickets. | `chr plan tracking create ...` | `service.MaterializePlanTracking` | `matched` | Command is gated to Plans and only available for existing plans. |
@@ -156,7 +160,7 @@ Command availability gates:
 | Runtime Quizzes | `chr quiz complete` | Quizzes complete | `service.CompleteQuiz` | `matched` | Same service path. |
 | Runtime Quizzes | `chr quiz cancel` | Quizzes cancel | `service.CancelQuiz` | `matched` | Same service path. |
 | Runtime Quizzes | `chr quiz mode` | Quizzes mode switch | `service.SwitchQuizMode` | `matched` | Same service path. |
-| Specs | `chr spec list` | Specs refresh | `service.ListSpecs` | `matched` | Same service path. |
+| Specs | `chr spec list` | Specs refresh | `service.ListSpecs` (CLI), `service.ListSpecDocuments` (TUI) | `partial` | TUI enumerates each canonical document. |
 | Specs | `chr spec generate` | Specs generate | `service.GenerateSpec` | `matched` | Same service path. |
 | Plans | `chr plan list` | Plans refresh | `service.ListPlans` | `matched` | Same service path. |
 | Plans | `chr plan generate` | Plans generate | `service.GeneratePlan` | `matched` | Same service path. |
@@ -205,7 +209,7 @@ Command availability gates:
 | Use-case metadata | `tuiCaseMetadataExecutor.SaveCaseMetadata` -> `service.SaveCaseMetadata` | `chr metadata case set` -> `service.SaveCaseMetadata` | `matched` | CLI creates or updates by slug. |
 | Dump operations | `tuiDumpActionExecutor` -> `service.ListDumps`, `CreateDump`, `AppendDump`, `ReadDump`, `SaveDump`, `OpenDump` | `chr dump *` -> same service methods | `matched` | CLI is path-based and non-interactive. |
 | Runtime quiz operations | `tuiQuizActionExecutor` -> `service.ListQuizzes`, `StartQuiz`, `ResumeQuiz`, `AnswerQuiz`, `SkipQuiz`, `CompleteQuiz`, `CancelQuiz`, `SwitchQuizMode` | `chr quiz *` -> same service methods | `matched` | Different from `chr author quiz new`; this is the runtime quiz loop. |
-| Spec operations | `tuiSpecActionExecutor` -> `service.ListSpecs`, `GenerateSpec` | `chr spec list`, `chr spec generate` -> same service methods | `matched` | Same service path. |
+| Spec operations | `tuiSpecActionExecutor` -> `ListSpecDocuments`, `CreateSpec`, `SaveSpec`, `GenerateSpec` | `chr spec list`, `chr spec generate` | `partial` | Manual authoring uses canonical owners; CLI retains scoped listing and generation. |
 | Plan operations | `tuiPlanActionExecutor` -> `service.ListPlans`, `GeneratePlan`, `RegeneratePlan`, `MaterializePlanTracking` | `chr plan *` -> same service methods | `matched` | Same service path. |
 | Ticket creation | `tuiArtifactActionExecutor` -> `service.CreateDefaultTicket` -> `service.CreateTicket` | `runTicketNew` -> `service.CreateTicket` | `matched` | CLI behavior is richer; both use the same ticket creation service. |
 | Board query | TUI Board views -> indexed ticket views | `runTicketBoard` -> `service.Board` | `matched` | CLI and TUI read the same Board columns and attention classification. |

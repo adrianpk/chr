@@ -9,7 +9,11 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:41Z
-commits: []
+commits:
+  - b4cbad75cce9bf02c7dea91749a3d287766a4a32
+  - 0e2d48d231fe52f71f1677e47b6e867b04a76b6f
+  - ab927ea40c7e95f967554a573d1ca5cbe2bb0429
+  - df73bed5809cc29d40a9dc9007411080e0015b47
 branch: feat/slice-6-tui-specs
 started_at: 2026-10-29T13:25:17Z
 ready_at: 2026-10-29T10:11:41Z
@@ -54,4 +58,4 @@ One branch and one PR to `dev`; tasks T6.1-T6.5 are the canonical work units. Lo
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+T6.1-T6.4 are implemented. Real canonical IO and HTTP resolve G-024: manual, generated and project-wide documents all appear with separate identities. Production PTY input proves manual creation, retained fields after a concurrent Save, cancelled/confirmed reload and a fresh revision Save. Metadata binding, unchanged retries and source inspection retain their canonical owners. Final exact-HEAD controller validation and dev integration remain pending; the Slice 6 report records task commands and boundaries.

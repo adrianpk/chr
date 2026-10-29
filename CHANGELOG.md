@@ -12,6 +12,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Browse every manual, generated and project-wide specification in the TUI.
+  Create one with scope, title, body and Draft/Approved state, or edit an existing
+  document while keeping its case binding. Refresh preserves selection, failed
+  saves retain all fields, and reloading newer content requires confirmation.
+
 - Create TUI cases with Name, Description and Context in one form. Capture
   project-wide or case-bound dumps with your own title and body, append free text,
   and round-trip unsaved body edits through the external editor with `alt+e`.

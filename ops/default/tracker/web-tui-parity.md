@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 6 — Spec catalog and manual editing.
 Completed slices: 5/14
-Completed tasks: 25/70
+Completed tasks: 29/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -127,11 +127,11 @@ Report: `ops/default/report/slices/web-tui-parity/slice-6-specs.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T6.1 | Read the same canonical Spec catalog as Web, including manual, generated and project-wide records. | pending | — | Planned: Owned fixture proves all three record kinds appear, with stable functional selection. |
-| T6.2 | Expose shared terminal forms for title, create-time case binding, body and draft state. | pending | — | Planned: Create, edit and cancel use production service operations; no generated-only assumptions. |
-| T6.3 | Apply canonical revision checks, field validation and confirmed reload while keeping unsent text. | pending | — | Planned: Stale save cannot overwrite a concurrent change; case identity is not silently rebound. |
-| T6.4 | Retain generation, acceptance-feature generation and document inspection and prepare the same form for wizard mode. | pending | — | Planned: Manual/wizard presentations share the editor owner rather than copying markup or update handlers. |
-| T6.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T6.1 | Read the same canonical Spec catalog as Web, including manual, generated and project-wide records. | done | b4cbad75 | Canonical manual/generated/project-wide IO and Web HTTP catalog agreement pass; refresh preserves the selected concrete path. |
+| T6.2 | Expose shared terminal forms for title, create-time case binding, body and draft state. | done | 0e2d48d2 | Project/case forms, actual title/body/state saves, validation retention and cancellation pass through canonical owners without generation. |
+| T6.3 | Apply canonical revision checks, field validation and confirmed reload while keeping unsent text. | done | ab927ea4 | Production PTY concurrent-save conflict, cancelled/confirmed reload and fresh Save pass; captured retries, late replies and immutable case guards pass. |
+| T6.4 | Retain generation, acceptance-feature generation and document inspection and prepare the same form for wizard mode. | done | df73bed5 | Palette keys reuse the direct Spec form; generation, feature generation, inspection and complete catalog frames pass. Unchanged committed-result retry creates no duplicate. |
+| T6.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Task checks passed; report and canonical PR preparation underway. Final clean-HEAD controller validation and dev integration pending. |
 
 ### Slice 7: Complete Quiz interaction
 

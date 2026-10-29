@@ -804,6 +804,29 @@ general dump and matching optional use-case discovery. It excludes unrelated
 cases. An edit made while generation is preparing output prevents that output
 from replacing the edited document.
 
+## Write and Edit Specs in the TUI
+
+Open **Specs** with `F4`. Each row is an individual stored specification, so
+manual, generated and project-wide documents remain available together. Several
+specs may belong to the same case. The selected case filters the catalog; use
+**Clear case context** in the palette to see every scope.
+
+Press `c` or choose **Create spec** in the palette. Choose **Project-wide** or a
+named case with left/right, then enter Title and Body and choose **Draft** or
+**Approved**. Tab and Shift+Tab select fields; Enter adds lines in Body. Submit
+once with Ctrl+S or Enter on **Create**. Manual creation needs no dump, quiz or
+model request. Cancelling entered text asks before discarding it.
+
+Select a row and press `e` to edit its title, body and state. The case remains
+fixed. Ctrl+S or Enter on **Save** updates that document and retains its identity
+and generation provenance. Catalog refresh keeps selection by document path.
+
+Failed saves keep every field. If another client changes the document, stale
+Save preserves your text. In the Action panel (`alt+o`), `r` asks before reloading
+the captured source and replacing your fields. Esc keeps the draft. An unchanged
+retry uses the same request, including when the document was saved but its
+catalog refresh failed.
+
 ## Generate Specs in the TUI
 
 Open the Specs view with `F4`.
@@ -818,8 +841,8 @@ from the spec, quiz, and dump context.
 
 | Key | Behavior |
 | --- | --- |
-| `up` / `down` or `k` / `j` | Select a use case. |
-| `g` | Generate a spec for the selected use case. |
+| `up` / `down` or `k` / `j` | Select a specification. |
+| `g` | Generate for the selected document’s case or the current case when empty. |
 | `f` | Generate an acceptance feature for the selected use case. |
 | `r` | Refresh specs from disk. |
 

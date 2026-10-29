@@ -288,20 +288,37 @@ chr quiz mode fast --use-case billing
 
 ## Specs View
 
+The catalog lists individual canonical manual, generated and project-wide
+specifications, including several documents in the same case. It preserves the
+selected path across refresh and shows its body and status. Case context filters
+the list; clear it in the palette to see all scopes.
+
 | Key | Behavior |
 | --- | --- |
-| `up` / `down` or `k` / `j` | Select a use case. |
-| `g` | Generate the selected spec. |
-| `r` | Refresh specs from disk. |
+| `up` / `down` or `k` / `j` | Select a specification. |
+| `c` | Create with Scope, Title, Body and Draft/Approved state. |
+| `e` | Edit the selected document's title, body and state; retain its case. |
+| `g` | Generate a spec for the selected document's case or current context. |
+| `f` | Generate an acceptance feature through the existing scoped operation. |
+| `r` | Refresh canonical specifications from disk. |
+| `alt+e` | Open the selected canonical source externally. |
 
-Spec generation uses project context, use-case context, dumps, quizzes, and
-related workspace documents.
+Forms use Tab/Shift+Tab for fields and Ctrl+S or Enter on Create/Save to submit.
+Enter adds a line in Body. Scope is selectable only during creation. Errors keep
+all inputs; stale Save cannot overwrite newer content. The Action panel offers
+confirmed Reload for the captured source. Esc asks before discarding input.
+Unchanged retries keep the original request, including after a saved result's
+catalog refresh failed.
 
-CLI equivalents:
+Manual creation needs no generation material. Spec generation retains project
+context, use-case context, dumps, quizzes and related workspace documents.
+
+Related CLI commands (listing retains the latest-in-scope CLI inventory):
 
 ```sh
 chr spec list
 chr spec generate --use-case billing
+chr acceptance feature generate --use-case billing
 ```
 
 ## Plans View
