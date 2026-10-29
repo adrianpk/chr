@@ -5,7 +5,7 @@ Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-11-tui-wizard-entry`
-PR: pending
+PR: [#465](https://forge.adrianpk.com/adrianpk/chr/pulls/465)
 
 ## Purpose
 
@@ -43,6 +43,8 @@ T11.1: `d0516dc70ac86ac9491a1ff5076650d40d7c9297`.
 T11.2: `a1ed8105573e40b269362b2559e902cf895e465e`.
 T11.3: `7524663d82fafeb04658281cc8e14319e977f977`.
 T11.4: `06d019e5d3117982539da0c14977ddd0c10d3e1c`.
+
+T11.5 report introduction: `f51e7e3921876794d162350b36c22b16494d9188`.
 
 The terminal adapter uses the existing named start and guided command owners.
 Stage mapping and mode restrictions are presentation concerns; the terminal does

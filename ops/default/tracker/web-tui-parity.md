@@ -200,7 +200,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-10-board-workflows.md`
 
 Ticket: `TKT-20261029101146` — `ops/default/ticket/reviewing/20261029101146-web-tui-parity-wizard-entry.md`
 State: reviewing
-PR: pending
+PR: [#465](https://forge.adrianpk.com/adrianpk/chr/pulls/465)
 Report: `ops/default/report/slices/web-tui-parity/slice-11-wizard-entry.md`
 
 | Task | Work | State | Commits | Validation |
@@ -209,7 +209,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-11-wizard-entry.md`
 | T11.2 | Replace the detached wizard presentation with case/run binding in the existing shell, stage indicator and shared forms. | done | a1ed8105 | Existing tab, progress, captured input/retry and committed-original inspection checks pass. |
 | T11.3 | Use the existing Dump form with a single Continue to quiz submission of the current content. | done | 7524663d | Shared Dump Continue seals exact current content once; real lost-ack replay and production PTY assertions pass. |
 | T11.4 | Keep non-current wizard tabs read-only with Continue to the current stage; isolate manual and wizard controls. | done | 06d019e5 | Non-current tabs and manual writers cannot mutate; navigation, provenance/byte identity and native parity checks pass. |
-| T11.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Focused checks passed; report and canonical PR preparation in progress. Final clean-HEAD controller validation and integration pending. |
+| T11.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | f51e7e39 | PR #465 opened; focused checks passed. Final PR-reference HEAD controller validation and integration pending. |
 
 
 ### Slice 12: Wizard Quiz and preparation

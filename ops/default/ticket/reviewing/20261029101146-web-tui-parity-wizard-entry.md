@@ -14,7 +14,9 @@ commits:
   - a1ed8105573e40b269362b2559e902cf895e465e
   - 7524663d82fafeb04658281cc8e14319e977f977
   - 06d019e5d3117982539da0c14977ddd0c10d3e1c
+  - f51e7e3921876794d162350b36c22b16494d9188
 branch: feat/slice-11-tui-wizard-entry
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/465
 reviewed_at: 2026-10-29T16:58:28Z
 started_at: 2026-10-29T16:27:19Z
 ready_at: 2026-10-29T10:11:46Z
@@ -63,5 +65,5 @@ T11.1–T11.4 implemented with named entry, case-bound re-entry, normal tabs,
 shared forms and Dump body editor, exact-content Continue/retry and read-only
 mode guards. Focused tests cover real persistence, committed original bytes,
 keyboard/palette boundaries and a production managed terminal journey. The report
-records successful commands. Final clean-HEAD validation and integration remain
+records successful commands. PR #465 final clean-HEAD validation and integration remain
 pending; this ticket remains reviewing.
