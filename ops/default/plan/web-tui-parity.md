@@ -90,7 +90,7 @@ Prerequisite: committed planning artifacts.
 
 ### Slice 2: Case-oriented shell and contextual help
 
-Ticket: `TKT-20261029101137` — `ops/default/ticket/in_progress/20261029101137-web-tui-parity-navigation.md`
+Ticket: `TKT-20261029101137` — `ops/default/ticket/solved/20261029101137-web-tui-parity-navigation.md`
 Findings: G-001, G-002, G-003, G-033, I-002.
 Prerequisite: Slice 1 integrated into dev.
 
@@ -202,7 +202,7 @@ Prerequisite: Slice 7 integrated into dev.
 
 ### Slice 9: Ticket editing, comments and references
 
-Ticket: `TKT-20261029101144` — `ops/default/ticket/in_progress/20261029101144-web-tui-parity-tickets.md`
+Ticket: `TKT-20261029101144` — `ops/default/ticket/solved/20261029101144-web-tui-parity-tickets.md`
 Findings: G-027, G-029, G-030, I-004.
 Prerequisite: Slice 8 integrated into dev.
 
