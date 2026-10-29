@@ -197,6 +197,8 @@ func (m *Model) selectPreviousQuiz() {
 		return
 	}
 
+	m.quizHistoryScroll = 0
+
 	position := m.selectedQuizPosition()
 	if position == 0 {
 		m.selectedQuiz = m.visibleQuizzes()[len(m.visibleQuizzes())-1].Index
@@ -211,6 +213,8 @@ func (m *Model) selectNextQuiz() {
 	if len(m.visibleQuizzes()) == 0 {
 		return
 	}
+
+	m.quizHistoryScroll = 0
 
 	position := m.selectedQuizPosition()
 	if position >= len(m.visibleQuizzes())-1 {
