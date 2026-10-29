@@ -1,12 +1,13 @@
 # Slice 2: Case-oriented shell and contextual help
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-2-tui-navigation`
 PR: [#456](https://forge.adrianpk.com/adrianpk/chr/pulls/456)
 Base: `1ac51bac2aa5d307cc7400e7c07462c7e0542eda` on dev, after verified integration of PR #455
+Integrated: `322e8f0a7a7b17536f1cbe72b72e8023d2a4efb0` into dev through PR #456, verified 2026-10-29
 
 ## Purpose
 
@@ -105,13 +106,14 @@ Implementation regressions passed locally:
 - `go test ./internal/app -run '^TestTUIHarnessSelection(Read|Save|Refresh)$' -count=1 -timeout=3m` — passed with real application adapters and independent-process updates.
 - `git diff --check` — passed.
 
-After the PR-reference follow-up, Looper records the clean final candidate and
-this ordered final batch in its canonical validation evidence:
+Looper validation `HCHOQPMEAG7XZXQ6XGFNLY3BFU` passed this ordered batch on clean
+candidate `322e8f0a7a7b17536f1cbe72b72e8023d2a4efb0`, also the verified
+canonical integration commit:
 
-- `make verify`
-- `go test -race ./internal/tui -run '^Test(Shell.*|CaseNavigation.*|DocumentCatalogFrames|GuidedUseCaseTUI(StaleInput|Replay|RetainedStep)|Model(Ownership|AsyncRefresh|WorkflowBinding))$' -count=1`
-- `go test -race ./internal/app -run '^Test(TUINavigationTerminal|GuidedUseCaseTUIJourney|GuidedUseCaseTUITerminal|TUIBusyTerminal|TUIDashTarget|TUIHarnessSelection(Read|Save|Refresh))$' -count=1 -timeout=3m`
-- `git diff --check`
+- `make verify` — passed.
+- `go test -race ./internal/tui -run '^Test(Shell.*|CaseNavigation.*|DocumentCatalogFrames|GuidedUseCaseTUI(StaleInput|Replay|RetainedStep)|Model(Ownership|AsyncRefresh|WorkflowBinding))$' -count=1` — passed.
+- `go test -race ./internal/app -run '^Test(TUINavigationTerminal|GuidedUseCaseTUIJourney|GuidedUseCaseTUITerminal|TUIBusyTerminal|TUIDashTarget|TUIHarnessSelection(Read|Save|Refresh))$' -count=1 -timeout=3m` — passed.
+- `git diff --check` — passed.
 
 The first controller batch `IYPMGXO2VY5S4L44QOFMZRZQYR` failed in
 `make verify`: the Harness refresh fixture still sent h from the previous
@@ -121,8 +123,7 @@ The close assertion checks picker-only Worker default content, because the new
 Project footer also names Harness defaults after the picker closes.
 The final focused batch explicitly selects all three without short mode.
 
-The PR Validation section records successful final commands. Canonical dev
-integration remains pending until the controller verifies its merge.
+The controller verified canonical dev integration through PR #456.
 
 ## Risks and Follow-ups
 

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101138
 title: "Shared operation feedback and draft retention"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:38Z
 commits: []
+branch: feat/slice-3-tui-feedback
+started_at: 2026-10-29T11:17:56Z
 ready_at: 2026-10-29T10:11:38Z
 ---
 

@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 2 — Case-oriented shell and contextual help.
-Completed slices: 1/14
-Completed tasks: 9/70
+Active slice: Slice 3 — Shared operation feedback and draft retention.
+Completed slices: 2/14
+Completed tasks: 10/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -57,8 +57,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-1-safe-actions.md`
 
 ### Slice 2: Case-oriented shell and contextual help
 
-Ticket: `TKT-20261029101137` — `ops/default/ticket/reviewing/20261029101137-web-tui-parity-navigation.md`
-State: reviewing
+Ticket: `TKT-20261029101137` — `ops/default/ticket/solved/20261029101137-web-tui-parity-navigation.md`
+State: delivered
 PR: [#456](https://forge.adrianpk.com/adrianpk/chr/pulls/456)
 Report: `ops/default/report/slices/web-tui-parity/slice-2-navigation.md`
 
@@ -68,12 +68,13 @@ Report: `ops/default/report/slices/web-tui-parity/slice-2-navigation.md`
 | T2.2 | Keep Project in header context and an alt+p action; expose real ? Help outside text modes and retain palette access. | done | f2d7961b; 5dbd0c2b | Contextual Help returns to the same pane; text, function-key and mouse guards retain drafts; production Harness read/save/refresh tests pass through alt+p. |
 | T2.3 | Propagate functional case/run binding between tabs and show active-view actions in the real shell footer. | done | f2d7961b; 5dbd0c2b | Case-scoped artifact and Board selection, retained-run binding, missing-case recovery and passive draft preservation regressions pass. |
 | T2.4 | Inventory useful legacy views and retain workspace-index health, runtime information and existing commands through Project, Dash or palette. | done | f2d7961b; 5dbd0c2b | Useful-capability inventory is in the Slice 2 report; production loader and PTY verify auxiliary access and unchanged canonical documents. |
-| T2.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 5dbd0c2b; b797ef9c | PR #456 opened; final exact-HEAD controller validation and canonical integration pending. |
+| T2.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | 5dbd0c2b; b797ef9c; 61e2398c; 322e8f0a | PR #456 integrated into dev at 322e8f0a7a7b17536f1cbe72b72e8023d2a4efb0; all four ordered checks passed in HCHOQPMEAG7XZXQ6XGFNLY3BFU. |
+
 
 ### Slice 3: Shared operation feedback and draft retention
 
-Ticket: `TKT-20261029101138` — `ops/default/ticket/ready/20261029101138-web-tui-parity-feedback.md`
-State: ready
+Ticket: `TKT-20261029101138` — `ops/default/ticket/in_progress/20261029101138-web-tui-parity-feedback.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-3-feedback.md`
 
