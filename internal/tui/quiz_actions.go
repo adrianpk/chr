@@ -65,10 +65,12 @@ type QuizActionState struct {
 
 // QuizAnswerState stores in-terminal quiz answer editing state.
 type QuizAnswerState struct {
-	Binding QuizActionBinding
-	Active  bool
-	Scope   QuizScope
-	Input   textarea.Model
+	History  []QuizAnswerRecord
+	Question string
+	Binding  QuizActionBinding
+	Active   bool
+	Scope    QuizScope
+	Input    textarea.Model
 }
 
 type quizActionFinishedMsg struct {
@@ -109,6 +111,10 @@ func (m *Model) updateQuizActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) tea.Cmd {
+	if command, handled := m.updateQuizAnswerControl(msg.String()); handled {
+		return command
+	}
+
 	switch msg.String() {
 	case "esc":
 		if m.quizAnswer.Input.Value() != "" {
@@ -124,10 +130,6 @@ func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) tea.Cmd {
 		m.quizAnswer.Input = input
 
 		return cmd
-	case "alt+s":
-		return m.requestQuizControl(QuizActionSkip)
-	case "alt+d":
-		return m.requestQuizControl(QuizActionComplete)
 	}
 
 	previous := m.quizAnswer.Input.Value()
@@ -140,6 +142,26 @@ func (m *Model) updateQuizAnswerKey(msg tea.KeyMsg) tea.Cmd {
 	}
 
 	return cmd
+}
+
+func (m *Model) updateQuizAnswerControl(key string) (tea.Cmd, bool) {
+	if m.scrollQuizHistoryKey(key) {
+		return nil, true
+	}
+
+	actions := map[string]QuizActionID{"alt+s": QuizActionSkip, "alt+d": QuizActionComplete, "alt+x": QuizActionCancel}
+	if key == "alt+m" {
+		actions[key] = QuizActionFastMode
+		if quiz, ok := m.selectedQuizView(); ok && quiz.Mode == "fast" {
+			actions[key] = QuizActionDeepMode
+		}
+	}
+
+	if action, ok := actions[key]; ok {
+		return m.requestQuizControl(action), true
+	}
+
+	return nil, false
 }
 
 func (m *Model) planQuizAction(action QuizActionID) {
@@ -290,11 +312,14 @@ func (m *Model) startQuizAnswer() {
 	}
 
 	m.quizAnswer = QuizAnswerState{
-		Binding: binding,
-		Active:  true,
-		Scope:   quiz.Scope,
-		Input:   input,
+		History:  append([]QuizAnswerRecord(nil), quiz.History...),
+		Question: quiz.ActiveQuestionSummary,
+		Binding:  binding,
+		Active:   true,
+		Scope:    quiz.Scope,
+		Input:    input,
 	}
+	m.quizHistoryScroll = 0
 	m.selectedPane = 1
 	m.maximizedPane = 1
 	m.statusMessage = "Answering quiz."

@@ -40,6 +40,7 @@ func loadTUIQuizzes(operations service) ([]tui.QuizView, error) {
 	quizzes := make([]tui.QuizView, 0, len(result.Views))
 	for index, quiz := range result.Views {
 		quizzes = append(quizzes, tui.QuizView{
+			History:               tuiQuizHistory(quiz.History),
 			Binding:               tui.QuizActionBinding{SessionID: quiz.Binding.SessionID, QuestionID: quiz.Binding.QuestionID, ExpectedRevision: quiz.Binding.ExpectedRevision},
 			Index:                 index,
 			Title:                 quiz.Title,

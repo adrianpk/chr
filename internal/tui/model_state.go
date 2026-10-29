@@ -75,12 +75,13 @@ type dumpState struct {
 }
 
 type quizState struct {
-	quizzes      []QuizView
-	selectedQuiz int
-	quizAction   QuizActionState
-	quizAnswer   QuizAnswerState
-	quizBusy     bool
-	quizExecutor QuizActionExecutor
+	quizHistoryScroll int
+	quizzes           []QuizView
+	selectedQuiz      int
+	quizAction        QuizActionState
+	quizAnswer        QuizAnswerState
+	quizBusy          bool
+	quizExecutor      QuizActionExecutor
 }
 
 type specState struct {

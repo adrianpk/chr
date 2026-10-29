@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"sort"
 	"strings"
 	"time"
 
@@ -76,20 +75,7 @@ func webQuizAnswerView(quiz QuizView, observed quizcore.Observation) *webui.Quiz
 }
 
 func webQuizHistory(entries []quizcore.Entry) []webui.QuizAnswerHistoryView {
-	answered := make([]quizcore.Entry, 0, len(entries))
-	for _, entry := range entries {
-		if entry.Status == quizcore.EntryStatusAnswered {
-			answered = append(answered, entry)
-		}
-	}
-
-	sort.Slice(answered, func(i, j int) bool {
-		if answered[i].AnsweredAt.Equal(answered[j].AnsweredAt) {
-			return answered[i].ID > answered[j].ID
-		}
-
-		return answered[i].AnsweredAt.After(answered[j].AnsweredAt)
-	})
+	answered := quizAnswerHistory(entries)
 
 	history := make([]webui.QuizAnswerHistoryView, 0, len(answered))
 	for _, entry := range answered {

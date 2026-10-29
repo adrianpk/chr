@@ -67,9 +67,13 @@ func (m *Model) bindDumpRecovery(request DumpActionRequest) {
 }
 
 func (m *Model) requestQuizControl(action QuizActionID) tea.Cmd {
-	request := QuizActionRequest{Action: action, Scope: m.quizAnswer.Scope, Binding: m.quizAnswer.Binding}
+	request := QuizActionRequest{Action: action, Scope: m.quizAnswer.Scope, Binding: m.quizAnswer.Binding, Mode: quizActionMode(action)}
 
 	apply := func(m *Model) tea.Cmd { return m.startQuizAction(request) }
+	if action == QuizActionCancel {
+		return m.confirmDraftChange("Cancel this quiz? Saved answers are retained; unsent text will be discarded.", apply)
+	}
+
 	if m.quizAnswer.Input.Value() != "" {
 		return m.confirmDraftChange("Continue without submitting the current answer?", apply)
 	}

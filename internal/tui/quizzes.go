@@ -16,6 +16,7 @@ type QuizScope struct {
 
 // QuizView is the terminal projection of a quiz session or available scope.
 type QuizView struct {
+	History               []QuizAnswerRecord
 	Binding               QuizActionBinding
 	Index                 int
 	Title                 string
@@ -92,15 +93,16 @@ func (m *Model) renderSelectedQuizDetailLines(width int) []string {
 		lines = append(lines, indentLines(renderContentReadLines(quiz.CuratedPreview, maxInt(width-2, 1)), "  ")...)
 	}
 
-	return lines
+	return append(lines, m.renderQuizHistory(quiz.History, width)...)
 }
 
 func (m *Model) renderSelectedQuizAnswerLines(quiz QuizView, width int) []string {
-	lines := []string{shellMutedStyle.Render(m.quizActionHint(quiz)), ""}
-	lines = append(lines, wrapPlainText(quiz.ActiveQuestionSummary, maxInt(width, 1))...)
+	lines := []string{shellMutedStyle.Render(m.quizActionHint(quiz)), quizModeLine(quiz), ""}
+	lines = append(lines, wrapPlainText(m.quizAnswer.Question, maxInt(width, 1))...)
 	lines = append(lines, strings.Split(m.renderQuizAnswerInput(maxInt(width, 1), 6), "\n")...)
+	lines = append(lines, "alt+x cancels quiz  alt+m changes mode")
 
-	return lines
+	return append(lines, m.renderQuizHistory(m.quizAnswer.History, width)...)
 }
 
 func (m *Model) renderQuizzes() string {
@@ -162,11 +164,15 @@ func (m *Model) quizActionHint(quiz QuizView) string {
 	}
 
 	if strings.TrimSpace(quiz.ActiveQuestionSummary) != "" {
-		return "enter answers  m mode  r refresh"
+		return "enter answers  m mode  x cancel  r refresh"
 	}
 
 	if quiz.Status == "done" && strings.TrimSpace(quiz.CuratedPath) != "" {
 		return "s restart  m Deep/Fast  r refresh"
+	}
+
+	if quiz.Status == "cancelled" || quiz.Status == "blocked" || quiz.Status == "idle" {
+		return "u resume  s restart  m Deep/Fast  x cancel  r refresh"
 	}
 
 	return "s start  m Deep/Fast  r refresh"
@@ -244,6 +250,10 @@ func (m *Model) selectedQuizScope() QuizScope {
 }
 
 func (m *Model) updateQuizzesKey(msg tea.KeyMsg) tea.Cmd {
+	if m.scrollQuizHistoryKey(msg.String()) {
+		return nil
+	}
+
 	switch msg.String() {
 	case "s":
 		cmd := m.startQuizAction(m.newQuizActionState(QuizActionStart).Request)
@@ -251,6 +261,10 @@ func (m *Model) updateQuizzesKey(msg tea.KeyMsg) tea.Cmd {
 		return cmd
 	case "m":
 		return m.cycleQuizMode()
+	case "u":
+		return m.startQuizAction(m.newQuizActionState(QuizActionResume).Request)
+	case "x":
+		m.planQuizAction(QuizActionCancel)
 	case "enter":
 		m.planQuizAction(QuizActionAnswer)
 	case "r":

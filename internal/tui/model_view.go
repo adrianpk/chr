@@ -199,7 +199,7 @@ func (m *Model) activeInteractionKeys() (string, bool) {
 		{Active: m.workAction.Pending, Text: "Keys: enter confirms work action, esc cancels work action"},
 		{Active: m.commandPalette.Open, Text: "Keys: up/down selects command, enter runs command, esc closes palette"},
 		{Active: m.quizBusy, Text: "Keys: waiting for quiz action to finish"},
-		{Active: m.quizAnswer.Active, Text: "Keys: enter submits answer, shift+enter inserts line, alt+s skips, alt+d done, esc cancels answer"},
+		{Active: m.quizAnswer.Active, Text: "Keys: enter answer  alt+s skip  alt+d done  alt+x cancel quiz  alt+m mode  PgUp/PgDn history  esc discard"},
 		{Active: m.filterEntryMode, Text: "Keys: enter applies filter, esc cancels filter, ctrl+c quits"},
 	}
 	for _, hint := range hints {
