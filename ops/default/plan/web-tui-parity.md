@@ -122,7 +122,7 @@ Prerequisite: Slice 2 integrated into dev.
 
 ### Slice 4: Shared queue observation and stable refresh
 
-Ticket: `TKT-20261029101139` — `ops/default/ticket/in_progress/20261029101139-web-tui-parity-dash.md`
+Ticket: `TKT-20261029101139` — `ops/default/ticket/reviewing/20261029101139-web-tui-parity-dash.md`
 Findings: G-032, G-035, G-036, G-037.
 Prerequisite: Slice 3 integrated into dev.
 

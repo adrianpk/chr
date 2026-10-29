@@ -5,7 +5,7 @@ Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-4-tui-dash`
-PR: pending
+PR: [#458](https://forge.adrianpk.com/adrianpk/chr/pulls/458)
 Base: `545d08312b8897b25fe56287d1cea51aa6f93674` on dev, after verified PR #457 integration and Slice 3 closure
 
 ## Purpose
@@ -60,7 +60,7 @@ Read-only preflight rejects changed snapshots and policy before target hydration
 canonical admission rechecks the exact guard under its existing owner.
 
 The independent Board catalog is read through canonical pages with one revision,
-a 15-second aggregate deadline and the existing 10,000-record source bound.
+a 15-second aggregate deadline and the existing 4,096-record source bound.
 A changed page revision rejects the read. This preserves access beyond the
 first queue page without rebuilding the legacy index. Existing running-work
 observability continues to provide log and report references.

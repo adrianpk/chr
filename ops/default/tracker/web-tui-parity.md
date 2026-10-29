@@ -89,9 +89,9 @@ Report: `ops/default/report/slices/web-tui-parity/slice-3-feedback.md`
 
 ### Slice 4: Shared queue observation and stable refresh
 
-Ticket: `TKT-20261029101139` — `ops/default/ticket/in_progress/20261029101139-web-tui-parity-dash.md`
-State: in_progress
-PR: pending
+Ticket: `TKT-20261029101139` — `ops/default/ticket/reviewing/20261029101139-web-tui-parity-dash.md`
+State: reviewing
+PR: [#458](https://forge.adrianpk.com/adrianpk/chr/pulls/458)
 Report: `ops/default/report/slices/web-tui-parity/slice-4-dash.md`
 
 | Task | Work | State | Commits | Validation |
@@ -100,7 +100,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-4-dash.md`
 | T4.2 | Keep Dash queue selection and Board selection separately by key across refresh, sorting and removal. | done | 863d09bd; 63f66c32 | Reorder/removal, stale-query and full 130-ticket Board catalog regressions pass; selection remains independent and never starts work. |
 | T4.3 | Render current work, recent activity and results in Dash; preserve filter, order, Run all ready and running-work details. | done | fed68882 | Bounded context/event/result rendering and actual production-loader PTY/SQLite observation pass without canonical writes. |
 | T4.4 | Expose Preview Work and Workflow details with exact scope/policy confirmation and cancellation. | done | f265da0e | Read-only Preview/Workflow PTY, cancellation, late replies, exact scope/policy conflicts and guarded host-checkpoint regressions pass. |
-| T4.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Report and user documentation prepared; canonical PR and ordered exact-HEAD controller evidence precede controller-owned integration. |
+| T4.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 65032c6b | PR #458 prepared with the immutable report; ordered exact-HEAD checks are retained by Looper before controller-owned integration. |
 
 
 ### Slice 5: Case and Dump forms
