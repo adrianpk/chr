@@ -21,22 +21,7 @@ type PlanView struct {
 func (m *Model) renderPlans() string { return m.documentCatalog(ViewPlans).render() }
 
 func (m *Model) planActionHint() string {
-	if m.selectedPlanCanMaterializeTracking() {
-		return "g generate missing  G regenerate  alt+t tracking  r refresh"
-	}
-
-	return "g generate missing  G regenerate  r refresh"
-}
-
-func (m *Model) selectedPlanCanMaterializeTracking() bool {
-	plan, ok := m.selectedPlanView()
-	if !ok {
-		return false
-	}
-
-	return strings.TrimSpace(plan.RelativePath) != "" &&
-		strings.TrimSpace(plan.Content) != "" &&
-		plan.Status != "missing"
+	return "g prepare plan + tickets  G regenerate  r refresh"
 }
 
 func (m *Model) selectedPlanView() (PlanView, bool) {

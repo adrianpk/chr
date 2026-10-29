@@ -154,11 +154,7 @@ func (e tuiPlanActionExecutor) runPlanAction(request tui.PlanActionRequest) (tui
 	case tui.PlanActionRegenerate:
 		result, err := e.operations.RegeneratePlan(e.operations.ctx, PlanRegenerateRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}, OperationID: request.OperationID, ExpectedRevision: request.Revision})
 
-		return tui.PlanActionResult{Message: result.Message, Outcome: operation.Result{ChangedFiles: compactChangedFiles(result.Plan.RelativePath)}}, err
-	case tui.PlanActionMaterializeTracking:
-		result, err := e.operations.MaterializePlanTracking(e.operations.ctx, PlanTrackingRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}})
-
-		return tui.PlanActionResult{Message: result.Message, Tickets: result.Tickets}, err
+		return tui.PlanActionResult{Message: result.Message, DocumentPath: result.Plan.RelativePath, Committed: result.Plan.RelativePath != "", Outcome: operation.Result{ChangedFiles: compactChangedFiles(result.Plan.RelativePath)}}, err
 	case tui.PlanActionRefresh:
 		return tui.PlanActionResult{}, nil
 	default:

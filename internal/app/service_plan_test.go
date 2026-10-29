@@ -886,48 +886,32 @@ Manual plan content.
 	}
 }
 
-func TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope(t *testing.T) {
-	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
-
-	projectDir := t.TempDir()
-	writeServiceQuizFixture(t, projectDir)
-
-	clock := serviceQuizClock()
-	model := &fakeServiceQuizModel{
-		responses: serviceQuizStagedPlanResponses(clock()),
-	}
-	operations := newPlanTestService(t, projectDir)
-	operations.quizModel = model
-	operations.now = clock
-
-	executor := newTUIPlanActionExecutor(operations)
-	result, err := executor.ExecutePlanAction(tui.PlanActionRequest{
-		Action: tui.PlanActionGenerate,
-		Scope:  tui.QuizScope{CaseSlug: "blog"},
-	})
+// Combined preparation still returns the canonical generated document in its
+// scoped terminal catalog, alongside the newly retained native tickets.
+func TestTUIPlanGeneratedCatalog(t *testing.T) {
+	provider, _ := webPlanDeliveryFixture(t)
+	operations := provider.service(t.Context())
+	result, err := newTUIPlanActionExecutor(operations).ExecutePlanAction(tuiPlanDeliveryRequest(t, operations, "catalog-plan"))
 	if err != nil {
-		t.Fatalf("ExecutePlanAction returned error: %v", err)
+		t.Fatal(err)
 	}
-
-	var generated tui.PlanView
+	layout, err := authoringcore.GeneratedPlanLayout(operations.projectContext.ProjectDir, operations.quizScope(quizcore.Scope{CaseSlug: "named-work"}))
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, plan := range result.Plans {
-		if plan.Scope.CaseSlug == "blog" {
-			generated = plan
+		if plan.Scope.CaseSlug == "named-work" {
+			if plan.RelativePath != layout.RelativePath || plan.Status == "missing" || plan.Revision == "" {
+				t.Fatal("incomplete generated catalog", plan)
+			}
 
-			break
+			return
 		}
 	}
-
-	if generated.RelativePath != "ops/default/plan/00000-blog-plan/artifact.md" {
-		t.Fatalf("generated RelativePath = %q, want canonical plan path in TUI result: %#v", generated.RelativePath, result.Plans)
-	}
-
-	if generated.Status == "missing" {
-		t.Fatalf("generated Status = missing, want existing plan: %#v", generated)
-	}
+	t.Fatal("generated case absent from catalog", result.Plans)
 }
 
-func TestTUIPlanGenerateReturnsRefusalMessageForExistingPlan(t *testing.T) {
+func TestTUIPlanRefreshRetainsExistingPlan(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "blog-plan.md"), `---
@@ -947,15 +931,15 @@ Manual plan content.
 
 	executor := newTUIPlanActionExecutor(operations)
 	result, err := executor.ExecutePlanAction(tui.PlanActionRequest{
-		Action: tui.PlanActionGenerate,
+		Action: tui.PlanActionRefresh,
 		Scope:  tui.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("ExecutePlanAction returned error: %v", err)
 	}
 
-	if result.Message != "Plan already exists. Use regenerate plan to replace it." {
-		t.Fatalf("Message = %q, want existing plan refusal", result.Message)
+	if result.Message != "Plans refreshed." {
+		t.Fatalf("Message = %q, want read-only catalog refresh", result.Message)
 	}
 
 	if len(model.requests) != 0 {

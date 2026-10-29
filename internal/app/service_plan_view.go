@@ -44,7 +44,10 @@ func (s service) ListPlans() (PlanListResult, error) {
 
 	plans := make([]PlanView, 0, len(scopes))
 	for _, scope := range scopes {
-		view := s.planViewFromScope(scope, index)
+		view, err := s.currentPlanView(scope, index)
+		if err != nil {
+			return PlanListResult{}, err
+		}
 
 		view.Revision, err = authoringcore.PlanTargetRevision(s.ctx, s.projectContext.ProjectDir, scope.scope)
 		if err != nil {
@@ -59,6 +62,19 @@ func (s service) ListPlans() (PlanListResult, error) {
 	}
 
 	return PlanListResult{Message: "Plans loaded.", Plans: plans}, nil
+}
+
+func (s service) currentPlanView(scope quizReadScope, index core.WorkspaceIndex) (PlanView, error) {
+	current, err := s.existingGeneratedPlan(scope.scope)
+	if err != nil {
+		return PlanView{}, err
+	}
+
+	if current.Exists {
+		return current.Plan.withMetadata(scope.title, current.Plan.Title, current.Plan.Status, current.Plan.UpdatedAt), nil
+	}
+
+	return s.planViewFromScope(scope, index), nil
 }
 
 func (s service) planViewFromScope(scope quizReadScope, index core.WorkspaceIndex) PlanView {

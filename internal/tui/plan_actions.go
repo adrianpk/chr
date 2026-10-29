@@ -16,10 +16,9 @@ type PlanActionID string
 
 // Plan action identifiers define supported plan commands.
 const (
-	PlanActionGenerate            PlanActionID = "generate_missing_plan"
-	PlanActionRegenerate          PlanActionID = "regenerate_plan"
-	PlanActionRefresh             PlanActionID = "refresh_plans"
-	PlanActionMaterializeTracking PlanActionID = "materialize_plan_tracking"
+	PlanActionGenerate   PlanActionID = "generate_missing_plan"
+	PlanActionRegenerate PlanActionID = "regenerate_plan"
+	PlanActionRefresh    PlanActionID = "refresh_plans"
 )
 
 // PlanActionExecutor runs confirmed plan actions.
@@ -101,22 +100,6 @@ func (m *Model) updatePlansKey(msg tea.KeyMsg) tea.Cmd {
 		}
 
 		m.planPlanAction(PlanActionRegenerate)
-
-		return nil
-	case "alt+t":
-		if m.planBusy {
-			m.statusMessage = "Plan action already running."
-
-			return nil
-		}
-
-		if !m.selectedPlanCanMaterializeTracking() {
-			m.statusMessage = "Plan tracking requires an existing plan."
-
-			return nil
-		}
-
-		m.planPlanAction(PlanActionMaterializeTracking)
 
 		return nil
 	case "r":
@@ -278,8 +261,6 @@ func planActionTitle(action PlanActionID) string {
 		return "Regenerate plan"
 	case PlanActionRefresh:
 		return "Refresh plans"
-	case PlanActionMaterializeTracking:
-		return "Create plan tracking"
 	default:
 		return "Plan action"
 	}
@@ -287,7 +268,7 @@ func planActionTitle(action PlanActionID) string {
 
 func planActionChangesContent(action PlanActionID) bool {
 	switch action {
-	case PlanActionGenerate, PlanActionRegenerate, PlanActionMaterializeTracking:
+	case PlanActionGenerate, PlanActionRegenerate:
 		return true
 	default:
 		return false
@@ -302,8 +283,6 @@ func planBusyMessage(request PlanActionRequest) string {
 		return "Regenerating plan..."
 	case PlanActionRefresh:
 		return "Refreshing plans..."
-	case PlanActionMaterializeTracking:
-		return "Creating plan tracking..."
 	default:
 		return "Running plan action..."
 	}
