@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101144
 title: "Ticket editing, comments and references"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: normal
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:44Z
 commits: []
+branch: feat/slice-9-tui-tickets
+started_at: 2026-10-29T15:00:15Z
 ready_at: 2026-10-29T10:11:44Z
 ---
 

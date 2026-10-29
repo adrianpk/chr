@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 8 — Plan and ticket preparation.
-Completed slices: 7/14
-Completed tasks: 39/70
+Active slice: Slice 9 — Ticket editing, comments and references.
+Completed slices: 8/14
+Completed tasks: 40/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -150,8 +150,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-7-quizzes.md`
 
 ### Slice 8: Plan and ticket preparation
 
-Ticket: `TKT-20261029101143` — `ops/default/ticket/reviewing/20261029101143-web-tui-parity-plans.md`
-State: reviewing
+Ticket: `TKT-20261029101143` — `ops/default/ticket/solved/20261029101143-web-tui-parity-plans.md`
+State: delivered
 PR: [#462](https://forge.adrianpk.com/adrianpk/chr/pulls/462)
 Report: `ops/default/report/slices/web-tui-parity/slice-8-plans.md`
 
@@ -161,12 +161,13 @@ Report: `ops/default/report/slices/web-tui-parity/slice-8-plans.md`
 | T8.2 | Reconcile a retained partial preparation by its original identity rather than regenerating plans or duplicate tickets. | done | 0f98d041 | Provider failure, original retry, duplicate replay and reopened preparation retain one plan and ticket set; queued commands keep their observed target. |
 | T8.3 | Preserve explicit Regenerate confirmation and any independent tracking CLI capability without exposing a misleading second required step. | done | 77f84ecb | Explicit Regenerate retains confirmation and source/revision guards; canonical catalog preference and independent tracking service regressions pass. |
 | T8.4 | Offer Open document and View tickets after successful Spec/Plan generation with context-preserving navigation. | done | 1523b132 | Production PTY and IO checks open actual documents and a populated case Board without writes; cancelled replacement and idle native task assertions pass. |
-| T8.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 72bae04e; 6a59cd2d | PR #462 opened. First controller gate exposed a body-only CLI fixture; its canonical envelope is corrected and focused CLI/IO/PTY checks pass. Fresh exact-HEAD validation and integration pending. |
+| T8.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | 72bae04e; 6a59cd2d; 59108dea | PR #462 integrated at 59108deadad1848bc0ffbfda9def9fb97ea81f52; all four ordered checks passed in 32RLE7DHDBWJYZRIOXRECPQMSH. |
+
 
 ### Slice 9: Ticket editing, comments and references
 
-Ticket: `TKT-20261029101144` — `ops/default/ticket/ready/20261029101144-web-tui-parity-tickets.md`
-State: ready
+Ticket: `TKT-20261029101144` — `ops/default/ticket/in_progress/20261029101144-web-tui-parity-tickets.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-9-tickets.md`
 

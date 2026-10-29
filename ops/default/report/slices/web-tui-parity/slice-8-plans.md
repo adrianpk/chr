@@ -1,6 +1,6 @@
 # Slice 8: Plan and ticket preparation
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
@@ -115,11 +115,16 @@ assertion, timeout or resource limit changed.
 
 - `go test ./internal/app -run '^Test(SpecAndPlanListCommandsUseServiceViews|TUIPlan.*|TUIGenerationResult)$' -count=1 -timeout=3m` — passed after that fixture correction, including the production terminal journey.
 
-Final ordered validation will be recorded by Looper on the clean PR head after
-PR-reference commits: make verify, focused terminal race checks, focused
-application IO/HTTP/PTY race checks and git diff --check. Canonical PR/controller
-evidence retains the exact candidate and ordered commands. These task checks do
-not claim final-candidate validation or dev integration.
+Controller validation `32RLE7DHDBWJYZRIOXRECPQMSH` passed all four ordered checks
+on clean HEAD `59108deadad1848bc0ffbfda9def9fb97ea81f52`:
+
+- `make verify`
+- `go test -race ./internal/tui -run '^Test(Plan.*|Model.*Plan.*|Model.*Spec.*|Operation.*|DocumentCatalogFrames|BusyQuit)$' -count=1`
+- `go test -race ./internal/app -run '^Test(TUIPlan.*|TUIGenerationResult|TUISpec(Retry|Terminal)|WebPlan(Delivery|DeliverySelection|DeliveryCases|DeliveryRecovery|Context|ReadOnly)|PlanPublicationFailures|ServiceMaterializePlanTracking.*|ServiceListPlansReturnsScopes|SpecAndPlanListCommandsUseServiceViews|TUIOperation.*)$' -count=1 -timeout=3m`
+- `git diff --check`
+
+Canonical Forgejo and Acta event `01M642RCVMD75TZ7F21KQV68YY` confirm
+PR #462 integrated at the validated commit. No checks were repeated for closure.
 
 ## Risks and Follow-ups
 
