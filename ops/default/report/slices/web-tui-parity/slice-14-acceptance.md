@@ -35,8 +35,8 @@ gate unsupported palette writes, and verify the integrated terminal/Web journeys
   submission or progression. The offered reload remains an explicit choice.
 - The User Guide and reference describe pre-confirmation unavailability. The
   changelog consolidates the delivered TUI capabilities by user task, retaining
-  unrelated entries. The cycle report records all 14 integrations and acceptance
-  evidence; its separate final controller gate remains pending.
+  unrelated entries. The cycle report records all 14 integrations, acceptance
+  evidence and the successful separate final controller gate.
 
 ## Implementation Notes
 
@@ -111,8 +111,10 @@ scenarios and six Chromium roots ran and passed without skips. The controller
 ledger binds these results to the exact clean head and command order. Acta note
 `01M64FNVNGK034565BYWC0ZQ1N` records validation; merge event
 `01M64FPHBRCSXTN5Q8YG2K1ZS6` and canonical PR #468 confirm the same head was
-integrated into dev. The controller's separate final delivery-set gate remains
-pending; these results do not establish a pass for later documentation commits.
+integrated into dev. The controller's separate final delivery-set `make verify`
+passed on `c5ae18e761d7c65e77784c04143197c8bba77462` in validation
+`AX3QL4I5ZYL2KD6M76ZBPYNHNN`. The cycle report records that exact gate evidence
+separately from the documentation-only closure successor.
 
 Runtime uncertainties are cross-checked by these actual boundaries:
 

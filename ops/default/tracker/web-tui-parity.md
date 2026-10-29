@@ -1,6 +1,6 @@
 # Web and TUI parity tracker
 
-Status: Awaiting controller final gate
+Status: Completed
 Date: 2026-10-29
 Delivery set: web-tui-parity
 Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity material to specification, slices, tickets and Looper execution within the recorded scope.
@@ -263,4 +263,4 @@ None recorded. The five source runtime uncertainties have recorded production ev
 
 ## Final evidence
 
-All 14 slices are integrated, all 70 tasks are done and all 14 tickets are solved, with exact-head evidence in the delivered reports. Slice 14 validation 4OVYDKWV4PUPDT57DT7IE3UMT2 passed on the merged PR-reference head d94d5af3dedad35b430f6fc3952b5efce88c75c4. The separate final controller gate remains `make verify` and has not run on the gate-preparation commit; cycle closure awaits that evidence. Prerequisites and fixture boundaries are recorded in `ops/default/report/web-tui-parity-cycle.md`.
+All 14 slices are integrated, all 70 tasks are done and all 14 tickets are solved, with exact-head evidence in the delivered reports. Slice 14 validation 4OVYDKWV4PUPDT57DT7IE3UMT2 passed on the merged PR-reference head d94d5af3dedad35b430f6fc3952b5efce88c75c4. The separate final controller gate `make verify` passed on c5ae18e761d7c65e77784c04143197c8bba77462 in validation AX3QL4I5ZYL2KD6M76ZBPYNHNN. Delivery-set closure changes only approved documentation after that tested candidate. Exact evidence and fixture boundaries are recorded in `ops/default/report/web-tui-parity-cycle.md`.

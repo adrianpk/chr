@@ -75,5 +75,7 @@ verified through canonical Forgejo state and Acta merge event
 `4OVYDKWV4PUPDT57DT7IE3UMT2` passed all five ordered checks on that exact
 clean PR-reference head, including nine acceptance roots and 14 named parity
 scenarios without skips. The delivered Slice 14 report records exact commands,
-results and fixture boundaries. The separate final delivery-set gate remains
-controller-owned and pending.
+results and fixture boundaries. The controller's separate final delivery-set
+`make verify` passed on `c5ae18e761d7c65e77784c04143197c8bba77462` in validation
+`AX3QL4I5ZYL2KD6M76ZBPYNHNN`; the cycle report records the exact evidence and
+documentation-only closure boundary.

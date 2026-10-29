@@ -1,6 +1,6 @@
 # Web and TUI parity cycle
 
-Status: Awaiting controller final gate
+Status: Completed
 Delivery set: web-tui-parity
 PR: [#468](https://forge.adrianpk.com/adrianpk/chr/pulls/468)
 Plan: [Delivery contract](../plan/web-tui-parity.md)
@@ -9,8 +9,9 @@ Coverage: [All source IDs](../plan/web-tui-parity-coverage.csv)
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Integrated candidate: `d94d5af3dedad35b430f6fc3952b5efce88c75c4` on dev.
 Last verified integrated slice: PR #468 at `d94d5af3dedad35b430f6fc3952b5efce88c75c4`.
-Final delivery-set gate candidate: pending controller evidence.
-Closure-only commit: pending; separate from the gate candidate.
+Final delivery-set gate candidate: `c5ae18e761d7c65e77784c04143197c8bba77462`.
+Final gate validation: `AX3QL4I5ZYL2KD6M76ZBPYNHNN` — passed.
+Closure-only commit: the documentation-only child of the gate candidate; its exact hash is recorded in Acta and the controller handoff.
 
 ## Delivered outcomes
 
@@ -38,8 +39,8 @@ confirmation; no new writer is introduced.
 All 14 slices are integrated and closed, with 70 completed tasks and 14 solved
 tickets. Canonical PR #468 and Acta merge event `01M64FPHBRCSXTN5Q8YG2K1ZS6`
 confirm the final integration at `d94d5af3dedad35b430f6fc3952b5efce88c75c4`.
-Slice acceptance passed on that exact clean head. Cycle closure awaits the
-controller's separate final gate on the prepared dev candidate.
+Slice acceptance passed on that exact clean head. The controller's separate
+final gate passed on the prepared dev candidate; this document closes the set.
 
 | Slice | Canonical PR | Integrated commit | Report | Successful validation |
 | --- | --- | --- | --- | --- |
@@ -94,8 +95,8 @@ The retained verbose log shows the three application roots, all 14 named parity
 scenarios and all six browser roots ran and passed without skips. The controller
 ledger and Acta note `01M64FNVNGK034565BYWC0ZQ1N` bind results to the exact clean
 PR head and ordered commands.
-The controller's later final `make verify` evidence is recorded separately from
-this slice batch and any documentation closure commit.
+The controller's final `make verify` evidence below is separate from this slice
+batch and the documentation closure commit.
 
 All mutations occur in owned temporary projects, stores, Git remotes and
 providers. Terminal input uses actual Bubble Tea processes and PTYs; Web checks
@@ -106,7 +107,7 @@ limits and original safety assertions remain enabled; only owned children stop
 after their checks finish. These focused checks do not claim exhaustive nightly
 or live-forge certification.
 
-## Final-gate preparation
+## Final controller gate and closure
 
 The frozen configuration selects exactly `make verify`. Its Makefile prerequisites
 are strict lint, short Go tests, Python CI-script regressions and the application
@@ -117,14 +118,27 @@ required for this gate; owned integration fixtures have already stopped after
 their Slice 14 checks. `/usr/bin/chromium` remains available for the recorded
 browser evidence.
 
-Gate preparation changes only approved delivery documentation. Whitespace and
-artifact consistency are checked before its dev commit and push. The worker does
-not run the full gate in this phase. The controller must capture the prepared
-clean dev head and run the unchanged gate before final delivery-set closure.
+The controller ran the unchanged gate on clean candidate
+`c5ae18e761d7c65e77784c04143197c8bba77462`. Validation
+`AX3QL4I5ZYL2KD6M76ZBPYNHNN` passed at `2026-10-29T18:54:47.779727541Z`:
+
+- `make verify`
+
+The retained controller evidence is
+`checks/c5ae18e761d7c65e77784c04143197c8bba77462.json`; its log is
+`checks/c5ae18e761d7c65e77784c04143197c8bba77462.AX3QL4I5ZYL2KD6M76ZBPYNHNN.log`
+inside this run's checkpoint directory. Strict lint reported zero issues, the
+short Go tests and eight Python CI-script regressions passed, and the application
+build succeeded. This is the configured local gate, not nightly or live-forge
+certification.
+
+The closure commit changes only configured delivery documentation after that
+candidate. Artifact consistency and `git diff --check` validate these closure
+edits; the worker does not repeat the gate or claim its successor was tested.
+All owned test fixtures have finished; no fixture required stopping at closure.
 
 ## Residual limitations
 
-No unresolved source finding or approved exception is recorded. Final controller
-gate evidence and delivery-set documentation closure remain pending. The separate
-broader Web feedback ticket remains outside this delivery
-set: `TKT-20261023210422`.
+No unresolved source finding, approved exception or remaining delivery-set work
+is recorded. The separate broader Web feedback ticket remains outside this
+delivery set: `TKT-20261023210422`.

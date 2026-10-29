@@ -1,6 +1,6 @@
 # Web and TUI parity delivery
 
-Status: Awaiting controller final gate
+Status: Completed
 Date: 2026-10-29
 Delivery set: web-tui-parity
 Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity material to specification, slices, tickets and Looper execution within the recorded scope.
@@ -297,6 +297,12 @@ Prerequisite: Slice 13 integrated into dev.
 - **T14.5:** Run the required and focused checks; update the ticket/tracker, create the slice report, open the recorded PR and verify controller-owned dev integration. Record exact commands, HEAD and PR, then close the slice.
 
 ## Completion and closure
+
+Completed: all 14 slices are integrated, all 70 tasks are done, all 14 tickets
+are solved and all 42 findings have delivered evidence. The controller's
+`make verify` passed on `c5ae18e761d7c65e77784c04143197c8bba77462` in
+validation `AX3QL4I5ZYL2KD6M76ZBPYNHNN`. The cycle report records the exact
+gate evidence separately from this documentation-only closure commit.
 
 All 14 slices must be integrated into dev; every task and ticket must have verified disposition; every report must be delivered with its canonical PR and integration hash. Update each coverage row with evidence/report references and a final disposition; retain the static source assessment unchanged. No unresolved source item may be silently labelled complete. A runtime check that disproves a suspected gap may close it as already satisfied only with recorded production evidence; other exclusions or deferrals require maintainer approval.
 
