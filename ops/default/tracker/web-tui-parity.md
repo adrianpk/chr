@@ -42,9 +42,9 @@ The map must remain identical to the plan. Tasks below are canonical. Record act
 
 ### Slice 1: Safe queue selection and canonical moves
 
-Ticket: `TKT-20261029101136` — `ops/default/ticket/in_progress/20261029101136-web-tui-parity-safe-actions.md`
-State: in_progress
-PR: pending
+Ticket: `TKT-20261029101136` — `ops/default/ticket/reviewing/20261029101136-web-tui-parity-safe-actions.md`
+State: reviewing
+PR: [#455](https://forge.adrianpk.com/adrianpk/chr/pulls/455)
 Report: `ops/default/report/slices/web-tui-parity/slice-1-safe-actions.md`
 
 | Task | Work | State | Commits | Validation |
@@ -53,7 +53,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-1-safe-actions.md`
 | T1.2 | Give Dash an independent stable selected key and bind preview/start to that key and the observed revision. | done | 61a30044 | Dash key/navigation/refresh tests and real native adapter preview/stale-confirmation regressions pass. |
 | T1.3 | Expose the six canonical Board targets through the existing guarded ticket move operation; preserve managed-ticket and review-evidence restrictions. | done | 450d25ab | Web/TUI move matrix, stale document and active-owner regressions pass; all six palette destinations are canonical. |
 | T1.4 | Route Ctrl+C through graceful UI shutdown during busy operations, preserving retained-work ownership and cancellation semantics. | done | 3b8baf49 | Busy-mode Ctrl+C tests and production PTY/provider shutdown pass; retained workflow inspection is unchanged. |
-| T1.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Report and PR preparation; exact clean-candidate make verify and focused race batch will follow PR-reference commits. Integration remains controller-owned. |
+| T1.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | reviewing | b97e2363 | PR #455 is open. The final ordered make verify, focused race regressions and git diff --check are recorded against the clean PR HEAD by Looper. Integration remains controller-owned. |
 
 ### Slice 2: Case-oriented shell and contextual help
 

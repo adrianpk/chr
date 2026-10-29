@@ -5,7 +5,7 @@ Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `fix/slice-1-tui-safe-actions`
-PR: pending
+PR: [#455](https://forge.adrianpk.com/adrianpk/chr/pulls/455)
 Base: `b1052249998cf4c432adf1f9082ce211f52533b3`
 
 ## Purpose
