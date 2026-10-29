@@ -76,6 +76,12 @@ func completeTerminalCaseForm(t *testing.T, terminal *guidedTerminal) {
 	terminal.keys(t, "Description from terminal.")
 	terminal.keys(t, "\t")
 	terminal.keys(t, "Context from terminal.")
+	resizeTUIParityTerminal(t, terminal, 80, 24)
+	terminal.see(t, "Context from terminal.")
+	terminal.keys(t, " AFTER_RESIZE")
+	terminal.see(t, "Context from terminal. AFTER_RESIZE")
+	resizeTUIParityTerminal(t, terminal, 120, 44)
+	terminal.see(t, "Context from terminal. AFTER_RESIZE")
 	terminal.keys(t, "\x13")
 	terminal.see(t, "Operation: validation_failed")
 	terminal.keys(t, "\x1b")
@@ -105,7 +111,7 @@ func checkTerminalFormDocuments(t *testing.T, operations service) {
 	t.Helper()
 
 	metadata, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadPath(authoringcore.CaseMetadataPath(operations.projectContext.ProjectDir, "form-journey"))
-	if err != nil || metadata.Description != "Description from terminal." || metadata.Context != "Context from terminal." {
+	if err != nil || metadata.Description != "Description from terminal." || metadata.Context != "Context from terminal. AFTER_RESIZE" {
 		t.Fatal(metadata, err)
 	}
 

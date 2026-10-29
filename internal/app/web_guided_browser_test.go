@@ -36,6 +36,7 @@ func TestGuidedUseCaseWebBrowser(t *testing.T) {
 	webBoardBrowserViewport(t, browser, 1440, 1000)
 
 	runURL := captureGuidedBrowserInput(t, browser, server.URL, host)
+	assertParityBrowserPolling(t, browser, provider, runURL)
 	answerGuidedBrowserQuiz(t, browser, host, ids)
 	assertGuidedQuizHistory(t, browser, operations, readWebGuidedSession(t, operations, guidedBrowserRunID(t, provider, runURL)))
 	reopenGuidedBrowser(t, browser, server.URL)
