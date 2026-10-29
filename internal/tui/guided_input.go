@@ -8,7 +8,7 @@ import (
 )
 
 func (m *Model) updateGuidedOrHarnessKey(message tea.KeyMsg) updateOutcome {
-	if m.wizardBound() && !m.textForm.Active && !m.dumpEdit.Active && !m.quizAnswer.Active && !m.quizAction.Pending {
+	if m.wizardBound() && !m.wizardInteractionActive() {
 		if command, handled := m.updateWizardKey(message); handled {
 			return updateOutcome{Command: command, Handled: true}
 		}
@@ -27,7 +27,7 @@ func (m *Model) updateWizardKey(message tea.KeyMsg) (tea.Cmd, bool) {
 	}
 
 	key := message.String()
-	if command, handled := m.updateWizardQuizKey(message); handled {
+	if command, handled := m.updateWizardComponentKey(message); handled {
 		return command, true
 	}
 

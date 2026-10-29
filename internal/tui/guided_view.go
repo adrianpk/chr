@@ -44,7 +44,7 @@ func (m *Model) wizardStageLabel() string {
 }
 
 func (m *Model) wizardDocumentTab() bool {
-	if !m.wizardBound() {
+	if !m.wizardBound() || m.wizardBoardCurrent() {
 		return false
 	}
 

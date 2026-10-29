@@ -41,6 +41,10 @@ func (e tuiGuidedExecutor) read(ctx context.Context, request tui.GuidedRequest) 
 	}
 
 	view := tuiGuidedView(observed)
+	if err := e.projectGuidedBoard(ctx, observed, &view); err != nil {
+		return view, err
+	}
+
 	if err := e.projectPreparedOriginals(ctx, observed, &view); err != nil {
 		return view, err
 	}

@@ -4,6 +4,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // GuidedExecutor maps terminal requests to the shared guided application owner.
@@ -33,6 +34,7 @@ type GuidedView struct {
 	Retry                                   *GuidedRequest
 	Native                                  *WorkflowView
 	CanRetainIdea, CanApprove               bool
+	Tickets                                 []ticketcore.Indexed
 	Quiz                                    *QuizView
 	Session                                 *authoringcore.Session
 	Runs                                    []authoringcore.Session
@@ -114,6 +116,7 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 
 	m.guided.View = message.View
 	m.observeGuidedCase(message.View)
+	m.observeGuidedBoard(message.View)
 
 	m.finishGuidedRequest(message.Request)
 

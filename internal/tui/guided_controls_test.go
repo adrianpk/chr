@@ -45,7 +45,7 @@ func TestGuidedUseCaseTUIControls(t *testing.T) {
 	m.guidedExtraKey("a")
 
 	approval := m.workAction.Request.Workflow
-	if m.guided.Active || approval == nil || approval.ID != "retained-native" || approval.ExpectedRevision != 19 || approval.BindingHash != "displayed-review" {
+	if !m.guided.Active || approval == nil || approval.ID != "retained-native" || approval.ExpectedRevision != 19 || approval.BindingHash != "displayed-review" {
 		t.Fatal("guided approval bypassed the existing exact native confirmation")
 	}
 }

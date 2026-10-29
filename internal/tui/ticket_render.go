@@ -112,7 +112,7 @@ func renderTicketRow(ticket TicketView) string {
 	)
 }
 
-func (m *Model) renderSelectedTicketDetail() string {
+func (m *Model) renderSelectedTicketDocument() string {
 	ticket, ok := m.selectedTicketView()
 	if !ok {
 		return "Selected Ticket\n  No ticket selected."
@@ -239,4 +239,13 @@ func renderTicketBodySection(output *strings.Builder, lines []string) {
 	for _, line := range lines {
 		fmt.Fprintf(output, "    %s\n", line)
 	}
+}
+
+func (m *Model) renderSelectedTicketDetail() string {
+	detail := m.renderSelectedTicketDocument()
+	if m.wizardBoardCurrent() {
+		return "Wizard work\n" + strings.Join(m.wizardTabLines(), "\n") + "\n\n" + detail
+	}
+
+	return detail
 }

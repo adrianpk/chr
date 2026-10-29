@@ -32,7 +32,7 @@ func projectTUIGuidedStatus(view *tui.GuidedView, observed GuidedUseCaseInspecti
 
 	if work := observed.Work; work != nil {
 		view.NativeRevision = work.Revision
-		view.CanApprove = work.ReviewState == "waiting_approval" && work.ApprovalHash != ""
+		view.CanApprove = workflowApprovalUnavailable(*work) == ""
 		native := tuiWorkflowView(*work)
 		view.Native = &native
 	}

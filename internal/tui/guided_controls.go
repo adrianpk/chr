@@ -35,7 +35,6 @@ func (m *Model) inspectGuidedApproval() {
 	}
 
 	m.workflow = *m.guided.View.Native
-	m.guided.Active = false
 	m.planWorkAction(WorkActionWorkflowApprove)
 }
 
@@ -55,5 +54,5 @@ func (m *Model) guidedControlHint() string {
 		text += "a Inspect native approval · "
 	}
 
-	return text
+	return text + m.wizardBoardNativeHint()
 }
