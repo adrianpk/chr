@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101141
 title: "Spec catalog and manual editing"
-status: in_progress
+status: reviewing
 kind: task
 severity: medium
 priority: normal
@@ -15,6 +15,8 @@ commits:
   - ab927ea40c7e95f967554a573d1ca5cbe2bb0429
   - df73bed5809cc29d40a9dc9007411080e0015b47
 branch: feat/slice-6-tui-specs
+pr: 460
+reviewing_at: 2026-10-29T13:44:37Z
 started_at: 2026-10-29T13:25:17Z
 ready_at: 2026-10-29T10:11:41Z
 ---
@@ -58,4 +60,4 @@ One branch and one PR to `dev`; tasks T6.1-T6.5 are the canonical work units. Lo
 
 ## Evidence
 
-T6.1-T6.4 are implemented. Real canonical IO and HTTP resolve G-024: manual, generated and project-wide documents all appear with separate identities. Production PTY input proves manual creation, retained fields after a concurrent Save, cancelled/confirmed reload and a fresh revision Save. Metadata binding, unchanged retries and source inspection retain their canonical owners. Final exact-HEAD controller validation and dev integration remain pending; the Slice 6 report records task commands and boundaries.
+T6.1-T6.4 are implemented. Real canonical IO and HTTP resolve G-024: manual, generated and project-wide documents all appear with separate identities. Production PTY input proves manual creation, retained fields after a concurrent Save, cancelled/confirmed reload and a fresh revision Save. Metadata binding, unchanged retries and source inspection retain their canonical owners. PR #460 is open. Final exact-HEAD controller validation and dev integration remain pending; the Slice 6 report records task commands and boundaries.
