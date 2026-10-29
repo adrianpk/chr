@@ -15,6 +15,8 @@ var viewKeyHandlers = map[View]func(*Model, tea.KeyMsg) tea.Cmd{
 	ViewQuizzes: (*Model).updateQuizzesKey,
 	ViewSpecs:   (*Model).updateSpecsKey,
 	ViewPlans:   (*Model).updatePlansKey,
+	ViewBoard:   (*Model).updateTicketKey,
+	ViewTickets: (*Model).updateTicketKey,
 }
 
 func (m *Model) updateModeKey(msg tea.KeyMsg, modes []keyMode) updateOutcome {

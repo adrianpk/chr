@@ -11,14 +11,17 @@ import (
 type textFormChoice struct{ Label, Value, Revision string }
 
 type textFormField struct {
-	Choices   []textFormChoice
-	Choice    int
-	Label     string
-	Multiline bool
-	Input     textarea.Model
+	Name, ReadOnly string
+	Choices        []textFormChoice
+	Choice         int
+	Label          string
+	Multiline      bool
+	Input          textarea.Model
 }
 
 type textFormState struct {
+	TicketRequest      TicketActionRequest
+	Details            []string
 	DumpRequest        DumpActionRequest
 	SpecRequest        SpecActionRequest
 	Active             bool
@@ -106,6 +109,12 @@ func (m *Model) updateTextFormInput(message tea.KeyMsg) tea.Cmd {
 	}
 
 	field := &m.textForm.Fields[m.textForm.Focus]
+	if field.ReadOnly != "" {
+		m.statusMessage = field.ReadOnly
+
+		return nil
+	}
+
 	if len(field.Choices) != 0 {
 		return m.updateTextFormChoice(message)
 	}
@@ -140,7 +149,7 @@ func discardTextForm(m *Model) tea.Cmd {
 }
 
 func (m *Model) textFormBinding() string {
-	values := []string{m.textForm.Title, m.textForm.DumpRequest.Path, m.textForm.DumpRequest.Revision, m.textForm.DumpRequest.OperationID, m.textForm.SpecRequest.Path, m.textForm.SpecRequest.Revision, m.textForm.SpecRequest.OperationID, m.textForm.SpecRequest.Scope.CaseSlug}
+	values := []string{m.textForm.Title, m.textForm.DumpRequest.Path, m.textForm.DumpRequest.Revision, m.textForm.DumpRequest.OperationID, m.textForm.SpecRequest.Path, m.textForm.SpecRequest.Revision, m.textForm.SpecRequest.OperationID, m.textForm.SpecRequest.Scope.CaseSlug, m.textForm.TicketRequest.Key, m.textForm.TicketRequest.Revision, m.textForm.TicketRequest.OperationID, m.textForm.TicketRequest.CaseSlug}
 	for _, field := range m.textForm.Fields {
 		values = append(values, field.value())
 	}
@@ -150,40 +159,65 @@ func (m *Model) textFormBinding() string {
 
 func (m *Model) textFormLines(width, height int) []string {
 	lines := []string{"Tab / Shift+Tab choose a field; Ctrl+S submits.", ""}
+	lines = append(lines, m.textForm.Details...)
+	focusStart, focusEnd := 0, 0
 
 	for index, field := range m.textForm.Fields {
-		if len(field.Choices) != 0 {
-			lines = append(lines, m.textFormChoiceLine(field, index))
+		start := len(lines)
 
-			continue
+		lines = append(lines, m.textFormFieldLines(field, index, width, height)...)
+		if index == m.textForm.Focus {
+			focusStart, focusEnd = start, len(lines)
 		}
-
-		if index != m.textForm.Focus {
-			lines = append(lines, field.Label+": "+fitPlainLine(strings.ReplaceAll(field.Input.Value(), "\n", " / "), max(1, width-len(field.Label)-2)))
-
-			continue
-		}
-
-		input := field.Input
-		input.SetWidth(max(1, width-2))
-
-		rows := 1
-		if field.Multiline {
-			rows = max(1, min(8, height-len(m.textForm.Fields)-8))
-		}
-
-		input.SetHeight(rows)
-
-		lines = append(lines, "> "+field.Label)
-		lines = append(lines, strings.Split(input.View(), "\n")...)
 	}
 
 	prefix := "  "
 	if m.textForm.Focus == len(m.textForm.Fields) {
 		prefix = "> "
+		focusStart, focusEnd = len(lines)+1, len(lines)+2
 	}
 
-	return append(lines, "", prefix+"["+m.textForm.SubmitLabel+"]", "Esc cancels; Enter on the button submits.")
+	lines = append(lines, "", prefix+"["+m.textForm.SubmitLabel+"]", "Esc cancels; Enter on the button submits.")
+	if len(lines) <= height {
+		return lines
+	}
+
+	start := max(0, focusEnd-height+2)
+	start = min(start, focusStart)
+	end := min(len(lines), start+max(1, height-1))
+
+	return append([]string{"Tab / Shift+Tab scroll to each field; Ctrl+S submits."}, lines[start:end]...)
+}
+
+func (m *Model) textFormFieldLines(field textFormField, index, width, height int) []string {
+	if field.ReadOnly != "" {
+		prefix := "  "
+		if index == m.textForm.Focus {
+			prefix = "> "
+		}
+
+		return []string{prefix + field.Label + ": " + fitPlainLine(strings.ReplaceAll(field.value(), "\n", " / "), max(1, width-len(field.Label)-4)), "  Read-only: " + field.ReadOnly}
+	}
+
+	if len(field.Choices) != 0 {
+		return []string{m.textFormChoiceLine(field, index)}
+	}
+
+	if index != m.textForm.Focus {
+		return []string{field.Label + ": " + fitPlainLine(strings.ReplaceAll(field.Input.Value(), "\n", " / "), max(1, width-len(field.Label)-2))}
+	}
+
+	input := field.Input
+	input.SetWidth(max(1, width-2))
+
+	rows := 1
+	if field.Multiline {
+		rows = max(1, min(8, height-8))
+	}
+
+	input.SetHeight(rows)
+
+	return append([]string{"> " + field.Label}, strings.Split(input.View(), "\n")...)
 }
 
 func (field textFormField) value() string {
@@ -195,6 +229,10 @@ func (field textFormField) value() string {
 }
 
 func (m *Model) rotateTextFormIntent() {
+	if m.textForm.TicketRequest.Action != "" {
+		m.textForm.TicketRequest.OperationID = rand.Text()
+	}
+
 	if m.textForm.DumpRequest.Action != "" {
 		m.textForm.DumpRequest.OperationID = rand.Text()
 	}

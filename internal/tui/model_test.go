@@ -1039,53 +1039,20 @@ func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 	}
 }
 
+// Ticket creation opens an editable form instead of a fixed-body confirmation.
 func TestModelPlansArtifactActionCommand(t *testing.T) {
-	model := NewModel(Options{
-		WorkspaceIndex: core.WorkspaceIndex{
-			NodesByID: map[string]core.WorkspaceNode{
-				"case:blog": {
-					Kind: core.WorkspaceNodeCase,
-					Slug: "blog",
-					Name: "Blog Publishing",
-				},
-			},
-			CasesBySlug: map[string]string{"blog": "case:blog"},
-		},
-	})
+	executor := &fakeTicketActionExecutor{result: TicketActionResult{Editor: &TicketEditorView{New: true, Fields: []TicketEditorField{{Name: "title", Label: "Title"}}}}}
+	model := NewModel(Options{TicketExecutor: executor})
 	model.commandPalette.Open = true
 	model.commandPalette.Filter = "create-ticket"
+	model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
-
-	planned, ok := updated.(*Model)
-	if !ok {
-		t.Fatalf("Update returned %T, want *Model", updated)
+	if model.commandPalette.Open || model.artifactAction.Pending || !model.textForm.Active || executor.request.Action != TicketActionRead {
+		t.Fatal("create-ticket did not open its editor", model.View())
 	}
 
-	if planned.commandPalette.Open {
-		t.Fatal("command palette is open after artifact action planning")
-	}
-
-	if !planned.artifactAction.Pending {
-		t.Fatal("artifact action is not pending")
-	}
-
-	if planned.artifactAction.Action != ArtifactActionCreateTicket {
-		t.Fatalf("artifact action = %q, want %q", planned.artifactAction.Action, ArtifactActionCreateTicket)
-	}
-
-	view := planned.View()
-	for _, want := range []string{
-		"Confirm Action",
-		"Create ticket",
-		"Title: TUI created ticket",
-		"Use case suggestions:",
-		"blog - Blog Publishing",
-		"enter confirms action",
-	} {
-		if !strings.Contains(view, want) {
-			t.Fatalf("View() missing %q:\n%s", want, view)
-		}
+	if !strings.Contains(model.View(), "Create Ticket") || strings.Contains(model.View(), "TUI created ticket") {
+		t.Fatal(model.View())
 	}
 }
 
@@ -1969,7 +1936,7 @@ func TestModelRefreshesDumpsAfterEditorFinishes(t *testing.T) {
 
 func TestModelCancelsArtifactAction(t *testing.T) {
 	model := NewModel(Options{})
-	model.artifactAction = NewArtifactActionState(ArtifactActionCreateTicket)
+	model.artifactAction = NewArtifactActionState(ArtifactActionCreateAuthoringSession)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 
@@ -1992,7 +1959,7 @@ func TestModelConfirmsArtifactAction(t *testing.T) {
 		result: ArtifactActionResult{
 			Message: "Created ticket CHR-1 at .chr/default/tickets/CHR-1-tui-created-ticket.md",
 			Tickets: []ticketcore.Indexed{
-				{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "TUI created ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
+				{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Fixture ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
 			},
 			Documents: []DocumentView{
 				{Index: 0, Title: "TUI Plan"},
@@ -2010,7 +1977,7 @@ func TestModelConfirmsArtifactAction(t *testing.T) {
 		},
 	}
 	model := NewModel(Options{ActionExecutor: executor})
-	model.artifactAction = NewArtifactActionState(ArtifactActionCreateTicket)
+	model.artifactAction = NewArtifactActionState(ArtifactActionCreateAuthoringSession)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
@@ -2019,8 +1986,8 @@ func TestModelConfirmsArtifactAction(t *testing.T) {
 		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
-	if executor.action != ArtifactActionCreateTicket {
-		t.Fatalf("executor action = %q, want %q", executor.action, ArtifactActionCreateTicket)
+	if executor.action != ArtifactActionCreateAuthoringSession {
+		t.Fatalf("executor action = %q, want %q", executor.action, ArtifactActionCreateAuthoringSession)
 	}
 
 	if confirmed.artifactAction.Pending {
@@ -2037,7 +2004,7 @@ func TestModelConfirmsArtifactAction(t *testing.T) {
 func TestModelReportsArtifactActionError(t *testing.T) {
 	executor := &fakeArtifactActionExecutor{err: errors.New("write failed")}
 	model := NewModel(Options{ActionExecutor: executor})
-	model.artifactAction = NewArtifactActionState(ArtifactActionCreateTicket)
+	model.artifactAction = NewArtifactActionState(ArtifactActionCreateAuthoringSession)
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 

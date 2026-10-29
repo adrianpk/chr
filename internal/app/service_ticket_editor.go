@@ -15,6 +15,7 @@ type (
 		Options                      []ticketEditorOption
 	}
 )
+
 type ticketEditorGroup struct {
 	Title  string
 	Fields []ticketEditorField

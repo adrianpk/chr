@@ -172,6 +172,8 @@ func newTUITicketActionExecutor(
 
 func (e tuiTicketActionExecutor) executeTicketAction(request tui.TicketActionRequest) (tui.TicketActionResult, error) {
 	switch request.Action {
+	case tui.TicketActionRead, tui.TicketActionCreate, tui.TicketActionSave, tui.TicketActionRefresh:
+		return e.executeTicketEditor(request)
 	case tui.TicketActionAddComment:
 		result, err := e.operations.AddSelectedTicketComment(request.Key)
 		if err != nil {

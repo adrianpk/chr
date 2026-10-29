@@ -16,7 +16,6 @@ type ArtifactActionID string
 
 // Artifact action identifiers define the supported artifact commands.
 const (
-	ArtifactActionCreateTicket           ArtifactActionID = "create_ticket"
 	ArtifactActionCreateAuthoringSession ArtifactActionID = "create_authoring_session"
 	ArtifactActionCreateContextQuiz      ArtifactActionID = "create_context_quiz"
 )
@@ -48,19 +47,6 @@ type ArtifactActionState struct {
 // action.
 func NewArtifactActionState(action ArtifactActionID) ArtifactActionState {
 	switch action {
-	case ArtifactActionCreateTicket:
-		return ArtifactActionState{
-			Pending: true,
-			Action:  action,
-			Title:   "Create ticket",
-			Details: []string{
-				"Title: TUI created ticket",
-				"Synopsis: Ticket created from the TUI Board action.",
-				"Type: task",
-				"Priority: normal",
-				"Severity: normal",
-			},
-		}
 	case ArtifactActionCreateAuthoringSession:
 		return ArtifactActionState{
 			Pending: true,
@@ -93,34 +79,7 @@ func (m *Model) renderArtifactAction() string {
 		output.WriteString("\n")
 	}
 
-	if m.artifactAction.Action == ArtifactActionCreateTicket {
-		for _, suggestion := range m.renderArtifactActionCaseSuggestionLines() {
-			output.WriteString("  ")
-			output.WriteString(suggestion)
-			output.WriteString("\n")
-		}
-	}
-
 	return strings.TrimRight(output.String(), "\n")
-}
-
-func (m *Model) renderArtifactActionCaseSuggestionLines() []string {
-	suggestions := m.workspaceIndex.ListCases()
-	if len(suggestions) == 0 {
-		return nil
-	}
-
-	lines := []string{"Use case suggestions:"}
-
-	for index, suggestion := range suggestions {
-		if index >= 3 {
-			break
-		}
-
-		lines = append(lines, "- "+suggestion.Slug+" - "+suggestion.Name)
-	}
-
-	return lines
 }
 
 func (m *Model) updateArtifactActionKey(msg tea.KeyMsg) tea.Cmd {

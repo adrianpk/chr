@@ -89,6 +89,12 @@ func (e tuiTicketActionExecutor) ExecuteTicketAction(request tui.TicketActionReq
 	result, err := e.executeTicketAction(request)
 	outcome := operationResult(result.Message, err)
 
+	outcome.OperationID, outcome.Retry = request.OperationID, false
+	if err != nil && result.Committed {
+		outcome.Status, outcome.Summary = operation.Blocked, "Ticket saved; refresh failed. Close this form and refresh tickets before editing again."
+		outcome.Reload = false
+	}
+
 	outcome.ChangedFiles = result.Outcome.ChangedFiles
 	if err != nil && (request.Action == tui.TicketActionToggleChecklist || request.Action == tui.TicketActionAddChecklistItem) {
 		outcome = unavailableOperation(err)

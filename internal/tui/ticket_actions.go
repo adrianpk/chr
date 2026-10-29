@@ -17,6 +17,11 @@ type TicketActionID string
 // Ticket action identifiers define supported ticket commands.
 const (
 	TicketActionAddComment       TicketActionID = "add_comment"
+	TicketActionRead             TicketActionID = "read_ticket"
+	TicketActionCreate           TicketActionID = "create_ticket"
+	TicketActionSave             TicketActionID = "save_ticket"
+	TicketActionEdit             TicketActionID = "edit_ticket"
+	TicketActionRefresh          TicketActionID = "refresh_tickets"
 	TicketActionAttachReviewRef  TicketActionID = "attach_review_ref"
 	TicketActionMoveStatus       TicketActionID = "move_status"
 	TicketActionToggleChecklist  TicketActionID = "toggle_checklist"
@@ -30,19 +35,24 @@ type TicketActionExecutor interface {
 
 // TicketActionRequest carries selected ticket action input.
 type TicketActionRequest struct {
-	Action    TicketActionID
-	Key       string
-	Revision  string
-	Status    string
-	Branch    string
-	ReviewRef *ticketmetadata.ReviewRef
+	OperationID, CaseSlug, Comment string
+	Fields                         map[string]string
+	Body                           *string
+	Action                         TicketActionID
+	Key                            string
+	Revision                       string
+	Status                         string
+	Branch                         string
+	ReviewRef                      *ticketmetadata.ReviewRef
 }
 
 // TicketActionResult contains refreshed ticket state after an action.
 type TicketActionResult struct {
-	Outcome operation.Result
-	Message string
-	Tickets []ticketcore.Indexed
+	Editor    *TicketEditorView
+	Committed bool
+	Outcome   operation.Result
+	Message   string
+	Tickets   []ticketcore.Indexed
 }
 
 // TicketActionState stores pending confirmation state for a ticket action.
@@ -141,6 +151,18 @@ func (m *Model) updateTicketActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) planTicketAction(action TicketActionID, status string) {
+	if action == TicketActionCreate {
+		m.openTicketCreateForm()
+
+		return
+	}
+
+	if action == TicketActionEdit {
+		m.openTicketEditForm()
+
+		return
+	}
+
 	ticket, ok := m.selectedTicketView()
 	if !ok {
 		m.statusMessage = "No selected ticket is available."

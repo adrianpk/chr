@@ -99,13 +99,6 @@ func newTUIArtifactActionExecutor(
 
 func (e tuiArtifactActionExecutor) executeArtifactAction(action tui.ArtifactActionID) (tui.ArtifactActionResult, error) {
 	switch action {
-	case tui.ArtifactActionCreateTicket:
-		result, err := e.operations.CreateDefaultTicket()
-		if err != nil {
-			return tui.ArtifactActionResult{}, err
-		}
-
-		return e.artifactActionResult(result)
 	case tui.ArtifactActionCreateAuthoringSession:
 		result, err := e.operations.CreateTUIAuthoringSession()
 		if err != nil {
