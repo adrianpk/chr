@@ -41,9 +41,7 @@ func newTUIPlanActionExecutor(
 	}
 }
 
-func (e tuiSpecActionExecutor) executeSpecAction(
-	request tui.SpecActionRequest,
-) (tui.SpecActionResult, error) {
+func (e tuiSpecActionExecutor) executeSpecAction(request tui.SpecActionRequest) (tui.SpecActionResult, error) {
 	result := tui.SpecActionResult{}
 
 	switch request.Action {
@@ -160,9 +158,7 @@ func newTUITicketActionExecutor(
 	}
 }
 
-func (e tuiTicketActionExecutor) executeTicketAction(
-	request tui.TicketActionRequest,
-) (tui.TicketActionResult, error) {
+func (e tuiTicketActionExecutor) executeTicketAction(request tui.TicketActionRequest) (tui.TicketActionResult, error) {
 	switch request.Action {
 	case tui.TicketActionAddComment:
 		result, err := e.operations.AddSelectedTicketComment(request.Key)

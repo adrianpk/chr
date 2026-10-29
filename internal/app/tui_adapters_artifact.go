@@ -48,9 +48,7 @@ func newTUIProjectMetadataExecutor(
 	}
 }
 
-func (e tuiProjectMetadataExecutor) saveProjectMetadata(
-	metadata authoringcore.ProjectMetadata,
-) (tui.ProjectMetadataResult, error) {
+func (e tuiProjectMetadataExecutor) saveProjectMetadata(metadata authoringcore.ProjectMetadata) (tui.ProjectMetadataResult, error) {
 	result, err := e.operations.SaveProjectMetadata(metadata)
 	if err != nil {
 		return tui.ProjectMetadataResult{}, err
@@ -74,9 +72,7 @@ func newTUICaseMetadataExecutor(
 	}
 }
 
-func (e tuiCaseMetadataExecutor) saveCaseMetadata(
-	metadata authoringcore.CaseMetadata,
-) (tui.CaseMetadataResult, error) {
+func (e tuiCaseMetadataExecutor) saveCaseMetadata(metadata authoringcore.CaseMetadata) (tui.CaseMetadataResult, error) {
 	result, err := e.operations.SaveCaseMetadata(metadata)
 	if err != nil {
 		return tui.CaseMetadataResult{}, err
@@ -101,9 +97,7 @@ func newTUIArtifactActionExecutor(
 	}
 }
 
-func (e tuiArtifactActionExecutor) executeArtifactAction(
-	action tui.ArtifactActionID,
-) (tui.ArtifactActionResult, error) {
+func (e tuiArtifactActionExecutor) executeArtifactAction(action tui.ArtifactActionID) (tui.ArtifactActionResult, error) {
 	switch action {
 	case tui.ArtifactActionCreateTicket:
 		result, err := e.operations.CreateDefaultTicket()

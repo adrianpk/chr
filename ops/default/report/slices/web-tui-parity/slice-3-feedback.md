@@ -94,6 +94,10 @@ Implementation checks passed locally:
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/tui ./internal/app ./internal/app/operation ./internal/webui` — passed after formatting and complexity corrections.
 - `git diff --check` — passed.
 
+The first controller batch `4ARNEJ3OLAZ4T4PB2SWPMQGYXB` stopped at the
+repository signature-format check. Renamed methods now use single-line
+parameter lists, and the neutral package includes its required README.
+
 Looper records the clean final HEAD and ordered required/focused commands after
 PR-reference follow-up commits. The PR Validation section contains successful
 commands from that evidence. Canonical integration remains pending.

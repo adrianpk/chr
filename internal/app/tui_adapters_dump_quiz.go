@@ -32,9 +32,7 @@ func newTUIQuizActionExecutor(
 	}
 }
 
-func (e tuiQuizActionExecutor) executeQuizAction(
-	request tui.QuizActionRequest,
-) (tui.QuizActionResult, error) {
+func (e tuiQuizActionExecutor) executeQuizAction(request tui.QuizActionRequest) (tui.QuizActionResult, error) {
 	operation, ok := e.quizOperation(request.Action)
 	if !ok {
 		return tui.QuizActionResult{}, errors.New("unknown quiz action")
@@ -170,9 +168,7 @@ func (e tuiQuizActionExecutor) executeQuizOperationMode(request tui.QuizActionRe
 	return result.Message, nil
 }
 
-func (e tuiDumpActionExecutor) executeDumpAction(
-	request tui.DumpActionRequest,
-) (tui.DumpActionResult, error) {
+func (e tuiDumpActionExecutor) executeDumpAction(request tui.DumpActionRequest) (tui.DumpActionResult, error) {
 	switch request.Action {
 	case tui.DumpActionCreate:
 		return e.executeCreateDump(request)
