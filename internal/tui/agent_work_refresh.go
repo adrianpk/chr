@@ -87,12 +87,11 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 		m.workflow = *view
 	}
 
-	m.workObservation = msg.result.Observation
 	m.queuePending = false
-	m.reconcileDashSelection()
 
 	m.observability = msg.result.Observability
 	m.workReadiness = msg.result.Readiness
+	m.installWorkObservation(msg.result.Observation)
 
 	return agentWorkRefreshTickCmd()
 }

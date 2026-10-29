@@ -75,6 +75,9 @@ func (m *Model) operationInteraction(family string) interactionContext {
 	context := m.currentInteraction()
 	if strings.HasPrefix(family, "work:") {
 		context.Run = m.workflow.ID
+		if m.SelectedView() == ViewDash {
+			context.Run += fmt.Sprintf(":%#v", m.queueRequest)
+		}
 	}
 
 	return context

@@ -53,6 +53,7 @@ type WorkActionResult struct {
 
 // WorkActionState stores pending confirmation state for an agent work action.
 type WorkActionState struct {
+	context *interactionContext
 	Pending bool
 	Request WorkActionRequest
 	Title   string
@@ -319,6 +320,8 @@ func (m *Model) updateWorkActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) planWorkAction(action WorkActionID) {
+	defer m.bindWorkActionContext()
+
 	if m.dashActionBlocked(action) {
 		return
 	}
@@ -366,6 +369,13 @@ func (m *Model) cancelWorkAction() {
 }
 
 func (m *Model) confirmWorkAction() tea.Cmd {
+	if binding := m.workAction.context; binding != nil && *binding != m.operationInteraction("work:"+string(m.workAction.Request.Action)) {
+		m.workAction = WorkActionState{}
+		m.statusMessage = "Work selection changed; preview again before confirmation."
+
+		return nil
+	}
+
 	request := m.workAction.Request
 	m.workAction = WorkActionState{}
 
@@ -506,4 +516,13 @@ func (m *Model) blockedWorkReadinessStatus() string {
 
 func nativeWorkExecutesIfBound(request WorkActionRequest) bool {
 	return request.Workflow != nil && nativeWorkExecutes(request)
+}
+
+func (m *Model) bindWorkActionContext() {
+	if !m.workAction.Pending {
+		return
+	}
+
+	context := m.operationInteraction("work:" + string(m.workAction.Request.Action))
+	m.workAction.context = &context
 }

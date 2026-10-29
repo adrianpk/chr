@@ -31,6 +31,8 @@ const (
 
 // WorkflowActionRequest retains service-supplied identities and revisions.
 type WorkflowActionRequest struct {
+	Admission        *workflowstate.AdmissionGuard
+	RequestKey       string
 	Preview          bool
 	Selection        workflowstate.PreviewRequest
 	Selected         *workflowstate.SelectionGuard
@@ -262,6 +264,7 @@ func (m *Model) completeNativeWorkAction(message workActionFinishedMsg) {
 
 	if message.Result.Confirmation != nil {
 		m.workAction = *message.Result.Confirmation
+		m.bindWorkActionContext()
 	}
 
 	m.statusMessage = message.Result.Message

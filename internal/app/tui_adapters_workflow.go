@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"strings"
@@ -47,12 +48,17 @@ func (e tuiWorkActionExecutor) nativeWorkExtentResult(request tui.WorkActionRequ
 		}
 
 		native.Selection, native.Selected, native.Preview = bound.Request, bound.Selected, false
+		native.Admission = &workflowstate.AdmissionGuard{
+			SnapshotHash: bound.Request.SnapshotHash, Selected: bound.Selected,
+			Policy: bound.View.Policy, ExecutionPolicy: bound.View.ExecutionPolicy, ReadyTicket: bound.ReadyTicket,
+		}
+		native.RequestKey = "work-preview-" + rand.Text()
 		confirmation := tui.WorkActionState{Pending: true, Request: request, Title: "Confirm native workflow extent", Details: nativeWorkPreviewLines(bound)}
 
 		return tui.WorkActionResult{Confirmation: &confirmation}, nil
 	}
 
-	result, err := e.operations.StartBoundWorkExtent(e.operations.ctx, native.Selection, native.Selected, 1)
+	result, err := e.operations.ExecuteConfirmedWorkExtent(e.operations.ctx, workflowstate.StartInput{RequestKey: native.RequestKey, Selection: native.Selection, Admission: native.Admission}, 1)
 	if result.Workflow == nil {
 		return tui.WorkActionResult{}, err
 	}

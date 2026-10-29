@@ -126,6 +126,7 @@ type interactionState struct {
 
 type workState struct {
 	dashTicketKey           string
+	dashWorkflowDetails     bool
 	workObservation         *work.Observation
 	queueRequest            work.Request
 	queuePending            bool

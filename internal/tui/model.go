@@ -243,7 +243,7 @@ func NewModel(opts Options) *Model {
 			guidedExecutor: opts.GuidedExecutor,
 		},
 	}
-	model.reconcileDashSelection()
+	model.installWorkObservation(opts.WorkObservation)
 
 	return model
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (m *Model) renderDash() string {
@@ -82,9 +83,7 @@ func (m *Model) renderDashWorkspace(width, height int) string {
 	}...)
 	queueLines = append(queueLines, m.renderAgentWorkQueueLines(maxInt(height-len(queueLines), 1))...)
 
-	currentLines := append(m.renderDashReadinessLines(maxInt(height/3, 3)), "")
-	currentLines = append(currentLines, m.renderAgentWorkCurrentLines()...)
-	currentLines = append(currentLines, m.nativeWorkflowLines()...)
+	currentLines := m.dashCurrentLines(maxInt(height/3, 3))
 
 	recentLines := append([]string{
 		"Actions",
@@ -204,12 +203,11 @@ func appendDashReadinessRepairGuidance(lines []string, view WorkReadinessView) [
 }
 
 func (m *Model) renderDashActionLines() []string {
-	lines := []string{
-		"a Run all ready tickets",
-		"enter Start selected ticket",
-		"p Cycle priority filter",
-		"o Cycle queue order",
+	lines := append(m.dashQueueActionLines(), "p Cycle priority filter", "o Cycle queue order")
+	if m.observability.Authority == workspaceconfig.WorkStateAuthorityTickets {
+		lines = append(lines, "v Preview Work", "w Workflow details")
 	}
+
 	if m.workReadiness.safeRepairAvailable() {
 		lines = append(lines, "x Apply safe readiness repair")
 	}

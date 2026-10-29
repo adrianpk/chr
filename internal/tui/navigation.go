@@ -49,12 +49,8 @@ func (m *Model) handleNavigationPageKey(keyType tea.KeyType) bool {
 }
 
 func (m *Model) handleNavigationActionKey(key string) tea.Cmd {
-	if command, handled := m.handleDashQueryKey(key); handled {
+	if command, handled := m.handleDashKey(key); handled {
 		return command
-	}
-
-	if m.handleDashActionKey(key) {
-		return nil
 	}
 
 	if m.handleDetailScrollKey(key) {

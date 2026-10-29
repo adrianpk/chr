@@ -113,3 +113,13 @@ func (m *Model) dashSelectedActionBlocked() bool {
 
 	return false
 }
+
+func (m *Model) installWorkObservation(observed *work.Observation) {
+	m.workObservation = observed
+	if observed != nil {
+		m.observability.Authority = observed.Authority
+		m.workReadiness = NewWorkReadinessView(observed.Readiness)
+	}
+
+	m.reconcileDashSelection()
+}

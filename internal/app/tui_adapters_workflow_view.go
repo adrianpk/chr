@@ -98,6 +98,8 @@ func nativeWorkPreviewLines(bound WorkflowBoundPreview) []string {
 		"Snapshot: " + view.Preview.SnapshotHash,
 		fmt.Sprintf("Target: %s at %s", view.Target.Repository, view.Target.Commit),
 		fmt.Sprintf("Policy: %s; method: %s; source: %s", view.Policy.Mode, view.Policy.Method, view.Policy.Source),
+		fmt.Sprintf("Frozen limits: worker attempts %d; integration attempts %d; checkpoint steps %d", view.ExecutionPolicy.MaxWorkerAttempts, view.ExecutionPolicy.MaxIntegrationAttempts, workflowDisplayStepLimit(view.ExecutionPolicy.CheckpointStepLimit)),
+		fmt.Sprintf("Timeouts: worker %ds; validation %ds; token budget %d", view.ExecutionPolicy.WorkerTimeoutSeconds, view.ExecutionPolicy.ValidationTimeoutSeconds, view.ExecutionPolicy.AgentTokenBudget),
 		"Execute at most one shared checkpoint; continue from retained status.",
 	}
 	if bound.Selected != nil {
