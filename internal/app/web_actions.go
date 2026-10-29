@@ -2,14 +2,13 @@ package app
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/url"
 	"strings"
 
+	"forge.adrianpk.com/chr/internal/app/operation"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
-	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -424,7 +423,8 @@ func webDumpOperation(kind string, result DumpOperationResult) webui.OperationSt
 }
 
 func webDumpWriteFailure(err error, reference string) webui.WriteActionResponse {
-	if errors.Is(err, workflowstate.ErrConflict) {
+	outcome := operationResult("", err)
+	if outcome.Status == operation.Stale {
 		reload := "/dumps"
 		if reference != "" {
 			reload += "/detail?id=" + url.QueryEscape(reference)
@@ -433,7 +433,7 @@ func webDumpWriteFailure(err error, reference string) webui.WriteActionResponse 
 		return webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "The dump changed after it was loaded. Reload before saving.", ReloadURL: reload, DiscardURL: "/dumps"}
 	}
 
-	if errors.Is(err, authoringcore.ErrProjectDumpReconciliation) {
+	if outcome.Status == operation.Blocked {
 		return webBlockedWrite(err.Error())
 	}
 
@@ -449,11 +449,13 @@ func webBlockedWrite(reason string) webui.WriteActionResponse {
 }
 
 func webValidationWrite(err error) webui.WriteActionResponse {
-	return webui.WriteActionResponse{
-		Status:     webui.WriteStatusValidation,
-		Summary:    "Write action failed validation.",
-		Validation: []string{err.Error()},
-	}
+	outcome := operation.Result{Status: operation.ValidationFailed, Summary: "Write action failed validation.", Validation: []string{err.Error()}}
+
+	return webOperationResult(outcome)
+}
+
+func webOperationResult(outcome operation.Result) webui.WriteActionResponse {
+	return webui.WriteActionResponse{Status: outcome.Status, Summary: outcome.Summary, ChangedFiles: outcome.ChangedFiles, Validation: outcome.Validation, BlockedReason: outcome.BlockedReason}
 }
 
 func webStaleWrite(currentRevision, expectedRevision string) webui.WriteActionResponse {

@@ -1,6 +1,10 @@
 package webui
 
-import "context"
+import (
+	"context"
+
+	"forge.adrianpk.com/chr/internal/app/operation"
+)
 
 // DataProvider loads read-only Web UI views from the application layer.
 type DataProvider interface {
@@ -369,13 +373,13 @@ type WriteActionRequest struct {
 
 const (
 	// WriteStatusOK marks a completed write action.
-	WriteStatusOK = "ok"
+	WriteStatusOK = operation.OK
 	// WriteStatusValidation marks a user-correctable validation failure.
-	WriteStatusValidation = "validation_failed"
+	WriteStatusValidation = operation.ValidationFailed
 	// WriteStatusStale marks a rejected stale write.
-	WriteStatusStale = "stale"
+	WriteStatusStale = operation.Stale
 	// WriteStatusBlocked marks an unsupported or unconfirmed operation.
-	WriteStatusBlocked = "blocked"
+	WriteStatusBlocked = operation.Blocked
 )
 
 // WriteActionResponse is the stable write result envelope returned by Web UI actions.
