@@ -1,6 +1,10 @@
 package app
 
-import "forge.adrianpk.com/chr/internal/tui"
+import (
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	"forge.adrianpk.com/chr/internal/tui"
+)
 
 func loadTUIDumps(operations service) ([]tui.DumpView, error) {
 	result, err := operations.ListDumps()
@@ -62,22 +66,32 @@ func loadTUIQuizzes(operations service) ([]tui.QuizView, error) {
 }
 
 func loadTUISpecs(operations service) ([]tui.SpecView, error) {
-	result, err := operations.ListSpecs()
+	documents, err := operations.ListSpecDocuments()
 	if err != nil {
 		return nil, err
 	}
 
-	specs := make([]tui.SpecView, 0, len(result.Specs))
-	for index, spec := range result.Specs {
+	cases, err := authoringcore.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.RecordLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	names := map[string]string{"": "Project-wide"}
+	for _, metadata := range cases {
+		names[metadata.Slug] = metadata.Name
+	}
+
+	specs := make([]tui.SpecView, 0, len(documents))
+	for index, spec := range documents {
 		specs = append(specs, tui.SpecView{
 			Index:        index,
-			UseCaseTitle: spec.UseCaseTitle,
+			UseCaseTitle: names[spec.CaseSlug],
 			Title:        spec.Title,
 			Status:       spec.Status,
-			Scope:        tui.QuizScope{CaseSlug: spec.Scope.CaseSlug},
-			RelativePath: spec.RelativePath,
-			UpdatedAt:    spec.UpdatedAt,
-			Content:      spec.Content,
+			Scope:        tui.QuizScope{CaseSlug: spec.CaseSlug},
+			RelativePath: spec.Reference,
+			Revision:     spec.Revision,
+			Content:      spec.Body,
 		})
 	}
 

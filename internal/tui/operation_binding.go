@@ -63,7 +63,9 @@ func (m *Model) currentOperationTarget() string {
 			return fmt.Sprintf("%s:%v", quiz.Scope.CaseSlug, quiz.Binding)
 		}
 	case ViewSpecs:
-		return m.selectedSpecScope().CaseSlug
+		if spec, ok := m.selectedSpecView(); ok {
+			return spec.RelativePath + ":" + spec.Revision
+		}
 	case ViewPlans:
 		return m.selectedPlanScope().CaseSlug
 	case ViewCases:

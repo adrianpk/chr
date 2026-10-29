@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/tui"
@@ -156,6 +157,12 @@ func TestTUIQuizAdapterDispatchesRuntimeQuizActions(t *testing.T) {
 func TestTUISpecAdapterGeneratesAcceptanceFeature(t *testing.T) {
 	projectDir := t.TempDir()
 	writeAcceptanceFeatureServiceFixture(t, projectDir)
+	// The concrete catalog reads the canonical body and metadata together.
+	for _, reference := range []string{"ops/default/spec/00000-blog-spec/artifact.md", "ops/default/spec/00000-blog-prior-spec/artifact.md"} {
+		if err := opscore.EnsureArtifactBodyMetadata(projectDir, reference); err != nil {
+			t.Fatal(err)
+		}
+	}
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{

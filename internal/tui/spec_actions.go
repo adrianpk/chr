@@ -37,6 +37,7 @@ type SpecActionResult struct {
 	Documents               []DocumentView
 	Specs                   []SpecView
 	Scope                   QuizScope
+	SelectedPath            string
 	AcceptanceFeatureStatus string
 	AcceptanceFeaturePath   string
 	AcceptanceFeatureRound  string
@@ -216,8 +217,17 @@ func (m *Model) applySpecActionResult(result SpecActionResult) {
 	}
 
 	if result.Specs != nil {
+		selected, _ := m.selectedSpecView()
+
+		path := result.SelectedPath
+		if path == "" {
+			path = selected.RelativePath
+		}
+
 		m.specs = normalizeSpecViews(result.Specs)
-		m.selectSpecByScope(result.Scope)
+		if !m.selectSpecByPath(path) {
+			m.selectSpecByScope(result.Scope)
+		}
 	}
 
 	m.statusMessage = specActionResultMessage(result)

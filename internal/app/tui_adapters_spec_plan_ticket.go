@@ -54,6 +54,7 @@ func (e tuiSpecActionExecutor) executeSpecAction(request tui.SpecActionRequest) 
 		}
 
 		result.Message = generated.Message
+		result.SelectedPath = generated.Spec.RelativePath
 		result.Outcome.ChangedFiles = compactChangedFiles(generated.Spec.RelativePath)
 	case tui.SpecActionGenerateFeature:
 		generated, err := e.operations.GenerateAcceptanceFeature(e.operations.ctx, AcceptanceFeatureGenerateRequest{

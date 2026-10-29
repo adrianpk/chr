@@ -13,6 +13,7 @@ type SpecView struct {
 	Status       string
 	Scope        QuizScope
 	RelativePath string
+	Revision     string
 	UpdatedAt    time.Time
 	Content      string
 }
@@ -116,10 +117,26 @@ func normalizeSpecViews(specs []SpecView) []SpecView {
 	return normalized
 }
 
+func (m *Model) selectSpecByPath(path string) bool {
+	if path == "" {
+		return false
+	}
+
+	for _, spec := range m.visibleSpecs() {
+		if spec.RelativePath == path {
+			m.selectedSpec = spec.Index
+
+			return true
+		}
+	}
+
+	return false
+}
+
 func specUseCaseTitle(spec SpecView) string {
 	title := strings.TrimSpace(spec.UseCaseTitle)
 	if title != "" {
-		return title
+		return title + " — " + spec.Title
 	}
 
 	title = strings.TrimSpace(spec.Title)
