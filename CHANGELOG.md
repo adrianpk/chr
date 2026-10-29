@@ -12,6 +12,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Prepare a case's TUI plan and native tickets with one action. Retry incomplete
+  preparation without regenerating the plan or duplicating tickets, then open
+  the saved document or case-filtered Board from the result. Spec generation
+  also offers Open document. Preparation leaves work ready without starting it.
+
 - Choose Deep/Fast before starting TUI quizzes, identify targets awaiting an
   answer, and read saved question/answer history beside the current input.
   Cancel and resume retain saved answers; failed or stale submissions preserve

@@ -9,7 +9,11 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:43Z
-commits: []
+commits:
+  - 446998e8544333e541aa067af244e4a0d5f4dc23
+  - 0f98d041c40005ff7ce88728e13eb603089d8f00
+  - 77f84ecbda38bac787f65d35c993cfbfbdbd6ade
+  - 1523b132f98fdf8c8022c0a1572fdce6bf09341e
 branch: feat/slice-8-tui-plans
 started_at: 2026-10-29T14:24:15Z
 ready_at: 2026-10-29T10:11:43Z
@@ -54,4 +58,4 @@ One branch and one PR to `dev`; tasks T8.1-T8.5 are the canonical work units. Lo
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+T8.1-T8.4 are implemented. The production adapter shares combined plan/native-ticket preparation with Web. Real IO/HTTP and production PTY checks retain original retries, prevent duplicate preparation, reject stale replacement, preserve cancellation, and open documents/case tickets without starting work. Independent CLI tracking remains available. Exact commands and correction evidence are in the Slice 8 report; final exact-HEAD controller validation and integration remain pending.

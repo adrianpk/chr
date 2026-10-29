@@ -348,17 +348,28 @@ chr acceptance feature generate --use-case billing
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a use case. |
-| `g` | Generate the selected plan only if it is missing. |
+| `g` | Prepare the case plan and native tickets together; resume retained preparation. |
 | `G` | Regenerate the selected plan after confirmation. |
-| `alt+t` | Create plan tracking and tickets after confirmation. |
 | `r` | Refresh plans from disk. |
 
-Plan generation is guarded against overlapping requests. `g` does not overwrite
-an existing plan. `G` archives the existing generated plan before writing a new
-one. `alt+t` is available only when the selected plan exists and contains
-content.
+Generate requires an existing named case with a saved Spec. It uses
+`GeneratePlanDelivery` with the captured operation ID and target revision.
+Existing plans are retained; partial ticket preparation resumes without duplicate
+plans or tickets. The result's `y` retries the exact original request. A stale
+result's `r` reloads the captured case. Neither preparation nor result navigation
+starts execution.
 
-CLI equivalents:
+After successful Spec/Plan generation, `o` opens the saved document in its tab.
+A combined plan/ticket result also offers `t` to open the case-filtered Board and
+a populated column. These actions appear only for retained outputs and remain
+bound to the current result. `alt+o` reopens that result.
+
+`G` archives and replaces the generated plan through the existing publication
+owner, preserving captured target revision and source checks. Cancelled or stale
+replacement does not write. The scoped catalog prefers the canonical target to
+retained native copies. Concurrent plan actions are blocked.
+
+Independent tracking remains a CLI capability. It is not a second terminal step:
 
 ```sh
 chr plan list

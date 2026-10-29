@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 8 — Plan and ticket preparation.
 Completed slices: 7/14
-Completed tasks: 35/70
+Completed tasks: 39/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -157,11 +157,11 @@ Report: `ops/default/report/slices/web-tui-parity/slice-8-plans.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T8.1 | Route manual Generate Plan through GeneratePlanDelivery, matching the Web plan surface. | pending | — | Planned: One action retains the plan and creates the expected native tickets; execution has not started. |
-| T8.2 | Reconcile a retained partial preparation by its original identity rather than regenerating plans or duplicate tickets. | pending | — | Planned: Injected partial failure followed by retry produces exactly one intended ticket set. |
-| T8.3 | Preserve explicit Regenerate confirmation and any independent tracking CLI capability without exposing a misleading second required step. | pending | — | Planned: Existing-plan handling and regeneration preserve source/revision and scope checks. |
-| T8.4 | Offer Open document and View tickets after successful Spec/Plan generation with context-preserving navigation. | pending | — | Planned: Actions appear only when their document or ticket result exists. |
-| T8.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T8.1 | Route manual Generate Plan through GeneratePlanDelivery, matching the Web plan surface. | done | 446998e8 | Real adapter/HTTP regressions retain the plan and native ticket through GeneratePlanDelivery; captured case, revision and operation ID reach the shared owner. |
+| T8.2 | Reconcile a retained partial preparation by its original identity rather than regenerating plans or duplicate tickets. | done | 0f98d041 | Provider failure, original retry, duplicate replay and reopened preparation retain one plan and ticket set; queued commands keep their observed target. |
+| T8.3 | Preserve explicit Regenerate confirmation and any independent tracking CLI capability without exposing a misleading second required step. | done | 77f84ecb | Explicit Regenerate retains confirmation and source/revision guards; canonical catalog preference and independent tracking service regressions pass. |
+| T8.4 | Offer Open document and View tickets after successful Spec/Plan generation with context-preserving navigation. | done | 1523b132 | Production PTY and IO checks open actual documents and a populated case Board without writes; cancelled replacement and idle native task assertions pass. |
+| T8.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Task checks passed; report and canonical PR preparation underway. Final exact-HEAD controller validation and integration pending. |
 
 ### Slice 9: Ticket editing, comments and references
 
