@@ -58,4 +58,4 @@ One branch and one PR to `dev`; tasks T2.1-T2.5 are the canonical work units. Lo
 
 ## Evidence
 
-Seven-tab navigation, contextual Help and Project access, case/run binding and the retained capability inventory are implemented in PR [#456](https://forge.adrianpk.com/adrianpk/chr/pulls/456). Component, retained-run and real-terminal regressions passed during implementation. The tracker and Slice 2 report record the commands and pending exact-HEAD validation; PR #456 is verified merged into dev at 322e8f0a7a7b17536f1cbe72b72e8023d2a4efb0.
+Seven-tab navigation, contextual Help and Project access, case/run binding and the retained capability inventory are implemented in PR [#456](https://forge.adrianpk.com/adrianpk/chr/pulls/456). Component, retained-run and real-terminal regressions passed during implementation. The tracker and Slice 2 report record the successful exact-HEAD validation; PR #456 is verified merged into dev at 322e8f0a7a7b17536f1cbe72b72e8023d2a4efb0.

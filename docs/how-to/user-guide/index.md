@@ -543,6 +543,26 @@ when the selected plan exists.
 Palette commands that change files open the same confirmation prompt used by
 direct keybindings. Confirm with `enter` or cancel with `esc`.
 
+## Inspect TUI Operation Results
+
+Manual operation results distinguish `ok`, `validation_failed`, `stale` and
+`blocked`. Failures open the Action panel with the summary, validation findings
+and blocking reason. Successful writes show their summary in the status line.
+Press `alt+o` to inspect the latest result, including known changed files; use
+arrows or Home/End to scroll. Esc returns to the complete retained input.
+
+The panel offers `r` only when a reload is available and `y` only for an eligible
+retry of the original operation. Reload asks for confirmation before replacing
+unsaved text. Enter confirms; Esc keeps it. Recovery for an older interaction
+cannot submit or replace the current editor's input.
+
+Project and Case field editors, Dump editing and Quiz answers ask before
+discarding entered text. Quiz Skip and Done also ask when an answer has not
+been submitted. A submitted answer stays visible until acknowledgement; a
+failed save or late response cannot clear a newer draft. Case and Project
+metadata reloads read the captured source, and Dump and Quiz reloads retain
+their original scope until confirmation succeeds.
+
 ## Edit Project Context
 
 Open the Project view with `alt+p`.
@@ -556,7 +576,7 @@ feeds later spec and plan generation.
 | `up` / `down` or `k` / `j` | Select the project field in the primary pane. |
 | `enter` or `e` | Edit the selected field. |
 | `enter` while editing | Apply the field edit locally. |
-| `esc` while editing | Cancel the field edit. |
+| `esc` while editing | Confirm discarding changed text, or leave an unchanged field. |
 | `s` or `ctrl+s` | Save project metadata to disk. |
 | `r` | Refresh the workspace graph from disk. |
 
@@ -647,7 +667,7 @@ the detail pane, and shows the raw sibling path when one exists.
 | `alt+e` | Open the selected dump in the external editor. |
 | `r` | Refresh dumps from disk. |
 | `ctrl+s` while editing | Save the TUI editor content. |
-| `esc` while editing | Cancel the TUI editor. |
+| `esc` while editing | Confirm discarding unsaved text. |
 
 Direct edit maximizes the detail pane. External edit starts the configured
 editor process and refreshes the dump list when the editor exits.
@@ -720,7 +740,7 @@ When answering a quiz:
 | `shift+enter` or `ctrl+j` | Insert a newline. |
 | `alt+s` | Skip the active question. |
 | `alt+d` | Mark the quiz done. |
-| `esc` | Cancel answer entry. |
+| `esc` | Confirm discarding an unsent answer. |
 
 The command palette also exposes resume, skip, complete, cancel, deep mode, and
 fast mode actions for the selected quiz.

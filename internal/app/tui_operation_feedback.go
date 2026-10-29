@@ -17,6 +17,7 @@ func (e tuiDumpActionExecutor) ExecuteDumpAction(request tui.DumpActionRequest) 
 	if request.OperationID == "" {
 		outcome.Retry = false
 	}
+
 	if result.Committed && result.ProjectionStale {
 		outcome.Reload = true
 	}

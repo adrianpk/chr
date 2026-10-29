@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 3 — Shared operation feedback and draft retention.
 Completed slices: 2/14
-Completed tasks: 10/70
+Completed tasks: 14/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -80,11 +80,12 @@ Report: `ops/default/report/slices/web-tui-parity/slice-3-feedback.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T3.1 | Reuse neutral application outcomes and map ok, validation_failed, stale and blocked into the existing Action overlay. | pending | — | Planned: No TUI import of Web DTOs and no domain import of terminal types. |
-| T3.2 | Show summary, field findings, changed files and eligible reload/retry action with existing TUI styling. | pending | — | Planned: Success, validation rejection, stale revision and retained pending operation remain distinguishable. |
-| T3.3 | Keep user input on validation/stale/error and require confirmation before destructive draft reload or discard. | pending | — | Planned: Sentinel unsent text survives errors, focus changes and delayed responses. |
-| T3.4 | Bind pending results to captured operation, selection and revision; ignore late results for a newer interaction. | pending | — | Planned: Out-of-order completion cannot overwrite another form or apply a stale confirmation. |
-| T3.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T3.1 | Reuse neutral application outcomes and map ok, validation_failed, stale and blocked into the existing Action overlay. | done | eb484dd3 | Shared application outcomes preserve Web status strings and typed errors; neutral classification and adapter mapping regressions pass. |
+| T3.2 | Show summary, field findings, changed files and eligible reload/retry action with existing TUI styling. | done | 8046584d; bc8e124d | Action panel renders distinct outcomes, findings, changed sources and current eligible recovery; long findings scroll. |
+| T3.3 | Keep user input on validation/stale/error and require confirmation before destructive draft reload or discard. | done | 8046584d; bc8e124d | Sentinel and production IO/PTY regressions retain failed input; reload/discard require confirmation and canonical sources remain unchanged on cancellation. |
+| T3.4 | Bind pending results to captured operation, selection and revision; ignore late results for a newer interaction. | done | 8046584d; bc8e124d | Queued/reordered replies, editor generations, original retries and native revision regressions preserve current drafts and confirmations. |
+| T3.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Focused implementation checks passed; exact-HEAD validation, PR references and controller integration pending. |
+
 
 ### Slice 4: Shared queue observation and stable refresh
 

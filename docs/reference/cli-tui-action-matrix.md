@@ -31,6 +31,7 @@ Status values:
 | Layout | Maximize focused pane | `alt+m` | none | `internal/tui.Model.toggleMaximizedPane` | `intentionally_interactive` | TUI-only layout state. Board ticket-pane maximization renders all normal Board columns. |
 | Layout | Resize panes | mouse drag | none | `internal/tui.Model.applyLayoutDrag` | `intentionally_interactive` | TUI-only layout state. |
 | Shell | Quit TUI | `q`, `ctrl+c`, `F10` | process exit | Bubble Tea quit | `intentionally_interactive` | Terminal lifecycle. |
+| Shell | Inspect latest operation result | `alt+o`, arrows, Home/End | none | `internal/tui.Model.renderOperationFeedback` | `intentionally_interactive` | Structured outcomes, captured recovery and confirmed draft replacement. |
 | Palette | Open command palette | `:` | none | `internal/tui.CommandPaletteState` | `intentionally_interactive` | TUI-only command launcher. |
 | Project | Edit project metadata field | `alt+p`, field selection, `enter` or `e` | `chr metadata project set --name ... --description ... --context ...` | `internal/tui.ProjectEditState`, `service.SaveProjectMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
 | Project | Save project metadata | `alt+p`, `s` or `ctrl+s` | `chr metadata project set ...` | `service.SaveProjectMetadata` through `tuiProjectMetadataExecutor` and CLI command | `matched` | Same metadata save service. |

@@ -271,6 +271,11 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Fixed
 
+- TUI writes now explain validation failures, changed sources and blocked or
+  pending operations in an Action panel with relevant recovery. Unsaved answers
+  and document text survive failures and late responses. Reload and discard ask
+  before replacing entered text, and retries keep the original operation.
+
 - TUI Dash actions use the marked queue ticket independently of Board selection
   and reject outdated observations. Board moves offer all six canonical states
   with the same revision, ownership and evidence checks as Web. Ctrl+C exits

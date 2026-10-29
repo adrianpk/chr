@@ -54,6 +54,26 @@ scopes. The shell footer shows the active view's actions.
 The footer tabs are clickable. Mouse dragging near pane dividers resizes the
 layout.
 
+## Operation Results
+
+Manual operation results distinguish `ok`, `validation_failed`, `stale` and
+`blocked`. Failures open the Action panel with the summary, validation findings
+and blocking reason. Successful writes show their summary in the status line.
+Press `alt+o` to inspect the latest result, including known changed files; use
+arrows or Home/End to scroll. Esc returns to the complete retained input.
+
+The panel offers `r` only when a reload is available and `y` only for an eligible
+retry of the original operation. Reload asks for confirmation before replacing
+unsaved text. Enter confirms; Esc keeps it. Recovery for an older interaction
+cannot submit or replace the current editor's input.
+
+Project and Case field editors, Dump editing and Quiz answers ask before
+discarding entered text. Quiz Skip and Done also ask when an answer has not
+been submitted. A submitted answer stays visible until acknowledgement; a
+failed save or late response cannot clear a newer draft. Case and Project
+metadata reloads read the captured source, and Dump and Quiz reloads retain
+their original scope until confirmation succeeds.
+
 ## Guided Use Cases
 
 From Cases (`F1`), `g` opens the guided catalog. The **Guided use cases** command
@@ -148,7 +168,7 @@ feature-round answers is not implemented in the current TUI.
 | `up` / `down` or `k` / `j` | Select project name, description, or context. |
 | `enter` or `e` | Edit the selected field. |
 | `enter` while editing | Apply the edit locally. |
-| `esc` while editing | Cancel the edit. |
+| `esc` while editing | Confirm discarding changed text. |
 | `s` or `ctrl+s` | Save project metadata. |
 | `r` | Refresh workspace state. |
 
@@ -197,7 +217,7 @@ disk and shown as metadata for the selected curated dump when available.
 | `alt+e` | Open the selected dump in the external editor. |
 | `r` | Refresh dumps from disk. |
 | `ctrl+s` while editing | Save the TUI editor content. |
-| `esc` while editing | Cancel TUI editing. |
+| `esc` while editing | Confirm discarding unsaved text. |
 
 CLI equivalents:
 
@@ -227,7 +247,7 @@ Answer entry:
 | `shift+enter` or `ctrl+j` | Insert a newline. |
 | `alt+s` | Skip the active question. |
 | `alt+d` | Mark the quiz done. |
-| `esc` | Cancel answer entry. |
+| `esc` | Confirm discarding an unsent answer. |
 
 CLI equivalents:
 
