@@ -105,9 +105,9 @@ Report: `ops/default/report/slices/web-tui-parity/slice-4-dash.md`
 
 ### Slice 5: Case and Dump forms
 
-Ticket: `TKT-20261029101140` — `ops/default/ticket/in_progress/20261029101140-web-tui-parity-case-dump.md`
-State: in_progress
-PR: pending
+Ticket: `TKT-20261029101140` — `ops/default/ticket/reviewing/20261029101140-web-tui-parity-case-dump.md`
+State: reviewing
+PR: [#459](https://forge.adrianpk.com/adrianpk/chr/pulls/459)
 Report: `ops/default/report/slices/web-tui-parity/slice-5-case-dump.md`
 
 | Task | Work | State | Commits | Validation |
@@ -116,7 +116,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-5-case-dump.md`
 | T5.2 | Create and edit dumps through scope, title and body using existing canonical operations. | done | d6f933ab | Project/case capture, selected-result editing and production PTY preserve entered body and retained title/scope. |
 | T5.3 | Expose AppendDump with free text and make external-editor shortcuts and displayed hints agree in textarea mode. | done | cf8c5e4b | Captured-target append and private external-editor IO preserve user text, revision, error/size limits and late-reply ownership. |
 | T5.4 | Exercise stale-save, confirmed reload/discard and unsent draft retention with owned Web and TUI fixtures. | done | fbd0b6d5 | Owned PTY concurrent Save rejects stale input; cancelled reload retains the draft and canonical bytes, confirmed reload permits the current revision. Web HTTP references pass. |
-| T5.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Task checks passed; report and PR preparation underway. Final clean-HEAD controller validation and integration pending. |
+| T5.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | bb8eef11 | PR #459 opened with report and task evidence. Final clean-HEAD controller validation and integration pending. |
 
 ### Slice 6: Spec catalog and manual editing
 

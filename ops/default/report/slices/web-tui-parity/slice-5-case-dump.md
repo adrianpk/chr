@@ -5,7 +5,7 @@ Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `feat/slice-5-tui-case-dump`
-PR: pending
+PR: [#459](https://forge.adrianpk.com/adrianpk/chr/pulls/459)
 Base: `bcabdf02513ae95fce41b6a8640b6cae2b4bd4c0` on dev, after verified PR #458 integration and Slice 4 closure
 
 ## Purpose
