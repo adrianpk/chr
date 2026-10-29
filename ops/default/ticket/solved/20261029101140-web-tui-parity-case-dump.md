@@ -2,6 +2,7 @@
 id: TKT-20261029101140
 title: "Case and Dump forms"
 status: solved
+resolution: fixed
 kind: task
 severity: medium
 priority: normal
@@ -16,7 +17,7 @@ commits:
   - fbd0b6d5a6dc7be995713fbbd8cbbb059ae9e6f2
 branch: feat/slice-5-tui-case-dump
 pr: 459
-solved_at: 2026-10-29T13:25:17Z
+closed_at: 2026-10-29T13:25:17Z
 reviewing_at: 2026-10-29T13:20:22Z
 started_at: 2026-10-29T12:44:00Z
 ready_at: 2026-10-29T10:11:40Z
@@ -61,6 +62,6 @@ One branch and one PR to `dev`; tasks T5.1-T5.5 are the canonical work units. Lo
 
 ## Evidence
 
-T5.1-T5.4 are implemented and focused checks pass. Owned production terminals prove complete creation, cancellation without canonical writes, append and unsaved external-editor round trips. A real concurrent writer reproduces a stale Save; cancellation retains the draft, while confirmed reload replaces it before a fresh Save. Web HTTP reference fixtures pass. The Slice 5 report records commands and G-018 runtime disposition; PR #459 is open; final exact-HEAD controller validation and dev integration remain pending.
+T5.1-T5.4 are implemented and focused checks pass. Owned production terminals prove complete creation, cancellation without canonical writes, append and unsaved external-editor round trips. A real concurrent writer reproduces a stale Save; cancellation retains the draft, while confirmed reload replaces it before a fresh Save. Web HTTP reference fixtures pass. The delivered Slice 5 report records commands, G-018 runtime disposition and verified integration.
 
 Integration: PR #459 merged into dev at `1bc34edaac9b751810f776efd5ea89535908760f`; controller validation `YV7TF3QYUUICJ24UVUIWR7TTC3` passed all four ordered checks.

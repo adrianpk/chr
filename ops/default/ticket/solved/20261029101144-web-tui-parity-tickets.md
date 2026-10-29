@@ -63,6 +63,6 @@ separate comments/history, guarded review references and canonical source editin
 have focused local legacy/native and production-terminal evidence. Checklist
 content and the existing dump-append terminal journey remain covered.
 
-The tracker and Slice 9 report retain exact commands and task commits. PR #463 is open with the immutable report introduction. Controller validation `RNRFX3HTEIWFXQJHIKQSD4HET4` passed all five ordered checks on
+The tracker and delivered Slice 9 report retain exact commands, task commits and the immutable report introduction. Controller validation `RNRFX3HTEIWFXQJHIKQSD4HET4` passed all five ordered checks on
 `be5cfd9ae8a1fa2899517feddcf1b87dc32ecea6`. Canonical Forgejo and Acta confirm PR #463 merged
 into dev at that exact commit. The report and tracker retain the evidence.

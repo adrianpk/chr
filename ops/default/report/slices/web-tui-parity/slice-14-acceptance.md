@@ -1,11 +1,12 @@
 # Slice 14: Parity acceptance and capability inventory
 
-Status: reviewing
+Status: delivered
 Delivery set: web-tui-parity
 Plan: [Delivery contract](../../../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../../../tracker/web-tui-parity.md)
 Branch: `test/slice-14-tui-acceptance`
 PR: [#468](https://forge.adrianpk.com/adrianpk/chr/pulls/468)
+Integrated commit: `d94d5af3dedad35b430f6fc3952b5efce88c75c4` on dev.
 
 ## Purpose
 
@@ -15,9 +16,9 @@ gate unsupported palette writes, and verify the integrated terminal/Web journeys
 ## Delivered Behavior
 
 - The coverage ledger preserves every original finding, acceptance statement and
-  static/runtime assessment. Its 41 delivered rows now link immutable delivered
+  static/runtime assessment. Its 42 delivered rows now link immutable delivered
   reports, canonical merges, successful controller evidence and exact assertion
-  families. I-003 records this slice's implementation with integration pending.
+  families. I-003 is closed with this slice's verified integration.
 - Both checklist palette entries visibly explain unavailability. Selecting them
   opens blocked feedback before confirmation, even without a selected ticket;
   Enter dispatches no writer. Shared confirmation construction cannot advertise
@@ -34,7 +35,8 @@ gate unsupported palette writes, and verify the integrated terminal/Web journeys
   submission or progression. The offered reload remains an explicit choice.
 - The User Guide and reference describe pre-confirmation unavailability. The
   changelog consolidates the delivered TUI capabilities by user task, retaining
-  unrelated entries. The cycle report records evidence and pending integration.
+  unrelated entries. The cycle report records all 14 integrations and acceptance
+  evidence; its separate final controller gate remains pending.
 
 ## Implementation Notes
 
@@ -43,6 +45,7 @@ T14.2: `80b1dcdcf47c65a58e53747a1561f6d30ac04816`.
 T14.3: `e941712f0c977722a961ff4f68991927a371dff5`.
 T14.4 report introduction: `c2a07937d9c2a9ac23b2de155989df450a072b8c`.
 T14.5 delivery metadata: `45ef4cb4f8156d67c59f67c3f1b948488450705d`.
+PR-reference follow-up: `d94d5af3dedad35b430f6fc3952b5efce88c75c4`.
 
 The new family composes existing production fixtures rather than substituting
 reducers for persistence or terminal IO. The fresh wizard child uses the root
@@ -93,8 +96,9 @@ Passed task checks with local owned fixtures:
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/tui ./internal/app` — zero issues.
 - `git diff --check`
 
-Final acceptance is recorded on the clean PR-reference HEAD by the controller,
-using this ordered command list:
+Controller validation `4OVYDKWV4PUPDT57DT7IE3UMT2` passed all five checks on
+clean PR-reference HEAD `d94d5af3dedad35b430f6fc3952b5efce88c75c4`, using this
+ordered command list:
 
 - `make verify`
 - `go test -race ./internal/tui -count=1`
@@ -102,9 +106,13 @@ using this ordered command list:
 - `CHR_WEB_BROWSER=/usr/bin/chromium go test ./internal/app -run '^Test(GuidedUseCaseWebBrowser|WebQuizBrowser|WebSpecBrowser|WebDumpEditorBrowser|WebBoardBrowser|WebDashBrowser)$' -count=1 -timeout=5m -v`
 - `git diff --check`
 
-The controller ledger and Acta own the exact candidate, validation identity and
-outcomes. Final named selections must execute without skips. PR integration and
-the controller's final delivery-set gate remain pending.
+The retained verbose log confirms three application roots, all 14 named parity
+scenarios and six Chromium roots ran and passed without skips. The controller
+ledger binds these results to the exact clean head and command order. Acta note
+`01M64FNVNGK034565BYWC0ZQ1N` records validation; merge event
+`01M64FPHBRCSXTN5Q8YG2K1ZS6` and canonical PR #468 confirm the same head was
+integrated into dev. The controller's separate final delivery-set gate remains
+pending; these results do not establish a pass for later documentation commits.
 
 Runtime uncertainties are cross-checked by these actual boundaries:
 

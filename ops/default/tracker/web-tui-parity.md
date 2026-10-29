@@ -1,15 +1,15 @@
 # Web and TUI parity tracker
 
-Status: In progress
+Status: Awaiting controller final gate
 Date: 2026-10-29
 Delivery set: web-tui-parity
 Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity material to specification, slices, tickets and Looper execution within the recorded scope.
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 14 — Parity acceptance and capability inventory.
-Completed slices: 13/14
-Completed tasks: 68/70
+Active slice: None; all 14 recorded slices are integrated and delivered.
+Completed slices: 14/14
+Completed tasks: 70/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -244,23 +244,23 @@ Report: `ops/default/report/slices/web-tui-parity/slice-13-wizard-results.md`
 
 ### Slice 14: Parity acceptance and capability inventory
 
-Ticket: `TKT-20261029101149` — `ops/default/ticket/reviewing/20261029101149-web-tui-parity-acceptance.md`
-State: reviewing
+Ticket: `TKT-20261029101149` — `ops/default/ticket/solved/20261029101149-web-tui-parity-acceptance.md`
+State: delivered
 PR: [#468](https://forge.adrianpk.com/adrianpk/chr/pulls/468)
 Report: `ops/default/report/slices/web-tui-parity/slice-14-acceptance.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T14.1 | Reconcile all 38 gap rows and four incidental findings with exact tests and dispositions; close runtime uncertainties without changing source claims into assumed results. | done | 6c7920dd | All 42 IDs and baseline claims retained; 41 delivered rows link immutable reports, canonical merges, successful ordered check ledgers and exact assertion families. I-003 is implemented/reviewing in this slice. |
+| T14.1 | Reconcile all 38 gap rows and four incidental findings with exact tests and dispositions; close runtime uncertainties without changing source claims into assumed results. | done | 6c7920dd | All 42 IDs and baseline claims retained; every row is delivered with immutable report, canonical merge, successful ordered check ledger and exact assertion references. I-003 closed after PR #468 integration. |
 | T14.2 | Reconcile the palette and legacy capability inventory; gate unsupported safe checklist writers before confirmation without inventing a new domain or filesystem writer. | done | 80b1dcdc | Reproduced checklist confirmation before unconditional failure. Selected/empty palette cases and production PTY now return blocked feedback before confirmation with zero writes; legacy access and strict lint pass. |
 | T14.3 | Extend owned production PTY and Web reference fixtures to exercise manual forms and the complete guided journey, including focus, resize, cancel and restart. | done | e941712f | Named 14-scenario family added; focused manual resize/focus and fresh full production PTY delivery/restart pass. Chromium real polling/resize/declined-cancel draft test passes; original assertions and 40/45-second terminal limits retained. |
-| T14.4 | Update the User Guide and consolidate the delivered user-visible changelog outcomes; run final focused acceptance and publish the cycle report. | reviewing | c2a07937 | User Guide/reference, consolidated changelog and cycle report prepared. Final named acceptance is recorded by the controller on the final PR-reference HEAD; integration and final delivery-set gate pending. |
-| T14.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | reviewing | c2a07937; 45ef4cb4 | Canonical PR #468 opened with immutable report introduction. Final exact-HEAD controller evidence follows the PR-reference commit; dev integration pending. |
+| T14.4 | Update the User Guide and consolidate the delivered user-visible changelog outcomes; run final focused acceptance and publish the cycle report. | done | c2a07937 | User Guide/reference, consolidated changelog and cycle report delivered. Validation 4OVYDKWV4PUPDT57DT7IE3UMT2 passed all five ordered checks on d94d5af3dedad35b430f6fc3952b5efce88c75c4; nine acceptance roots and all 14 named scenarios ran without skips. |
+| T14.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | c2a07937; 45ef4cb4; d94d5af3 | PR #468 merged into dev at d94d5af3dedad35b430f6fc3952b5efce88c75c4 with immutable report introduction and successful exact-head validation 4OVYDKWV4PUPDT57DT7IE3UMT2. Merge recorded in Acta 01M64FPHBRCSXTN5Q8YG2K1ZS6. |
 
 ## Blockers and decisions
 
-None recorded. Five source runtime uncertainties are assigned to explicit implementation/acceptance tasks; they are not execution blockers. Any missing canonical operation or incompatible guard must be investigated in the owning slice, with out-of-scope domain changes returned for maintainer decision.
+None recorded. The five source runtime uncertainties have recorded production evidence in the owning reports and Slice 14 acceptance. No source finding is excluded or deferred.
 
 ## Final evidence
 
-Thirteen slices are integrated with exact-head evidence in their delivered reports. Slice 14 task checks pass; final ordered PR-head acceptance is recorded after its reference follow-up commit. The separate final controller gate remains `make verify`; no cycle closure is claimed. See `ops/default/report/web-tui-parity-cycle.md`.
+All 14 slices are integrated, all 70 tasks are done and all 14 tickets are solved, with exact-head evidence in the delivered reports. Slice 14 validation 4OVYDKWV4PUPDT57DT7IE3UMT2 passed on the merged PR-reference head d94d5af3dedad35b430f6fc3952b5efce88c75c4. The separate final controller gate remains `make verify` and has not run on the gate-preparation commit; cycle closure awaits that evidence. Prerequisites and fixture boundaries are recorded in `ops/default/report/web-tui-parity-cycle.md`.

@@ -1,13 +1,13 @@
 # Web and TUI parity delivery
 
-Status: Approved for execution
+Status: Awaiting controller final gate
 Date: 2026-10-29
 Delivery set: web-tui-parity
 Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity material to specification, slices, tickets and Looper execution within the recorded scope.
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 14 — Parity acceptance and capability inventory.
+Active slice: None; all 14 recorded slices are integrated and delivered.
 
 Spec: [Requirements](../spec/web-tui-parity.md)
 Tracker: [Tasks and evidence](../tracker/web-tui-parity.md)
@@ -282,7 +282,7 @@ Prerequisite: Slice 12 integrated into dev.
 
 ### Slice 14: Parity acceptance and capability inventory
 
-Ticket: `TKT-20261029101149` — `ops/default/ticket/reviewing/20261029101149-web-tui-parity-acceptance.md`
+Ticket: `TKT-20261029101149` — `ops/default/ticket/solved/20261029101149-web-tui-parity-acceptance.md`
 Findings: I-003.
 Prerequisite: Slice 13 integrated into dev.
 

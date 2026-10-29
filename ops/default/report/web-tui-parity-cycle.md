@@ -1,14 +1,14 @@
 # Web and TUI parity cycle
 
-Status: reviewing
+Status: Awaiting controller final gate
 Delivery set: web-tui-parity
 PR: [#468](https://forge.adrianpk.com/adrianpk/chr/pulls/468)
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Tracker: [Tasks and evidence](../tracker/web-tui-parity.md)
 Coverage: [All source IDs](../plan/web-tui-parity-coverage.csv)
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Integrated candidate: pending Slice 14 integration.
-Last verified integrated slice: PR #467 at `91df4d01d2838180430f9259eeab1569ed6618e5`.
+Integrated candidate: `d94d5af3dedad35b430f6fc3952b5efce88c75c4` on dev.
+Last verified integrated slice: PR #468 at `d94d5af3dedad35b430f6fc3952b5efce88c75c4`.
 Final delivery-set gate candidate: pending controller evidence.
 Closure-only commit: pending; separate from the gate candidate.
 
@@ -35,9 +35,11 @@ confirmation; no new writer is introduced.
 
 ## Integration evidence
 
-Thirteen slices are integrated and closed. Slice 14 has implementation and owned
-task evidence in its report; PR #468 targets dev. Final exact-HEAD checks and integration are
-recorded during the remaining handoff. This report does not claim cycle closure.
+All 14 slices are integrated and closed, with 70 completed tasks and 14 solved
+tickets. Canonical PR #468 and Acta merge event `01M64FPHBRCSXTN5Q8YG2K1ZS6`
+confirm the final integration at `d94d5af3dedad35b430f6fc3952b5efce88c75c4`.
+Slice acceptance passed on that exact clean head. Cycle closure awaits the
+controller's separate final gate on the prepared dev candidate.
 
 | Slice | Canonical PR | Integrated commit | Report | Successful validation |
 | --- | --- | --- | --- | --- |
@@ -54,15 +56,15 @@ recorded during the remaining handoff. This report does not claim cycle closure.
 | 11 | [#465](https://forge.adrianpk.com/adrianpk/chr/pulls/465) | `6ee42aac701f6b2e6f479cbd639601965b29602b` | [Slice 11 report](slices/web-tui-parity/slice-11-wizard-entry.md) | `COHC2KP7RZY5ONJTIC4UAQFWZJ` |
 | 12 | [#466](https://forge.adrianpk.com/adrianpk/chr/pulls/466) | `a0e8ec258860a56fcc6d9d1c5e5fefee9eb39e8f` | [Slice 12 report](slices/web-tui-parity/slice-12-wizard-authoring.md) | `TKFQDKEODV6WVKUYFMQMOX3ZWP` |
 | 13 | [#467](https://forge.adrianpk.com/adrianpk/chr/pulls/467) | `91df4d01d2838180430f9259eeab1569ed6618e5` | [Slice 13 report](slices/web-tui-parity/slice-13-wizard-results.md) | `BV6G4MNWIBE7TQXVHIDFMORIVQ` |
-| 14 | [#468](https://forge.adrianpk.com/adrianpk/chr/pulls/468) | Integration pending | [Slice 14 report](slices/web-tui-parity/slice-14-acceptance.md) | Final PR-reference validation recorded by controller |
+| 14 | [#468](https://forge.adrianpk.com/adrianpk/chr/pulls/468) | `d94d5af3dedad35b430f6fc3952b5efce88c75c4` | [Slice 14 report](slices/web-tui-parity/slice-14-acceptance.md) | `4OVYDKWV4PUPDT57DT7IE3UMT2` |
 
 ## Source coverage
 
 The ledger retains exactly 38 G findings and four I findings. Baseline acceptance
 text, evidence locations and the five runtime-unverified assessments are
-unchanged. Forty-one rows have delivered owning slices and immutable report,
-merge, command and assertion references. I-003 is implemented and reviewing in
-Slice 14; its delivered disposition follows verified integration. No source item
+unchanged. All 42 rows have delivered owning slices and immutable report,
+merge, command and assertion references. I-003 is delivered through Slice 14's
+verified integration and pre-confirmation checklist assertions. No source item
 is excluded, deferred or closed from static provenance alone.
 
 The Slice 14 report cross-checks G-008, G-013, G-014, G-018 and G-024 against
@@ -78,8 +80,9 @@ manual resize/input and a fresh wizard through real native delivery and restart.
 Chromium polling, focused input, resize, declined cancellation and the existing
 full guided journey also passed. Exact commands appear in the Slice 14 report.
 
-Final clean-HEAD acceptance runs after the PR-reference follow-up commit through
-the controller, in this order:
+Final Slice 14 acceptance passed through controller validation
+`4OVYDKWV4PUPDT57DT7IE3UMT2` on clean PR-reference head
+`d94d5af3dedad35b430f6fc3952b5efce88c75c4`, in this order:
 
 - `make verify`
 - `go test -race ./internal/tui -count=1`
@@ -87,9 +90,10 @@ the controller, in this order:
 - `CHR_WEB_BROWSER=/usr/bin/chromium go test ./internal/app -run '^Test(GuidedUseCaseWebBrowser|WebQuizBrowser|WebSpecBrowser|WebDumpEditorBrowser|WebBoardBrowser|WebDashBrowser)$' -count=1 -timeout=5m -v`
 - `git diff --check`
 
-Verbose logs must show the three application roots, all 14 named parity
-scenarios and all six browser roots executing without skips. The controller
-ledger and Acta bind results to the exact clean PR head and ordered commands.
+The retained verbose log shows the three application roots, all 14 named parity
+scenarios and all six browser roots ran and passed without skips. The controller
+ledger and Acta note `01M64FNVNGK034565BYWC0ZQ1N` bind results to the exact clean
+PR head and ordered commands.
 The controller's later final `make verify` evidence is recorded separately from
 this slice batch and any documentation closure commit.
 
@@ -102,9 +106,25 @@ limits and original safety assertions remain enabled; only owned children stop
 after their checks finish. These focused checks do not claim exhaustive nightly
 or live-forge certification.
 
+## Final-gate preparation
+
+The frozen configuration selects exactly `make verify`. Its Makefile prerequisites
+are strict lint, short Go tests, Python CI-script regressions and the application
+build. Go 1.27.1, Git 2.55.0, Python 3.14.7, GNU Make 4.4.1 and the required shell
+tools and executable repository scripts are available. The pinned lint command
+remains v2.14.0. No persistent server, external account or prestarted fixture is
+required for this gate; owned integration fixtures have already stopped after
+their Slice 14 checks. `/usr/bin/chromium` remains available for the recorded
+browser evidence.
+
+Gate preparation changes only approved delivery documentation. Whitespace and
+artifact consistency are checked before its dev commit and push. The worker does
+not run the full gate in this phase. The controller must capture the prepared
+clean dev head and run the unchanged gate before final delivery-set closure.
+
 ## Residual limitations
 
-No unresolved source finding or approved exception is recorded. Slice 14
-integration, final controller gate evidence and documentation closure remain
-pending. The separate broader Web feedback ticket remains outside this delivery
+No unresolved source finding or approved exception is recorded. Final controller
+gate evidence and delivery-set documentation closure remain pending. The separate
+broader Web feedback ticket remains outside this delivery
 set: `TKT-20261023210422`.

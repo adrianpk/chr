@@ -1,7 +1,9 @@
 ---
 id: TKT-20261029101149
 title: "Parity acceptance and capability inventory"
-status: reviewing
+status: solved
+resolution: fixed
+closed_at: 2026-10-29T18:49:48Z
 kind: task
 severity: medium
 priority: normal
@@ -15,6 +17,7 @@ commits:
   - e941712f0c977722a961ff4f68991927a371dff5
   - c2a07937d9c2a9ac23b2de155989df450a072b8c
   - 45ef4cb4f8156d67c59f67c3f1b948488450705d
+  - d94d5af3dedad35b430f6fc3952b5efce88c75c4
 reviewed_at: 2026-10-29T18:37:55Z
 started_at: 2026-10-29T18:12:24Z
 branch: test/slice-14-tui-acceptance
@@ -66,6 +69,11 @@ writers stop before confirmation. The named acceptance family reuses owned
 production boundaries; focused fresh full wizard PTY, manual resize/input and
 Chromium polling/resize/cancellation checks pass. Exact commands, runtime
 uncertainties and retained capabilities are recorded in the Slice 14 report.
-PR #468 targets dev. Final ordered exact-HEAD validation is recorded in the
-controller ledger and Acta after the PR-reference commit; controller-owned
-integration remains pending.
+PR #468 merged into dev at `d94d5af3dedad35b430f6fc3952b5efce88c75c4`,
+verified through canonical Forgejo state and Acta merge event
+`01M64FPHBRCSXTN5Q8YG2K1ZS6`. Controller validation
+`4OVYDKWV4PUPDT57DT7IE3UMT2` passed all five ordered checks on that exact
+clean PR-reference head, including nine acceptance roots and 14 named parity
+scenarios without skips. The delivered Slice 14 report records exact commands,
+results and fixture boundaries. The separate final delivery-set gate remains
+controller-owned and pending.

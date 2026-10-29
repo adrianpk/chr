@@ -2,6 +2,7 @@
 id: TKT-20261029101141
 title: "Spec catalog and manual editing"
 status: solved
+resolution: fixed
 kind: task
 severity: medium
 priority: normal
@@ -16,7 +17,7 @@ commits:
   - df73bed5809cc29d40a9dc9007411080e0015b47
 branch: feat/slice-6-tui-specs
 pr: 460
-solved_at: 2026-10-29T13:50:00Z
+closed_at: 2026-10-29T13:50:00Z
 reviewing_at: 2026-10-29T13:44:37Z
 started_at: 2026-10-29T13:25:17Z
 ready_at: 2026-10-29T10:11:41Z
