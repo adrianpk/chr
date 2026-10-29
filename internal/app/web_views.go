@@ -72,7 +72,7 @@ func (p webViewProvider) BoardView(ctx context.Context, request webui.BoardReque
 
 func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.TicketDetailRequest) (webui.TicketDetailView, error) {
 	if request.New {
-		return p.completeTicketEditor(webui.TicketDetailView{New: true, Fields: map[string]string{"status": string(ticketcore.StatusBacklog), "priority": "normal", "severity": "unclassified", "type": "task"}})
+		return p.completeTicketEditor(ctx, webui.TicketDetailView{New: true, Fields: map[string]string{"status": string(ticketcore.StatusBacklog), "priority": "normal", "severity": "unclassified", "type": "task"}})
 	}
 
 	document, err := p.service(ctx).ReadTicketDocument(request.Key)
@@ -103,7 +103,7 @@ func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.Tic
 	}
 	view.Revision = document.Revision
 
-	return p.completeTicketEditor(view)
+	return p.completeTicketEditor(ctx, view)
 }
 
 //nolint:cyclop,gocognit // The linear parser mirrors the ticket comments section grammar.
