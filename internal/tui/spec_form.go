@@ -103,6 +103,7 @@ func (m *Model) executeSpecForm(request SpecActionRequest) {
 
 	if err != nil {
 		m.statusMessage = "Spec submission failed: " + err.Error()
+		m.bindSpecFormRecovery(request)
 
 		return
 	}
