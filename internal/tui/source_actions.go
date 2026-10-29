@@ -130,6 +130,8 @@ func (m *Model) scrollDetailPage(direction int) {
 
 func (m *Model) detailPaneCanScroll() bool {
 	switch m.SelectedView() {
+	case ViewDash:
+		return m.selectedPane != 0
 	case ViewBoard, ViewTickets, ViewDocuments, ViewDumps, ViewQuizzes, ViewSpecs, ViewPlans, ViewAuthoring, ViewAgent, ViewRuntime:
 		return true
 	default:

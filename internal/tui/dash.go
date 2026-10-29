@@ -83,8 +83,8 @@ func (m *Model) renderDashWorkspace(width, height int) string {
 	queueLines = append(queueLines, m.renderAgentWorkQueueLines(maxInt(height-len(queueLines), 1))...)
 
 	currentLines := append(m.renderDashReadinessLines(maxInt(height/3, 3)), "")
-	currentLines = append(currentLines, m.nativeWorkflowLines()...)
 	currentLines = append(currentLines, m.renderAgentWorkCurrentLines()...)
+	currentLines = append(currentLines, m.nativeWorkflowLines()...)
 
 	recentLines := append([]string{
 		"Actions",
@@ -464,6 +464,10 @@ func compareInt(left, right int) int {
 }
 
 func (m *Model) renderAgentWorkCurrentLines() []string {
+	if m.workObservation != nil {
+		return renderObservedWork(m.workObservation.Current, 128, "No current work.")
+	}
+
 	loop := m.observability.LatestLoop
 	execution := m.observability.LatestExecution
 
@@ -504,6 +508,10 @@ func (m *Model) renderAgentWorkCurrentLines() []string {
 }
 
 func (m *Model) renderAgentWorkRecentLines() []string {
+	if m.workObservation != nil {
+		return m.renderObservedActivity()
+	}
+
 	lines := []string{}
 
 	if m.observability.LatestExecution.ID != "" {
