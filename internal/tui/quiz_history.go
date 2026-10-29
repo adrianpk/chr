@@ -23,6 +23,7 @@ func (m *Model) renderQuizHistory(history []QuizAnswerRecord, width int) []strin
 		lines = append(lines, "")
 	}
 
+	lines = lines[:len(lines)-1]
 	limit := m.quizHistoryPageSize()
 	start := min(m.quizHistoryScroll, max(0, len(lines)-limit))
 
