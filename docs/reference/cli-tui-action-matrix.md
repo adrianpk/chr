@@ -46,10 +46,12 @@ Status values:
 | Dumps | Open dump in external editor | `F2`, `alt+e` | `chr dump open <path>` | `service.OpenDump`, `OpenDumpDraftEditor` | `matched` | Inside the body editor, a private unsaved copy returns to the TUI before explicit Save. CLI prints the stored-document editor command. |
 | Dumps | Append entered text | `F2`, `a`, Text, Append | `chr dump append <path> --content ...` | `service.AppendDump` | `matched` | Captures the selected path/revision; failures retain entered text. |
 | Dumps | Refresh dump list | `F2`, `r` | `chr dump list` | `service.ListDumps` | `matched` | Same dump list service. |
-| Quizzes | Start selected quiz | `F3`, `s` | `chr quiz start [--use-case ...] [--mode deep|fast]` | `service.StartQuiz` through `tuiQuizActionExecutor` and CLI command | `matched` | Same runtime quiz service. |
+| Quizzes | Start selected quiz | `F3`, `m` selects Deep/Fast, `s` | `chr quiz start [--use-case ...] [--mode deep|fast]` | `service.StartQuiz` through `tuiQuizActionExecutor` and CLI command | `matched` | Same runtime quiz service. |
 | Quizzes | Answer active question | `F3`, `enter`, answer editor, `enter` | `chr quiz answer --answer ... [--use-case ...]` | `service.AnswerQuiz` | `matched` | Same runtime quiz service. |
 | Quizzes | Skip active question | answer editor `alt+s` | `chr quiz skip [--use-case ...]` | `service.SkipQuiz` | `matched` | Same runtime quiz service. |
 | Quizzes | Complete selected quiz | answer editor `alt+d` | `chr quiz complete [--use-case ...]` | `service.CompleteQuiz` | `matched` | Same runtime quiz service. |
+| Quizzes | Cancel and resume | `alt+x` while answering or `x`; `u` resumes | `chr quiz cancel`, `chr quiz resume` | `service.CancelQuiz`, `ResumeQuiz` | `matched` | Confirmation retains saved answers; resume keeps the retained session. |
+| Quizzes | Inspect saved answer history | `PgUp` / `PgDn` | none | bounded quiz observation and shared answer-history projection | `missing_cli` | Complete saved questions/answers beside captured current input; newest first, excluding skips. |
 | Quizzes | Refresh quizzes | `F3`, `r` | `chr quiz list` | `service.ListQuizzes` | `matched` | Same runtime quiz list service. |
 | Specs | Create manual spec | `F4`, `c`, Scope/Title/Body/State, Create | none | `service.CreateSpec` | `missing_cli` | Canonical creation needs no generation prerequisite. |
 | Specs | Edit exact spec | `F4`, `e`, Save | none | `ReadSpecDocument`, `service.SaveSpec` | `missing_cli` | Retained case binding, observed revision and confirmed reload. |
@@ -97,7 +99,7 @@ Status values:
 | Plan | `materialize-plan-tracking` | Create plan tracking and tickets. | `chr plan tracking create ...` | `service.MaterializePlanTracking` | `matched` | Command is gated to Plans and only available for existing plans. |
 | Plan | `refresh-plans` | Reload plan views. | `chr plan list` | `service.ListPlans` | `matched` | Command is gated to Plans view. |
 | Authoring | `create-authoring-session` | Create TUI default authoring session. | `chr author session new ...` | `service.CreateAuthoringSession`; TUI wraps default session metadata with `service.CreateTUIAuthoringSession` | `matched` | CLI is configurable; TUI creates a default spec-oriented session through the same service. |
-| Authoring | `create-context-quiz` | Validate context-aware quiz creation availability. | `chr author quiz new ...` | TUI returns unavailable; CLI `runAuthorContextualQuizNew` | `missing_tui` | CLI supports context-aware quiz generation; TUI action is not implemented. |
+| Authoring | `create-context-quiz` | Validate context-aware quiz creation availability. | `chr author quiz new ...` | TUI returns unavailable; CLI `runAuthorContextualQuizNew` | `missing_tui` | CLI supports context-aware quiz generation; TUI explains unavailability before confirmation/execution; scoped runtime questions remain separate. |
 | Ticket | `ticket-add-comment` | Add default selected-ticket comment. | `chr ticket comment <key> <body>` | `service.AddTicketComment`; TUI wraps default body with `service.AddSelectedTicketComment` | `matched` | CLI supports arbitrary body; TUI supplies the standard body through the same service. |
 | Ticket | `ticket-status-ready` | Move selected ticket to `ready`. | `chr ticket status <key> ready` | `service.MoveTicketStatus`; TUI wraps selection with `service.MoveSelectedTicketStatus` | `matched` | Same service path. |
 | Ticket | `ticket-status-in-progress` | Move selected ticket to `in_progress`. | `chr ticket status <key> in_progress` | `service.MoveTicketStatus`; TUI wraps selection with `service.MoveSelectedTicketStatus` | `matched` | Same service path. |
@@ -221,7 +223,7 @@ Command availability gates:
 | Work readiness repair | `tuiWorkActionExecutor` -> `core.RepairWorkReadiness` | `chr work doctor --fix-safe` -> `core.RepairWorkReadiness` | `matched` | TUI confirms safe repair and reloads readiness before the user retries agent work. |
 | Work request stop | `tuiWorkActionExecutor` -> `service.RequestDaemonStop` -> `requestDaemonStopState` | `runDaemonStop` -> `requestDaemonStopState` | `matched` | CLI owns output and dry-run; TUI reloads work state after the shared stop request. |
 | Authoring session creation | `tuiArtifactActionExecutor` -> `service.CreateTUIAuthoringSession` -> `service.CreateAuthoringSession` | `runAuthorSessionNew` -> `service.CreateAuthoringSession` | `matched` | CLI is configurable; TUI creates a default spec-oriented session. |
-| Context-aware authoring quiz | TUI returns unavailable | `runAuthorContextualQuizNew` | `missing_tui` | CLI path exists and should inform future TUI implementation. |
+| Context-aware authoring quiz | TUI explains unavailability before any confirmation | `runAuthorContextualQuizNew` | `missing_tui` | The CLI owns its separate topic/target/provider-backed authoring flow; runtime quiz controls stay available. |
 | Assisted authoring | no default TUI path | `runAuthorAssisted*` | `missing_tui` | CLI-only workflow. |
 | Project registry | no TUI path | `runProject*` | `missing_tui` | User-level registry management is CLI-only. |
 | Maintenance/notify/proving | no TUI path | command-specific paths | `missing_tui` | Operational/admin command families are CLI-only. |
@@ -233,7 +235,7 @@ Command availability gates:
 | CLI command registration | `TestRootCommandRegistersParitySubcommands` | Verifies metadata, dump, quiz, spec, plan, and plan tracking command paths are registered. |
 | CLI metadata and document commands | `TestMetadataProjectSetSavesProjectMetadata`, `TestMetadataCaseSetCreatesUseCaseMetadata`, `TestDumpNewAndShowUseServiceCommands`, `TestSpecAndPlanListCommandsUseServiceViews` | Verifies representative CLI commands write or read through project services. |
 | TUI dump adapter | `TestTUIDumpAdapterUsesDumpServices` | Verifies TUI dump create/edit/save dispatch reaches dump services and preserves selected paths. |
-| TUI runtime quiz adapter | `TestTUIQuizAdapterDispatchesRuntimeQuizActions` | Verifies TUI quiz start/answer/mode dispatch reaches runtime quiz services. |
+| TUI runtime quiz adapter | `TestTUIQuizStartMode`, `TestTUIQuizHistory`, `TestTUIQuizDraft`, `TestTUIQuizBinding`, `TestTUIQuizTerminal` | Verifies selected modes, real retained IO/history, exact question guards, duplicate reconciliation and production terminal controls. |
 | TUI plan adapter | `TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope`, `TestTUIPlanGenerateReturnsRefusalMessageForExistingPlan` | Verifies TUI plan generation dispatch and existing-plan guard. |
 | Board CLI and TUI | `TestTicketBoardPrintsBoardColumns`, `TestModelRendersMaximizedBoardColumns`, `TestModelRendersMaximizedBoardAttentionSeparately` | Verifies CLI Board output, maximized TUI Board columns, and separate attention rendering. |
 | Service generation paths | `TestServiceGenerateSpecUsesUseCaseContext`, `TestServiceMaterializePlanTrackingCreatesTrackingAndTickets` | Verifies spec generation and plan tracking services used by both surfaces. |

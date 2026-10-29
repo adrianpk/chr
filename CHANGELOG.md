@@ -12,6 +12,12 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Choose Deep/Fast before starting TUI quizzes, identify targets awaiting an
+  answer, and read saved question/answer history beside the current input.
+  Cancel and resume retain saved answers; failed or stale submissions preserve
+  the draft, and reloading newer questions requires confirmation. The separate
+  contextual-authoring entry explains availability before asking for an action.
+
 - Browse every manual, generated and project-wide specification in the TUI.
   Create one with scope, title, body and Draft/Approved state, or edit an existing
   document while keeping its case binding. Refresh preserves selection, failed

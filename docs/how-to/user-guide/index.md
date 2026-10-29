@@ -751,7 +751,10 @@ The TUI shows quiz state, active question, recorded answers, and curated notes.
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a quiz. |
-| `s` | Start a quiz, or restart a completed/cancelled session. |
+| `s` | Start or restart with the displayed Deep/Fast choice. |
+| `m` | Choose Deep/Fast before Start; change an open quiz through its service. |
+| `u` | Resume retained work. |
+| `x` | Confirm cancellation, retaining saved answers. |
 | `enter` | Answer the active question. |
 | `r` | Refresh quiz state from disk. |
 
@@ -763,10 +766,28 @@ When answering a quiz:
 | `shift+enter` or `ctrl+j` | Insert a newline. |
 | `alt+s` | Skip the active question. |
 | `alt+d` | Mark the quiz done. |
+| `alt+x` | Confirm cancellation, retaining saved answers. |
+| `alt+m` | Change Deep/Fast mode; confirm discarding unsent text first. |
+| `PgUp` / `PgDn` | Page complete saved question/answer history. |
 | `esc` | Confirm discarding an unsent answer. |
 
 The command palette also exposes resume, skip, complete, cancel, deep mode, and
 fast mode actions for the selected quiz.
+
+
+The selected case scopes available quiz targets. `[answer pending]` marks a target
+with an active question. The displayed mode is submitted by Start; changing it
+before Start writes no session. Saved answers appear newest first beside the
+current question and input. Skipped questions are excluded from answer history.
+Paging history and resizing keep the current prompt and unsent answer intact.
+
+Each answer retains its observed session, question and revision. Failed or stale
+submissions preserve the draft and its original question. The Action panel
+(`alt+o`) offers confirmed Reload or an unchanged retry when eligible. A read-only
+refresh cannot pair an old draft with a newer prompt. If generation fails after
+an answer was saved, its history remains and `u` resumes continuation. Cancel
+retains saved answers; Skip, Done and mode changes ask before discarding unsent
+text. Esc discards only the current input after confirmation.
 
 Equivalent CLI commands:
 

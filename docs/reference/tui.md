@@ -152,10 +152,11 @@ Available command families:
 - Ticket comment and selected ticket status transitions.
 - Work start, ready-loop start, run-all-ready, and agent stop request.
 
-`Create context-aware quiz`, `Toggle ticket checklist item`, and `Add ticket
-checklist item` are capability checks in the current TUI. They report an
-unavailable-operation error until their safe writers or provider-backed paths
-are implemented.
+`Context-aware quiz (unavailable)` explains its separate contextual authoring CLI
+alternative before any confirmation or executor call. Use `chr author quiz new`
+for that authoring document, or F3 for supported project/case runtime questions.
+`Toggle ticket checklist item` and `Add ticket checklist item` remain capability
+checks for their safe writers.
 
 Acceptance feature generation can return `needs_more_info`. In that case the
 TUI reports the feature-round note path. Interactive collection of those
@@ -259,7 +260,10 @@ chr dump open ops/default/dump/00000-notes/artifact.md
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a quiz. |
-| `s` | Start or restart the selected quiz. |
+| `s` | Start or restart with the displayed Deep/Fast choice. |
+| `m` | Choose Deep/Fast before Start; change an open quiz through its service. |
+| `u` | Resume retained work. |
+| `x` | Confirm cancellation, retaining saved answers. |
 | `enter` | Enter an answer for the active question. |
 | `r` | Refresh quizzes from disk. |
 
@@ -271,7 +275,25 @@ Answer entry:
 | `shift+enter` or `ctrl+j` | Insert a newline. |
 | `alt+s` | Skip the active question. |
 | `alt+d` | Mark the quiz done. |
+| `alt+x` | Confirm cancellation, retaining saved answers. |
+| `alt+m` | Change Deep/Fast mode; confirm discarding unsent text first. |
+| `PgUp` / `PgDn` | Page complete saved question/answer history. |
 | `esc` | Confirm discarding an unsent answer. |
+
+
+The selected case scopes available quiz targets. `[answer pending]` marks a target
+with an active question. The displayed mode is submitted by Start; changing it
+before Start writes no session. Saved answers appear newest first beside the
+current question and input. Skipped questions are excluded from answer history.
+Paging history and resizing keep the current prompt and unsent answer intact.
+
+Each answer retains its observed session, question and revision. Failed or stale
+submissions preserve the draft and its original question. The Action panel
+(`alt+o`) offers confirmed Reload or an unchanged retry when eligible. A read-only
+refresh cannot pair an old draft with a newer prompt. If generation fails after
+an answer was saved, its history remains and `u` resumes continuation. Cancel
+retains saved answers; Skip, Done and mode changes ask before discarding unsent
+text. Esc discards only the current input after confirmation.
 
 CLI equivalents:
 

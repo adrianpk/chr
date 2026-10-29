@@ -9,7 +9,13 @@ scope: ui
 tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:42Z
-commits: []
+commits:
+  - 6d12928d88911fa896fba7ddb1c2dc025fe536c8
+  - 552751e3b451550946d842cc36027aad39b85c50
+  - 4fa89c658afee30b98e5499cd352633988ab5aec
+  - 15fbe9b97c82dec1f13599edf1b4142080be992b
+  - 8466be11507a83418ca18b1d5b8bbefc7c9cbfc0
+  - 8958f0200940db15a1e17b19d3a20591897fc788
 branch: feat/slice-7-tui-quizzes
 started_at: 2026-10-29T13:50:00Z
 ready_at: 2026-10-29T10:11:42Z
@@ -54,4 +60,4 @@ One branch and one PR to `dev`; tasks T7.1-T7.5 are the canonical work units. Lo
 
 ## Evidence
 
-Planning only. No runtime implementation or passing acceptance is claimed. Baseline evidence and runtime uncertainties are preserved in `ops/default/report/web-tui-parity-discovery.md`. Record actual validation, commits and PR in the tracker/report during implementation.
+T7.1-T7.4 are implemented. Production adapter, owned canonical IO/HTTP references and real PTY checks prove visible modes, pending targets, retained answer history, exact captured question/revision, stale and duplicate submissions, confirmed reload, cancellation and resume. The separate contextual-authoring entry takes the approved pre-action unavailable path with no writes or failing confirmation. Task commands and correction evidence are in the Slice 7 report; final exact-HEAD controller validation and integration remain pending.

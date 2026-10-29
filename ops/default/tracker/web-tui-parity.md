@@ -9,7 +9,7 @@ Merge authority: Looper may merge only these 14 recorded slice PRs into dev usin
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
 Active slice: Slice 7 — Complete Quiz interaction.
 Completed slices: 6/14
-Completed tasks: 30/70
+Completed tasks: 34/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -142,11 +142,11 @@ Report: `ops/default/report/slices/web-tui-parity/slice-7-quizzes.md`
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T7.1 | Make Deep/Fast selection visible before start and mark targets with pending answers. | pending | — | Planned: Mode reaches the shared service; targets are scoped to the functional case. |
-| T7.2 | Show answer history alongside the current question and retain answer, skip, done, cancel and resume. | pending | — | Planned: Multiple rounds preserve history and do not lose the active question. |
-| T7.3 | Bind each submission to its exact session, current question, revision and input digest; retain draft after errors. | pending | — | Planned: Stale/double submission cannot answer another question; cancel/discard has confirmation. |
-| T7.4 | Replace the always-failing context-aware quiz entry with the existing supported operation and real scope input, or explicit pre-action unavailability if unsupported. | pending | — | Planned: No confirmation invites an operation known to fail; no invented generator or new domain workflow. |
-| T7.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | pending | — | Planned: make verify; focused named regressions; git diff --check; canonical merged PR/hash |
+| T7.1 | Make Deep/Fast selection visible before start and mark targets with pending answers. | done | 6d12928d | Reproduced forced Deep mode; real adapter and production PTY now submit the visible Fast choice. Pending targets and scoped selection are visible. |
+| T7.2 | Show answer history alongside the current question and retain answer, skip, done, cancel and resume. | done | 552751e3; 4fa89c65; 8958f020 | Neutral history agrees with Web ordering; real saved IO, history paging/resize, Cancel, Resume, Skip and Done pass. Narrow final-page and target-offset corrections preserve complete answers. |
+| T7.3 | Bind each submission to its exact session, current question, revision and input digest; retain draft after errors. | done | 15fbe9b9 | Reproduced missing absent-session revision. Captured binding, queued stale answer, duplicate reconciliation, retained prompt/input, confirmed reload and actual concurrent-writer PTY pass. |
+| T7.4 | Replace the always-failing context-aware quiz entry with the existing supported operation and real scope input, or explicit pre-action unavailability if unsupported. | done | 8466be11 | The contextual-authoring entry is explicitly unavailable before confirmation/executor calls. Real palette PTY compares unchanged canonical files; supported scoped runtime questions remain available. |
+| T7.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | — | Task checks passed; report and canonical PR preparation underway. Final exact-HEAD controller validation and integration pending. |
 
 ### Slice 8: Plan and ticket preparation
 
