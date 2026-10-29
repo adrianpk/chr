@@ -437,6 +437,6 @@ func defaultCommandEntries() []Command {
 		{ID: "work-run-all-ready", Title: "Run all ready tickets", Description: "Run all ready_for_dev tickets through the agent loop after confirmation.", Action: CommandActionPlanWork, Work: WorkActionRunAllReady},
 		{ID: "work-repair-readiness", Title: "Apply safe readiness repair", Description: "Run safe work readiness repair after confirmation.", Action: CommandActionPlanWork, Work: WorkActionRepairReadiness},
 		{ID: "work-request-stop", Title: "Request agent stop", Description: "Request daemon stop after confirmation.", Action: CommandActionPlanWork, Work: WorkActionRequestStop},
-		{ID: "guided-use-cases", Title: "Guided use cases", Description: "Develop a new use case or continue a named guided run.", Action: CommandActionGuided},
+		{ID: "guided-use-cases", Title: "Open workflow", Description: "Open the selected case retained workflow.", Action: CommandActionGuided},
 	}
 }

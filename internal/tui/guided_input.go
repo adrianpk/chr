@@ -10,7 +10,7 @@ import (
 )
 
 func (m *Model) updateGuidedOrHarnessKey(message tea.KeyMsg) updateOutcome {
-	if m.guided.Active {
+	if m.guided.Active && !m.textForm.Active {
 		command := m.updateGuidedKey(message)
 
 		return updateOutcome{Command: command, Handled: true}
@@ -54,9 +54,9 @@ func (m *Model) updateGuidedKey(message tea.KeyMsg) tea.Cmd {
 func (m *Model) guidedActionKey(key string) tea.Cmd {
 	switch key {
 	case "n":
-		command := m.startGuidedRun()
+		m.openWizardCreateForm()
 
-		return command
+		return nil
 	case "r":
 		command := m.startGuidedRequest(m.guidedRequest("inspect"))
 

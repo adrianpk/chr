@@ -89,7 +89,7 @@ func (m *Model) renderShellTopbar(width int) string {
 }
 
 func (m *Model) renderWorkspace(width, height int) string {
-	if m.guided.Active {
+	if m.guided.Active && !m.textForm.Active {
 		return m.renderGuidedWorkspace(width, height)
 	}
 

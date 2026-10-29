@@ -42,7 +42,13 @@ func (m *Model) updateCasesKey(msg tea.KeyMsg) tea.Cmd {
 		return nil
 	}
 
-	if msg.String() == "g" {
+	if msg.String() == "w" || msg.String() == "g" {
+		m.openWizardCreateForm()
+
+		return nil
+	}
+
+	if msg.String() == "o" {
 		command := m.openGuided()
 
 		return command

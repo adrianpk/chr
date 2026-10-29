@@ -26,14 +26,16 @@ func TestGuidedUseCaseTUIJourney(t *testing.T) {
 	t.Parallel()
 
 	operations, model := guidedTUIFixture(t)
-	openGuidedTUI(t, model)
-	runGuidedTUIKey(t, model, "n", true)
+	runGuidedTUIKey(t, model, "w", false)
 
-	if !strings.Contains(model.View(), "use-case name") {
+	if !strings.Contains(model.View(), "Name") {
 		t.Fatal("new journey did not request its name")
 	}
 
-	enterGuidedTUIInput(t, model, "Terminal audit")
+	runGuidedTUIKey(t, model, "Terminal audit", false)
+
+	_, create := model.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
+	model.Update(create())
 	enterGuidedTUIInput(t, model, "Retain complete evidence and finite limits.")
 	runGuidedTUIKey(t, model, "f", true)
 
@@ -102,7 +104,7 @@ func openGuidedTUI(t *testing.T, model *tui.Model) {
 	t.Helper()
 
 	runGuidedTUIKey(t, model, "f1", false)
-	runGuidedTUIKey(t, model, "g", true)
+	runGuidedTUIKey(t, model, "o", true)
 }
 
 func enterGuidedTUIInput(t *testing.T, model *tui.Model, text string) {

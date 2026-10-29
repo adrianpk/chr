@@ -55,9 +55,9 @@ func (m *Model) renderCaseListLines(width, limit int) []string {
 		filterPrefix = "> Filter"
 	}
 
-	lines := []string{filterPrefix + ": " + filter}
+	lines := []string{"w Wizard · o Open workflow", filterPrefix + ": " + filter}
 	if filter == "" {
-		lines[0] = filterPrefix
+		lines[1] = filterPrefix
 	}
 
 	cases := m.filteredCases()

@@ -21,10 +21,18 @@ func (e tuiGuidedExecutor) ExecuteGuided(request tui.GuidedRequest) (tui.GuidedV
 		return tui.GuidedView{}, workflowstate.ErrConflict
 	}
 
+	if request.Action == "open" {
+		return e.openCase(ctx, request)
+	}
+
 	if err := e.apply(ctx, request); err != nil {
 		return tui.GuidedView{}, err
 	}
 
+	return e.read(ctx, request)
+}
+
+func (e tuiGuidedExecutor) read(ctx context.Context, request tui.GuidedRequest) (tui.GuidedView, error) {
 	observed, err := e.operations.InspectGuidedUseCase(ctx, request.Command.RunID, request.Command.Namespace)
 	if err != nil {
 		return tui.GuidedView{}, err
@@ -69,7 +77,7 @@ func (e tuiGuidedExecutor) apply(ctx context.Context, request tui.GuidedRequest)
 	case "inspect", "document":
 		return nil
 	case "start":
-		_, err = e.operations.StartGuidedUseCase(ctx, request.Command.RunID, request.Command.Namespace, "local")
+		_, err = e.operations.StartNamedGuidedUseCase(ctx, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: request.Command.GuidedUseCaseScope, Actor: "local"}, request.Command.Content)
 	case "input":
 		_, err = e.operations.ChangeGuidedUseCase(ctx, request.Command)
 	default:

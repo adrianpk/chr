@@ -7,7 +7,7 @@ import (
 
 // View renders the current terminal screen.
 func (m *Model) View() string {
-	if m.guided.Active && m.width == 0 {
+	if m.guided.Active && !m.textForm.Active && m.width == 0 {
 		return m.renderGuidedWorkspace(80, 40)
 	}
 

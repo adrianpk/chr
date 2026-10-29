@@ -1,9 +1,6 @@
 package tui
 
 import (
-	"crypto/rand"
-	"strings"
-
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -17,8 +14,8 @@ type GuidedExecutor interface {
 
 // GuidedRequest freezes a selected run, input revision and operation before IO.
 type GuidedRequest struct {
-	Action, Document string
-	Command          authoringcore.GuidedUseCaseCommand
+	Action, Document, CaseSlug string
+	Command                    authoringcore.GuidedUseCaseCommand
 }
 
 // GuidedDocument is a complete original, verified by the application reader.
@@ -61,9 +58,14 @@ type guidedFinishedMsg struct {
 }
 
 func (m *Model) openGuided() tea.Cmd {
+	request := GuidedRequest{Action: "open", Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{ProjectID: m.projectID, RunID: m.caseContext.RunID}}}
+	if metadata, ok := m.selectedCaseMetadata(); ok {
+		request.CaseSlug = metadata.Slug
+	}
+
 	m.guided = guidedState{Active: true}
 
-	return m.startGuidedRequest(GuidedRequest{Action: "inspect", Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{ProjectID: m.projectID}}})
+	return m.startGuidedRequest(request)
 }
 
 func (m *Model) startGuidedRequest(request GuidedRequest) tea.Cmd {
@@ -92,12 +94,17 @@ func (m *Model) completeGuided(message guidedFinishedMsg) {
 	m.guided.Busy = false
 	if message.Err != nil {
 		m.guided.Problem = message.Err.Error()
+		m.statusMessage = "Wizard: " + message.Err.Error()
 
 		return
 	}
 
 	if retainGuidedOriginal(message.Request, m.guided.View, message.View) {
 		message.View.Document = m.guided.View.Document
+	}
+
+	if message.Request.Action == "start" {
+		m.textForm = textFormState{}
 	}
 
 	m.guided.View = message.View
@@ -157,13 +164,4 @@ func (m *Model) refreshGuided() tea.Cmd {
 	}
 
 	return m.startGuidedRequest(m.guidedRequest("inspect"))
-}
-
-func (m *Model) startGuidedRun() tea.Cmd {
-	request := m.guidedRequest("start")
-	request.Command.RunID = "guided-" + strings.ToLower(rand.Text())
-	request.Command.ExpectedRevision = 0
-	m.guided.Editing = false
-
-	return m.startGuidedRequest(request)
 }

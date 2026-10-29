@@ -6,7 +6,7 @@ type interactionKeyHint struct {
 }
 
 var viewKeyHints = map[View]string{
-	ViewCases:     "Keys: enter opens case  g guided use cases  n new  s save  r refresh  / filter",
+	ViewCases:     "Keys: enter opens case  w Wizard  o Open workflow  n new  s save  r refresh  / filter",
 	ViewDumps:     "Keys: enter edit  a append  alt+e external  c create  r refresh",
 	ViewQuizzes:   "Keys: s start  m Deep/Fast  u resume  x cancel  enter answer  r refresh  alt+e source",
 	ViewSpecs:     "Keys: c create  e edit  g generate spec  f generate feature  r refresh  alt+e source",

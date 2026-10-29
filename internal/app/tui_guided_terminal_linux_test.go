@@ -27,10 +27,9 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 
 	operations, _ := guidedTUIFixture(t)
 	terminal := startGuidedTerminal(t, operations)
-	terminal.catalog(t)
-	terminal.keys(t, "n")
-	terminal.see(t, "What is the use-case name?")
-	terminal.input(t, "Terminal process audit")
+	terminal.keys(t, "w")
+	terminal.see(t, "Wizard")
+	terminal.keys(t, "Terminal process audit\x13")
 	terminal.see(t, "Add the known context")
 	terminal.input(t, "Preserve finite work and original inputs.")
 	terminal.see(t, "Finish capture")
@@ -59,7 +58,6 @@ func TestGuidedUseCaseTUITerminal(t *testing.T) {
 	reopened := startGuidedTerminal(t, operations)
 	reopened.catalog(t)
 	reopened.see(t, "Terminal process audit")
-	reopened.keys(t, "\r")
 	reopened.see(t, "Dispatch stopped: pause")
 	reopened.stop(t)
 
@@ -207,9 +205,8 @@ func (p *guidedTerminal) catalog(t *testing.T) {
 	t.Helper()
 
 	p.keys(t, "\x1bOP")
-	p.keys(t, "g")
-	p.see(t, "Develop a new use case")
-	p.see(t, "Execution target:")
+	p.keys(t, "o")
+	p.see(t, "Use case: ")
 }
 
 func (p *guidedTerminal) input(t *testing.T, value string) {
