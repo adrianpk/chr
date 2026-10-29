@@ -1714,6 +1714,11 @@ func TestSpecAndPlanListCommandsUseServiceViews(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceWorkspaceQueryFixture(t, projectDir)
 
+	// Listing observes the canonical target revision, including its envelope.
+	if err := opscore.EnsureArtifactBodyMetadata(projectDir, "ops/default/plan/00000-project-plan/artifact.md"); err != nil {
+		t.Fatal(err)
+	}
+
 	var stdout bytes.Buffer
 
 	err := run(t.Context(), []string{

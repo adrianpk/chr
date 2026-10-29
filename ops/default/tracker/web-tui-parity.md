@@ -161,7 +161,7 @@ Report: `ops/default/report/slices/web-tui-parity/slice-8-plans.md`
 | T8.2 | Reconcile a retained partial preparation by its original identity rather than regenerating plans or duplicate tickets. | done | 0f98d041 | Provider failure, original retry, duplicate replay and reopened preparation retain one plan and ticket set; queued commands keep their observed target. |
 | T8.3 | Preserve explicit Regenerate confirmation and any independent tracking CLI capability without exposing a misleading second required step. | done | 77f84ecb | Explicit Regenerate retains confirmation and source/revision guards; canonical catalog preference and independent tracking service regressions pass. |
 | T8.4 | Offer Open document and View tickets after successful Spec/Plan generation with context-preserving navigation. | done | 1523b132 | Production PTY and IO checks open actual documents and a populated case Board without writes; cancelled replacement and idle native task assertions pass. |
-| T8.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 72bae04e | Task checks passed; report introduced and PR #462 opened. Final exact-HEAD controller validation and integration pending. |
+| T8.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 72bae04e; 6a59cd2d | PR #462 opened. First controller gate exposed a body-only CLI fixture; its canonical envelope is corrected and focused CLI/IO/PTY checks pass. Fresh exact-HEAD validation and integration pending. |
 
 ### Slice 9: Ticket editing, comments and references
 

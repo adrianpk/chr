@@ -106,6 +106,15 @@ Implementation checks passed locally:
 - `go test ./internal/tui -run '^Test(Operation.*|Plan.*|Model.*Plan.*)$' -count=1` — passed.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --fix --timeout=5m ./internal/tui ./internal/app` — passed.
 
+Controller validation `LAU6QGNYXGTP3NIU2USM4XDY53` on
+`6a59cd2d7c65ec2a277af31e6babe8e407a4f8bf` failed `make verify` in
+`TestSpecAndPlanListCommandsUseServiceViews`: its body-only canonical plan lacked
+the metadata envelope required by target revision observation. The correction
+adds the normal envelope only inside that owned CLI fixture. No production guard,
+assertion, timeout or resource limit changed.
+
+- `go test ./internal/app -run '^Test(SpecAndPlanListCommandsUseServiceViews|TUIPlan.*|TUIGenerationResult)$' -count=1 -timeout=3m` — passed after that fixture correction, including the production terminal journey.
+
 Final ordered validation will be recorded by Looper on the clean PR head after
 PR-reference commits: make verify, focused terminal race checks, focused
 application IO/HTTP/PTY race checks and git diff --check. Canonical PR/controller

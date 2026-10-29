@@ -61,3 +61,5 @@ One branch and one PR to `dev`; tasks T8.1-T8.5 are the canonical work units. Lo
 ## Evidence
 
 T8.1-T8.4 are implemented. The production adapter shares combined plan/native-ticket preparation with Web. Real IO/HTTP and production PTY checks retain original retries, prevent duplicate preparation, reject stale replacement, preserve cancellation, and open documents/case tickets without starting work. Independent CLI tracking remains available. Exact commands and correction evidence are in the Slice 8 report; PR #462 is open; final exact-HEAD controller validation and integration remain pending.
+
+The first exact-candidate `make verify` failed in the existing CLI plan-list fixture because its canonical plan had no metadata envelope. The owned fixture now includes the required envelope; unchanged assertions and focused CLI/IO/PTY checks pass. Fresh controller validation remains pending.
