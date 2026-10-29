@@ -13,7 +13,7 @@ func newTUIAgentWorkRefreshExecutor(operations service) tuiAgentWorkRefreshExecu
 }
 
 func (e tuiAgentWorkRefreshExecutor) RefreshAgentWork(request tui.AgentWorkRefreshRequest) (tui.AgentWorkRefreshResult, error) {
-	board, err := e.operations.ReadTicketBoard(0)
+	tickets, err := loadTUITicketSnapshot(e.operations)
 	if err != nil {
 		return tui.AgentWorkRefreshResult{}, err
 	}
@@ -35,7 +35,7 @@ func (e tuiAgentWorkRefreshExecutor) RefreshAgentWork(request tui.AgentWorkRefre
 
 	return tui.AgentWorkRefreshResult{
 		Workflow:      workflow,
-		Tickets:       board.Tickets,
+		Tickets:       tickets,
 		Observability: observability,
 		Readiness:     tui.NewWorkReadinessView(observation.Readiness),
 		Observation:   &observation,

@@ -346,12 +346,7 @@ func loadTUITickets(
 	projectContext commandProjectContext,
 	assetsFS fs.FS,
 ) ([]ticketcore.Indexed, error) {
-	board, err := newService(ctx, env, projectContext, assetsFS).ReadTicketBoard(0)
-	if err != nil {
-		return nil, err
-	}
-
-	return board.Tickets, nil
+	return loadTUITicketSnapshot(newService(ctx, env, projectContext, assetsFS))
 }
 
 func loadTUIAuthoringSessions(

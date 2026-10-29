@@ -112,6 +112,10 @@ func seedDashQueue(t *testing.T, operations service) {
 }
 
 func checkTUIDashPage(t *testing.T, result tui.AgentWorkRefreshResult, count, total int, key string) {
+	if len(result.Tickets) != 130 {
+		t.Fatal("queue pagination truncated the Board", len(result.Tickets))
+	}
+
 	t.Helper()
 
 	observed := result.Observation
