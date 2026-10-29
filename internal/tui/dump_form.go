@@ -33,7 +33,14 @@ func (m *Model) openDumpCreateForm() {
 
 func (m *Model) submitDumpForm() tea.Cmd {
 	fields := m.textForm.Fields
+
 	request := m.textForm.DumpRequest
+	if request.Action == DumpActionAppend {
+		request.Content = fields[0].Input.Value()
+
+		return m.executeDumpForm(request)
+	}
+
 	choice := fields[0].Choices[fields[0].Choice]
 	request.Scope, request.Revision = DumpScope{CaseSlug: choice.Value}, choice.Revision
 	request.Title, request.Content = fields[1].Input.Value(), fields[2].Input.Value()
@@ -82,4 +89,20 @@ func (m *Model) bindDumpFormRetry(request DumpActionRequest) {
 
 		return m.executeDumpForm(request)
 	}
+}
+
+func (m *Model) openDumpAppendForm() {
+	dump, ok := m.selectedDumpView()
+	if !ok {
+		m.statusMessage = "No dump selected."
+
+		return
+	}
+
+	request := m.newSelectedDumpActionState(DumpActionAppend, "Append dump").Request
+	request.Scope = dump.Scope
+	m.openTextForm(textFormState{
+		Title: "Append to " + dump.Title, SubmitLabel: "Append", Submit: (*Model).submitDumpForm,
+		DumpRequest: request, Fields: []textFormField{newTextFormField("Text", true, 1<<20)},
+	})
 }

@@ -29,6 +29,10 @@ func (m *Model) updateSystemMessage(msg tea.Msg) updateOutcome {
 		cmd := m.updateMouse(typedMsg)
 
 		return updateOutcome{Command: cmd, Handled: true}
+	case dumpDraftEditorFinishedMsg:
+		m.completeDumpDraftEditor(typedMsg)
+
+		return updateOutcome{Command: nil, Handled: true}
 	case dumpEditorFinishedMsg:
 		m.completeDumpEdit(typedMsg)
 

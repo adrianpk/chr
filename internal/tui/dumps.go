@@ -167,13 +167,15 @@ func (m *Model) dumpActionHint() string {
 		return "c create  r refresh"
 	}
 
-	return "enter edit  alt+e external  c create  r refresh"
+	return "enter edit  a append  alt+e external  c create  r refresh"
 }
 
 func (m *Model) updateDumpsKey(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "c":
 		m.planDumpAction(DumpActionCreate)
+	case "a":
+		m.planDumpAction(DumpActionAppend)
 	case "enter":
 		m.planDumpAction(DumpActionEdit)
 

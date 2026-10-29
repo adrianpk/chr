@@ -3766,7 +3766,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 		"Blog Publishing",
 		"Raw: .chr/default/dumps/project-context-raw.md",
 		"Project-wide notes.",
-		"enter edit  alt+e external  c create  r refresh",
+		"enter edit  a append  alt+e external  c create  r refresh",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)

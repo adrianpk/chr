@@ -101,6 +101,10 @@ func (m *Model) updateDumpActionKey(msg tea.KeyMsg) tea.Cmd {
 }
 
 func (m *Model) updateDumpEditKey(msg tea.KeyMsg) tea.Cmd {
+	if msg.String() == "alt+e" {
+		return m.openDumpDraftEditor()
+	}
+
 	switch msg.Type {
 	case tea.KeyEsc:
 		if m.dumpEdit.Input.Value() != m.dumpEdit.Original {
@@ -130,6 +134,12 @@ func (m *Model) updateDumpEditKey(msg tea.KeyMsg) tea.Cmd {
 func (m *Model) planDumpAction(action DumpActionID) {
 	if action == DumpActionCreate {
 		m.openDumpCreateForm()
+
+		return
+	}
+
+	if action == DumpActionAppend {
+		m.openDumpAppendForm()
 
 		return
 	}
@@ -356,10 +366,6 @@ func (m *Model) newSelectedDumpActionState(action DumpActionID, title string) Du
 	request := DumpActionRequest{
 		Action: action, OperationID: rand.Text(), Revision: dump.Revision,
 		Path: dump.RelativePath,
-	}
-
-	if action == DumpActionAppend {
-		request.Content = "Appended dump note from the TUI."
 	}
 
 	return DumpActionState{
