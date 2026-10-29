@@ -7,9 +7,9 @@ Approved: maintainer request, 2026-10-29; convert the supplied Web/TUI parity ma
 Implementation authority: execute these 14 slices in order through one Looper run.
 Merge authority: Looper may merge only these 14 recorded slice PRs into dev using Rebase + Fast-forward after required exact-candidate checks pass.
 Baseline: `4e2a556cbc34129f7ab91f76252bcb7ae80315ca` on dev.
-Active slice: Slice 12 — Wizard Quiz and preparation.
-Completed slices: 11/14
-Completed tasks: 59/70
+Active slice: Slice 13 — Wizard execution, results and recovery.
+Completed slices: 12/14
+Completed tasks: 60/70
 
 Plan: [Delivery contract](../plan/web-tui-parity.md)
 Spec: [Requirements](../spec/web-tui-parity.md)
@@ -214,8 +214,8 @@ Report: `ops/default/report/slices/web-tui-parity/slice-11-wizard-entry.md`
 
 ### Slice 12: Wizard Quiz and preparation
 
-Ticket: `TKT-20261029101147` — `ops/default/ticket/reviewing/20261029101147-web-tui-parity-wizard-authoring.md`
-State: reviewing
+Ticket: `TKT-20261029101147` — `ops/default/ticket/solved/20261029101147-web-tui-parity-wizard-authoring.md`
+State: delivered
 PR: [#466](https://forge.adrianpk.com/adrianpk/chr/pulls/466)
 Report: `ops/default/report/slices/web-tui-parity/slice-12-wizard-authoring.md`
 
@@ -225,12 +225,12 @@ Report: `ops/default/report/slices/web-tui-parity/slice-12-wizard-authoring.md`
 | T12.2 | Render specification and preparation stages in their existing tabs from the shared guided operation. | done | fc3e0563 | Shared Specs/Plans rendering reads exact committed originals; working-copy replacement and navigation preserve bytes, bindings and one native materialization. |
 | T12.3 | Show stage-specific processing, suspended, pending-operation and blocker feedback with eligible actions. | done | d21a31eb | Real partial preparation, suspended state and lost acknowledgement show retained inputs, blockers and only owner-provided retry/control actions. |
 | T12.4 | Retry the retained operation and handle stale/newer revisions without UI-owned orchestration or duplicate preparation. | done | bfc05ca3 | Contract failure, deadline and plan/materialization acknowledgement faults restart with the same command, one plan and one ticket set; delayed stale answers write nothing and confirmed reload preserves cancellation. |
-| T12.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | in_progress | 517571b3 | Focused tests and strict lint passed; PR #466 opened; final PR-reference HEAD controller validation and integration pending. |
+| T12.5 | Validate, report, open the recorded PR, verify dev integration and close this slice. | done | 517571b3; a0e8ec25 | PR #466 merged at a0e8ec258860a56fcc6d9d1c5e5fefee9eb39e8f; validation TKFQDKEODV6WVKUYFMQMOX3ZWP passed all four ordered checks. |
 
 ### Slice 13: Wizard execution, results and recovery
 
-Ticket: `TKT-20261029101148` — `ops/default/ticket/ready/20261029101148-web-tui-parity-wizard-results.md`
-State: ready
+Ticket: `TKT-20261029101148` — `ops/default/ticket/in_progress/20261029101148-web-tui-parity-wizard-results.md`
+State: in_progress
 PR: pending
 Report: `ops/default/report/slices/web-tui-parity/slice-13-wizard-results.md`
 

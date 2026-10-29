@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101147
 title: "Wizard Quiz and preparation"
-status: reviewing
+status: solved
 kind: task
 severity: medium
 priority: high
@@ -15,6 +15,8 @@ commits:
   - d21a31eb2820f2ae2030039cef8679fcdda13c1e
   - bfc05ca37ce59466d85010e7b274fde92c0a89d0
   - 517571b3e4556afa37c502a260435cdb268d95cc
+resolution: fixed
+closed_at: 2026-10-29T17:38:33Z
 reviewed_at: 2026-10-29T17:32:11Z
 started_at: 2026-10-29T17:10:35Z
 branch: feat/slice-12-tui-wizard-authoring
@@ -65,5 +67,7 @@ T12.1–T12.4 implemented with shared Quiz editing/controls/history, committed
 Specs/Plans rendering, stage-specific feedback and exact retained retry/reload.
 Real Git/filesystem/SQLite and production terminal checks pass, including
 partial preparation, deadline/lost-ack restart, duplicate prevention and stale
-answer rejection. PR #466 is open. Final controller checks on the PR-reference
-HEAD and integration remain pending; this ticket remains reviewing.
+answer rejection. PR #466 merged at
+a0e8ec258860a56fcc6d9d1c5e5fefee9eb39e8f after all four ordered checks
+passed in TKFQDKEODV6WVKUYFMQMOX3ZWP. Acta merge event:
+01M64BT6T97H8G2FPT7XGKF0W1.

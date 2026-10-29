@@ -1,7 +1,7 @@
 ---
 id: TKT-20261029101148
 title: "Wizard execution, results and recovery"
-status: ready
+status: in_progress
 kind: task
 severity: medium
 priority: high
@@ -10,6 +10,8 @@ tags: tui, parity, web-tui-parity
 source: review
 reported_at: 2026-10-29T10:11:48Z
 commits: []
+started_at: 2026-10-29T17:38:33Z
+branch: feat/slice-13-tui-wizard-results
 ready_at: 2026-10-29T10:11:48Z
 ---
 
